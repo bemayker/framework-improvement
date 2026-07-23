@@ -1,0 +1,91 @@
+# PR notification pipeline (mayker-dev), optional. Canonical template copied into
+# a project by /init-project (Section 6.3). Opt-in and OFF by default. To enable:
+#   1. add a repo VARIABLE  NOTIFY_SLACK = true        (Variables tab, NOT Secrets)
+#   2. add a repo SECRET    SLACK_WEBHOOK_URL = <url>   (Slack Incoming Webhook)
+#   3. push this file from a LOCAL CLI (workflow files need the `workflow` token scope)
+# Verify without a PR: Actions -> "Notify Slack on PR" -> "Run workflow".
+#
+# The job ALWAYS runs and its log states why it did or did not post, so a
+# half-finished setup never shows as a failed check.
+name: Notify Slack on PR
+
+on:
+  pull_request:
+    types: [opened, ready_for_review, closed]
+  workflow_dispatch:
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Precheck toggle and secret
+        id: precheck
+        env:
+          NOTIFY_SLACK: ${{ vars.NOTIFY_SLACK }}
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          EVENT: ${{ github.event_name }}
+          ACTION: ${{ github.event.action }}
+          MERGED: ${{ github.event.pull_request.merged }}
+        run: |
+          set -euo pipefail
+          # Skip a non-merge "closed" event (PR closed without merging).
+          if [ "$EVENT" = "pull_request" ] && [ "$ACTION" = "closed" ] && [ "$MERGED" != "true" ]; then
+            echo "::notice::PR closed without merging; nothing to announce."
+            echo "post=false" >> "$GITHUB_OUTPUT"; exit 0
+          fi
+          if [ "${NOTIFY_SLACK:-}" != "true" ]; then
+            echo "::notice::NOTIFY_SLACK is not 'true'; skipping (set the repo Variable to enable)."
+            echo "post=false" >> "$GITHUB_OUTPUT"; exit 0
+          fi
+          if [ -z "${SLACK_WEBHOOK_URL:-}" ]; then
+            echo "::warning::NOTIFY_SLACK is on but SLACK_WEBHOOK_URL secret is missing; not posting."
+            echo "post=false" >> "$GITHUB_OUTPUT"; exit 0
+          fi
+          echo "post=true" >> "$GITHUB_OUTPUT"
+
+      - name: Build message
+        if: steps.precheck.outputs.post == 'true'
+        id: msg
+        env:
+          EVENT: ${{ github.event_name }}
+          ACTION: ${{ github.event.action }}
+          DRAFT: ${{ github.event.pull_request.draft }}
+          MERGED: ${{ github.event.pull_request.merged }}
+          TITLE: ${{ github.event.pull_request.title }}
+          URL: ${{ github.event.pull_request.html_url }}
+          REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          if [ "$EVENT" = "workflow_dispatch" ]; then
+            text="mayker-dev Slack notifications are configured correctly ($REPO)."
+          elif [ "$ACTION" = "opened" ] && [ "$DRAFT" = "true" ]; then
+            text="Plan draft ready: $TITLE - $URL"
+          elif [ "$ACTION" = "ready_for_review" ]; then
+            text="Build ready for review: $TITLE - $URL"
+          elif [ "$ACTION" = "closed" ] && [ "$MERGED" = "true" ]; then
+            text="Merged and marked Done: $TITLE - $URL"
+          else
+            text="$TITLE - $URL"
+          fi
+          {
+            echo "text<<EOF"
+            echo "$text"
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Post to Slack
+        if: steps.precheck.outputs.post == 'true'
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          TEXT: ${{ steps.msg.outputs.text }}
+        run: |
+          set -euo pipefail
+          code="$(curl -sS -o /dev/null -w '%{http_code}' \
+            -X POST "$SLACK_WEBHOOK_URL" \
+            -H 'Content-Type: application/json' \
+            -d "$(jq -nc --arg t "$TEXT" '{text:$t}')")"
+          if [ "$code" != "200" ]; then
+            echo "::error::Slack webhook returned HTTP $code. Check the webhook URL and that the Incoming Webhooks app is permitted in your workspace."
+            exit 1
+          fi
+          echo "Posted to Slack (HTTP $code)."

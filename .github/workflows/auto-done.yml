@@ -1,0 +1,122 @@
+# Auto-Done pipeline (mayker-dev). Materialized from the plugin's canonical
+# template by /init-project (Section 6.2). Work Item Source is `local`: on
+# merge to the default branch it flips the merged item's frontmatter status to
+# done in docs/issues/{ID}.md and commits it back with [skip ci]. No tracker
+# API or secret is needed. NOTE: this pushes directly to the default branch, so
+# if that branch is protected against direct pushes, allow the github-actions
+# bot to bypass protection.
+#
+# The feature ID is parsed from the `feature/{ID}-{slug}` branch name, matched
+# against the known IDs in .claude/project_state.json when a features registry
+# exists (none under local source), falling back to the regex. This branch
+# contract is enforced in-session by the branch-guard hook.
+name: Auto-Done on merge
+
+on:
+  pull_request:
+    types: [closed]
+
+permissions:
+  contents: write # for the local-source frontmatter flip commit
+
+jobs:
+  auto-done:
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.base.ref }}
+
+      - name: Resolve feature ID from branch
+        id: fid
+        env:
+          BRANCH: ${{ github.event.pull_request.head.ref }}
+        run: |
+          set -euo pipefail
+          id=""
+          if [ -f .claude/project_state.json ]; then
+            best=""
+            while IFS= read -r cand; do
+              [ -n "$cand" ] || continue
+              case "$BRANCH" in
+                "feature/$cand"|"feature/$cand-"*)
+                  if [ "${#cand}" -gt "${#best}" ]; then best="$cand"; fi ;;
+              esac
+            done < <(jq -r '(.features // {}) | keys[]' .claude/project_state.json 2>/dev/null || true)
+            id="$best"
+          fi
+          if [ -z "$id" ]; then
+            id="$(printf '%s' "$BRANCH" | sed -nE 's#^feature/([A-Za-z]+-[0-9]+)-.*#\1#p')"
+          fi
+          if [ -z "$id" ]; then
+            echo "::warning::could not parse a feature ID from branch '$BRANCH'; nothing to do."
+          fi
+          echo "id=$id" >> "$GITHUB_OUTPUT"
+
+      - name: Mark Done (local work item)
+        if: steps.fid.outputs.id != ''
+        env:
+          ID: ${{ steps.fid.outputs.id }}
+        run: |
+          set -euo pipefail
+          issue_file="docs/issues/${ID}.md"
+          if [ ! -f "$issue_file" ]; then
+            echo "::warning::${issue_file} not found; Work Item Source is local, so there is nothing to transition."
+            exit 0
+          fi
+          if grep -qiE '^status:' "$issue_file"; then
+            sed -i -E 's/^[Ss]tatus:.*/status: done/' "$issue_file"
+          else
+            echo "::warning::$issue_file has no status: field; leaving as-is."
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add "$issue_file"
+          git commit -m "chore(${ID}): mark done on merge [skip ci]" || { echo "nothing to commit"; exit 0; }
+          git push
+
+  validate-uat:
+    # UAT Gherkin well-formedness check (mayker-dev), part of the merge pipeline.
+    # UAT Generation is ENABLED for this project; the guard on the presence of
+    # e2e/uat/scenarios/*.feature still keeps it a clean no-op before the first
+    # scenarios land. It validates STRUCTURE only and never runs the scenarios
+    # as browser tests: the executable E2E specs (*.spec.ts) run in pr-tests.yml.
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.base.ref }}
+
+      - name: Validate UAT Gherkin is well-formed
+        run: |
+          set -euo pipefail
+          shopt -s nullglob
+          files=(e2e/uat/scenarios/*.feature)
+          if [ ${#files[@]} -eq 0 ]; then
+            echo "No e2e/uat/scenarios/*.feature files found; UAT validation is a no-op."
+            exit 0
+          fi
+          fail=0
+          for f in "${files[@]}"; do
+            errs=""
+            grep -qE '^[[:space:]]*Feature:' "$f" || errs="missing 'Feature:'"
+            grep -qE '^[[:space:]]*(Scenario:|Scenario Outline:)' "$f" \
+              || errs="${errs:+$errs; }no 'Scenario:' or 'Scenario Outline:'"
+            # Scenarios must have steps: require at least one Given/When/Then.
+            grep -qE '^[[:space:]]*(Given|When|Then)\b' "$f" \
+              || errs="${errs:+$errs; }no Given/When/Then steps"
+            # A Scenario Outline must be backed by an Examples: table.
+            if grep -qE '^[[:space:]]*Scenario Outline:' "$f" \
+               && ! grep -qE '^[[:space:]]*Examples:' "$f"; then
+              errs="${errs:+$errs; }Scenario Outline without an Examples: table"
+            fi
+            if [ -n "$errs" ]; then
+              echo "::error file=$f::not well-formed Gherkin: $errs"
+              fail=1
+            else
+              echo "ok: $f"
+            fi
+          done
+          exit "$fail"

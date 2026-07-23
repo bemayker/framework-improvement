@@ -1,0 +1,7 @@
+{
+  "work_item_source": "local",
+  "git_provider": {
+    "provider": "github",
+    "repository": "serneelsflorian/mayker-sandbox"
+  }
+}

@@ -1,0 +1,108 @@
+# PR Test pipeline (mayker-dev). Materialized from the plugin's canonical
+# template by /init-project (Section 6.1) and adapted to this project's stack:
+# FastAPI + Python 3.12 managed with uv (backend/), React + TypeScript + Vite
+# with Vitest (frontend/), Playwright TypeScript E2E (e2e/, config at repo
+# root), PostgreSQL via Docker Compose. All test tiers are ENABLED (blocking).
+# The scaffold feature's plan verifies the concrete service and test commands
+# and updates this file if needed.
+#
+# SCAFFOLD-SAFETY (keep this when adapting — see init-project SKILL.md 6.1):
+# The first run is the scaffold story's plan PR, when no backend/, frontend/,
+# lockfiles, or tests exist yet. This file stays green then because (a) it adds
+# NO `cache:` to setup-python/setup-node — `cache: pip` hard-errors when it
+# can't find a dependency file to hash — and (b) every install/test step is
+# guarded on its files' presence (`if [ -f … ]`, pytest exit 5 treated as
+# pass). If you expand this into a multi-job pipeline, only enable `cache:`
+# behind a presence-gated step with an explicit `cache-dependency-path`, and
+# keep the guards so the pipeline no-ops cleanly until the scaffold lands the
+# real code.
+name: PR Tests
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+
+# One run per PR branch; a newer push supersedes the one in flight. This keeps
+# CI load bounded when several items and fix-cycles push in quick succession.
+concurrency:
+  group: pr-tests-${{ github.head_ref || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # --- Runtime setup ---
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v5
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install backend dependencies
+        run: |
+          if [ -f backend/pyproject.toml ]; then
+            (cd backend && uv sync)
+          fi
+
+      - name: Install frontend dependencies
+        run: |
+          if [ -f frontend/package.json ]; then
+            (cd frontend && (npm ci || npm install))
+          fi
+
+      - name: Install E2E dependencies
+        run: |
+          if [ -f playwright.config.ts ] && [ -f package.json ]; then
+            npm ci || npm install
+            npx playwright install --with-deps chromium
+          fi
+
+      # --- Services (PostgreSQL via Docker Compose) ---
+      - name: Start services
+        run: |
+          if [ -f docker-compose.yml ] || [ -f compose.yml ] || [ -f compose.yaml ]; then
+            docker compose up -d
+          fi
+
+      # --- Unit tests (ENABLED, blocking) ---
+      - name: Backend unit tests
+        run: |
+          # pytest exits 5 when it collects no tests yet (e.g. before the
+          # scaffold feature adds them); treat that as a pass, not a red X.
+          if [ -d backend/tests/unit ]; then
+            (cd backend && uv run pytest tests/unit -q) || [ "$?" -eq 5 ]
+          fi
+      - name: Frontend unit tests (Vitest)
+        run: |
+          if [ -f frontend/package.json ] && (cd frontend && npm run 2>/dev/null | grep -q " test"); then
+            (cd frontend && npm test --silent)
+          fi
+
+      # --- Integration tests (ENABLED, blocking) ---
+      - name: Backend integration tests
+        run: |
+          if [ -d backend/tests/integration ]; then
+            (cd backend && uv run pytest tests/integration -q) || [ "$?" -eq 5 ]
+          fi
+
+      # --- E2E tests (ENABLED, blocking) ---
+      - name: E2E tests (Playwright)
+        run: |
+          if [ -f playwright.config.ts ] && [ -d e2e/tests ]; then
+            npx playwright test
+          fi
+
+      - name: Stop services
+        if: always()
+        run: |
+          if [ -f docker-compose.yml ] || [ -f compose.yml ] || [ -f compose.yaml ]; then
+            docker compose down -v
+          fi
