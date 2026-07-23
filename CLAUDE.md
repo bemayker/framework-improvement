@@ -60,7 +60,7 @@ Minimal task-notes app used exclusively as a validation sandbox for the mayker-d
 -->
 
 - **Git Provider:** github
-- **Repository:** serneelsflorian/mayker-sandbox
+- **Repository:** bemayker/framework-improvement
 
 ## Design Reference
 
