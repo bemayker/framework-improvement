@@ -12,9 +12,10 @@ from dataclasses import dataclass
 @dataclass(frozen=True)
 class Settings:
     app_title: str = "Task Notes API"
-    database_url: str = os.environ.get(
-        "DATABASE_URL", "postgresql://tasknotes:tasknotes@localhost:5432/tasknotes"
-    )
+    # Dev-only, unused until TEST-02 (no DB engine/session is opened by this
+    # feature). No credential-shaped default: docker-compose.yml and
+    # .env.example supply the real value via DATABASE_URL.
+    database_url: str | None = os.environ.get("DATABASE_URL")
 
 
 def get_settings() -> Settings:
