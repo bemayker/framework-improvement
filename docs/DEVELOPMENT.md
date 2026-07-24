@@ -142,8 +142,14 @@ The CI pipelines require secrets to be configured in your repository settings. T
 
 ### 4. Development Environment
 
-> Specific requirements (Docker, Node.js, Python versions, etc.) depend on the tech stack configured in `CLAUDE.md`.
-> This section is filled in automatically after the scaffold feature creates the project infrastructure.
+Required to run the project locally (per `CLAUDE.md` Tech Stack):
+
+- **Docker** and **Docker Compose** (runs `db`, `backend`, `frontend` via `docker-compose.yml`).
+- **Node.js 20** (frontend: React, TypeScript, Vite; matches the `node:20-slim` image in `frontend/Dockerfile`).
+- **Python 3.12** (backend: FastAPI, matches the `python:3.12-slim` image in `backend/Dockerfile`).
+- **uv** (manages the backend's Python environment and dependencies; see `backend/pyproject.toml`).
+
+See the [README → Running the project](../README.md#running-the-project) for the `docker compose up` quick start, and [Running tests locally](#running-tests-locally) below to run the test suites directly on the host.
 
 ---
 
@@ -457,6 +463,19 @@ Testing is integrated into the build pipeline at multiple layers.
 | UAT manual script | `/build-feature` | Human tester | No (reference only) |
 
 Test directory paths and naming conventions are configured in `CLAUDE.md` → Test Configuration. Toggle configuration is in `CLAUDE.md` → Feature Toggles.
+
+### Running tests locally
+
+```bash
+# Frontend (Vitest)
+cd frontend && npm test
+
+# Backend (pytest, via uv)
+cd backend && uv run pytest
+
+# E2E (Playwright) — requires the app running (docker compose up, or the dev servers directly)
+npx playwright test
+```
 
 ---
 
