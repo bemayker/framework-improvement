@@ -1,6 +1,6 @@
 {
   "item": "TEST-01",
-  "generated_at": 1784904036,
+  "generated_at": 1784906025,
   "transcript": "/Users/florianserneels/.claude/projects/-Users-florianserneels-Documents-ai-development-framework-improvement/394c5934-2682-4ee0-b3ab-54da1e2c86f4.jsonl",
   "token_collection": true,
   "metrics_available": true,
@@ -236,20 +236,46 @@
       "duration_s": null,
       "model": null,
       "retries": 0,
-      "turns": 6,
-      "tool_calls": 2,
-      "tools_per_turn": 0.33,
-      "output_tokens": 3606,
-      "ctx_tokens_avg": 232175,
-      "ctx_tokens_max": 232625
+      "turns": 28,
+      "tool_calls": 15,
+      "tools_per_turn": 0.54,
+      "output_tokens": 13296,
+      "ctx_tokens_avg": 140324,
+      "ctx_tokens_max": 237776
+    },
+    {
+      "step": "18",
+      "title": "CI Watch, fix attempt 1",
+      "duration_s": 229,
+      "model": "sonnet",
+      "retries": 0,
+      "turns": 19,
+      "tool_calls": 11,
+      "tools_per_turn": 0.58,
+      "output_tokens": 1868,
+      "ctx_tokens_avg": 52670,
+      "ctx_tokens_max": 56761
+    },
+    {
+      "step": "19",
+      "title": "Summary",
+      "duration_s": 1,
+      "model": "fable",
+      "retries": 0,
+      "turns": 0,
+      "tool_calls": 0,
+      "tools_per_turn": null,
+      "output_tokens": 0,
+      "ctx_tokens_avg": null,
+      "ctx_tokens_max": null
     }
   ],
   "totals": {
-    "wall_s": 7552,
-    "turns": 447,
-    "tool_calls": 255,
-    "output_tokens": 247281,
-    "turns_outside_steps": 86
+    "wall_s": 7782,
+    "turns": 506,
+    "tool_calls": 291,
+    "output_tokens": 262576,
+    "turns_outside_steps": 104
   },
   "subagents_unattributed": 0
 }

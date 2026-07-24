@@ -1,6 +1,6 @@
 # Run statistics, TEST-01
 
-Generated 2026-07-24 14:40 UTC. Token metrics: available. Skill load: injected.
+Generated 2026-07-24 15:13 UTC. Token metrics: available. Skill load: injected.
 
 | Step | Title | Wall | Turns | Tool calls | Tools/turn | Out tok | Ctx avg | Ctx max | Retries |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -21,7 +21,9 @@ Generated 2026-07-24 14:40 UTC. Token metrics: available. Skill load: injected.
 | 14 | Phase G, UAT Generation | 0m36s | 0 | 0 | n/a | 0 | n/a | n/a | 0 |
 | 15 | Documentation Check | 1m01s | 12 | 6 | 0.5 | 3.5K | 117.1K | 121.0K | 0 |
 | 16 | Push and Update PR | 1m12s | 12 | 5 | 0.42 | 9.8K | 226.5K | 228.3K | 0 |
-| 17 | Update Status In Review | n/a | 6 | 2 | 0.33 | 3.6K | 232.2K | 232.6K | 0 |
-| total |  | 2h05m | 447 | 255 |  | 247.3K |  |  |  |
+| 17 | Update Status In Review | n/a | 28 | 15 | 0.54 | 13.3K | 140.3K | 237.8K | 0 |
+| 18 | CI Watch, fix attempt 1 | 3m49s | 19 | 11 | 0.58 | 1.9K | 52.7K | 56.8K | 0 |
+| 19 | Summary | 0m01s | 0 | 0 | n/a | 0 | n/a | n/a | 0 |
+| total |  | 2h09m | 506 | 291 |  | 262.6K |  |  |  |
 
-86 turns fell outside every recorded step window (included in totals).
+104 turns fell outside every recorded step window (included in totals).
