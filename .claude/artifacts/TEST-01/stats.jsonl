@@ -1,0 +1,21 @@
+{"run":"plan-feature","item":"TEST-01","step":"0","title":"Load Context","event":"start","ts":1784902431}
+{"run":"plan-feature","item":"TEST-01","step":"0","event":"end","ts":1784902446,"model":"fable"}
+{"run":"plan-feature","item":"TEST-01","step":"1","title":"MCP Verification","event":"start","ts":1784902446}
+{"run":"plan-feature","item":"TEST-01","step":"1","event":"end","model":"fable","ts":1784902480}
+{"run":"plan-feature","item":"TEST-01","step":"2","title":"Dependency Check","event":"start","ts":1784902480}
+{"run":"plan-feature","item":"TEST-01","step":"2","event":"end","model":"fable","ts":1784902480}
+{"run":"plan-feature","item":"TEST-01","step":"3","title":"Fetch Feature Details","event":"start","ts":1784902480}
+{"run":"plan-feature","item":"TEST-01","step":"3","event":"end","model":"fable","ts":1784902480}
+{"run":"plan-feature","item":"TEST-01","step":"4","title":"Update Status Planning","event":"start","ts":1784902480}
+{"run":"plan-feature","item":"TEST-01","step":"4","event":"end","ts":1784902508,"model":"fable"}
+{"run":"plan-feature","item":"TEST-01","step":"5","title":"Create Branch","event":"start","ts":1784902508}
+{"run":"plan-feature","item":"TEST-01","step":"5","event":"end","ts":1784902508,"model":"fable"}
+{"run":"plan-feature","item":"TEST-01","step":"6","title":"Read References","event":"start","ts":1784902556}
+{"run":"plan-feature","item":"TEST-01","step":"6","event":"end","ts":1784902566,"model":"opus-4.8"}
+{"run":"plan-feature","item":"TEST-01","step":"7","title":"Detect Scaffold Requirement","event":"start","ts":1784902566}
+{"run":"plan-feature","item":"TEST-01","step":"7","event":"end","ts":1784902583,"model":"opus-4.8"}
+{"run":"plan-feature","item":"TEST-01","step":"8","title":"Generate Architect Plan","event":"start","ts":1784902583}
+{"run":"plan-feature","item":"TEST-01","step":"8","event":"end","ts":1784902730,"model":"opus-4.8"}
+{"run":"plan-feature","item":"TEST-01","step":"9","title":"Generate Shared Risk Analysis","event":"start","ts":1784902731}
+{"run":"plan-feature","item":"TEST-01","step":"9","event":"end","ts":1784902752,"model":"opus-4.8"}
+{"run":"plan-feature","item":"TEST-01","step":"10","title":"Commit and Push","event":"start","ts":1784902793}

@@ -7,113 +7,114 @@
 - [ ] Visiting the app root (http://localhost:5173) shows a landing page with the app title "Task Notes".
 - [ ] The project structure, test infrastructure, and Docker Compose setup are in place, and all test tiers run green (or as clean no-ops where no tests exist yet).
 
+## Re-Plan Feedback
+This is a fresh re-plan (Section 3.1): draft PR #2 exists with **zero review comments**, so there is no feedback to fold in. The plan below is regenerated from scratch and supersedes the prior version.
+
 ## Plan Overview
-This is the scaffold feature. It bootstraps the entire repository so the two dependent items (TEST-02 health endpoint, TEST-03 note form) have a working frontend, backend, database, and test harness to build on. The only *visible* product output is a single static landing page rendering the title "Task Notes" at the Vite dev root. Everything else in this plan is infrastructure that exists solely to satisfy the second acceptance criterion (structure + test tiers green) and to unblock the downstream items.
+TEST-01 is the **scaffold item** and no project directories exist yet (only an untracked pytest cache under `backend/`). The build therefore stands up the full project skeleton — Vite/React/TS frontend, FastAPI/uv backend with the Router → Service → Repository layout as empty-but-present packages, Docker Compose with PostgreSQL, and the test infrastructure (Vitest, pytest unit/integration dirs + shared conftest, Playwright E2E) — and delivers exactly one piece of visible behaviour: a static landing page rendering the title "Task Notes".
 
-Scope containment: no navigation, no note features, no styling framework beyond a clean minimal layout, no backend business logic. The FastAPI backend is created as a runnable skeleton only (a bare app with no domain endpoints); TEST-02 will add the first real endpoint. Keep every part as small as possible per the architecture note.
+Scope is held tight (`user_story_alignment.md`, CLAUDE.md "keep every feature as small as possible"): **no backend feature endpoints** are added (health is TEST-02, notes CRUD is TEST-03), and **no DB engine/session wiring** is created beyond a config that reads `DATABASE_URL` — the actual connectivity check lands with TEST-02. The layered backend packages are created empty so TEST-02/TEST-03 extend them without restructuring. Integration tests are a clean no-op for this item (no repository/router yet); they become warranted at TEST-02.
 
-Layers touched: Frontend (React landing component). Backend (FastAPI app skeleton, no Router/Service/Repository domain code yet, since there is no data to persist in this item). Infrastructure (Docker Compose, test harnesses for all enabled tiers).
-
-## Infrastructure Scaffolding (scaffold feature only)
-The following infrastructure will be created alongside the feature. Confirmed required: no `frontend/`, `e2e/`, or tracked backend source exists yet.
+## Infrastructure Scaffolding (scaffold feature)
+Project directories do not exist yet, so this plan creates them.
 
 ### Project Structure
-- `frontend/` : React + TypeScript + Vite application (source, config, `package.json`).
-- `backend/` : FastAPI application managed with uv (`pyproject.toml`, `app/` package, `tests/` tree).
-- `backend/tests/unit/`, `backend/tests/integration/` : pytest tiers per CLAUDE.md Test Configuration.
-- `e2e/tests/`, `e2e/helpers/` : Playwright TypeScript E2E.
-- `e2e/uat/scenarios/`, `e2e/uat/scripts/`, `e2e/uat/screenshots/` (gitignored), `e2e/uat/reports/` (gitignored) : UAT artifacts per CLAUDE.md.
+- `frontend/` — Vite + React + TypeScript app (source under `frontend/src/`).
+- `backend/` — FastAPI app under `backend/app/` with layered packages: `routers/`, `services/`, `repositories/`, `schemas/`, `models/`, `core/` (all present, mostly empty at this stage to establish the pattern).
+- `backend/tests/unit/`, `backend/tests/integration/` — pytest tiers with a shared `backend/tests/conftest.py`.
+- `e2e/tests/`, `e2e/helpers/`, plus the UAT tree `e2e/uat/scenarios/`, `e2e/uat/scripts/` (screenshots/reports dirs are gitignored, created at runtime).
 
 ### Docker Setup
-- `backend/Dockerfile` : FastAPI service image (Python 3.12, uv).
-- `frontend/Dockerfile` : Vite dev/build image (optional for local dev; compose can run Vite directly).
-- `docker-compose.yml` (project root) with services:
-  - `db` : PostgreSQL (the DB is provisioned now so TEST-02/TEST-03 inherit it; TEST-01 itself does not read or write it).
-  - `backend` : FastAPI app (uvicorn), depends on `db`.
-  - `frontend` : Vite dev server on port 5173.
-- `.env.example` (project root) : `DATABASE_URL`, `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_DB`, backend host/port, and `VITE_API_BASE_URL`. No real secrets committed.
+- `backend/Dockerfile` — Python 3.12 image, `uv sync`, runs uvicorn.
+- `frontend/Dockerfile` — Node 20 image, Vite dev server on 5173.
+- `docker-compose.yml` at repo root with services: `db` (postgres:16, named volume), `backend` (depends_on db, exposes 8000), `frontend` (exposes 5173). Env wired from `.env`.
+- `.env.example` with `DATABASE_URL`, `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_DB`, and the frontend `VITE_API_BASE_URL` placeholder.
 
 ### Test Infrastructure
-- Backend shared fixtures: `backend/tests/conftest.py` with a module-scoped PostgreSQL container/instance fixture, a session-scoped FastAPI test client fixture, and a migration/setup runner. For TEST-01 these fixtures exist and are exercised by at least one trivial smoke test so the tiers run green; the DB fixture is wired but the scaffold app has nothing to persist yet.
-- Backend unit tests: `backend/tests/unit/` (naming `test_{module}_unit.py`).
-- Backend integration tests: `backend/tests/integration/` (naming `test_{module}_integration.py`), enabled per CLAUDE.md.
-- Frontend unit tests: Vitest configured in `frontend/` (colocated `*.test.tsx` next to components).
-- E2E framework config: `playwright.config.ts` (project root), `baseURL` = http://localhost:5173, test dir `e2e/tests/`, screenshot-on-failure enabled.
-- UAT directory structure created (empty scenario/script dirs) per CLAUDE.md; the landing-page Gherkin + manual script land in this item.
+- Backend: `backend/tests/conftest.py` with a session-scoped FastAPI `TestClient` fixture and documented placeholders for a module-scoped DB fixture + migration runner (wired in TEST-02 when the DB layer arrives). Unit dir `backend/tests/unit/`, integration dir `backend/tests/integration/` (naming `test_{module}_unit.py` / `test_{module}_integration.py`).
+- Frontend: Vitest + Testing Library configured in `frontend/vite.config.ts` (jsdom environment, `frontend/src/setupTests.ts`), `test` script in `frontend/package.json`.
+- E2E: `playwright.config.ts` at repo root, `baseURL` http://localhost:5173, specs in `e2e/tests/`, screenshot-on-failure, chromium.
+- Root `package.json` carrying the Playwright dev dependency and an `e2e` script.
 
 ### CI Pipeline Configuration
-- CI files are generated by /init-project. The builder must verify the workflow references the correct commands (`uv run pytest` for backend unit + integration, `vitest run` for frontend, `playwright test` for E2E) and brings up the Docker `db` service for integration tests. Update the workflow only if a referenced command or service name is wrong; do not add new pipelines.
+`/init-project` already generated `.github/workflows/pr-tests.yml`. Verified against this plan: it installs `backend` (uv), `frontend` (npm), and root E2E deps; starts `docker-compose.yml`; runs `backend/tests/unit`, `backend/tests/integration` (pytest exit-5 treated as pass), frontend Vitest, and Playwright when `e2e/tests` exists. All paths and commands match this scaffold — **no changes to the workflow are required.**
 
 ## Frontend Plan
-- Components to create/modify:
-  - `frontend/src/App.tsx` : root component rendering the landing page.
-  - `frontend/src/components/LandingPage.tsx` : the landing page (atom/organism), renders a semantic `<main>` with an `<h1>` title "Task Notes". Carries `data-testid="landing-page"` on the container and `data-testid="landing-title"` on the title.
-  - `frontend/src/main.tsx` : Vite entry, mounts `<App />`.
-  - `frontend/index.html` : Vite HTML shell.
-- Routes: none. Single static root view. No router library (scope containment).
-- State management: none required. Static render only.
-- Design reference notes: Design Reference Mode is NONE, so this is a clean, professional minimal UI per stack conventions: centered `<main>`, a single `<h1>` heading, no CSS framework pulled in beyond default Vite styling or a small inline stylesheet. No hardcoded copy beyond the title; keep text i18n-ready (a simple constant is acceptable at this scale).
+- Components to create:
+  - `frontend/src/main.tsx` — React entry, mounts `<App/>`.
+  - `frontend/src/App.tsx` — top-level app shell.
+  - `frontend/src/components/LandingPage.tsx` — the landing page: semantic `<header>`/`<main>` with an `<h1>` reading "Task Notes" and a short subtitle. `data-testid="landing-page"` on the container and `data-testid="landing-title"` on the heading. Clean, professional default styling (Design Reference is NONE — AI freestyle, minimal plain CSS; no CSS framework is configured in CLAUDE.md).
+- Routes: none; single static page at `/`.
+- State management: none (static content).
+- Design reference notes: NONE mode → simple centered title + subtitle, accessible landmarks, mobile-first. No external fonts/icons.
 
 ## Backend Plan
-Minimal skeleton only, no domain logic in this item.
-- Endpoints: none domain-specific. Create the FastAPI `app` instance (`backend/app/main.py`) so the service is runnable and importable by the test client fixture. TEST-02 adds the first real endpoint (health).
-- Service layer: none (no business logic in scaffold).
-- Repository layer: none (nothing persisted in scaffold; DB fixture wired for downstream items).
-- Migrations: none. The DB service is provisioned via Docker Compose; schema/migration tooling is set up as infrastructure but no tables are created for TEST-01.
+- Endpoints: **none added by TEST-01.** The FastAPI app is instantiated (title "Task Notes API") so TEST-02/TEST-03 can register routers on it; no feature routes are created here (scope containment).
+- Service layer: none yet — `backend/app/services/` created as an empty package.
+- Repository layer: none yet — `backend/app/repositories/` created as an empty package.
+- Config: `backend/app/core/config.py` — a settings object reading `DATABASE_URL` and app metadata from the environment (used by later features; no DB connection opened here).
+- Migrations: none. DB engine/session wiring is deferred to TEST-02.
 
 ## API Integration Plan
 No external API integration.
 
 ## API Contract
-Not applicable to TEST-01. The landing page is a static frontend render with no backend call. The frontend-to-backend contract is introduced by TEST-02 (health endpoint).
+No internal or external API endpoints are introduced by TEST-01. The frontend renders a fully static page and makes no network calls. (The internal REST contract begins at TEST-02 `GET /api/health` and TEST-03 `/api/notes`.)
 
 ## File Manifest
 ### New files
-- `frontend/package.json` : frontend dependencies and scripts (dev, build, test).
-- `frontend/index.html` : Vite HTML shell mounting the app.
-- `frontend/vite.config.ts` : Vite config, dev server on port 5173.
-- `frontend/tsconfig.json` : TypeScript config.
-- `frontend/vitest.config.ts` (or Vitest block in vite.config) : Vitest config.
-- `frontend/src/main.tsx` : app entry, mounts `<App />`.
-- `frontend/src/App.tsx` : root component.
-- `frontend/src/components/LandingPage.tsx` : landing page with "Task Notes" title and data-testids.
-- `frontend/src/components/LandingPage.test.tsx` : Vitest unit test asserting the title renders.
-- `backend/pyproject.toml` : uv-managed project metadata and deps (fastapi, uvicorn, pytest, httpx).
+**Repo root**
+- `docker-compose.yml`: db (postgres:16) + backend + frontend services.
+- `.env.example`: env var template (DB + VITE_API_BASE_URL).
+- `package.json`: root, Playwright dev dependency + `e2e` script.
+- `playwright.config.ts`: Playwright config, baseURL 5173, specs in `e2e/tests/`.
+
+**Frontend**
+- `frontend/package.json`: React, TS, Vite, Vitest, Testing Library; `dev`/`build`/`test` scripts.
+- `frontend/vite.config.ts`: Vite + Vitest (jsdom) config.
+- `frontend/tsconfig.json`, `frontend/tsconfig.node.json`: TS config.
+- `frontend/index.html`: Vite HTML entry.
+- `frontend/src/main.tsx`: React entry point.
+- `frontend/src/App.tsx`: app shell rendering `LandingPage`.
+- `frontend/src/components/LandingPage.tsx`: landing page with "Task Notes" title + test ids.
+- `frontend/src/components/LandingPage.test.tsx`: Vitest render test.
+- `frontend/src/setupTests.ts`: Testing Library / jsdom setup.
+- `frontend/Dockerfile`: frontend container.
+
+**Backend**
+- `backend/pyproject.toml`: FastAPI, uvicorn, pytest, httpx (managed with uv).
 - `backend/app/__init__.py`
-- `backend/app/main.py` : FastAPI app instance (runnable skeleton, no domain routes).
-- `backend/tests/__init__.py`
-- `backend/tests/conftest.py` : shared fixtures (DB instance, test client, migration/setup runner).
-- `backend/tests/unit/test_app_unit.py` : smoke unit test (e.g. app instance exists / imports) so the unit tier runs green.
-- `backend/tests/integration/test_app_integration.py` : smoke integration test hitting the app through the test client so the integration tier runs green.
-- `backend/Dockerfile` : backend service image.
-- `frontend/Dockerfile` : frontend service image.
-- `docker-compose.yml` : db + backend + frontend services.
-- `.env.example` : required environment variables (no secrets).
-- `playwright.config.ts` : E2E config, baseURL http://localhost:5173, screenshot on failure.
-- `e2e/tests/TEST-01_static-landing-page.spec.ts` : E2E asserting the landing page shows "Task Notes".
-- `e2e/uat/scenarios/TEST-01_static-landing-page.feature` : Gherkin scenarios.
-- `e2e/uat/scripts/TEST-01_static-landing-page_uat_script.md` : manual UAT script.
-- `.gitignore` (project root) : add if missing; ignore node_modules, Python caches, `e2e/uat/screenshots/`, `e2e/uat/reports/`, `.env`.
+- `backend/app/main.py`: FastAPI app factory (title "Task Notes API"), no feature routes.
+- `backend/app/core/__init__.py`, `backend/app/core/config.py`: settings reading `DATABASE_URL`.
+- `backend/app/routers/__init__.py`, `backend/app/services/__init__.py`, `backend/app/repositories/__init__.py`, `backend/app/schemas/__init__.py`, `backend/app/models/__init__.py`: empty layered packages.
+- `backend/tests/__init__.py`, `backend/tests/conftest.py`: shared fixtures (TestClient; DB fixture placeholder documented for TEST-02).
+- `backend/tests/unit/__init__.py`, `backend/tests/unit/test_main_unit.py`: asserts the app instantiates with the expected title.
+- `backend/tests/integration/__init__.py`: present, no tests yet (clean no-op).
+- `backend/Dockerfile`: backend container.
+
+**E2E / UAT**
+- `e2e/tests/TEST-01_static_landing_page.spec.ts`: landing page shows "Task Notes".
+- `e2e/helpers/.gitkeep`
+- `e2e/uat/scenarios/TEST-01_static_landing_page.feature`: Gherkin (UAT ENABLED).
+- `e2e/uat/scripts/TEST-01_static_landing_page_uat_script.md`: manual UAT script.
 
 ### Modified files
-- CI workflow file under `.github/workflows/` (generated by /init-project): verify and, only if incorrect, correct test commands and the compose `db` service reference. No new workflow created.
+- `.github/workflows/pr-tests.yml`: no change required (verified above); modify only if the concrete uv/npm commands differ from what the workflow assumes.
+- `.gitignore`: add `node_modules/`, `frontend/dist/`, `e2e/uat/screenshots/`, `e2e/uat/reports/`, `.venv/` entries if not already covered.
 
 ## Testing Strategy
-- Unit tests:
-  - Backend: smoke test that the FastAPI app imports and is instantiated. Full happy/edge/error coverage is not applicable because there is no service-layer business logic in the scaffold (documented skip per tier-selection guidance).
-    - Directory: `backend/tests/unit/`
-    - Naming: `test_{module}_unit.py` (e.g. `test_app_unit.py`)
-  - Frontend: Vitest test that `LandingPage` renders the "Task Notes" title.
-- Integration tests: smoke test that the FastAPI test client can reach the running app (e.g. an OpenAPI/docs route or a trivial 404 on an unknown path) so the tier and DB fixtures execute green. No repository or domain endpoint exists yet.
-  - Directory: `backend/tests/integration/`
-- E2E tests: navigate to http://localhost:5173 and assert the landing page and the "Task Notes" title are visible (locator via `data-testid`, falling back to role+name).
+- Unit tests: backend — assert the FastAPI app instantiates with title "Task Notes API" (happy path); the scaffold has no service/business logic yet, so the single instantiation test is the warranted unit coverage. Frontend — Vitest render test that `LandingPage` shows "Task Notes".
+  - Directory: `backend/tests/unit/` (naming `test_{module}_unit.py`); frontend colocated `*.test.tsx`.
+- Integration tests: **clean no-op for TEST-01** — no repository or router exists yet, so `backend/tests/integration/` is present but empty (pytest exit-5 = pass). Warranted starting TEST-02. (Integration Tests ENABLED per CLAUDE.md.)
+  - Directory: `backend/tests/integration/`.
+- E2E tests: one spec verifying the landing page renders the "Task Notes" title at the root URL (E2E ENABLED).
   - Directory: `e2e/tests/`
-  - File: `TEST-01_static-landing-page.spec.ts`
-- UAT scenarios: one scenario verifying the landing page title renders on visiting the root, plus one edge-case scenario (e.g. page loads with no console error / renders without a backend running, since the page is static).
-  - Directory: `e2e/uat/scenarios/` (Gherkin), `e2e/uat/scripts/` (manual script)
+  - File: `TEST-01_static_landing_page.spec.ts`
+- UAT scenarios: one Gherkin scenario + manual script for the landing-page title (UAT ENABLED).
+  - Directory: `e2e/uat/scenarios/` and `e2e/uat/scripts/`
 
 ## Acceptance Test Outline
 | # | Acceptance Criterion | E2E Strategy | UAT Scenario Sketch |
 |---|---|---|---|
-| 1 | Visiting the app root shows a landing page with the title "Task Notes" | Playwright: `page.goto('/')`, assert `getByTestId('landing-title')` (fallback role `heading` name "Task Notes") is visible with text "Task Notes" | Given the app is running, When I open http://localhost:5173, Then I see a landing page titled "Task Notes" |
-| 2 | Project structure, test infrastructure, and Docker Compose are in place and all test tiers run green (or clean no-ops) | Covered by the CI run itself: unit (backend + frontend), integration, and E2E tiers all execute and pass on the branch; `docker compose config` validates the compose file | Given the scaffolded repo, When CI runs on the branch, Then backend unit + integration, frontend unit, and E2E suites all pass and `docker compose up` starts db + backend + frontend |
+| 1 | Root shows landing page with title "Task Notes" | Navigate to `/`; assert `getByTestId('landing-title')` (role heading) has text "Task Notes" | Given the app is running, When I open http://localhost:5173, Then I see the title "Task Notes" |
+| 2 | Structure, test infra, Docker Compose in place; all tiers green/no-op | Covered by the pipeline: Vitest + pytest unit run green, integration no-ops cleanly, `docker compose up` starts db/backend/frontend, and the E2E spec above passes | Given the repo is checked out, When I run `docker compose up` and the test suites, Then services start and all tiers pass or no-op cleanly |

@@ -1,0 +1,99 @@
+{
+  "item": "TEST-01",
+  "generated_at": 1784902551,
+  "transcript": "/Users/florianserneels/.claude/projects/-Users-florianserneels-Documents-ai-development-framework-improvement/394c5934-2682-4ee0-b3ab-54da1e2c86f4.jsonl",
+  "token_collection": true,
+  "metrics_available": true,
+  "skill_load": {
+    "source": "injected",
+    "skill": null
+  },
+  "steps": [
+    {
+      "step": "0",
+      "title": "Load Context",
+      "duration_s": 15,
+      "model": "fable",
+      "retries": 0,
+      "turns": 3,
+      "tool_calls": 1,
+      "tools_per_turn": 0.33,
+      "output_tokens": 2304,
+      "ctx_tokens_avg": 170283,
+      "ctx_tokens_max": 170283
+    },
+    {
+      "step": "1",
+      "title": "MCP Verification",
+      "duration_s": 34,
+      "model": "fable",
+      "retries": 0,
+      "turns": 6,
+      "tool_calls": 2,
+      "tools_per_turn": 0.33,
+      "output_tokens": 4632,
+      "ctx_tokens_avg": 171616,
+      "ctx_tokens_max": 172051
+    },
+    {
+      "step": "2",
+      "title": "Dependency Check",
+      "duration_s": 0,
+      "model": "fable",
+      "retries": 0,
+      "turns": 0,
+      "tool_calls": 0,
+      "tools_per_turn": null,
+      "output_tokens": 0,
+      "ctx_tokens_avg": null,
+      "ctx_tokens_max": null
+    },
+    {
+      "step": "3",
+      "title": "Fetch Feature Details",
+      "duration_s": 0,
+      "model": "fable",
+      "retries": 0,
+      "turns": 0,
+      "tool_calls": 0,
+      "tools_per_turn": null,
+      "output_tokens": 0,
+      "ctx_tokens_avg": null,
+      "ctx_tokens_max": null
+    },
+    {
+      "step": "4",
+      "title": "Update Status Planning",
+      "duration_s": 28,
+      "model": "fable",
+      "retries": 0,
+      "turns": 6,
+      "tool_calls": 2,
+      "tools_per_turn": 0.33,
+      "output_tokens": 4488,
+      "ctx_tokens_avg": 173544,
+      "ctx_tokens_max": 174026
+    },
+    {
+      "step": "5",
+      "title": "Create Branch",
+      "duration_s": 0,
+      "model": "fable",
+      "retries": 0,
+      "turns": 0,
+      "tool_calls": 0,
+      "tools_per_turn": null,
+      "output_tokens": 0,
+      "ctx_tokens_avg": null,
+      "ctx_tokens_max": null
+    }
+  ],
+  "totals": {
+    "wall_s": 77,
+    "turns": 100,
+    "tool_calls": 48,
+    "output_tokens": 122201,
+    "turns_outside_steps": 85
+  },
+  "subagents_unattributed": 0
+}
