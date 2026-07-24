@@ -1,0 +1,12 @@
+{
+  "name": "task-notes-e2e",
+  "private": true,
+  "version": "0.0.0",
+  "description": "Root E2E test harness (Playwright) for the Task Notes sandbox app.",
+  "scripts": {
+    "e2e": "playwright test"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.48.0"
+  }
+}

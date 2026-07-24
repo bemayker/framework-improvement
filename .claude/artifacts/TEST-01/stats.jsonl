@@ -37,3 +37,8 @@
 {"run":"build-feature","item":"TEST-01","step":"4","title":"Branch Setup","event":"start","ts":1784902947}
 {"run":"build-feature","item":"TEST-01","step":"4","event":"end","model":"fable","ts":1784902947}
 {"run":"build-feature","item":"TEST-01","step":"5","title":"Update Status In Progress","event":"start","ts":1784902947}
+{"run":"build-feature","item":"TEST-01","step":"5","event":"end","ts":1784902947,"model":"fable"}
+{"run":"build-feature","item":"TEST-01","step":"6","title":"Read the Plan","event":"start","ts":1784902947}
+{"run":"build-feature","item":"TEST-01","step":"6","event":"end","ts":1784902947,"model":"fable"}
+{"run":"build-feature","item":"TEST-01","step":"6","event":"end","ts":1784903023,"model":"sonnet"}
+{"run":"build-feature","item":"TEST-01","step":"7","title":"Phase 0S, Infrastructure Scaffolding","event":"start","ts":1784903023}
