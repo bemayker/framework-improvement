@@ -49,3 +49,7 @@
 {"run":"build-feature","item":"TEST-01","step":"9","event":"end","ts":1784903280,"model":"sonnet"}
 {"run":"build-feature","item":"TEST-01","step":"11","title":"Phase D, E2E Test Generation","event":"start","ts":1784903280}
 {"run":"build-feature","item":"TEST-01","step":"11","event":"end","ts":1784903428,"model":"sonnet"}
+{"run":"build-feature","item":"TEST-01","step":"12","title":"Phase E, Self-Review","event":"start","ts":1784903474}
+{"run":"build-feature","item":"TEST-01","step":"12","event":"end","ts":1784903625,"model":"fable"}
+{"run":"build-feature","item":"TEST-01","step":"14","title":"Phase G, UAT Generation","event":"start","ts":1784903697}
+{"run":"build-feature","item":"TEST-01","step":"14","event":"end","ts":1784903733,"model":"sonnet"}
