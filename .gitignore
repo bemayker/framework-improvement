@@ -31,6 +31,9 @@ e2e/uat/reports/
 coverage/
 .pytest_cache/
 htmlcov/
+test-results/
+playwright-report/
+*.tsbuildinfo
 
 # Logs
 *.log
