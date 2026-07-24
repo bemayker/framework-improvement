@@ -1,6 +1,6 @@
 {
   "item": "TEST-01",
-  "generated_at": 1784902551,
+  "generated_at": 1784902842,
   "transcript": "/Users/florianserneels/.claude/projects/-Users-florianserneels-Documents-ai-development-framework-improvement/394c5934-2682-4ee0-b3ab-54da1e2c86f4.jsonl",
   "token_collection": true,
   "metrics_available": true,
@@ -86,14 +86,118 @@
       "output_tokens": 0,
       "ctx_tokens_avg": null,
       "ctx_tokens_max": null
+    },
+    {
+      "step": "6",
+      "title": "Read References",
+      "duration_s": 10,
+      "model": "opus-4.8",
+      "retries": 0,
+      "turns": 3,
+      "tool_calls": 1,
+      "tools_per_turn": 0.33,
+      "output_tokens": 544,
+      "ctx_tokens_avg": 53522,
+      "ctx_tokens_max": 53522
+    },
+    {
+      "step": "7",
+      "title": "Detect Scaffold Requirement",
+      "duration_s": 17,
+      "model": "opus-4.8",
+      "retries": 0,
+      "turns": 8,
+      "tool_calls": 4,
+      "tools_per_turn": 0.5,
+      "output_tokens": 1210,
+      "ctx_tokens_avg": 54902,
+      "ctx_tokens_max": 55382
+    },
+    {
+      "step": "8",
+      "title": "Generate Architect Plan",
+      "duration_s": 147,
+      "model": "opus-4.8",
+      "retries": 0,
+      "turns": 9,
+      "tool_calls": 5,
+      "tools_per_turn": 0.56,
+      "output_tokens": 12073,
+      "ctx_tokens_avg": 65061,
+      "ctx_tokens_max": 70516
+    },
+    {
+      "step": "9",
+      "title": "Generate Shared Risk Analysis",
+      "duration_s": 21,
+      "model": "opus-4.8",
+      "retries": 0,
+      "turns": 2,
+      "tool_calls": 2,
+      "tools_per_turn": 1.0,
+      "output_tokens": 1440,
+      "ctx_tokens_avg": 71707,
+      "ctx_tokens_max": 72376
+    },
+    {
+      "step": "10",
+      "title": "Commit and Push",
+      "duration_s": 21,
+      "model": "fable",
+      "retries": 0,
+      "turns": 3,
+      "tool_calls": 1,
+      "tools_per_turn": 0.33,
+      "output_tokens": 3648,
+      "ctx_tokens_avg": 180071,
+      "ctx_tokens_max": 180071
+    },
+    {
+      "step": "11",
+      "title": "Create or Update Draft PR",
+      "duration_s": 11,
+      "model": "fable",
+      "retries": 0,
+      "turns": 1,
+      "tool_calls": 1,
+      "tools_per_turn": 1.0,
+      "output_tokens": 418,
+      "ctx_tokens_avg": 181452,
+      "ctx_tokens_max": 181452
+    },
+    {
+      "step": "12",
+      "title": "Update Status Plan Review",
+      "duration_s": 17,
+      "model": "fable",
+      "retries": 0,
+      "turns": 0,
+      "tool_calls": 0,
+      "tools_per_turn": null,
+      "output_tokens": 0,
+      "ctx_tokens_avg": null,
+      "ctx_tokens_max": null
+    },
+    {
+      "step": "13",
+      "title": "Summary",
+      "duration_s": 1,
+      "model": "fable",
+      "retries": 0,
+      "turns": 0,
+      "tool_calls": 0,
+      "tools_per_turn": null,
+      "output_tokens": 0,
+      "ctx_tokens_avg": null,
+      "ctx_tokens_max": null
     }
   ],
   "totals": {
-    "wall_s": 77,
-    "turns": 100,
-    "tool_calls": 48,
-    "output_tokens": 122201,
-    "turns_outside_steps": 85
+    "wall_s": 322,
+    "turns": 136,
+    "tool_calls": 65,
+    "output_tokens": 145816,
+    "turns_outside_steps": 95
   },
   "subagents_unattributed": 0
 }

@@ -2,7 +2,7 @@
 id: TEST-01
 type: feature
 title: Static landing page
-status: ready_for_build
+status: in_progress
 branch: feature/TEST-01-static-landing-page
 depends_on: []
 scaffold: true
