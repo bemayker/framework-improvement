@@ -4,8 +4,14 @@
     "provider": "clickup",
     "mcp_server": "clickup",
     "workspace_id": "30307190",
-    "project": { "id": "901524718831", "name": "Validation sandbox" },
-    "team": { "id": "901511582199", "name": "Mayker AI Development Framework" }
+    "project": {
+      "id": "901524718831",
+      "name": "Validation sandbox"
+    },
+    "team": {
+      "id": "901511582199",
+      "name": "Mayker AI Development Framework"
+    }
   },
   "git_provider": {
     "provider": "github",
@@ -13,8 +19,8 @@
     "effective_path": {
       "path": "gh",
       "host": "github.com",
-      "verified_at": "2026-07-27T07:29:35Z",
-      "plugin_version": "0.3.16",
+      "verified_at": "2026-07-27T14:48:29Z",
+      "plugin_version": "0.3.28",
       "mcp_server_url": "https://api.githubcopilot.com/mcp/"
     }
   },
