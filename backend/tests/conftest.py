@@ -17,6 +17,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.engine import Engine
 from sqlalchemy.orm import Session, sessionmaker
 
+from app.core import db as db_module
 from app.core.db import get_db, normalize_database_url
 from app.main import create_app
 
@@ -78,8 +79,24 @@ def db_session(db_engine: Engine) -> Session:
 
 
 @pytest.fixture()
-def client(db_session: Session) -> TestClient:
-    """Function-scoped test client whose `get_db` dependency reuses `db_session`."""
+def client(db_session: Session, db_engine: Engine, monkeypatch: pytest.MonkeyPatch) -> TestClient:
+    """Function-scoped test client whose `get_db` dependency reuses `db_session`.
+
+    `TestClient(app)` runs the app's `lifespan`, which calls `init_db()` ->
+    `get_engine()`. Left alone, `get_engine()` would build its own engine from
+    `get_settings().database_url` (i.e. the `DATABASE_URL` env var) and raise
+    if that variable is not set in the process environment — a real
+    possibility in CI, where the test step sets no such variable even though
+    `docker compose up` (started by an earlier CI step) already published a
+    real PostgreSQL on the same host/port `db_engine` above already resolved
+    and connected to. Rather than requiring the CI workflow and this fixture's
+    default to agree on a URL by convention, point the app's engine singleton
+    directly at the already-connected `db_engine` before the app starts, so
+    `init_db()` never consults `DATABASE_URL` at all. `Base.metadata.create_all`
+    is idempotent, so re-running it here against tables `db_engine` already
+    created is a safe no-op.
+    """
+    monkeypatch.setattr(db_module, "_engine", db_engine)
     app = create_app()
     app.dependency_overrides[get_db] = lambda: db_session
     with TestClient(app) as test_client:
