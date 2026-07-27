@@ -44,4 +44,4 @@ CLAUDE.local.md
 
 # Autonomous delivery — per-item worktrees and run cache (never commit)
 .claude/worktrees/
-.claude/artifacts/run/run_state.json
+.claude/artifacts/run/
