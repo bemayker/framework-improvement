@@ -32,11 +32,16 @@ async function extractErrorMessage(response: Response): Promise<string> {
   return `Request failed with status ${response.status}`;
 }
 
-/** Fetches all saved notes, oldest first. */
-export async function fetchNotes(): Promise<Note[]> {
+/**
+ * Issues a `fetch` against the notes API and returns the parsed JSON body.
+ *
+ * Shared by every endpoint call so the network-error and non-2xx handling
+ * (identical for GET and POST) lives in exactly one place.
+ */
+async function requestJson<T>(path: string, init?: RequestInit): Promise<T> {
   let response: Response;
   try {
-    response = await fetch(`${BASE_URL}/api/notes`, { method: "GET" });
+    response = await fetch(`${BASE_URL}${path}`, init);
   } catch {
     throw new Error("Could not reach the server. Check your connection and try again.");
   }
@@ -45,25 +50,19 @@ export async function fetchNotes(): Promise<Note[]> {
     throw new Error(await extractErrorMessage(response));
   }
 
-  return (await response.json()) as Note[];
+  return (await response.json()) as T;
+}
+
+/** Fetches all saved notes, oldest first. */
+export async function fetchNotes(): Promise<Note[]> {
+  return requestJson<Note[]>("/api/notes", { method: "GET" });
 }
 
 /** Creates a note with the given content and returns the stored note. */
 export async function createNote(content: string): Promise<Note> {
-  let response: Response;
-  try {
-    response = await fetch(`${BASE_URL}/api/notes`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ content }),
-    });
-  } catch {
-    throw new Error("Could not reach the server. Check your connection and try again.");
-  }
-
-  if (!response.ok) {
-    throw new Error(await extractErrorMessage(response));
-  }
-
-  return (await response.json()) as Note;
+  return requestJson<Note>("/api/notes", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ content }),
+  });
 }
