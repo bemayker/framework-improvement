@@ -121,8 +121,9 @@ The CI pipelines require secrets to be configured in your repository settings. T
 
 | Secret | Purpose | Where to get it | Where to add it |
 | --- | --- | --- | --- |
+| `CLICKUP_API_KEY` | Auto-Done pipeline: transitions tracker-resident items to `complete` in ClickUp when their PR merges | ClickUp → Settings → Apps → API Token | GitHub → Settings → Secrets and variables → Actions |
 
-> The secret name matches your tracker. ClickUp uses `CLICKUP_API_KEY`; Linear uses `LINEAR_API_KEY`; Jira uses `JIRA_API_TOKEN` **and** `JIRA_EMAIL`. With `Work Item Source: local`, the auto-Done step flips an in-repo file instead of calling a tracker API, so **no tracker secret is required** (the optional Slack secrets below still apply).
+> The secret name matches your tracker. ClickUp uses `CLICKUP_API_KEY`; Linear uses `LINEAR_API_KEY`; Jira uses `JIRA_API_TOKEN` **and** `JIRA_EMAIL`. With `Work Item Source: hybrid`, the auto-Done step flips the in-repo file when `docs/issues/{ID}.md` exists and calls the tracker REST API otherwise, so the tracker secret is required for tracker-resident items (the optional Slack secrets below still apply). Caveat: an item with **both** a tracker task and a shadowed local file (e.g. TEST-02) gets only the file flip; transition its ClickUp task from the session or by hand.
 
 **Platform-specific instructions (where to add the secret):**
 

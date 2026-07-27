@@ -1,15 +1,23 @@
 # Auto-Done pipeline (mayker-dev). Materialized from the plugin's canonical
-# template by /init-project (Section 6.2). Work Item Source is `local`: on
-# merge to the default branch it flips the merged item's frontmatter status to
-# done in docs/issues/{ID}.md and commits it back with [skip ci]. No tracker
-# API or secret is needed. NOTE: this pushes directly to the default branch, so
-# if that branch is protected against direct pushes, allow the github-actions
-# bot to bypass protection.
+# template (v0.3.16) by /init-project (Section 6.2). Work Item Source is
+# `hybrid` and the tracker is ClickUp (secret: CLICKUP_API_KEY). On merge to
+# the default branch it marks the work item Done. It runs in CI (no MCP):
+#   - local item (docs/issues/{ID}.md present): flips frontmatter status to done
+#     and commits it back with [skip ci]. No tracker secret needed. NOTE: this
+#     pushes directly to the default branch, so if that branch is protected
+#     against direct pushes, allow the github-actions bot to bypass protection
+#     (or use tracker source, which transitions via API and never pushes).
+#   - tracker item: transitions via the tracker REST API using a repo secret.
 #
 # The feature ID is parsed from the `feature/{ID}-{slug}` branch name, matched
-# against the known IDs in .claude/project_state.json when a features registry
-# exists (none under local source), falling back to the regex. This branch
-# contract is enforced in-session by the branch-guard hook.
+# against the known IDs in .claude/project_state.json so IDs containing hyphens
+# (e.g. US-101) parse correctly. This branch contract is enforced in-session by
+# the branch-guard hook.
+#
+# Routing is by file presence: a docs/issues/{ID}.md wins over the tracker
+# REST path. CAVEAT for hybrid twins: an item with BOTH a tracker task and a
+# (shadowed) local file — e.g. TEST-02 — gets only the file flip; its ClickUp
+# task must be transitioned by the session or by hand.
 name: Auto-Done on merge
 
 on:
@@ -54,34 +62,57 @@ jobs:
           fi
           echo "id=$id" >> "$GITHUB_OUTPUT"
 
-      - name: Mark Done (local work item)
+      - name: Mark Done
         if: steps.fid.outputs.id != ''
         env:
           ID: ${{ steps.fid.outputs.id }}
+          # Tracker source only. /init-project sets the secret name for your tracker
+          # (CLICKUP_API_KEY / LINEAR_API_KEY / JIRA_API_TOKEN[, JIRA_EMAIL]).
+          TRACKER_API_KEY: ${{ secrets.CLICKUP_API_KEY }}
         run: |
           set -euo pipefail
           issue_file="docs/issues/${ID}.md"
-          if [ ! -f "$issue_file" ]; then
-            echo "::warning::${issue_file} not found; Work Item Source is local, so there is nothing to transition."
-            exit 0
-          fi
-          if grep -qiE '^status:' "$issue_file"; then
-            sed -i -E 's/^[Ss]tatus:.*/status: done/' "$issue_file"
+          if [ -f "$issue_file" ]; then
+            # ---- local source: flip frontmatter, commit back (no tracker API) ----
+            if grep -qiE '^status:' "$issue_file"; then
+              sed -i -E 's/^[Ss]tatus:.*/status: done/' "$issue_file"
+            else
+              echo "::warning::$issue_file has no status: field; leaving as-is."
+            fi
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add "$issue_file"
+            git commit -m "chore(${ID}): mark done on merge [skip ci]" || { echo "nothing to commit"; exit 0; }
+            git push
           else
-            echo "::warning::$issue_file has no status: field; leaving as-is."
+            # ---- tracker source: transition via REST (example: ClickUp) ----
+            if [ -z "${TRACKER_API_KEY:-}" ]; then
+              echo "::error::TRACKER_API_KEY not set; cannot transition ${ID}."
+              exit 1
+            fi
+            external_id="$(jq -r --arg id "$ID" '(.features[$id].external_id) // empty' .claude/project_state.json)"
+            done_status="$(jq -r '(.status_mapping.done) // "done"' .claude/project_state.json)"
+            if [ -z "$external_id" ]; then
+              echo "::error::no external_id for ${ID} in project_state.json"; exit 1
+            fi
+            code="$(curl -sS -o /dev/null -w '%{http_code}' \
+              -X PUT "https://api.clickup.com/api/v2/task/${external_id}" \
+              -H "Authorization: ${TRACKER_API_KEY}" \
+              -H "Content-Type: application/json" \
+              -d "$(jq -nc --arg s "$done_status" '{status:$s}')")"
+            if [ "$code" != "200" ]; then
+              echo "::error::tracker transition failed (HTTP $code) for ${ID}"; exit 1
+            fi
+            echo "Transitioned ${ID} to '${done_status}'."
           fi
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add "$issue_file"
-          git commit -m "chore(${ID}): mark done on merge [skip ci]" || { echo "nothing to commit"; exit 0; }
-          git push
 
   validate-uat:
     # UAT Gherkin well-formedness check (mayker-dev), part of the merge pipeline.
-    # UAT Generation is ENABLED for this project; the guard on the presence of
-    # e2e/uat/scenarios/*.feature still keeps it a clean no-op before the first
-    # scenarios land. It validates STRUCTURE only and never runs the scenarios
-    # as browser tests: the executable E2E specs (*.spec.ts) run in pr-tests.yml.
+    # Guarded on the presence of e2e/uat/scenarios/*.feature, so it is a clean
+    # no-op when UAT generation is off (CLAUDE.md Feature Toggles -> UAT
+    # Generation). It validates STRUCTURE only and never runs the scenarios as
+    # browser tests: the executable E2E specs (*.spec.ts) run in pr-tests.yml.
+    # See the plugin's DEVELOPMENT.md -> "Why UAT is validated, not executed".
     if: github.event.pull_request.merged == true
     runs-on: ubuntu-latest
     steps:

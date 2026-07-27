@@ -1,14 +1,44 @@
 {
-  "work_item_source": "local",
+  "work_item_source": "hybrid",
+  "issue_tracker": {
+    "provider": "clickup",
+    "mcp_server": "clickup",
+    "workspace_id": "30307190",
+    "project": { "id": "901524718831", "name": "Validation sandbox" },
+    "team": { "id": "901511582199", "name": "Mayker AI Development Framework" }
+  },
   "git_provider": {
     "provider": "github",
     "repository": "bemayker/framework-improvement",
     "effective_path": {
       "path": "gh",
       "host": "github.com",
-      "verified_at": "2026-07-24T14:14:30Z",
+      "verified_at": "2026-07-27T07:29:35Z",
       "plugin_version": "0.3.16",
-      "mcp_server_url": ""
+      "mcp_server_url": "https://api.githubcopilot.com/mcp/"
+    }
+  },
+  "status_mapping": {
+    "todo": "to do",
+    "planning": "in progress",
+    "plan_review": "to test",
+    "ready_for_build": "to do",
+    "in_progress": "in progress",
+    "in_review": "to test",
+    "done": "complete"
+  },
+  "reverse_status_mapping": {
+    "to do": "todo",
+    "in progress": "in_progress",
+    "to test": "in_review",
+    "on hold": null,
+    "complete": "done",
+    "cancelled": null
+  },
+  "features": {
+    "TEST-02": {
+      "external_id": "86caweme3",
+      "external_identifier": "TEST-02"
     }
   }
 }

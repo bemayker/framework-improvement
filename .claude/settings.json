@@ -15,7 +15,8 @@
       "Bash(pytest:*)","Bash(ruff:*)","Bash(black:*)","Bash(prettier:*)","Bash(eslint:*)",
       "Bash(docker:*)","Bash(docker compose:*)","Bash(docker-compose:*)",
       "Bash(sleep:*)","Bash(jq:*)","Bash(head:*)","Bash(tail:*)","Bash(wc:*)","Bash(date:*)",
-      "Bash(touch:*)","Bash(diff:*)"
+      "Bash(touch:*)","Bash(diff:*)",
+      "mcp__clickup__*","mcp__github__*"
     ],
     "deny": [
       "Bash(rm -rf:*)","Bash(sudo:*)",

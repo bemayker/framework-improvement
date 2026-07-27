@@ -86,6 +86,8 @@ Minimal task-notes app used exclusively as a validation sandbox for the mayker-d
   Agents use these paths when generating and locating test files.
 -->
 
+- **Test gate command:** cd backend && uv run pytest -q && cd ../frontend && npm test
+
 ### Unit & Integration Tests
 
 - **Unit test directory:** backend/tests/unit/
