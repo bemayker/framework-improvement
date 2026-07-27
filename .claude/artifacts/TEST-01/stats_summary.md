@@ -1,6 +1,6 @@
 # Run statistics, TEST-01
 
-Generated 2026-07-24 15:13 UTC. Token metrics: available. Skill load: injected.
+Generated 2026-07-27 07:44 UTC. Token metrics: available. Skill load: injected.
 
 | Step | Title | Wall | Turns | Tool calls | Tools/turn | Out tok | Ctx avg | Ctx max | Retries |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -24,6 +24,6 @@ Generated 2026-07-24 15:13 UTC. Token metrics: available. Skill load: injected.
 | 17 | Update Status In Review | n/a | 28 | 15 | 0.54 | 13.3K | 140.3K | 237.8K | 0 |
 | 18 | CI Watch, fix attempt 1 | 3m49s | 19 | 11 | 0.58 | 1.9K | 52.7K | 56.8K | 0 |
 | 19 | Summary | 0m01s | 0 | 0 | n/a | 0 | n/a | n/a | 0 |
-| total |  | 2h09m | 506 | 291 |  | 262.6K |  |  |  |
+| total |  | 2h09m | 601 | 341 |  | 464.5K |  |  |  |
 
-104 turns fell outside every recorded step window (included in totals).
+199 turns fell outside every recorded step window (included in totals).
