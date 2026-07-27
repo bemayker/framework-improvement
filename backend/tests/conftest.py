@@ -41,10 +41,33 @@ def db_engine() -> Engine:
 
 @pytest.fixture()
 def db_session(db_engine: Engine) -> Session:
-    """Function-scoped session bound to a transaction rolled back after the test."""
+    """Function-scoped session bound to a transaction rolled back after the test.
+
+    Isolation relies on SQLAlchemy 2.0's ``join_transaction_mode`` on the
+    `Session` bound to this already-begun `Connection`. It is pinned here
+    explicitly (rather than left to the library default) because the exact
+    mode matters for correctness: with no SAVEPOINT open at bind time (we
+    call `connection.begin()`, not `connection.begin_nested()`),
+    `"conditional_savepoint"` resolves to `"rollback_only"` — the Session's
+    `.commit()` (called by `NoteService.create_note()` on every successful
+    write) flushes to the connection but does NOT propagate a commit to this
+    outer transaction. Only `.rollback()` propagates. So the final
+    `transaction.rollback()` below always undoes everything written during
+    the test, including rows the service layer "committed" from its own
+    point of view. See `test_db_session_isolation_integration.py` for a
+    regression test that fails loudly if this guarantee ever breaks (e.g. if
+    a future change binds a Connection that already holds a SAVEPOINT, which
+    would flip this mode to `"create_savepoint"` and change commit semantics).
+    """
     connection = db_engine.connect()
     transaction = connection.begin()
-    session_factory = sessionmaker(bind=connection, autoflush=False, autocommit=False, future=True)
+    session_factory = sessionmaker(
+        bind=connection,
+        autoflush=False,
+        autocommit=False,
+        future=True,
+        join_transaction_mode="conditional_savepoint",
+    )
     session = session_factory()
 
     yield session
