@@ -1,3 +1,4 @@
+<!-- materialized-from: mayker-dev v0.3.16; do not edit, regenerate with /init-project refresh-rules -->
 <!--
   Universal standard. Imported into CLAUDE.md (always on). Do not edit per project.
   Autonomous decision authority, decision log, merge policy, escalation bar,
@@ -52,7 +53,7 @@ When only one condition holds, act: an ambiguous but reversible choice is decide
 
 A PR is merged, via the GitHub MCP `merge_pull_request` and by the framework's own decision, when **all** of the following hold:
 
-1. Self-review is clean: no unresolved BLOCKING findings from `review_standards.md`.
+1. Self-review is clean: the reviewer's verdict line reports `blocking=0` (`review_standards.md` Section 6.2), i.e. no unresolved BLOCKING findings.
 2. All CI checks on the PR have completed and are green. Never merge with checks pending or failing.
 3. Every acceptance criterion of the work item is satisfied by the implementation.
 4. All PR review comments (human or bot) have been addressed in code or answered with a reply, and no unresolved change request remains.
@@ -80,6 +81,6 @@ Autonomous loops are bounded so a run always terminates:
 - CI failure fixing: at most `CLAUDE.md` → Autonomy → CI fix attempts (default 3) diagnose-fix-push cycles per PR. On exhaustion, record the blocker, leave the PR unmerged, continue the run.
 - Self-review fixes: max 2 cycles (unchanged from `review_standards.md`).
 - Review-comment rounds: max 3 fetch-address-reply cycles per PR, then treat remaining threads as the CI-exhaustion case.
-- Status polling: poll with backoff (see the deliver skill); a pipeline that never completes within the poll budget is treated as a failure.
+- Status polling: poll with backoff per the waiting policy (`workflow_triggers.md` Section 2.1, applied in the deliver skill Section 6.7); a pipeline that never completes within the poll budget is treated as a failure.
 
 An item that exhausts its retries is reported as blocked, never silently dropped and never merged red.

@@ -4,7 +4,7 @@
 - **Mode:** greenfield            # greenfield | existing
 
 ## Work item source
-- **Source:** local               # tracker | local | hybrid
+- **Source:** hybrid               # tracker | local | hybrid
 
 ## Autonomy
 
