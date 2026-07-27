@@ -1,4 +1,4 @@
-<!-- materialized-from: mayker-dev v0.3.16; do not edit, regenerate with /init-project refresh-rules -->
+<!-- materialized-from: mayker-dev v0.3.28; do not edit, regenerate with /init-project refresh-rules -->
 <!--
   Universal standard. Imported into CLAUDE.md (always on). Do not edit per project.
   MCP usage is gated by Work Item Source: issue tracker + Git provider patterns,
@@ -195,7 +195,8 @@ All operations below run through the recorded working path: the Git provider MCP
 
 - **Create branch:** Use Git provider MCP or `git` CLI (both are acceptable).
 - **Create PR:** Use Git provider MCP. Include feature ID in the PR title.
-- **Update PR:** Use Git provider MCP to convert draft → ready, update title, update description, add labels.
+- **Update PR:** Use Git provider MCP to convert draft → ready, update title, update description, add labels. **The draft → ready conversion is gated on a settled CI watch** in every skill that performs it (build-feature Sections 18-19, fix Sections 9-10, deliver 6.6-6.7, refactor and generate-tests Sections 10-11): it fires the Slack announcement, so it happens after the checks are green, never on the push that starts them. Title, description and label edits fire nothing and are unrestricted.
+- **Every command that opens a PR opens it as a draft and watches before converting.** There is exactly one exception, and it is explicit rather than a default: `/refactor` and `/generate-tests` accept `--no-watch`, and on that path they open the PR ready for review directly (one `opened` announcement instead of an `opened` plus a `ready_for_review`) and say in their summary that the checks were not watched. A command must never *silently* skip the watch, and no skill converts a PR out of draft without a settled watch behind it.
 
 ### 5.2 Reading PR Review Comments
 
@@ -208,7 +209,7 @@ Used by `/revise-feature` and `/plan-feature` (when re-planning):
 
 ### 5.3 Reading PR Checks and CI Logs
 
-Used by the `watch-pr` skill (the CI watch at the tail of `/build-feature`, `/revise-feature`, and `/fix`) and by `/deliver` Section 6.7:
+Used by the `watch-pr` skill (the CI watch `/build-feature`, `/revise-feature`, and `/fix` run after their push and **before** handing the PR over) and by `/deliver` Section 6.7:
 
 1. Read the PR's check runs via the working path: GitHub MCP `pull_request_read` (status / check runs) plus `get_commit`, or the `gh` CLI (`gh pr checks {PR}`).
 2. For a failing check, fetch the failing job's log: `gh run view {RUN_ID} --log-failed` on the CLI path; on the MCP path use the check's output summary from `pull_request_read` when no job-log tool is available.

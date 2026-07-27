@@ -1,4 +1,4 @@
-<!-- materialized-from: mayker-dev v0.3.16; do not edit, regenerate with /init-project refresh-rules -->
+<!-- materialized-from: mayker-dev v0.3.28; do not edit, regenerate with /init-project refresh-rules -->
 <!--
   Universal standard. Imported into CLAUDE.md (always on). Do not edit per project.
   Autonomous decision authority, decision log, merge policy, escalation bar,
@@ -54,18 +54,18 @@ When only one condition holds, act: an ambiguous but reversible choice is decide
 A PR is merged, via the GitHub MCP `merge_pull_request` and by the framework's own decision, when **all** of the following hold:
 
 1. Self-review is clean: the reviewer's verdict line reports `blocking=0` (`review_standards.md` Section 6.2), i.e. no unresolved BLOCKING findings.
-2. All CI checks on the PR have completed and are green. Never merge with checks pending or failing.
+2. All CI checks on the PR have completed and are green. Never merge with checks pending or failing. The PR is opened as a draft and converted to ready for review only once they are (deliver Sections 6.6 and 6.7 step 5), so a still-draft PR at merge time means the checks never settled — and GitHub refuses to merge a draft in the first place.
 3. Every acceptance criterion of the work item is satisfied by the implementation.
 4. All PR review comments (human or bot) have been addressed in code or answered with a reply, and no unresolved change request remains.
 5. The Section 4 escalation bar is not triggered.
 
-The merge method is `CLAUDE.md` → Autonomy → Merge method (default `squash`). After merging, the framework verifies the work item transitioned to Done (the auto-Done pipeline) and performs the transition itself via the tracker MCP or the local frontmatter if CI could not, then recomputes the dependency graph so dependents unblock.
+The merge method is `CLAUDE.md` → Autonomy → Merge method (default `squash`). After merging, the framework verifies the work item transitioned to Done on its **authoritative** side (`work_items.md` Sections 3-4: the tracker twin for a tracker-resident item, the file for a local one) and performs the transition itself via the tracker MCP or the local frontmatter — both, for a `hybrid` item that has a twin and a shadow file — if CI could not, then recomputes the dependency graph so dependents unblock.
 
 ## 6. Git operations: GitHub MCP only
 
 In autonomous mode, **every remote git operation goes through the custom GitHub MCP** (registered as `github` in `.mcp.json`). No `git push`, `git fetch` from remotes for write purposes, and no `gh` CLI for remote actions. The assisted-mode degradation to the `gh` CLI does not apply: if the GitHub MCP is unavailable, the run stops before starting (this is a setup failure, not a mid-run prompt). The exact operation-to-tool mapping is in `mcp_integration.md` Section 7.
 
-Local, non-remote git remains allowed and expected: reading files, `git worktree` for per-item isolation, local branches, local commits, and local test runs. The deterministic hooks gate both push paths: a Bash `git push` and a GitHub MCP push (`push_files`, `create_or_update_file`, `delete_file`) each trigger the branch guard and the test gate.
+Local, non-remote git remains allowed and expected: reading files, `git worktree` for per-item isolation (always on in an autonomous run, whatever `CLAUDE.md` → Worktrees says — that toggle governs the assisted commands, `workflow_triggers.md` Section 4.1), local branches, local commits, and local test runs. The deterministic hooks gate both push paths: a Bash `git push` and a GitHub MCP push (`push_files`, `create_or_update_file`, `delete_file`) each trigger the branch guard and the test gate.
 
 ## 7. Repository policy
 

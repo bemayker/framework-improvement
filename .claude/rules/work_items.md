@@ -1,4 +1,4 @@
-<!-- materialized-from: mayker-dev v0.3.16; do not edit, regenerate with /init-project refresh-rules -->
+<!-- materialized-from: mayker-dev v0.3.28; do not edit, regenerate with /init-project refresh-rules -->
 # Work items
 
 ## 1. Sources
@@ -54,7 +54,13 @@ If the item cannot be resolved from the configured source, stop with a clear mes
 
 Either way, skip the update when the item is already at the target status (idempotent resume, Section 8), and never let a status mutation be the session's first tracker call (`mcp_integration.md` Section 1.4).
 
-Done on merge: for local items, a CI step (or a manual step) sets `status: done` in the file when the PR merges. No tracker REST call or secret is needed. That CI step pushes the flip commit to the default branch, so if the default branch is protected the CI bot must be allowed to bypass the protection (on GitHub, exempt the `github-actions` bot in the branch ruleset; on GitLab/Bitbucket, grant the CI user push access). Otherwise the push is rejected and the item stays in its pre-merge status until flipped by hand.
+**Done on merge.** A CI step (or a manual step) marks the item done when the PR merges. It runs outside Claude Code, so it uses the tracker's REST API, not MCP, and it routes on `work_item_source` in `project_state.json` — **not** on which files exist:
+
+- `local`: sets `status: done` in `docs/issues/{ID}.md`. No tracker REST call or secret is needed.
+- `tracker`: transitions the tracker item to the `status_mapping.done` status. No file is touched.
+- `hybrid`: an ID in the `features` registry is tracker-resident, so its **authoritative** side is the tracker twin (Section 3) — transition it, **and** also flip `docs/issues/{ID}.md` when that file exists, so the shadow copy does not contradict the authority. An ID that is not in the registry is local-only and takes the file path. Flipping only the shadowed file would leave the authoritative status at pre-merge and block every dependent that resolves the item through the tracker.
+
+The file flip pushes a commit to the default branch, so if the default branch is protected the CI bot must be allowed to bypass the protection (on GitHub, exempt the `github-actions` bot in the branch ruleset; on GitLab/Bitbucket, grant the CI user push access). Otherwise the push is rejected and the item stays in its pre-merge status until flipped by hand. The step fails loudly only when **no** side recorded the merge: a missing tracker secret (or `external_id`) errors under `tracker`, and under `hybrid` for an item with no local file, but degrades to a warning when the local flip still ran; a routed file path with no `docs/issues/{ID}.md` errors unless the tracker transition already succeeded.
 
 ## 5. MCP requirement by source
 
@@ -75,7 +81,9 @@ When a scaffold item is found and is not the item being worked on, the gate reso
 
 ## 7. Readiness and the dependency graph
 
-Execution order is governed by the **dependency graph**, not by any grouping. `feature_map.md` is a flat table whose columns are `Feature ID`, `Title`, `depends_on`, `branch`, `scaffold`, and `shared_risk_notes` (local items carry `depends_on`/`branch` in frontmatter instead). There are no waves; a wave was only ever a derived view of this graph and is no longer generated.
+Execution order is governed by the **dependency graph**, not by any grouping. The graph *is* `feature_map.md`: a flat six-column table, one row per item, with the edges in `depends_on` (local items carry `depends_on`/`branch` in frontmatter instead and need no row). The column set and the per-column rules are defined once, in `${CLAUDE_PLUGIN_ROOT}/templates/feature_map.md` → `## Schema`; that template is the single source of truth and every generator materializes it rather than composing the table from memory. There are no waves; a wave was only ever a derived view of this graph and is no longer generated.
+
+**The schema is enforced, not just documented.** `${CLAUDE_PLUGIN_ROOT}/hooks/lib/feature-map-validate.sh {path}` checks a written map against that template and exits 0 (valid), 1 (violations, each naming the row, the rule and the consequence) or 2 (it could not check). Every step that **writes** the file runs it and refuses to proceed on a non-zero exit (`init-project` Section 4, `deliver` Section 2 step 5 and Section 3 step 3), and the `feature-map-guard` PostToolUse hook re-runs it advisorily on any other write, including a hand edit. Run it yourself before trusting a map you did not just generate: a blank `depends_on`, a `scaffold` cell reading `true` instead of `✅`, or a `branch` missing its `feature/{ID}-` prefix all render fine and all break a different gate silently.
 
 **Readiness rule:** an item is *ready* to be worked on if and only if
 
