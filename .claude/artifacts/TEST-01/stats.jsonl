@@ -1,0 +1,66 @@
+{"run":"plan-feature","item":"TEST-01","step":"0","title":"Load Context","event":"start","ts":1784902431}
+{"run":"plan-feature","item":"TEST-01","step":"0","event":"end","ts":1784902446,"model":"fable"}
+{"run":"plan-feature","item":"TEST-01","step":"1","title":"MCP Verification","event":"start","ts":1784902446}
+{"run":"plan-feature","item":"TEST-01","step":"1","event":"end","model":"fable","ts":1784902480}
+{"run":"plan-feature","item":"TEST-01","step":"2","title":"Dependency Check","event":"start","ts":1784902480}
+{"run":"plan-feature","item":"TEST-01","step":"2","event":"end","model":"fable","ts":1784902480}
+{"run":"plan-feature","item":"TEST-01","step":"3","title":"Fetch Feature Details","event":"start","ts":1784902480}
+{"run":"plan-feature","item":"TEST-01","step":"3","event":"end","model":"fable","ts":1784902480}
+{"run":"plan-feature","item":"TEST-01","step":"4","title":"Update Status Planning","event":"start","ts":1784902480}
+{"run":"plan-feature","item":"TEST-01","step":"4","event":"end","ts":1784902508,"model":"fable"}
+{"run":"plan-feature","item":"TEST-01","step":"5","title":"Create Branch","event":"start","ts":1784902508}
+{"run":"plan-feature","item":"TEST-01","step":"5","event":"end","ts":1784902508,"model":"fable"}
+{"run":"plan-feature","item":"TEST-01","step":"6","title":"Read References","event":"start","ts":1784902556}
+{"run":"plan-feature","item":"TEST-01","step":"6","event":"end","ts":1784902566,"model":"opus-4.8"}
+{"run":"plan-feature","item":"TEST-01","step":"7","title":"Detect Scaffold Requirement","event":"start","ts":1784902566}
+{"run":"plan-feature","item":"TEST-01","step":"7","event":"end","ts":1784902583,"model":"opus-4.8"}
+{"run":"plan-feature","item":"TEST-01","step":"8","title":"Generate Architect Plan","event":"start","ts":1784902583}
+{"run":"plan-feature","item":"TEST-01","step":"8","event":"end","ts":1784902730,"model":"opus-4.8"}
+{"run":"plan-feature","item":"TEST-01","step":"9","title":"Generate Shared Risk Analysis","event":"start","ts":1784902731}
+{"run":"plan-feature","item":"TEST-01","step":"9","event":"end","ts":1784902752,"model":"opus-4.8"}
+{"run":"plan-feature","item":"TEST-01","step":"10","title":"Commit and Push","event":"start","ts":1784902793}
+{"run":"plan-feature","item":"TEST-01","step":"10","event":"end","ts":1784902814,"model":"fable"}
+{"run":"plan-feature","item":"TEST-01","step":"11","title":"Create or Update Draft PR","event":"start","ts":1784902814}
+{"run":"plan-feature","item":"TEST-01","step":"11","event":"end","ts":1784902825,"model":"fable"}
+{"run":"plan-feature","item":"TEST-01","step":"12","title":"Update Status Plan Review","event":"start","ts":1784902825}
+{"run":"plan-feature","item":"TEST-01","step":"12","event":"end","ts":1784902842,"model":"fable"}
+{"run":"plan-feature","item":"TEST-01","step":"13","title":"Summary","event":"start","ts":1784902842}
+{"run":"plan-feature","item":"TEST-01","step":"13","event":"end","ts":1784902843,"model":"fable"}
+{"run":"build-feature","item":"TEST-01","step":"0","title":"Load Context","event":"start","ts":1784902913}
+{"run":"build-feature","item":"TEST-01","step":"0","event":"end","model":"fable","ts":1784902913}
+{"run":"build-feature","item":"TEST-01","step":"1","title":"MCP Verification","event":"start","ts":1784902913}
+{"run":"build-feature","item":"TEST-01","step":"1","event":"end","model":"fable","ts":1784902913}
+{"run":"build-feature","item":"TEST-01","step":"2","title":"Dependency Check","event":"start","ts":1784902913}
+{"run":"build-feature","item":"TEST-01","step":"2","event":"end","model":"fable","ts":1784902913}
+{"run":"build-feature","item":"TEST-01","step":"3","title":"Status and Plan Verification","event":"start","ts":1784902913}
+{"run":"build-feature","item":"TEST-01","step":"3","event":"end","model":"fable","ts":1784902947}
+{"run":"build-feature","item":"TEST-01","step":"4","title":"Branch Setup","event":"start","ts":1784902947}
+{"run":"build-feature","item":"TEST-01","step":"4","event":"end","model":"fable","ts":1784902947}
+{"run":"build-feature","item":"TEST-01","step":"5","title":"Update Status In Progress","event":"start","ts":1784902947}
+{"run":"build-feature","item":"TEST-01","step":"5","event":"end","ts":1784902947,"model":"fable"}
+{"run":"build-feature","item":"TEST-01","step":"6","title":"Read the Plan","event":"start","ts":1784902947}
+{"run":"build-feature","item":"TEST-01","step":"6","event":"end","ts":1784902947,"model":"fable"}
+{"run":"build-feature","item":"TEST-01","step":"6","event":"end","ts":1784903023,"model":"sonnet"}
+{"run":"build-feature","item":"TEST-01","step":"7","title":"Phase 0S, Infrastructure Scaffolding","event":"start","ts":1784903023}
+{"run":"build-feature","item":"TEST-01","step":"7","event":"end","ts":1784903125,"model":"sonnet"}
+{"run":"build-feature","item":"TEST-01","step":"8","title":"Phase A, Frontend Implementation","event":"start","ts":1784903125}
+{"run":"build-feature","item":"TEST-01","step":"8","event":"end","ts":1784903234,"model":"sonnet"}
+{"run":"build-feature","item":"TEST-01","step":"9","title":"Phase B, Backend Implementation","event":"start","ts":1784903234}
+{"run":"build-feature","item":"TEST-01","step":"9","event":"end","ts":1784903280,"model":"sonnet"}
+{"run":"build-feature","item":"TEST-01","step":"11","title":"Phase D, E2E Test Generation","event":"start","ts":1784903280}
+{"run":"build-feature","item":"TEST-01","step":"11","event":"end","ts":1784903428,"model":"sonnet"}
+{"run":"build-feature","item":"TEST-01","step":"12","title":"Phase E, Self-Review","event":"start","ts":1784903474}
+{"run":"build-feature","item":"TEST-01","step":"12","event":"end","ts":1784903625,"model":"fable"}
+{"run":"build-feature","item":"TEST-01","step":"14","title":"Phase G, UAT Generation","event":"start","ts":1784903697}
+{"run":"build-feature","item":"TEST-01","step":"14","event":"end","ts":1784903733,"model":"sonnet"}
+{"run":"build-feature","item":"TEST-01","step":"13","title":"Phase F, Refactor Gate","event":"start","ts":1784903747}
+{"run":"build-feature","item":"TEST-01","step":"13","event":"end","ts":1784903809,"model":"sonnet"}
+{"run":"build-feature","item":"TEST-01","step":"15","title":"Documentation Check","event":"start","ts":1784903819}
+{"run":"build-feature","item":"TEST-01","step":"15","event":"end","ts":1784903880,"model":"sonnet"}
+{"run":"build-feature","item":"TEST-01","step":"16","title":"Push and Update PR","event":"start","ts":1784903934}
+{"run":"build-feature","item":"TEST-01","step":"16","event":"end","ts":1784904006,"model":"fable"}
+{"run":"build-feature","item":"TEST-01","step":"17","title":"Update Status In Review","event":"start","ts":1784904006}
+{"run":"build-feature","item":"TEST-01","step":"18","title":"CI Watch, fix attempt 1","event":"start","ts":1784904190}
+{"run":"build-feature","item":"TEST-01","step":"18","title":"CI Watch, fix attempt 1","event":"end","ts":1784904419,"model":"sonnet"}
+{"run":"build-feature","item":"TEST-01","step":"19","title":"Summary","event":"start","ts":1784906025}
+{"run":"build-feature","item":"TEST-01","step":"19","event":"end","ts":1784906026,"model":"fable"}
