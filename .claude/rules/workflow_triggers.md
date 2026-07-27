@@ -1,4 +1,4 @@
-<!-- materialized-from: mayker-dev v0.3.28; do not edit, regenerate with /init-project refresh-rules -->
+<!-- materialized-from: mayker-dev v0.3.29; do not edit, regenerate with /init-project refresh-rules -->
 <!--
   Universal standard. Imported into CLAUDE.md (always on). Do not edit per project.
   Slash-command mapping, operational behaviour, git conventions.
@@ -94,7 +94,7 @@ Setup procedure, run once per command — once **per item** in a batch — right
 4. If this run has **already committed** work on the current branch of the primary checkout, finish it there and do not move to a worktree mid-run; note it in the summary. Moving would strand those commits.
 5. From here on the worktree is the working directory: `cd` into it once, or prefix each command with `git -C {worktree}`. Read and write the item's files under that path — including `.claude/artifacts/{ID}/`, which is branch content — and run the tests there. The primary checkout keeps whatever branch it was on and is not touched.
 6. The upstream assertion (`git branch --set-upstream-to=origin/{branch} {branch}` then `git rev-parse --abbrev-ref {branch}@{upstream}`, MUST print `origin/{branch}`) runs **in the worktree**, unchanged.
-7. **Point the statistics collector at the worktree.** The step markers land in the worktree's `.claude/artifacts/{ID}/stats.jsonl`, so the in-session run at each skill's Summary must name it: `bash "${CLAUDE_PLUGIN_ROOT}/hooks/stats-collect.sh" --project {worktree}`. The session's `.claude/artifacts/run/session.json` may only exist in the primary checkout; when it does, pass its `transcript_path` too (`--transcript {path}`), otherwise the token metrics degrade to null. Statistics never block a run either way.
+7. **Point the statistics collector at the worktree.** The step markers land in the worktree's `.claude/artifacts/{ID}/stats.jsonl`, so the in-session run at each skill's Summary must name it: `bash "${CLAUDE_PLUGIN_ROOT}/hooks/stats-collect.sh" --project {worktree}`. The session's `.claude/artifacts/run/session.json` may only exist in the primary checkout; when it does, pass its `transcript_path` too (`--transcript {path}`), otherwise the collector cannot resolve a transcript and reports the token metrics as ABSENT with a `**Degraded:**` line naming the cause, rather than writing zeros that read like a measurement. Statistics never block a run either way.
 8. Report the worktree path in the command's summary, so the developer knows where the code is.
 
 Removal is manual in assisted mode, since the human merges the PR: `git worktree remove .claude/worktrees/{ID}` after the merge (`git worktree prune` clears entries whose directory is already gone). A leftover worktree is harmless, the item's next command reuses it.

@@ -471,7 +471,8 @@ Test directory paths and naming conventions are configured in `CLAUDE.md` → Te
 # Frontend (Vitest)
 cd frontend && npm test
 
-# Backend (pytest, via uv)
+# Backend (pytest, via uv) — integration tests need PostgreSQL reachable at
+# DATABASE_URL (falls back to the .env.example default), e.g. `docker compose up -d db`
 cd backend && uv run pytest
 
 # E2E (Playwright) — requires the app running (docker compose up, or the dev servers directly)
