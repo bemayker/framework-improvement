@@ -54,11 +54,15 @@ Minimal task-notes app used exclusively as a validation sandbox for the mayker-d
 ## MCP Configuration
 
 <!--
-  Work Item Source is `local`: work items live in docs/issues/ and no issue
-  tracker MCP is required. The Git provider MCP stays recommended for PRs but
-  degrades to the `gh` CLI, which this project uses.
+  Work Item Source is `hybrid`: TEST-02 resolves from its ClickUp twin (list
+  "Validation sandbox"), TEST-01/TEST-03 stay local in docs/issues/. The Git
+  provider MCP stays recommended for PRs but degrades to the `gh` CLI, which
+  this project uses.
 -->
 
+- **Issue Tracker:** clickup
+- **Workspace ID:** 30307190
+- **Project/List:** Validation sandbox (list id 901524718831)
 - **Git Provider:** github
 - **Repository:** bemayker/framework-improvement
 
