@@ -5,6 +5,7 @@ TEST-03 registers the notes router; later features register their own
 routers here too, without restructuring this factory.
 """
 
+import logging
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 
@@ -27,8 +28,6 @@ async def _lifespan(app: FastAPI) -> AsyncIterator[None]:
     if settings.database_url:
         init_db()
     else:
-        import logging
-
         logging.getLogger(__name__).warning(
             "DATABASE_URL is not set; skipping database schema initialization."
         )

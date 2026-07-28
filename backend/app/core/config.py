@@ -6,7 +6,7 @@ the raw and normalised connection string, CORS origins, and app metadata.
 """
 
 import os
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 
 def _normalize_sqlalchemy_url(url: str | None) -> str | None:
@@ -36,11 +36,18 @@ class Settings:
     app_title: str = "Task Notes API"
     # Connection details come exclusively from DATABASE_URL; nothing is
     # hardcoded. None when unset, so unit tests stay database-free.
-    database_url: str | None = os.environ.get("DATABASE_URL")
+    # `default_factory` (not a plain default) so the environment is read on
+    # every `Settings()` construction, matching `get_settings()`'s "read
+    # fresh from the environment" contract: a bare `os.environ.get(...)`
+    # default expression is evaluated once at class-definition time, not
+    # per instance.
+    database_url: str | None = field(default_factory=lambda: os.environ.get("DATABASE_URL"))
     # Allow-listed browser origins for CORSMiddleware. The frontend dev server
     # (http://localhost:5173) and the backend API (http://localhost:8000) are
     # different origins, so CORS is functionally required, not optional.
-    cors_origins: tuple[str, ...] = _parse_cors_origins(os.environ.get("CORS_ORIGINS"))
+    cors_origins: tuple[str, ...] = field(
+        default_factory=lambda: _parse_cors_origins(os.environ.get("CORS_ORIGINS"))
+    )
 
     @property
     def sqlalchemy_url(self) -> str | None:
