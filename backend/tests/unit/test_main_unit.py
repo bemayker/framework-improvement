@@ -3,6 +3,27 @@
 from app.main import create_app
 
 
+def _collect_route_paths(routes) -> set[str]:
+    """Flatten an app's route list into path strings.
+
+    The installed FastAPI represents `app.include_router(...)` as a wrapper
+    object (no `.path` of its own) holding an `original_router` whose own
+    `.routes` carry the real paths, rather than flattening included routes
+    directly onto `app.routes`. Recurse through that wrapper so this test
+    keeps working regardless of which of the two shapes is in play.
+    """
+    paths: set[str] = set()
+    for route in routes:
+        path = getattr(route, "path", None)
+        if path is not None:
+            paths.add(path)
+            continue
+        original_router = getattr(route, "original_router", None)
+        if original_router is not None:
+            paths.update(_collect_route_paths(original_router.routes))
+    return paths
+
+
 def test_create_app_returns_app_with_expected_title():
     """Happy path: the app instantiates with the configured title."""
     app = create_app()
@@ -10,20 +31,34 @@ def test_create_app_returns_app_with_expected_title():
     assert app.title == "Task Notes API"
 
 
-def test_create_app_registers_no_feature_routes():
-    """Edge case: the scaffold app exposes no feature routes yet.
+def test_create_app_registers_version_route():
+    """Edge case: the app registers the TEST-05 version route.
 
-    Only FastAPI's own built-in routes (OpenAPI schema, docs, redoc) exist
-    at this stage; feature endpoints are added starting with TEST-02.
+    Only FastAPI's own built-in routes (OpenAPI schema, docs, redoc) existed
+    before TEST-05; this asserts the version router is now wired in without
+    asserting the (now stale) claim that the app exposes no custom routes.
     """
     app = create_app()
 
     built_in_paths = {"/openapi.json", "/docs", "/docs/oauth2-redirect", "/redoc"}
-    custom_paths = {
-        route.path for route in app.routes if getattr(route, "path", None) not in built_in_paths
-    }
+    custom_paths = _collect_route_paths(app.routes) - built_in_paths
 
-    assert custom_paths == set()
+    assert "/api/version" in custom_paths
+def test_create_app_registers_notes_routes():
+    """Edge case: the notes router (TEST-03) is registered on the app.
+
+    The scaffold app (TEST-01) exposed no feature routes; TEST-03 adds the
+    first ones, so this test now asserts they exist instead of asserting
+    their absence. Reads the generated OpenAPI schema (static route
+    introspection) rather than issuing a request, so this stays DB-free like
+    every other test in this module.
+    """
+    app = create_app()
+
+    operations = app.openapi()["paths"].get("/api/notes", {})
+
+    assert "get" in operations
+    assert "post" in operations
 
 
 def test_create_app_returns_independent_instances():
