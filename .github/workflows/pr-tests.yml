@@ -69,7 +69,7 @@ jobs:
       - name: Start services
         run: |
           if [ -f docker-compose.yml ] || [ -f compose.yml ] || [ -f compose.yaml ]; then
-            docker compose up -d
+            docker compose up -d --wait db
           fi
 
       # --- Unit tests (ENABLED, blocking) ---
@@ -88,6 +88,11 @@ jobs:
 
       # --- Integration tests (ENABLED, blocking) ---
       - name: Backend integration tests
+        env:
+          # Compose defaults (docker-compose.yml / .env.example), ephemeral
+          # CI-only credentials reachable at localhost since "db" publishes
+          # 5432 on the runner host.
+          DATABASE_URL: postgresql://tasknotes:tasknotes@localhost:5432/tasknotes
         run: |
           if [ -d backend/tests/integration ]; then
             (cd backend && uv run pytest tests/integration -q) || [ "$?" -eq 5 ]
