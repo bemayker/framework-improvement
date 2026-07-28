@@ -65,11 +65,18 @@ jobs:
             npx playwright install --with-deps chromium
           fi
 
-      # --- Services (PostgreSQL via Docker Compose) ---
+      # --- Services (PostgreSQL, backend API, frontend dev server via Docker
+      # Compose) ---
+      # No service filter: the integration step needs `db` reachable at
+      # DATABASE_URL below, and the E2E step drives the app through
+      # playwright.config.ts's baseURL (http://localhost:5173), which needs
+      # `frontend` serving and, through it, `backend` on :8000. Omitting the
+      # filter also means a service added to docker-compose.yml later is
+      # started here without this step needing an edit.
       - name: Start services
         run: |
           if [ -f docker-compose.yml ] || [ -f compose.yml ] || [ -f compose.yaml ]; then
-            docker compose up -d
+            docker compose up -d --wait
           fi
 
       # --- Unit tests (ENABLED, blocking) ---
@@ -88,6 +95,11 @@ jobs:
 
       # --- Integration tests (ENABLED, blocking) ---
       - name: Backend integration tests
+        env:
+          # Compose defaults (docker-compose.yml / .env.example), ephemeral
+          # CI-only credentials reachable at localhost since "db" publishes
+          # 5432 on the runner host.
+          DATABASE_URL: postgresql://tasknotes:tasknotes@localhost:5432/tasknotes
         run: |
           if [ -d backend/tests/integration ]; then
             (cd backend && uv run pytest tests/integration -q) || [ "$?" -eq 5 ]
