@@ -10,20 +10,20 @@ def test_create_app_returns_app_with_expected_title():
     assert app.title == "Task Notes API"
 
 
-def test_create_app_registers_notes_routes():
-    """Edge case: TEST-03 registers the notes router.
+def test_create_app_registers_no_feature_routes():
+    """Edge case: the scaffold app exposes no feature routes yet.
 
-    Read the resolved OpenAPI schema rather than walking `app.routes`
-    directly: FastAPI's router now wraps included routers lazily, so the
-    schema is the version-independent way to see the effective paths.
-    Only the notes endpoints are registered at this stage; no other
-    feature routes exist yet.
+    Only FastAPI's own built-in routes (OpenAPI schema, docs, redoc) exist
+    at this stage; feature endpoints are added starting with TEST-02.
     """
     app = create_app()
 
-    paths = set(app.openapi()["paths"].keys())
+    built_in_paths = {"/openapi.json", "/docs", "/docs/oauth2-redirect", "/redoc"}
+    custom_paths = {
+        route.path for route in app.routes if getattr(route, "path", None) not in built_in_paths
+    }
 
-    assert paths == {"/api/notes"}
+    assert custom_paths == set()
 
 
 def test_create_app_returns_independent_instances():

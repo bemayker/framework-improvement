@@ -1,11 +1,11 @@
 import type { CSSProperties } from "react";
-import NotesSection from "./NotesSection";
 
 const containerStyle: CSSProperties = {
   minHeight: "100vh",
   display: "flex",
   flexDirection: "column",
   alignItems: "center",
+  justifyContent: "center",
   padding: "1.5rem",
   textAlign: "center",
   fontFamily: "system-ui, -apple-system, sans-serif",
@@ -37,7 +37,6 @@ function LandingPage() {
         <p style={subtitleStyle}>
           A minimal task-notes app for keeping track of what needs doing.
         </p>
-        <NotesSection />
       </main>
     </div>
   );

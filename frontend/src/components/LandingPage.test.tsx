@@ -1,14 +1,6 @@
-import { describe, it, expect, vi } from "vitest";
+import { describe, it, expect } from "vitest";
 import { render, screen } from "@testing-library/react";
 import LandingPage from "./LandingPage";
-
-// LandingPage now mounts NotesSection, which fetches notes on mount. Mock the
-// API client so these pre-existing assertions never trigger a real network
-// call (TEST-01's LandingPage tests predate the notes feature).
-vi.mock("../api/notesApi", () => ({
-  fetchNotes: vi.fn().mockResolvedValue([]),
-  createNote: vi.fn(),
-}));
 
 describe("LandingPage", () => {
   it("renders the app title 'Task Notes'", () => {
