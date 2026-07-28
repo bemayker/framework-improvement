@@ -1,4 +1,5 @@
 import type { CSSProperties } from "react";
+import AppFooter from "./AppFooter";
 import NoteForm from "./NoteForm";
 import NoteList from "./NoteList";
 import { useNotes } from "../hooks/useNotes";
