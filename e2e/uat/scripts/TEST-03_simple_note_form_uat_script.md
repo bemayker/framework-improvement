@@ -4,7 +4,7 @@
 
 - Docker and Docker Compose installed and running.
 - Repository checked out locally, on branch `feature/TEST-03-simple-note-form` (or later, once merged, on `main`).
-- Copy `.env.example` to `.env` in the repository root (the defaults are usable as-is for local UAT).
+- **No `.env` file in the repository root.** `docker-compose.yml` supplies a working default for every value it reads, so Compose needs no `.env` for UAT. If a root `.env` already exists (an earlier UAT script asked for one), either move it aside for this run or make sure it sets `DATABASE_URL=postgresql://tasknotes:tasknotes@db:5432/tasknotes`: Compose reads the root `.env` for interpolation, and the `localhost` value shipped in `.env.example` points the backend container at itself, so it cannot reach the database.
 - No other process bound to ports `5173` (frontend), `8000` (backend), or `5432` (database).
 - A browser with developer tools available: two steps below read the **Network** tab to confirm what the page does and does not send to the server.
 - The notes database is shared and persistent, so the list may already contain notes from an earlier session. Every check below is written against the note **you** enter, never against the list being empty.
