@@ -1,6 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { render, screen } from "@testing-library/react";
 import LandingPage from "./LandingPage";
+import { version } from "../../package.json";
 
 describe("LandingPage", () => {
   it("renders the app title 'Task Notes'", () => {
@@ -19,5 +20,12 @@ describe("LandingPage", () => {
     render(<LandingPage />);
 
     expect(screen.getByRole("heading", { name: "Task Notes" })).toBeInTheDocument();
+  });
+
+  it("renders the footer with the app name and version", () => {
+    render(<LandingPage />);
+
+    expect(screen.getByTestId("app-footer")).toHaveTextContent("Task Notes");
+    expect(screen.getByTestId("app-footer")).toHaveTextContent(version);
   });
 });
