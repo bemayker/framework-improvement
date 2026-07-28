@@ -20,6 +20,13 @@ const MESSAGES = {
   serverError: "The server is currently unavailable. Please try again.",
 } as const;
 
+/**
+ * Longest note text the API accepts, mirroring `MAX_NOTE_LENGTH` in
+ * `backend/app/models/note.py`. This module owns the API contract, so UI code
+ * reads the limit from here instead of repeating the number.
+ */
+export const MAX_NOTE_LENGTH = 500;
+
 export interface Note {
   id: number;
   text: string;

@@ -1,4 +1,5 @@
 import { useState, type CSSProperties, type FormEvent } from "react";
+import { MAX_NOTE_LENGTH } from "../api/notes";
 
 /** User-facing strings, kept together so they can be moved to i18n resources. */
 const LABELS = {
@@ -105,7 +106,7 @@ function NoteForm({ onSubmit, submitError = null }: NoteFormProps) {
           type="text"
           value={text}
           placeholder={LABELS.placeholder}
-          maxLength={500}
+          maxLength={MAX_NOTE_LENGTH}
           aria-invalid={errorMessage !== null}
           aria-describedby={errorMessage !== null ? ERROR_ID : undefined}
           onChange={(event) => setText(event.target.value)}
