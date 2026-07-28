@@ -11,7 +11,7 @@ This project uses a Claude Code-driven, per-feature delivery framework: a human 
 **Prerequisites:** Docker and Docker Compose.
 
 1. Copy the environment template: `cp .env.example .env` (defaults work as-is for local development).
-2. From the repository root, start all services: `docker compose up`.
+2. From the repository root, start all services: `docker compose up --build`. The `--build` matters after a feature adds a backend dependency (the backend image installs them at build time), so reusing a stale image fails at import; plain `docker compose up` is fine once the image is current.
 3. Once the services are up:
    - Frontend (React/Vite dev server): http://localhost:5173
    - Backend (FastAPI): http://localhost:8000
