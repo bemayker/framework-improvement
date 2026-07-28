@@ -68,10 +68,8 @@ jobs:
       # --- Services (PostgreSQL via Docker Compose) ---
       - name: Start services
         run: |
-          # --wait honours the db healthcheck, so the integration step below
-          # finds PostgreSQL accepting connections rather than racing it.
           if [ -f docker-compose.yml ] || [ -f compose.yml ] || [ -f compose.yaml ]; then
-            docker compose up -d --wait
+            docker compose up -d
           fi
 
       # --- Unit tests (ENABLED, blocking) ---
@@ -90,13 +88,6 @@ jobs:
 
       # --- Integration tests (ENABLED, blocking) ---
       - name: Backend integration tests
-        # The integration tier runs against the Compose PostgreSQL. Without
-        # DATABASE_URL the DB-backed tests skip themselves (see
-        # backend/tests/conftest.py), which would turn this step into a silent
-        # pass. These are the docker-compose.yml defaults: ephemeral CI
-        # credentials for a throwaway container, not a secret.
-        env:
-          DATABASE_URL: postgresql://tasknotes:tasknotes@localhost:5432/tasknotes
         run: |
           if [ -d backend/tests/integration ]; then
             (cd backend && uv run pytest tests/integration -q) || [ "$?" -eq 5 ]

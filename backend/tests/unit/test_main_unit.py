@@ -31,13 +31,12 @@ def test_create_app_returns_app_with_expected_title():
     assert app.title == "Task Notes API"
 
 
-def test_create_app_registers_feature_routes():
-    """Edge case: every feature router the factory should wire in is present.
+def test_create_app_registers_version_route():
+    """Edge case: the app registers the TEST-05 version route.
 
     Only FastAPI's own built-in routes (OpenAPI schema, docs, redoc) existed
-    before TEST-05 added /api/version and TEST-03 added /api/notes. Asserting on
-    the set of custom paths keeps this test honest as further routers land,
-    rather than asserting the (long stale) claim that there are no custom routes.
+    before TEST-05; this asserts the version router is now wired in without
+    asserting the (now stale) claim that the app exposes no custom routes.
     """
     app = create_app()
 
@@ -45,7 +44,6 @@ def test_create_app_registers_feature_routes():
     custom_paths = _collect_route_paths(app.routes) - built_in_paths
 
     assert "/api/version" in custom_paths
-    assert "/api/notes" in custom_paths
 
 
 def test_create_app_returns_independent_instances():

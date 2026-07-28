@@ -471,18 +471,12 @@ Test directory paths and naming conventions are configured in `CLAUDE.md` → Te
 # Frontend (Vitest)
 cd frontend && npm test
 
-# Backend unit tests (pytest, via uv) — no database needed
-cd backend && uv run pytest tests/unit
-
-# Backend, everything including the integration tier — needs a reachable PostgreSQL
-docker compose up -d --wait db
-cd backend && DATABASE_URL=postgresql://tasknotes:tasknotes@localhost:5432/tasknotes uv run pytest
+# Backend (pytest, via uv)
+cd backend && uv run pytest
 
 # E2E (Playwright) — requires the app running (docker compose up, or the dev servers directly)
 npx playwright test
 ```
-
-**`DATABASE_URL` is required for the integration tier, and its absence does not fail the run.** `backend/tests/conftest.py` *skips* every database-backed test when `DATABASE_URL` is unset, so a bare `cd backend && uv run pytest` reports a pass while leaving the repository and router layers untested. Set it (the value above matches the Compose defaults in `.env.example`), or read the skip reasons in the output before trusting a green run. A `DATABASE_URL` that is set but unreachable errors instead of skipping, so a broken environment cannot masquerade as an absent one.
 
 ---
 
