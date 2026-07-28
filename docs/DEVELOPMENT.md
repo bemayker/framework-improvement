@@ -478,6 +478,8 @@ cd backend && uv run pytest
 npx playwright test
 ```
 
+The backend's **integration** tier talks to a real PostgreSQL. With no environment set it uses the `docker-compose.yml` defaults (`localhost:5432`, database/user/password `tasknotes`), which is what CI runs against after `docker compose up -d`. Point it elsewhere with `DATABASE_URL` (a single override, e.g. `DATABASE_URL=postgresql://tasknotes:tasknotes@localhost:5442/tasknotes`), or override the pieces individually with `POSTGRES_HOST`, `POSTGRES_PORT`, `POSTGRES_USER`, `POSTGRES_PASSWORD` and `POSTGRES_DB`. The unit tier needs no database.
+
 ---
 
 ## CI/CD
