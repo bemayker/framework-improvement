@@ -23,5 +23,6 @@
 | TEST-01 | Static landing page | [] | feature/TEST-01-static-landing-page | ✅ | |
 | TEST-02 | Health endpoint | [TEST-01] | feature/TEST-02-health-endpoint | | ⚠️ both TEST-02 and TEST-03 touch the FastAPI app entry (router registration); serialize if run concurrently |
 | TEST-03 | Simple note form | [TEST-01] | feature/TEST-03-simple-note-form | | ⚠️ both TEST-02 and TEST-03 touch the FastAPI app entry (router registration); serialize if run concurrently |
+| TEST-04 | Page footer with app version | [TEST-01] | feature/TEST-04-page-footer | | ⚠️ TEST-04 and TEST-03 both modify frontend/src/components/LandingPage.tsx; serialize if run concurrently. Disjoint from TEST-02 (backend only) |
 
 Scaffold gate: TEST-01 (`scaffold: true` in its frontmatter) is **done**, so the gate passes; TEST-02 and TEST-03 are both ready and otherwise independent.
