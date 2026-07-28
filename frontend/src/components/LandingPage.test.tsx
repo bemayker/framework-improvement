@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { render, screen, waitFor } from "@testing-library/react";
 import LandingPage from "./LandingPage";
+import { version } from "../../package.json";
 
 function stubEmptyNotesFetch() {
   vi.stubGlobal(
@@ -50,5 +51,12 @@ describe("LandingPage", () => {
     expect(screen.getByTestId("note-form")).toBeInTheDocument();
 
     await waitFor(() => expect(screen.getByTestId("note-list-empty")).toBeInTheDocument());
+  });
+
+  it("renders the footer with the app name and version", () => {
+    render(<LandingPage />);
+
+    expect(screen.getByTestId("app-footer")).toHaveTextContent("Task Notes");
+    expect(screen.getByTestId("app-footer")).toHaveTextContent(version);
   });
 });
