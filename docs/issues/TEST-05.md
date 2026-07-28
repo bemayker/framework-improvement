@@ -2,7 +2,7 @@
 id: TEST-05
 type: feature
 title: Backend version endpoint
-status: todo
+status: plan_review
 branch: feature/TEST-05-version-endpoint
 depends_on: [TEST-01]
 scaffold: false
