@@ -2,7 +2,7 @@
 id: TEST-04
 type: feature
 title: Page footer with app version
-status: ready_for_build
+status: in_progress
 branch: feature/TEST-04-page-footer
 depends_on: [TEST-01]
 scaffold: false
