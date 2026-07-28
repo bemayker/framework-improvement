@@ -2,7 +2,7 @@
 id: TEST-03
 type: feature
 title: Simple note form
-status: ready_for_build
+status: in_progress
 branch: feature/TEST-03-simple-note-form
 depends_on: [TEST-01]
 scaffold: false
