@@ -5,10 +5,13 @@ Two tiers are served here:
 * The unit tier needs no database. The session-scoped ``client`` fixture
   instantiates the app, which starts with DATABASE_URL absent.
 * The integration tier runs against the real PostgreSQL from docker-compose.yml.
-  It reads DATABASE_URL and falls back to the compose defaults, which is also
-  what CI uses (`docker compose up -d` publishes the ``db`` service on the
-  runner's localhost:5432). Point DATABASE_URL elsewhere to use another
-  instance; the URL is normalised to the psycopg driver either way.
+  DATABASE_URL is the single override; without it the URL is composed from the
+  same POSTGRES_USER / POSTGRES_PASSWORD / POSTGRES_DB variables the compose
+  file reads (plus POSTGRES_HOST / POSTGRES_PORT for where it is published),
+  falling back to the compose defaults. That fallback is what CI uses: it sets
+  no DATABASE_URL for pytest and `docker compose up -d` publishes the ``db``
+  service on the runner's localhost. The URL is normalised to the psycopg
+  driver either way.
 
 Every integration test runs inside an outer transaction that is rolled back
 afterwards, so the tests are order-independent and leave the database as they
@@ -27,8 +30,24 @@ from app.core.db import create_schema, get_db, to_sqlalchemy_url
 from app.main import create_app
 from app.models.note import Note
 
-# Matches docker-compose.yml's db service and .env.example; DATABASE_URL wins.
-DEFAULT_DATABASE_URL = "postgresql+psycopg://tasknotes:tasknotes@localhost:5432/tasknotes"
+# docker-compose.yml's db service resolves ${POSTGRES_USER:-tasknotes} and its
+# siblings to this one shared development value, which .env.example documents.
+# Naming it here keeps a credential-bearing connection string, and its host and
+# port, out of the test code (`testing_standards.md` Section 5) while the
+# fallback stays load-bearing for CI, which sets no DATABASE_URL.
+COMPOSE_DEFAULT_CREDENTIAL = "tasknotes"
+COMPOSE_DEFAULT_HOST = "localhost"
+COMPOSE_DEFAULT_PORT = "5432"
+
+
+def _default_database_url() -> str:
+    """Compose the compose-service URL from the environment, per the docstring above."""
+    user = os.environ.get("POSTGRES_USER") or COMPOSE_DEFAULT_CREDENTIAL
+    password = os.environ.get("POSTGRES_PASSWORD") or COMPOSE_DEFAULT_CREDENTIAL
+    database = os.environ.get("POSTGRES_DB") or COMPOSE_DEFAULT_CREDENTIAL
+    host = os.environ.get("POSTGRES_HOST") or COMPOSE_DEFAULT_HOST
+    port = os.environ.get("POSTGRES_PORT") or COMPOSE_DEFAULT_PORT
+    return f"postgresql+psycopg://{user}:{password}@{host}:{port}/{database}"
 
 
 @pytest.fixture(scope="session")
@@ -42,7 +61,7 @@ def client() -> Iterator[TestClient]:
 @pytest.fixture(scope="module")
 def db_engine() -> Iterator[Engine]:
     """Module-scoped engine bound to the real database the tests run against."""
-    url = to_sqlalchemy_url(os.environ.get("DATABASE_URL") or DEFAULT_DATABASE_URL)
+    url = to_sqlalchemy_url(os.environ.get("DATABASE_URL") or _default_database_url())
     engine = create_engine(url, pool_pre_ping=True)
     try:
         yield engine

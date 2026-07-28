@@ -11,6 +11,17 @@ from dataclasses import dataclass, field
 DEFAULT_CORS_ORIGINS = ("http://localhost:5173",)
 
 
+def _read_database_url() -> str | None:
+    """Read DATABASE_URL when the settings are constructed, not at import time.
+
+    A plain dataclass default is evaluated once, when this module is first
+    imported, which would make :func:`get_settings`'s "read fresh from the
+    environment" contract true for some fields and false for this one — and a
+    test that unsets the variable would silently keep the imported value.
+    """
+    return os.environ.get("DATABASE_URL")
+
+
 def _read_cors_origins() -> list[str]:
     """Read CORS_ORIGINS as a comma-separated list, falling back to the dev origin.
 
@@ -29,7 +40,7 @@ class Settings:
     app_title: str = "Task Notes API"
     # No credential-shaped default: docker-compose.yml and .env.example supply
     # the real value via DATABASE_URL.
-    database_url: str | None = os.environ.get("DATABASE_URL")
+    database_url: str | None = field(default_factory=_read_database_url)
     cors_origins: list[str] = field(default_factory=_read_cors_origins)
 
 
