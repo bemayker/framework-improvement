@@ -2,7 +2,7 @@
 id: TEST-05
 type: feature
 title: Backend version endpoint
-status: ready_for_build
+status: in_progress
 branch: feature/TEST-05-version-endpoint
 depends_on: [TEST-01]
 scaffold: false
