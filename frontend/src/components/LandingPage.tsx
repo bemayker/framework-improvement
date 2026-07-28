@@ -1,4 +1,7 @@
 import type { CSSProperties } from "react";
+import NoteForm from "./NoteForm";
+import NoteList from "./NoteList";
+import { useNotes } from "../hooks/useNotes";
 
 const containerStyle: CSSProperties = {
   minHeight: "100vh",
@@ -25,7 +28,30 @@ const subtitleStyle: CSSProperties = {
   maxWidth: "32rem",
 };
 
+const notesSectionStyle: CSSProperties = {
+  width: "100%",
+  maxWidth: "32rem",
+  marginTop: "2rem",
+  display: "flex",
+  flexDirection: "column",
+  gap: "1rem",
+  textAlign: "left",
+};
+
+const statusTextStyle: CSSProperties = {
+  color: "#5f5f5f",
+  fontSize: "0.9rem",
+};
+
+const submitErrorStyle: CSSProperties = {
+  color: "#b3261e",
+  fontSize: "0.875rem",
+  margin: 0,
+};
+
 function LandingPage() {
+  const { notes, isLoading, loadError, submitError, addNote } = useNotes();
+
   return (
     <div data-testid="landing-page" style={containerStyle}>
       <header>
@@ -37,6 +63,25 @@ function LandingPage() {
         <p style={subtitleStyle}>
           A minimal task-notes app for keeping track of what needs doing.
         </p>
+        <section data-testid="notes-section" style={notesSectionStyle}>
+          <NoteForm onSubmit={addNote} />
+          {submitError && (
+            <p data-testid="note-submit-error" role="alert" style={submitErrorStyle}>
+              {submitError}
+            </p>
+          )}
+          {isLoading ? (
+            <p data-testid="note-list-loading" style={statusTextStyle}>
+              Loading notes…
+            </p>
+          ) : loadError ? (
+            <p data-testid="note-list-error" role="alert" style={submitErrorStyle}>
+              {loadError}
+            </p>
+          ) : (
+            <NoteList notes={notes} />
+          )}
+        </section>
       </main>
     </div>
   );
