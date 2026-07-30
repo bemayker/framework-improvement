@@ -471,11 +471,26 @@ Test directory paths and naming conventions are configured in `CLAUDE.md` → Te
 # Frontend (Vitest)
 cd frontend && npm test
 
-# Backend (pytest, via uv)
+# Backend unit tests (pytest, via uv) — no database needed
+cd backend && uv run pytest tests/unit
+
+# Backend integration tests — require PostgreSQL reachable
+docker compose up -d db
+cd backend && uv run pytest tests/integration
+
+# Full backend suite (unit + integration), i.e. what the test gate runs
 cd backend && uv run pytest
 
 # E2E (Playwright) — requires the app running (docker compose up, or the dev servers directly)
 npx playwright test
+```
+
+The integration tier connects to `DATABASE_URL`, falling back to
+`postgresql://tasknotes:tasknotes@localhost:5432/tasknotes` — the `db` service's
+default. Point `DATABASE_URL` elsewhere if your PostgreSQL is on another port:
+
+```bash
+cd backend && DATABASE_URL=postgresql://tasknotes:tasknotes@localhost:5544/tasknotes uv run pytest tests/integration
 ```
 
 ---
