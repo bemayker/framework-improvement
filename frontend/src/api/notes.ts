@@ -25,11 +25,16 @@ export class NotesApiError extends Error {
 async function requestJson<T>(path: string, init?: RequestInit): Promise<T> {
   let response: Response;
 
+  // Content-Type describes a body, so it is only sent when there is one. On a
+  // bodyless GET it is not just noise: it makes the request non-simple and
+  // costs a CORS preflight round trip the call does not need.
+  const headers =
+    init?.body === undefined
+      ? init?.headers
+      : { "Content-Type": "application/json", ...init?.headers };
+
   try {
-    response = await fetch(`${API_BASE_URL}${path}`, {
-      ...init,
-      headers: { "Content-Type": "application/json", ...init?.headers },
-    });
+    response = await fetch(`${API_BASE_URL}${path}`, { ...init, headers });
   } catch {
     throw new NotesApiError(`Could not reach the notes API at ${API_BASE_URL}.`);
   }

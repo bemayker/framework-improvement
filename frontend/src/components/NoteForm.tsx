@@ -54,26 +54,34 @@ interface NoteFormProps {
   onSubmit: (content: string) => Promise<void>;
 }
 
+/**
+ * The two failure conditions are reported under separate test ids: a rejected
+ * input and a failed save are different outcomes for the user and for a test,
+ * so they must not share one identifier. One state carries both, which keeps
+ * the invariant that at most one message is on screen.
+ */
+type Feedback = { kind: "validation" | "save"; message: string };
+
 function NoteForm({ onSubmit }: NoteFormProps) {
   const [content, setContent] = useState("");
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [feedback, setFeedback] = useState<Feedback | null>(null);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
     const trimmedContent = content.trim();
     if (trimmedContent === "") {
-      setErrorMessage(EMPTY_NOTE_MESSAGE);
+      setFeedback({ kind: "validation", message: EMPTY_NOTE_MESSAGE });
       return;
     }
 
-    setErrorMessage(null);
+    setFeedback(null);
 
     try {
       await onSubmit(trimmedContent);
       setContent("");
     } catch {
-      setErrorMessage(SAVE_FAILED_MESSAGE);
+      setFeedback({ kind: "save", message: SAVE_FAILED_MESSAGE });
     }
   }
 
@@ -93,9 +101,14 @@ function NoteForm({ onSubmit }: NoteFormProps) {
           {SUBMIT_LABEL}
         </button>
       </div>
-      {errorMessage !== null && (
+      {feedback?.kind === "validation" && (
         <p data-testid="note-validation-error" role="alert" style={errorStyle}>
-          {errorMessage}
+          {feedback.message}
+        </p>
+      )}
+      {feedback?.kind === "save" && (
+        <p data-testid="note-save-error" role="alert" style={errorStyle}>
+          {feedback.message}
         </p>
       )}
     </form>

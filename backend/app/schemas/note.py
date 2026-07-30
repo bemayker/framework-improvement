@@ -5,13 +5,18 @@ Kept separate from the ORM model per `coding_standards.md` Section 2.2 point 4.
 
 from datetime import datetime
 
-from pydantic import BaseModel, ConfigDict, field_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator
+
+# The `notes.content` column is unbounded `Text` and POST /api/notes is
+# unauthenticated, so without a bound one request can write an arbitrarily large
+# row. A note is a short reminder; 1000 characters is far above any real one.
+MAX_NOTE_LENGTH = 1000
 
 
 class NoteCreate(BaseModel):
     """Request body for POST /api/notes."""
 
-    content: str
+    content: str = Field(max_length=MAX_NOTE_LENGTH)
 
     @field_validator("content")
     @classmethod

@@ -40,15 +40,27 @@ describe("NoteForm", () => {
     expect(onSubmit).not.toHaveBeenCalled();
   });
 
-  it("keeps the typed note and reports the failure when submitting rejects", async () => {
+  it("keeps the typed note and reports a save failure under its own test id", async () => {
     const onSubmit = vi.fn().mockRejectedValue(new Error("api down"));
     render(<NoteForm onSubmit={onSubmit} />);
 
     typeNote("Walk the dog");
     fireEvent.click(screen.getByTestId("note-submit"));
 
-    expect(await screen.findByTestId("note-validation-error")).toBeVisible();
+    expect(await screen.findByTestId("note-save-error")).toBeVisible();
+    // A failed save is not a rejected input: the two must not share a test id.
+    expect(screen.queryByTestId("note-validation-error")).not.toBeInTheDocument();
     expect(screen.getByTestId("note-input")).toHaveValue("Walk the dog");
+  });
+
+  it("reports a rejected input without raising the save-failure message", async () => {
+    const onSubmit = vi.fn().mockResolvedValue(undefined);
+    render(<NoteForm onSubmit={onSubmit} />);
+
+    fireEvent.click(screen.getByTestId("note-submit"));
+
+    expect(await screen.findByTestId("note-validation-error")).toBeVisible();
+    expect(screen.queryByTestId("note-save-error")).not.toBeInTheDocument();
   });
 
   it("clears a previous validation message once a valid note is submitted", async () => {
