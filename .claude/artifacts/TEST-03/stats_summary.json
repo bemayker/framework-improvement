@@ -1,0 +1,2248 @@
+{
+  "item": "TEST-03",
+  "generated_at": 1785415078,
+  "transcript": "/Users/florianserneels/.claude/projects/-Users-florianserneels-Documents-ai-development-framework-improvement/975e4bc0-cd3a-4b24-8a85-00d8c6ab2449.jsonl",
+  "transcript_resolved": true,
+  "token_collection": true,
+  "metrics_available": true,
+  "degraded": [
+    "the summary this collection replaced was generated 1h15m BEFORE this item's newest step marker, so it predated its own data: a collection was skipped or killed (an end-of-session hook can be killed outright on cloud surfaces), and any figure read from that file in the meantime was a stale one rather than the run it appeared to describe"
+  ],
+  "marker_schema": {
+    "markers_without_event": 0,
+    "markers_without_event_steps": [],
+    "event_alias_markers": 0,
+    "event_key_aliases": [],
+    "event_alias_steps": [],
+    "run_recovered_steps": [],
+    "run_unattributed_steps": [],
+    "no_run_field_anywhere": false,
+    "markers_without_ts": 0,
+    "markers_without_ts_steps": [],
+    "missing_titles": [],
+    "incomplete_runs": []
+  },
+  "marker_schema_notes": [],
+  "collector_health": {
+    "prior_failure": null,
+    "stale_summary_replaced": {
+      "generated_at": 1785410533,
+      "newest_marker_ts": 1785415077,
+      "lag_s": 4544
+    }
+  },
+  "skill_load": {
+    "source": "read",
+    "skill": "init-project",
+    "skills": [
+      "init-project",
+      "plan-feature",
+      "build-feature"
+    ]
+  },
+  "config": {
+    "context_threshold": 200000,
+    "threshold_note": "Context threshold: 200,000 tokens per turn; steps and dispatches whose peak exceeded it are flagged. No cost is estimated: per-token pricing depends on commercial terms this framework cannot know, so tokens and wall time are recorded and money is left to whoever knows the rates (decision record 0004)."
+  },
+  "overlapping_windows": [],
+  "runs": [
+    {
+      "run": "plan-feature",
+      "step_set_incomplete": false,
+      "steps": [
+        {
+          "step": "0",
+          "title": "Load Context",
+          "duration_s": 35,
+          "model": "claude-opus-5",
+          "models_observed": [
+            "claude-opus-5"
+          ],
+          "model_reported": "opus",
+          "model_mismatch": false,
+          "retries": 0,
+          "turns": 2,
+          "tool_calls": 4,
+          "tools_per_turn": 2.0,
+          "turn_classes": {
+            "read": {
+              "turns": 0,
+              "tool_calls": 0,
+              "tools_per_turn": null
+            },
+            "edit": {
+              "turns": 0,
+              "tool_calls": 0,
+              "tools_per_turn": null
+            },
+            "exec": {
+              "turns": 2,
+              "tool_calls": 4,
+              "tools_per_turn": 2.0
+            },
+            "other": {
+              "turns": 0,
+              "tool_calls": 0,
+              "tools_per_turn": null
+            }
+          },
+          "max_batch": 2,
+          "output_tokens": 1734,
+          "input_tokens": 4,
+          "cache_read_tokens": 425575,
+          "cache_creation_tokens": 4052,
+          "cache_hit_ratio": 0.991,
+          "ctx_tokens_avg": 214816,
+          "ctx_tokens_max": 216091,
+          "ctx_threshold_crossed": true,
+          "turns_over_threshold": 2,
+          "flags": [
+            "ctx>threshold"
+          ]
+        },
+        {
+          "step": "1",
+          "title": "MCP Verification",
+          "duration_s": 36,
+          "model": "claude-opus-5",
+          "models_observed": [
+            "claude-opus-5"
+          ],
+          "model_reported": "opus",
+          "model_mismatch": false,
+          "retries": 0,
+          "turns": 1,
+          "tool_calls": 1,
+          "tools_per_turn": 1.0,
+          "turn_classes": {
+            "read": {
+              "turns": 0,
+              "tool_calls": 0,
+              "tools_per_turn": null
+            },
+            "edit": {
+              "turns": 0,
+              "tool_calls": 0,
+              "tools_per_turn": null
+            },
+            "exec": {
+              "turns": 1,
+              "tool_calls": 1,
+              "tools_per_turn": 1.0
+            },
+            "other": {
+              "turns": 0,
+              "tool_calls": 0,
+              "tools_per_turn": null
+            }
+          },
+          "max_batch": 1,
+          "output_tokens": 1653,
+          "input_tokens": 2,
+          "cache_read_tokens": 216089,
+          "cache_creation_tokens": 5645,
+          "cache_hit_ratio": 0.975,
+          "ctx_tokens_avg": 221736,
+          "ctx_tokens_max": 221736,
+          "ctx_threshold_crossed": true,
+          "turns_over_threshold": 1,
+          "flags": [
+            "ctx>threshold"
+          ]
+        },
+        {
+          "step": "2",
+          "title": "Dependency Check",
+          "duration_s": 7,
+          "model": "claude-opus-5",
+          "models_observed": [
+            "claude-opus-5"
+          ],
+          "model_reported": "opus",
+          "model_mismatch": false,
+          "retries": 0,
+          "turns": 1,
+          "tool_calls": 1,
+          "tools_per_turn": 1.0,
+          "turn_classes": {
+            "read": {
+              "turns": 0,
+              "tool_calls": 0,
+              "tools_per_turn": null
+            },
+            "edit": {
+              "turns": 0,
+              "tool_calls": 0,
+              "tools_per_turn": null
+            },
+            "exec": {
+              "turns": 1,
+              "tool_calls": 1,
+              "tools_per_turn": 1.0
+            },
+            "other": {
+              "turns": 0,
+              "tool_calls": 0,
+              "tools_per_turn": null
+            }
+          },
+          "max_batch": 1,
+          "output_tokens": 296,
+          "input_tokens": 2,
+          "cache_read_tokens": 221734,
+          "cache_creation_tokens": 2076,
+          "cache_hit_ratio": 0.991,
+          "ctx_tokens_avg": 223812,
+          "ctx_tokens_max": 223812,
+          "ctx_threshold_crossed": true,
+          "turns_over_threshold": 1,
+          "flags": [
+            "ctx>threshold"
+          ]
+        },
+        {
+          "step": "3",
+          "title": "Fetch Feature Details",
+          "duration_s": 8,
+          "model": "claude-opus-5",
+          "models_observed": [
+            "claude-opus-5"
+          ],
+          "model_reported": "opus",
+          "model_mismatch": false,
+          "retries": 0,
+          "turns": 1,
+          "tool_calls": 1,
+          "tools_per_turn": 1.0,
+          "turn_classes": {
+            "read": {
+              "turns": 0,
+              "tool_calls": 0,
+              "tools_per_turn": null
+            },
+            "edit": {
+              "turns": 0,
+              "tool_calls": 0,
+              "tools_per_turn": null
+            },
+            "exec": {
+              "turns": 1,
+              "tool_calls": 1,
+              "tools_per_turn": 1.0
+            },
+            "other": {
+              "turns": 0,
+              "tool_calls": 0,
+              "tools_per_turn": null
+            }
+          },
+          "max_batch": 1,
+          "output_tokens": 329,
+          "input_tokens": 2,
+          "cache_read_tokens": 223810,
+          "cache_creation_tokens": 305,
+          "cache_hit_ratio": 0.999,
+          "ctx_tokens_avg": 224117,
+          "ctx_tokens_max": 224117,
+          "ctx_threshold_crossed": true,
+          "turns_over_threshold": 1,
+          "flags": [
+            "ctx>threshold"
+          ]
+        },
+        {
+          "step": "4",
+          "title": "Update Status to Planning",
+          "duration_s": 7,
+          "model": "claude-opus-5",
+          "models_observed": [
+            "claude-opus-5"
+          ],
+          "model_reported": "opus",
+          "model_mismatch": false,
+          "retries": 0,
+          "turns": 1,
+          "tool_calls": 1,
+          "tools_per_turn": 1.0,
+          "turn_classes": {
+            "read": {
+              "turns": 0,
+              "tool_calls": 0,
+              "tools_per_turn": null
+            },
+            "edit": {
+              "turns": 0,
+              "tool_calls": 0,
+              "tools_per_turn": null
+            },
+            "exec": {
+              "turns": 1,
+              "tool_calls": 1,
+              "tools_per_turn": 1.0
+            },
+            "other": {
+              "turns": 0,
+              "tool_calls": 0,
+              "tools_per_turn": null
+            }
+          },
+          "max_batch": 1,
+          "output_tokens": 367,
+          "input_tokens": 2,
+          "cache_read_tokens": 224115,
+          "cache_creation_tokens": 338,
+          "cache_hit_ratio": 0.998,
+          "ctx_tokens_avg": 224455,
+          "ctx_tokens_max": 224455,
+          "ctx_threshold_crossed": true,
+          "turns_over_threshold": 1,
+          "flags": [
+            "ctx>threshold"
+          ]
+        },
+        {
+          "step": "5",
+          "title": "Create Branch",
+          "duration_s": 35,
+          "model": "claude-opus-5",
+          "models_observed": [
+            "claude-opus-5"
+          ],
+          "model_reported": "opus",
+          "model_mismatch": false,
+          "retries": 0,
+          "turns": 2,
+          "tool_calls": 2,
+          "tools_per_turn": 1.0,
+          "turn_classes": {
+            "read": {
+              "turns": 0,
+              "tool_calls": 0,
+              "tools_per_turn": null
+            },
+            "edit": {
+              "turns": 0,
+              "tool_calls": 0,
+              "tools_per_turn": null
+            },
+            "exec": {
+              "turns": 2,
+              "tool_calls": 2,
+              "tools_per_turn": 1.0
+            },
+            "other": {
+              "turns": 0,
+              "tool_calls": 0,
+              "tools_per_turn": null
+            }
+          },
+          "max_batch": 1,
+          "output_tokens": 1326,
+          "input_tokens": 4,
+          "cache_read_tokens": 449357,
+          "cache_creation_tokens": 1613,
+          "cache_hit_ratio": 0.996,
+          "ctx_tokens_avg": 225487,
+          "ctx_tokens_max": 226068,
+          "ctx_threshold_crossed": true,
+          "turns_over_threshold": 2,
+          "flags": [
+            "ctx>threshold"
+          ]
+        },
+        {
+          "step": "6-9",
+          "title": "Planner dispatch, Sections 6 to 9",
+          "duration_s": 286,
+          "model": "claude-fable-5",
+          "models_observed": [
+            "claude-fable-5",
+            "claude-opus-5"
+          ],
+          "model_reported": "fable",
+          "model_mismatch": false,
+          "retries": 0,
+          "turns": 11,
+          "tool_calls": 26,
+          "tools_per_turn": 2.6,
+          "turn_classes": {
+            "read": {
+              "turns": 0,
+              "tool_calls": 0,
+              "tools_per_turn": null
+            },
+            "edit": {
+              "turns": 2,
+              "tool_calls": 2,
+              "tools_per_turn": 1.0
+            },
+            "exec": {
+              "turns": 7,
+              "tool_calls": 23,
+              "tools_per_turn": 3.29
+            },
+            "other": {
+              "turns": 1,
+              "tool_calls": 1,
+              "tools_per_turn": 1.0
+            }
+          },
+          "max_batch": 8,
+          "output_tokens": 3241,
+          "input_tokens": 22,
+          "cache_read_tokens": 1150324,
+          "cache_creation_tokens": 108641,
+          "cache_hit_ratio": 0.914,
+          "ctx_tokens_avg": 114453,
+          "ctx_tokens_max": 228970,
+          "ctx_threshold_crossed": true,
+          "turns_over_threshold": 2,
+          "flags": [
+            "ctx>threshold"
+          ]
+        },
+        {
+          "step": "10",
+          "title": "Commit and Push",
+          "duration_s": 17,
+          "model": "claude-opus-5",
+          "models_observed": [
+            "claude-opus-5"
+          ],
+          "model_reported": "opus",
+          "model_mismatch": false,
+          "retries": 0,
+          "turns": 2,
+          "tool_calls": 2,
+          "tools_per_turn": 1.0,
+          "turn_classes": {
+            "read": {
+              "turns": 0,
+              "tool_calls": 0,
+              "tools_per_turn": null
+            },
+            "edit": {
+              "turns": 0,
+              "tool_calls": 0,
+              "tools_per_turn": null
+            },
+            "exec": {
+              "turns": 2,
+              "tool_calls": 2,
+              "tools_per_turn": 1.0
+            },
+            "other": {
+              "turns": 0,
+              "tool_calls": 0,
+              "tools_per_turn": null
+            }
+          },
+          "max_batch": 1,
+          "output_tokens": 796,
+          "input_tokens": 4,
+          "cache_read_tokens": 459091,
+          "cache_creation_tokens": 1680,
+          "cache_hit_ratio": 0.996,
+          "ctx_tokens_avg": 230388,
+          "ctx_tokens_max": 230650,
+          "ctx_threshold_crossed": true,
+          "turns_over_threshold": 2,
+          "flags": [
+            "ctx>threshold"
+          ]
+        },
+        {
+          "step": "11",
+          "title": "Create Draft PR",
+          "duration_s": 30,
+          "model": "claude-opus-5",
+          "models_observed": [
+            "claude-opus-5"
+          ],
+          "model_reported": "opus",
+          "model_mismatch": false,
+          "retries": 0,
+          "turns": 2,
+          "tool_calls": 2,
+          "tools_per_turn": 1.0,
+          "turn_classes": {
+            "read": {
+              "turns": 0,
+              "tool_calls": 0,
+              "tools_per_turn": null
+            },
+            "edit": {
+              "turns": 0,
+              "tool_calls": 0,
+              "tools_per_turn": null
+            },
+            "exec": {
+              "turns": 2,
+              "tool_calls": 2,
+              "tools_per_turn": 1.0
+            },
+            "other": {
+              "turns": 0,
+              "tool_calls": 0,
+              "tools_per_turn": null
+            }
+          },
+          "max_batch": 1,
+          "output_tokens": 1612,
+          "input_tokens": 4,
+          "cache_read_tokens": 463692,
+          "cache_creation_tokens": 3718,
+          "cache_hit_ratio": 0.992,
+          "ctx_tokens_avg": 233707,
+          "ctx_tokens_max": 234368,
+          "ctx_threshold_crossed": true,
+          "turns_over_threshold": 2,
+          "flags": [
+            "ctx>threshold"
+          ]
+        },
+        {
+          "step": "12",
+          "title": "Update Status to Plan Review",
+          "duration_s": 11,
+          "model": "claude-opus-5",
+          "models_observed": [
+            "claude-opus-5"
+          ],
+          "model_reported": "opus",
+          "model_mismatch": false,
+          "retries": 0,
+          "turns": 1,
+          "tool_calls": 1,
+          "tools_per_turn": 1.0,
+          "turn_classes": {
+            "read": {
+              "turns": 0,
+              "tool_calls": 0,
+              "tools_per_turn": null
+            },
+            "edit": {
+              "turns": 0,
+              "tool_calls": 0,
+              "tools_per_turn": null
+            },
+            "exec": {
+              "turns": 1,
+              "tool_calls": 1,
+              "tools_per_turn": 1.0
+            },
+            "other": {
+              "turns": 0,
+              "tool_calls": 0,
+              "tools_per_turn": null
+            }
+          },
+          "max_batch": 1,
+          "output_tokens": 551,
+          "input_tokens": 2,
+          "cache_read_tokens": 234366,
+          "cache_creation_tokens": 383,
+          "cache_hit_ratio": 0.998,
+          "ctx_tokens_avg": 234751,
+          "ctx_tokens_max": 234751,
+          "ctx_threshold_crossed": true,
+          "turns_over_threshold": 1,
+          "flags": [
+            "ctx>threshold"
+          ]
+        },
+        {
+          "step": "13",
+          "title": "Summary",
+          "duration_s": 8,
+          "model": "claude-opus-5",
+          "models_observed": [
+            "claude-opus-5"
+          ],
+          "model_reported": "opus",
+          "model_mismatch": false,
+          "retries": 0,
+          "turns": 1,
+          "tool_calls": 1,
+          "tools_per_turn": 1.0,
+          "turn_classes": {
+            "read": {
+              "turns": 0,
+              "tool_calls": 0,
+              "tools_per_turn": null
+            },
+            "edit": {
+              "turns": 0,
+              "tool_calls": 0,
+              "tools_per_turn": null
+            },
+            "exec": {
+              "turns": 1,
+              "tool_calls": 1,
+              "tools_per_turn": 1.0
+            },
+            "other": {
+              "turns": 0,
+              "tool_calls": 0,
+              "tools_per_turn": null
+            }
+          },
+          "max_batch": 1,
+          "output_tokens": 416,
+          "input_tokens": 2,
+          "cache_read_tokens": 234749,
+          "cache_creation_tokens": 744,
+          "cache_hit_ratio": 0.997,
+          "ctx_tokens_avg": 235495,
+          "ctx_tokens_max": 235495,
+          "ctx_threshold_crossed": true,
+          "turns_over_threshold": 1,
+          "flags": [
+            "ctx>threshold"
+          ]
+        }
+      ],
+      "totals": {
+        "wall_s": 480,
+        "steps_sum_s": 480,
+        "turns": 25,
+        "tool_calls": 42,
+        "tools_per_turn": 1.75,
+        "turn_classes": {
+          "read": {
+            "turns": 0,
+            "tool_calls": 0,
+            "tools_per_turn": null
+          },
+          "edit": {
+            "turns": 2,
+            "tool_calls": 2,
+            "tools_per_turn": 1.0
+          },
+          "exec": {
+            "turns": 21,
+            "tool_calls": 39,
+            "tools_per_turn": 1.86
+          },
+          "other": {
+            "turns": 1,
+            "tool_calls": 1,
+            "tools_per_turn": 1.0
+          }
+        },
+        "max_batch": 8,
+        "output_tokens": 12321,
+        "input_tokens": 50,
+        "cache_read_tokens": 4302902,
+        "cache_creation_tokens": 129195,
+        "cache_hit_ratio": 0.971,
+        "ctx_tokens_avg": 177286,
+        "ctx_tokens_max": 235495,
+        "turns_over_threshold": 16,
+        "models_observed": [
+          "claude-opus-5",
+          "claude-fable-5"
+        ],
+        "model": "claude-opus-5"
+      }
+    },
+    {
+      "run": "build-feature",
+      "step_set_incomplete": false,
+      "steps": [
+        {
+          "step": "0",
+          "title": "Load Context",
+          "duration_s": 32,
+          "model": "claude-opus-5",
+          "models_observed": [
+            "claude-opus-5"
+          ],
+          "model_reported": "opus",
+          "model_mismatch": false,
+          "retries": 0,
+          "turns": 2,
+          "tool_calls": 2,
+          "tools_per_turn": 1.0,
+          "turn_classes": {
+            "read": {
+              "turns": 0,
+              "tool_calls": 0,
+              "tools_per_turn": null
+            },
+            "edit": {
+              "turns": 0,
+              "tool_calls": 0,
+              "tools_per_turn": null
+            },
+            "exec": {
+              "turns": 2,
+              "tool_calls": 2,
+              "tools_per_turn": 1.0
+            },
+            "other": {
+              "turns": 0,
+              "tool_calls": 0,
+              "tools_per_turn": null
+            }
+          },
+          "max_batch": 1,
+          "output_tokens": 1680,
+          "input_tokens": 4,
+          "cache_read_tokens": 556747,
+          "cache_creation_tokens": 3214,
+          "cache_hit_ratio": 0.994,
+          "ctx_tokens_avg": 279982,
+          "ctx_tokens_max": 280718,
+          "ctx_threshold_crossed": true,
+          "turns_over_threshold": 2,
+          "flags": [
+            "ctx>threshold"
+          ]
+        },
+        {
+          "step": "1",
+          "title": "MCP Verification",
+          "duration_s": 8,
+          "model": "claude-opus-5",
+          "models_observed": [
+            "claude-opus-5"
+          ],
+          "model_reported": "opus",
+          "model_mismatch": false,
+          "retries": 0,
+          "turns": 1,
+          "tool_calls": 1,
+          "tools_per_turn": 1.0,
+          "turn_classes": {
+            "read": {
+              "turns": 0,
+              "tool_calls": 0,
+              "tools_per_turn": null
+            },
+            "edit": {
+              "turns": 0,
+              "tool_calls": 0,
+              "tools_per_turn": null
+            },
+            "exec": {
+              "turns": 1,
+              "tool_calls": 1,
+              "tools_per_turn": 1.0
+            },
+            "other": {
+              "turns": 0,
+              "tool_calls": 0,
+              "tools_per_turn": null
+            }
+          },
+          "max_batch": 1,
+          "output_tokens": 315,
+          "input_tokens": 2,
+          "cache_read_tokens": 280716,
+          "cache_creation_tokens": 887,
+          "cache_hit_ratio": 0.997,
+          "ctx_tokens_avg": 281605,
+          "ctx_tokens_max": 281605,
+          "ctx_threshold_crossed": true,
+          "turns_over_threshold": 1,
+          "flags": [
+            "ctx>threshold"
+          ]
+        },
+        {
+          "step": "2",
+          "title": "Dependency Check",
+          "duration_s": 7,
+          "model": "claude-opus-5",
+          "models_observed": [
+            "claude-opus-5"
+          ],
+          "model_reported": "opus",
+          "model_mismatch": false,
+          "retries": 0,
+          "turns": 1,
+          "tool_calls": 1,
+          "tools_per_turn": 1.0,
+          "turn_classes": {
+            "read": {
+              "turns": 0,
+              "tool_calls": 0,
+              "tools_per_turn": null
+            },
+            "edit": {
+              "turns": 0,
+              "tool_calls": 0,
+              "tools_per_turn": null
+            },
+            "exec": {
+              "turns": 1,
+              "tool_calls": 1,
+              "tools_per_turn": 1.0
+            },
+            "other": {
+              "turns": 0,
+              "tool_calls": 0,
+              "tools_per_turn": null
+            }
+          },
+          "max_batch": 1,
+          "output_tokens": 296,
+          "input_tokens": 2,
+          "cache_read_tokens": 281603,
+          "cache_creation_tokens": 742,
+          "cache_hit_ratio": 0.997,
+          "ctx_tokens_avg": 282347,
+          "ctx_tokens_max": 282347,
+          "ctx_threshold_crossed": true,
+          "turns_over_threshold": 1,
+          "flags": [
+            "ctx>threshold"
+          ]
+        },
+        {
+          "step": "3",
+          "title": "Status and Plan Verification",
+          "duration_s": 8,
+          "model": "claude-opus-5",
+          "models_observed": [
+            "claude-opus-5"
+          ],
+          "model_reported": "opus",
+          "model_mismatch": false,
+          "retries": 0,
+          "turns": 1,
+          "tool_calls": 1,
+          "tools_per_turn": 1.0,
+          "turn_classes": {
+            "read": {
+              "turns": 0,
+              "tool_calls": 0,
+              "tools_per_turn": null
+            },
+            "edit": {
+              "turns": 0,
+              "tool_calls": 0,
+              "tools_per_turn": null
+            },
+            "exec": {
+              "turns": 1,
+              "tool_calls": 1,
+              "tools_per_turn": 1.0
+            },
+            "other": {
+              "turns": 0,
+              "tool_calls": 0,
+              "tools_per_turn": null
+            }
+          },
+          "max_batch": 1,
+          "output_tokens": 293,
+          "input_tokens": 2,
+          "cache_read_tokens": 282345,
+          "cache_creation_tokens": 373,
+          "cache_hit_ratio": 0.999,
+          "ctx_tokens_avg": 282720,
+          "ctx_tokens_max": 282720,
+          "ctx_threshold_crossed": true,
+          "turns_over_threshold": 1,
+          "flags": [
+            "ctx>threshold"
+          ]
+        },
+        {
+          "step": "4",
+          "title": "Branch Setup",
+          "duration_s": 8,
+          "model": "claude-opus-5",
+          "models_observed": [
+            "claude-opus-5"
+          ],
+          "model_reported": "opus",
+          "model_mismatch": false,
+          "retries": 0,
+          "turns": 1,
+          "tool_calls": 1,
+          "tools_per_turn": 1.0,
+          "turn_classes": {
+            "read": {
+              "turns": 0,
+              "tool_calls": 0,
+              "tools_per_turn": null
+            },
+            "edit": {
+              "turns": 0,
+              "tool_calls": 0,
+              "tools_per_turn": null
+            },
+            "exec": {
+              "turns": 1,
+              "tool_calls": 1,
+              "tools_per_turn": 1.0
+            },
+            "other": {
+              "turns": 0,
+              "tool_calls": 0,
+              "tools_per_turn": null
+            }
+          },
+          "max_batch": 1,
+          "output_tokens": 310,
+          "input_tokens": 2,
+          "cache_read_tokens": 282718,
+          "cache_creation_tokens": 357,
+          "cache_hit_ratio": 0.999,
+          "ctx_tokens_avg": 283077,
+          "ctx_tokens_max": 283077,
+          "ctx_threshold_crossed": true,
+          "turns_over_threshold": 1,
+          "flags": [
+            "ctx>threshold"
+          ]
+        },
+        {
+          "step": "5",
+          "title": "Update Status to In Progress",
+          "duration_s": 14,
+          "model": "claude-opus-5",
+          "models_observed": [
+            "claude-opus-5"
+          ],
+          "model_reported": "opus",
+          "model_mismatch": false,
+          "retries": 0,
+          "turns": 1,
+          "tool_calls": 1,
+          "tools_per_turn": 1.0,
+          "turn_classes": {
+            "read": {
+              "turns": 0,
+              "tool_calls": 0,
+              "tools_per_turn": null
+            },
+            "edit": {
+              "turns": 0,
+              "tool_calls": 0,
+              "tools_per_turn": null
+            },
+            "exec": {
+              "turns": 1,
+              "tool_calls": 1,
+              "tools_per_turn": 1.0
+            },
+            "other": {
+              "turns": 0,
+              "tool_calls": 0,
+              "tools_per_turn": null
+            }
+          },
+          "max_batch": 1,
+          "output_tokens": 424,
+          "input_tokens": 2,
+          "cache_read_tokens": 283075,
+          "cache_creation_tokens": 321,
+          "cache_hit_ratio": 0.999,
+          "ctx_tokens_avg": 283398,
+          "ctx_tokens_max": 283398,
+          "ctx_threshold_crossed": true,
+          "turns_over_threshold": 1,
+          "flags": [
+            "ctx>threshold"
+          ]
+        },
+        {
+          "step": "6",
+          "title": "Read the Plan",
+          "duration_s": 22,
+          "model": "claude-opus-5",
+          "models_observed": [
+            "claude-opus-5"
+          ],
+          "model_reported": "opus",
+          "model_mismatch": false,
+          "retries": 0,
+          "turns": 1,
+          "tool_calls": 1,
+          "tools_per_turn": 1.0,
+          "turn_classes": {
+            "read": {
+              "turns": 0,
+              "tool_calls": 0,
+              "tools_per_turn": null
+            },
+            "edit": {
+              "turns": 0,
+              "tool_calls": 0,
+              "tools_per_turn": null
+            },
+            "exec": {
+              "turns": 1,
+              "tool_calls": 1,
+              "tools_per_turn": 1.0
+            },
+            "other": {
+              "turns": 0,
+              "tool_calls": 0,
+              "tools_per_turn": null
+            }
+          },
+          "max_batch": 1,
+          "output_tokens": 1629,
+          "input_tokens": 2,
+          "cache_read_tokens": 283396,
+          "cache_creation_tokens": 810,
+          "cache_hit_ratio": 0.997,
+          "ctx_tokens_avg": 284208,
+          "ctx_tokens_max": 284208,
+          "ctx_threshold_crossed": true,
+          "turns_over_threshold": 1,
+          "flags": [
+            "ctx>threshold"
+          ]
+        },
+        {
+          "step": "8",
+          "title": "Phase A, Frontend Implementation",
+          "duration_s": 256,
+          "model": "claude-opus-5",
+          "models_observed": [
+            "claude-opus-5"
+          ],
+          "model_reported": "opus",
+          "model_mismatch": false,
+          "retries": 0,
+          "turns": 12,
+          "tool_calls": 29,
+          "tools_per_turn": 2.64,
+          "turn_classes": {
+            "read": {
+              "turns": 2,
+              "tool_calls": 11,
+              "tools_per_turn": 5.5
+            },
+            "edit": {
+              "turns": 3,
+              "tool_calls": 8,
+              "tools_per_turn": 2.67
+            },
+            "exec": {
+              "turns": 5,
+              "tool_calls": 9,
+              "tools_per_turn": 1.8
+            },
+            "other": {
+              "turns": 1,
+              "tool_calls": 1,
+              "tools_per_turn": 1.0
+            }
+          },
+          "max_batch": 7,
+          "output_tokens": 4073,
+          "input_tokens": 24,
+          "cache_read_tokens": 1316457,
+          "cache_creation_tokens": 100385,
+          "cache_hit_ratio": 0.929,
+          "ctx_tokens_avg": 118072,
+          "ctx_tokens_max": 289432,
+          "ctx_threshold_crossed": true,
+          "turns_over_threshold": 2,
+          "flags": [
+            "ctx>threshold"
+          ]
+        },
+        {
+          "step": "9",
+          "title": "Phase B, Backend Implementation",
+          "duration_s": 522,
+          "model": "claude-opus-5",
+          "models_observed": [
+            "claude-opus-5"
+          ],
+          "model_reported": "opus",
+          "model_mismatch": false,
+          "retries": 0,
+          "turns": 18,
+          "tool_calls": 44,
+          "tools_per_turn": 2.59,
+          "turn_classes": {
+            "read": {
+              "turns": 3,
+              "tool_calls": 13,
+              "tools_per_turn": 4.33
+            },
+            "edit": {
+              "turns": 3,
+              "tool_calls": 13,
+              "tools_per_turn": 4.33
+            },
+            "exec": {
+              "turns": 10,
+              "tool_calls": 17,
+              "tools_per_turn": 1.7
+            },
+            "other": {
+              "turns": 1,
+              "tool_calls": 1,
+              "tools_per_turn": 1.0
+            }
+          },
+          "max_batch": 7,
+          "output_tokens": 3181,
+          "input_tokens": 36,
+          "cache_read_tokens": 1979962,
+          "cache_creation_tokens": 104025,
+          "cache_hit_ratio": 0.95,
+          "ctx_tokens_avg": 115779,
+          "ctx_tokens_max": 295376,
+          "ctx_threshold_crossed": true,
+          "turns_over_threshold": 2,
+          "flags": [
+            "ctx>threshold"
+          ]
+        },
+        {
+          "step": "10",
+          "title": "Phase C, Integration",
+          "duration_s": 296,
+          "model": "claude-opus-5",
+          "models_observed": [
+            "claude-opus-5"
+          ],
+          "model_reported": "opus",
+          "model_mismatch": false,
+          "retries": 0,
+          "turns": 9,
+          "tool_calls": 27,
+          "tools_per_turn": 3.38,
+          "turn_classes": {
+            "read": {
+              "turns": 2,
+              "tool_calls": 16,
+              "tools_per_turn": 8.0
+            },
+            "edit": {
+              "turns": 0,
+              "tool_calls": 0,
+              "tools_per_turn": null
+            },
+            "exec": {
+              "turns": 5,
+              "tool_calls": 10,
+              "tools_per_turn": 2.0
+            },
+            "other": {
+              "turns": 1,
+              "tool_calls": 1,
+              "tools_per_turn": 1.0
+            }
+          },
+          "max_batch": 10,
+          "output_tokens": 2598,
+          "input_tokens": 18,
+          "cache_read_tokens": 1101651,
+          "cache_creation_tokens": 81455,
+          "cache_hit_ratio": 0.931,
+          "ctx_tokens_avg": 131458,
+          "ctx_tokens_max": 300729,
+          "ctx_threshold_crossed": true,
+          "turns_over_threshold": 2,
+          "flags": [
+            "ctx>threshold"
+          ]
+        },
+        {
+          "step": "11",
+          "title": "Phase D, E2E Test Generation",
+          "duration_s": 444,
+          "model": "claude-opus-5",
+          "models_observed": [
+            "claude-opus-5"
+          ],
+          "model_reported": "opus",
+          "model_mismatch": false,
+          "retries": 0,
+          "turns": 24,
+          "tool_calls": 43,
+          "tools_per_turn": 1.87,
+          "turn_classes": {
+            "read": {
+              "turns": 1,
+              "tool_calls": 7,
+              "tools_per_turn": 7.0
+            },
+            "edit": {
+              "turns": 2,
+              "tool_calls": 4,
+              "tools_per_turn": 2.0
+            },
+            "exec": {
+              "turns": 19,
+              "tool_calls": 31,
+              "tools_per_turn": 1.63
+            },
+            "other": {
+              "turns": 1,
+              "tool_calls": 1,
+              "tools_per_turn": 1.0
+            }
+          },
+          "max_batch": 7,
+          "output_tokens": 4390,
+          "input_tokens": 48,
+          "cache_read_tokens": 2639723,
+          "cache_creation_tokens": 96802,
+          "cache_hit_ratio": 0.965,
+          "ctx_tokens_avg": 114024,
+          "ctx_tokens_max": 305046,
+          "ctx_threshold_crossed": true,
+          "turns_over_threshold": 2,
+          "flags": [
+            "ctx>threshold"
+          ]
+        },
+        {
+          "step": "12",
+          "title": "Phase E, Self-Review",
+          "duration_s": 831,
+          "model": "claude-opus-5",
+          "models_observed": [
+            "claude-opus-5"
+          ],
+          "model_reported": "opus",
+          "model_mismatch": false,
+          "retries": 1,
+          "turns": 25,
+          "tool_calls": 71,
+          "tools_per_turn": 3.09,
+          "turn_classes": {
+            "read": {
+              "turns": 10,
+              "tool_calls": 56,
+              "tools_per_turn": 5.6
+            },
+            "edit": {
+              "turns": 1,
+              "tool_calls": 1,
+              "tools_per_turn": 1.0
+            },
+            "exec": {
+              "turns": 10,
+              "tool_calls": 12,
+              "tools_per_turn": 1.2
+            },
+            "other": {
+              "turns": 2,
+              "tool_calls": 2,
+              "tools_per_turn": 1.0
+            }
+          },
+          "max_batch": 12,
+          "output_tokens": 7021,
+          "input_tokens": 50,
+          "cache_read_tokens": 2768488,
+          "cache_creation_tokens": 279559,
+          "cache_hit_ratio": 0.908,
+          "ctx_tokens_avg": 121924,
+          "ctx_tokens_max": 320122,
+          "ctx_threshold_crossed": true,
+          "turns_over_threshold": 4,
+          "flags": [
+            "ctx>threshold"
+          ]
+        },
+        {
+          "step": "13",
+          "title": "Phase F, Refactor Gate",
+          "duration_s": 595,
+          "model": "claude-opus-5",
+          "models_observed": [
+            "claude-opus-5"
+          ],
+          "model_reported": "opus",
+          "model_mismatch": false,
+          "retries": 0,
+          "turns": 19,
+          "tool_calls": 50,
+          "tools_per_turn": 2.78,
+          "turn_classes": {
+            "read": {
+              "turns": 5,
+              "tool_calls": 24,
+              "tools_per_turn": 4.8
+            },
+            "edit": {
+              "turns": 4,
+              "tool_calls": 8,
+              "tools_per_turn": 2.0
+            },
+            "exec": {
+              "turns": 8,
+              "tool_calls": 17,
+              "tools_per_turn": 2.12
+            },
+            "other": {
+              "turns": 1,
+              "tool_calls": 1,
+              "tools_per_turn": 1.0
+            }
+          },
+          "max_batch": 8,
+          "output_tokens": 3106,
+          "input_tokens": 38,
+          "cache_read_tokens": 2417231,
+          "cache_creation_tokens": 123854,
+          "cache_hit_ratio": 0.951,
+          "ctx_tokens_avg": 133743,
+          "ctx_tokens_max": 326009,
+          "ctx_threshold_crossed": true,
+          "turns_over_threshold": 2,
+          "flags": [
+            "ctx>threshold"
+          ]
+        },
+        {
+          "step": "14",
+          "title": "Phase G, UAT Generation",
+          "duration_s": 257,
+          "model": "claude-opus-5",
+          "models_observed": [
+            "claude-opus-5"
+          ],
+          "model_reported": "opus",
+          "model_mismatch": false,
+          "retries": 0,
+          "turns": 15,
+          "tool_calls": 27,
+          "tools_per_turn": 1.93,
+          "turn_classes": {
+            "read": {
+              "turns": 2,
+              "tool_calls": 7,
+              "tools_per_turn": 3.5
+            },
+            "edit": {
+              "turns": 2,
+              "tool_calls": 2,
+              "tools_per_turn": 1.0
+            },
+            "exec": {
+              "turns": 9,
+              "tool_calls": 17,
+              "tools_per_turn": 1.89
+            },
+            "other": {
+              "turns": 1,
+              "tool_calls": 1,
+              "tools_per_turn": 1.0
+            }
+          },
+          "max_batch": 6,
+          "output_tokens": 3708,
+          "input_tokens": 30,
+          "cache_read_tokens": 1753667,
+          "cache_creation_tokens": 88818,
+          "cache_hit_ratio": 0.952,
+          "ctx_tokens_avg": 122834,
+          "ctx_tokens_max": 330828,
+          "ctx_threshold_crossed": true,
+          "turns_over_threshold": 2,
+          "flags": [
+            "ctx>threshold"
+          ]
+        },
+        {
+          "step": "15",
+          "title": "Documentation Check",
+          "duration_s": 43,
+          "model": "claude-opus-5",
+          "models_observed": [
+            "claude-opus-5"
+          ],
+          "model_reported": "opus",
+          "model_mismatch": false,
+          "retries": 0,
+          "turns": 4,
+          "tool_calls": 4,
+          "tools_per_turn": 1.0,
+          "turn_classes": {
+            "read": {
+              "turns": 1,
+              "tool_calls": 1,
+              "tools_per_turn": 1.0
+            },
+            "edit": {
+              "turns": 1,
+              "tool_calls": 1,
+              "tools_per_turn": 1.0
+            },
+            "exec": {
+              "turns": 2,
+              "tool_calls": 2,
+              "tools_per_turn": 1.0
+            },
+            "other": {
+              "turns": 0,
+              "tool_calls": 0,
+              "tools_per_turn": null
+            }
+          },
+          "max_batch": 1,
+          "output_tokens": 2282,
+          "input_tokens": 8,
+          "cache_read_tokens": 1332813,
+          "cache_creation_tokens": 4224,
+          "cache_hit_ratio": 0.997,
+          "ctx_tokens_avg": 334261,
+          "ctx_tokens_max": 335052,
+          "ctx_threshold_crossed": true,
+          "turns_over_threshold": 4,
+          "flags": [
+            "ctx>threshold"
+          ]
+        },
+        {
+          "step": "16",
+          "title": "Phase H, Artifact Re-check",
+          "duration_s": 332,
+          "model": "claude-opus-5",
+          "models_observed": [
+            "claude-opus-5"
+          ],
+          "model_reported": "opus",
+          "model_mismatch": false,
+          "retries": 0,
+          "turns": 8,
+          "tool_calls": 20,
+          "tools_per_turn": 2.86,
+          "turn_classes": {
+            "read": {
+              "turns": 5,
+              "tool_calls": 18,
+              "tools_per_turn": 3.6
+            },
+            "edit": {
+              "turns": 0,
+              "tool_calls": 0,
+              "tools_per_turn": null
+            },
+            "exec": {
+              "turns": 1,
+              "tool_calls": 1,
+              "tools_per_turn": 1.0
+            },
+            "other": {
+              "turns": 1,
+              "tool_calls": 1,
+              "tools_per_turn": 1.0
+            }
+          },
+          "max_batch": 6,
+          "output_tokens": 3548,
+          "input_tokens": 16,
+          "cache_read_tokens": 1045173,
+          "cache_creation_tokens": 118702,
+          "cache_hit_ratio": 0.898,
+          "ctx_tokens_avg": 145486,
+          "ctx_tokens_max": 341866,
+          "ctx_threshold_crossed": true,
+          "turns_over_threshold": 2,
+          "flags": [
+            "ctx>threshold"
+          ]
+        },
+        {
+          "step": "17",
+          "title": "Push",
+          "duration_s": 584,
+          "model": "claude-opus-5",
+          "models_observed": [
+            "claude-opus-5"
+          ],
+          "model_reported": "opus",
+          "model_mismatch": false,
+          "retries": 0,
+          "turns": 13,
+          "tool_calls": 13,
+          "tools_per_turn": 1.0,
+          "turn_classes": {
+            "read": {
+              "turns": 0,
+              "tool_calls": 0,
+              "tools_per_turn": null
+            },
+            "edit": {
+              "turns": 0,
+              "tool_calls": 0,
+              "tools_per_turn": null
+            },
+            "exec": {
+              "turns": 12,
+              "tool_calls": 12,
+              "tools_per_turn": 1.0
+            },
+            "other": {
+              "turns": 1,
+              "tool_calls": 1,
+              "tools_per_turn": 1.0
+            }
+          },
+          "max_batch": 1,
+          "output_tokens": 7862,
+          "input_tokens": 26,
+          "cache_read_tokens": 4542413,
+          "cache_creation_tokens": 14312,
+          "cache_hit_ratio": 0.997,
+          "ctx_tokens_avg": 350519,
+          "ctx_tokens_max": 356178,
+          "ctx_threshold_crossed": true,
+          "turns_over_threshold": 13,
+          "flags": [
+            "ctx>threshold"
+          ]
+        },
+        {
+          "step": "18",
+          "title": "CI Watch",
+          "duration_s": 193,
+          "model": "claude-opus-5",
+          "models_observed": [
+            "claude-opus-5"
+          ],
+          "model_reported": "opus",
+          "model_mismatch": false,
+          "retries": 0,
+          "turns": 3,
+          "tool_calls": 3,
+          "tools_per_turn": 1.0,
+          "turn_classes": {
+            "read": {
+              "turns": 0,
+              "tool_calls": 0,
+              "tools_per_turn": null
+            },
+            "edit": {
+              "turns": 0,
+              "tool_calls": 0,
+              "tools_per_turn": null
+            },
+            "exec": {
+              "turns": 3,
+              "tool_calls": 3,
+              "tools_per_turn": 1.0
+            },
+            "other": {
+              "turns": 0,
+              "tool_calls": 0,
+              "tools_per_turn": null
+            }
+          },
+          "max_batch": 1,
+          "output_tokens": 4236,
+          "input_tokens": 6,
+          "cache_read_tokens": 1070121,
+          "cache_creation_tokens": 1601,
+          "cache_hit_ratio": 0.999,
+          "ctx_tokens_avg": 357243,
+          "ctx_tokens_max": 357779,
+          "ctx_threshold_crossed": true,
+          "turns_over_threshold": 3,
+          "flags": [
+            "ctx>threshold"
+          ]
+        },
+        {
+          "step": "19",
+          "title": "Handover",
+          "duration_s": 18,
+          "model": "claude-opus-5",
+          "models_observed": [
+            "claude-opus-5"
+          ],
+          "model_reported": "opus",
+          "model_mismatch": false,
+          "retries": 0,
+          "turns": 1,
+          "tool_calls": 1,
+          "tools_per_turn": 1.0,
+          "turn_classes": {
+            "read": {
+              "turns": 0,
+              "tool_calls": 0,
+              "tools_per_turn": null
+            },
+            "edit": {
+              "turns": 0,
+              "tool_calls": 0,
+              "tools_per_turn": null
+            },
+            "exec": {
+              "turns": 1,
+              "tool_calls": 1,
+              "tools_per_turn": 1.0
+            },
+            "other": {
+              "turns": 0,
+              "tool_calls": 0,
+              "tools_per_turn": null
+            }
+          },
+          "max_batch": 1,
+          "output_tokens": 558,
+          "input_tokens": 2,
+          "cache_read_tokens": 357777,
+          "cache_creation_tokens": 3838,
+          "cache_hit_ratio": 0.989,
+          "ctx_tokens_avg": 361617,
+          "ctx_tokens_max": 361617,
+          "ctx_threshold_crossed": true,
+          "turns_over_threshold": 1,
+          "flags": [
+            "ctx>threshold"
+          ]
+        },
+        {
+          "step": "20",
+          "title": "Summary",
+          "duration_s": 0,
+          "model": null,
+          "models_observed": [],
+          "model_reported": "opus",
+          "model_mismatch": false,
+          "retries": 0,
+          "turns": 0,
+          "tool_calls": 0,
+          "tools_per_turn": null,
+          "turn_classes": {
+            "read": {
+              "turns": 0,
+              "tool_calls": 0,
+              "tools_per_turn": null
+            },
+            "edit": {
+              "turns": 0,
+              "tool_calls": 0,
+              "tools_per_turn": null
+            },
+            "exec": {
+              "turns": 0,
+              "tool_calls": 0,
+              "tools_per_turn": null
+            },
+            "other": {
+              "turns": 0,
+              "tool_calls": 0,
+              "tools_per_turn": null
+            }
+          },
+          "max_batch": 0,
+          "output_tokens": 0,
+          "input_tokens": 0,
+          "cache_read_tokens": 0,
+          "cache_creation_tokens": 0,
+          "cache_hit_ratio": null,
+          "ctx_tokens_avg": null,
+          "ctx_tokens_max": null,
+          "ctx_threshold_crossed": false,
+          "turns_over_threshold": 0,
+          "flags": []
+        }
+      ],
+      "totals": {
+        "wall_s": 4470,
+        "steps_sum_s": 4470,
+        "turns": 159,
+        "tool_calls": 340,
+        "tools_per_turn": 2.27,
+        "turn_classes": {
+          "read": {
+            "turns": 31,
+            "tool_calls": 153,
+            "tools_per_turn": 4.94
+          },
+          "edit": {
+            "turns": 16,
+            "tool_calls": 37,
+            "tools_per_turn": 2.31
+          },
+          "exec": {
+            "turns": 93,
+            "tool_calls": 140,
+            "tools_per_turn": 1.51
+          },
+          "other": {
+            "turns": 10,
+            "tool_calls": 10,
+            "tools_per_turn": 1.0
+          }
+        },
+        "max_batch": 12,
+        "output_tokens": 51510,
+        "input_tokens": 318,
+        "cache_read_tokens": 24576076,
+        "cache_creation_tokens": 1024279,
+        "cache_hit_ratio": 0.96,
+        "ctx_tokens_avg": 161011,
+        "ctx_tokens_max": 361617,
+        "turns_over_threshold": 47,
+        "models_observed": [
+          "claude-opus-5"
+        ],
+        "model": "claude-opus-5"
+      }
+    }
+  ],
+  "dispatches": [
+    {
+      "agent": "agent-a1efe411b0e7f9d9d",
+      "run": "build-feature",
+      "steps": [
+        "16"
+      ],
+      "turns_outside_steps": 0,
+      "turns": 6,
+      "tool_calls": 18,
+      "tools_per_turn": 3.6,
+      "turn_classes": {
+        "read": {
+          "turns": 5,
+          "tool_calls": 18,
+          "tools_per_turn": 3.6
+        },
+        "edit": {
+          "turns": 0,
+          "tool_calls": 0,
+          "tools_per_turn": null
+        },
+        "exec": {
+          "turns": 0,
+          "tool_calls": 0,
+          "tools_per_turn": null
+        },
+        "other": {
+          "turns": 0,
+          "tool_calls": 0,
+          "tools_per_turn": null
+        }
+      },
+      "max_batch": 6,
+      "output_tokens": 28,
+      "input_tokens": 12,
+      "cache_read_tokens": 373680,
+      "cache_creation_tokens": 111888,
+      "cache_hit_ratio": 0.77,
+      "ctx_tokens_avg": 80930,
+      "ctx_tokens_max": 111890,
+      "ctx_threshold_crossed": false,
+      "turns_over_threshold": 0,
+      "model": "claude-opus-5",
+      "models_observed": [
+        "claude-opus-5"
+      ]
+    },
+    {
+      "agent": "agent-a4a4c01dc60aa58bc",
+      "run": "build-feature",
+      "steps": [
+        "8"
+      ],
+      "turns_outside_steps": 0,
+      "turns": 10,
+      "tool_calls": 27,
+      "tools_per_turn": 3.0,
+      "turn_classes": {
+        "read": {
+          "turns": 2,
+          "tool_calls": 11,
+          "tools_per_turn": 5.5
+        },
+        "edit": {
+          "turns": 3,
+          "tool_calls": 8,
+          "tools_per_turn": 2.67
+        },
+        "exec": {
+          "turns": 4,
+          "tool_calls": 8,
+          "tools_per_turn": 2.0
+        },
+        "other": {
+          "turns": 0,
+          "tool_calls": 0,
+          "tools_per_turn": null
+        }
+      },
+      "max_batch": 7,
+      "output_tokens": 1291,
+      "input_tokens": 20,
+      "cache_read_tokens": 745635,
+      "cache_creation_tokens": 95161,
+      "cache_hit_ratio": 0.887,
+      "ctx_tokens_avg": 84082,
+      "ctx_tokens_max": 95163,
+      "ctx_threshold_crossed": false,
+      "turns_over_threshold": 0,
+      "model": "claude-opus-5",
+      "models_observed": [
+        "claude-opus-5"
+      ]
+    },
+    {
+      "agent": "agent-a4c84341e37ba1904",
+      "run": "build-feature",
+      "steps": [
+        "13"
+      ],
+      "turns_outside_steps": 0,
+      "turns": 17,
+      "tool_calls": 48,
+      "tools_per_turn": 3.0,
+      "turn_classes": {
+        "read": {
+          "turns": 5,
+          "tool_calls": 24,
+          "tools_per_turn": 4.8
+        },
+        "edit": {
+          "turns": 4,
+          "tool_calls": 8,
+          "tools_per_turn": 2.0
+        },
+        "exec": {
+          "turns": 7,
+          "tool_calls": 16,
+          "tools_per_turn": 2.29
+        },
+        "other": {
+          "turns": 0,
+          "tool_calls": 0,
+          "tools_per_turn": null
+        }
+      },
+      "max_batch": 8,
+      "output_tokens": 48,
+      "input_tokens": 34,
+      "cache_read_tokens": 1774870,
+      "cache_creation_tokens": 117967,
+      "cache_hit_ratio": 0.938,
+      "ctx_tokens_avg": 111345,
+      "ctx_tokens_max": 136744,
+      "ctx_threshold_crossed": false,
+      "turns_over_threshold": 0,
+      "model": "claude-opus-5",
+      "models_observed": [
+        "claude-opus-5"
+      ]
+    },
+    {
+      "agent": "agent-a64872faae04f551e",
+      "run": "build-feature",
+      "steps": [
+        "11"
+      ],
+      "turns_outside_steps": 0,
+      "turns": 22,
+      "tool_calls": 41,
+      "tools_per_turn": 1.95,
+      "turn_classes": {
+        "read": {
+          "turns": 1,
+          "tool_calls": 7,
+          "tools_per_turn": 7.0
+        },
+        "edit": {
+          "turns": 2,
+          "tool_calls": 4,
+          "tools_per_turn": 2.0
+        },
+        "exec": {
+          "turns": 18,
+          "tool_calls": 30,
+          "tools_per_turn": 1.67
+        },
+        "other": {
+          "turns": 0,
+          "tool_calls": 0,
+          "tools_per_turn": null
+        }
+      },
+      "max_batch": 7,
+      "output_tokens": 1195,
+      "input_tokens": 44,
+      "cache_read_tokens": 2037048,
+      "cache_creation_tokens": 92485,
+      "cache_hit_ratio": 0.957,
+      "ctx_tokens_avg": 96799,
+      "ctx_tokens_max": 111262,
+      "ctx_threshold_crossed": false,
+      "turns_over_threshold": 0,
+      "model": "claude-opus-5",
+      "models_observed": [
+        "claude-opus-5"
+      ]
+    },
+    {
+      "agent": "agent-a7329ff8f8596918b",
+      "run": "plan-feature",
+      "steps": [
+        "6-9"
+      ],
+      "turns_outside_steps": 0,
+      "turns": 9,
+      "tool_calls": 24,
+      "tools_per_turn": 3.0,
+      "turn_classes": {
+        "read": {
+          "turns": 0,
+          "tool_calls": 0,
+          "tools_per_turn": null
+        },
+        "edit": {
+          "turns": 2,
+          "tool_calls": 2,
+          "tools_per_turn": 1.0
+        },
+        "exec": {
+          "turns": 6,
+          "tool_calls": 22,
+          "tools_per_turn": 3.67
+        },
+        "other": {
+          "turns": 0,
+          "tool_calls": 0,
+          "tools_per_turn": null
+        }
+      },
+      "max_batch": 8,
+      "output_tokens": 1223,
+      "input_tokens": 18,
+      "cache_read_tokens": 697732,
+      "cache_creation_tokens": 105739,
+      "cache_hit_ratio": 0.868,
+      "ctx_tokens_avg": 89277,
+      "ctx_tokens_max": 105741,
+      "ctx_threshold_crossed": false,
+      "turns_over_threshold": 0,
+      "model": "claude-fable-5",
+      "models_observed": [
+        "claude-fable-5"
+      ]
+    },
+    {
+      "agent": "agent-a7d3f236c31ece82e",
+      "run": "build-feature",
+      "steps": [
+        "14"
+      ],
+      "turns_outside_steps": 0,
+      "turns": 13,
+      "tool_calls": 25,
+      "tools_per_turn": 2.08,
+      "turn_classes": {
+        "read": {
+          "turns": 2,
+          "tool_calls": 7,
+          "tools_per_turn": 3.5
+        },
+        "edit": {
+          "turns": 2,
+          "tool_calls": 2,
+          "tools_per_turn": 1.0
+        },
+        "exec": {
+          "turns": 8,
+          "tool_calls": 16,
+          "tools_per_turn": 2.0
+        },
+        "other": {
+          "turns": 0,
+          "tool_calls": 0,
+          "tools_per_turn": null
+        }
+      },
+      "max_batch": 6,
+      "output_tokens": 1366,
+      "input_tokens": 26,
+      "cache_read_tokens": 1100193,
+      "cache_creation_tokens": 83999,
+      "cache_hit_ratio": 0.929,
+      "ctx_tokens_avg": 91094,
+      "ctx_tokens_max": 102776,
+      "ctx_threshold_crossed": false,
+      "turns_over_threshold": 0,
+      "model": "claude-opus-5",
+      "models_observed": [
+        "claude-opus-5"
+      ]
+    },
+    {
+      "agent": "agent-a8f43f98eee5ecefe",
+      "run": "build-feature",
+      "steps": [
+        "12"
+      ],
+      "turns_outside_steps": 0,
+      "turns": 12,
+      "tool_calls": 23,
+      "tools_per_turn": 2.09,
+      "turn_classes": {
+        "read": {
+          "turns": 2,
+          "tool_calls": 12,
+          "tools_per_turn": 6.0
+        },
+        "edit": {
+          "turns": 1,
+          "tool_calls": 1,
+          "tools_per_turn": 1.0
+        },
+        "exec": {
+          "turns": 8,
+          "tool_calls": 10,
+          "tools_per_turn": 1.25
+        },
+        "other": {
+          "turns": 0,
+          "tool_calls": 0,
+          "tools_per_turn": null
+        }
+      },
+      "max_batch": 7,
+      "output_tokens": 35,
+      "input_tokens": 24,
+      "cache_read_tokens": 977393,
+      "cache_creation_tokens": 107357,
+      "cache_hit_ratio": 0.901,
+      "ctx_tokens_avg": 90398,
+      "ctx_tokens_max": 107359,
+      "ctx_threshold_crossed": false,
+      "turns_over_threshold": 0,
+      "model": "claude-opus-5",
+      "models_observed": [
+        "claude-opus-5"
+      ]
+    },
+    {
+      "agent": "agent-a9b9ba6dd80383476",
+      "run": "build-feature",
+      "steps": [
+        "10"
+      ],
+      "turns_outside_steps": 0,
+      "turns": 7,
+      "tool_calls": 25,
+      "tools_per_turn": 4.17,
+      "turn_classes": {
+        "read": {
+          "turns": 2,
+          "tool_calls": 16,
+          "tools_per_turn": 8.0
+        },
+        "edit": {
+          "turns": 0,
+          "tool_calls": 0,
+          "tools_per_turn": null
+        },
+        "exec": {
+          "turns": 4,
+          "tool_calls": 9,
+          "tools_per_turn": 2.25
+        },
+        "other": {
+          "turns": 0,
+          "tool_calls": 0,
+          "tools_per_turn": null
+        }
+      },
+      "max_batch": 10,
+      "output_tokens": 22,
+      "input_tokens": 14,
+      "cache_read_tokens": 508783,
+      "cache_creation_tokens": 76102,
+      "cache_hit_ratio": 0.87,
+      "ctx_tokens_avg": 83557,
+      "ctx_tokens_max": 94879,
+      "ctx_threshold_crossed": false,
+      "turns_over_threshold": 0,
+      "model": "claude-opus-5",
+      "models_observed": [
+        "claude-opus-5"
+      ]
+    },
+    {
+      "agent": "agent-aa6bbad34593a122e",
+      "run": "build-feature",
+      "steps": [
+        "9"
+      ],
+      "turns_outside_steps": 0,
+      "turns": 16,
+      "tool_calls": 42,
+      "tools_per_turn": 2.8,
+      "turn_classes": {
+        "read": {
+          "turns": 3,
+          "tool_calls": 13,
+          "tools_per_turn": 4.33
+        },
+        "edit": {
+          "turns": 3,
+          "tool_calls": 13,
+          "tools_per_turn": 4.33
+        },
+        "exec": {
+          "turns": 9,
+          "tool_calls": 16,
+          "tools_per_turn": 1.78
+        },
+        "other": {
+          "turns": 0,
+          "tool_calls": 0,
+          "tools_per_turn": null
+        }
+      },
+      "max_batch": 7,
+      "output_tokens": 64,
+      "input_tokens": 32,
+      "cache_read_tokens": 1399255,
+      "cache_creation_tokens": 98081,
+      "cache_hit_ratio": 0.934,
+      "ctx_tokens_avg": 93586,
+      "ctx_tokens_max": 116858,
+      "ctx_threshold_crossed": false,
+      "turns_over_threshold": 0,
+      "model": "claude-opus-5",
+      "models_observed": [
+        "claude-opus-5"
+      ]
+    },
+    {
+      "agent": "agent-ad879bf51ae2ed347",
+      "run": "build-feature",
+      "steps": [
+        "12"
+      ],
+      "turns_outside_steps": 0,
+      "turns": 9,
+      "tool_calls": 44,
+      "tools_per_turn": 5.5,
+      "turn_classes": {
+        "read": {
+          "turns": 8,
+          "tool_calls": 44,
+          "tools_per_turn": 5.5
+        },
+        "edit": {
+          "turns": 0,
+          "tool_calls": 0,
+          "tools_per_turn": null
+        },
+        "exec": {
+          "turns": 0,
+          "tool_calls": 0,
+          "tools_per_turn": null
+        },
+        "other": {
+          "turns": 0,
+          "tool_calls": 0,
+          "tools_per_turn": null
+        }
+      },
+      "max_batch": 12,
+      "output_tokens": 27,
+      "input_tokens": 18,
+      "cache_read_tokens": 546736,
+      "cache_creation_tokens": 157126,
+      "cache_hit_ratio": 0.777,
+      "ctx_tokens_avg": 78209,
+      "ctx_tokens_max": 100602,
+      "ctx_threshold_crossed": false,
+      "turns_over_threshold": 0,
+      "model": "claude-opus-5",
+      "models_observed": [
+        "claude-opus-5"
+      ]
+    }
+  ],
+  "dispatch_totals": {
+    "count": 10,
+    "ctx_tokens_max_median": 106550,
+    "ctx_tokens_max_max": 136744,
+    "ctx_tokens_max_distribution": [
+      94879,
+      95163,
+      100602,
+      102776,
+      105741,
+      107359,
+      111262,
+      111890,
+      116858,
+      136744
+    ],
+    "over_threshold": 0
+  },
+  "totals": {
+    "runs": 2,
+    "wall_s": 4950,
+    "turns": 229,
+    "tool_calls": 439,
+    "turn_classes": {
+      "read": {
+        "turns": 38,
+        "tool_calls": 160,
+        "tools_per_turn": 4.21
+      },
+      "edit": {
+        "turns": 18,
+        "tool_calls": 39,
+        "tools_per_turn": 2.17
+      },
+      "exec": {
+        "turns": 146,
+        "tool_calls": 218,
+        "tools_per_turn": 1.49
+      },
+      "other": {
+        "turns": 15,
+        "tool_calls": 22,
+        "tools_per_turn": 1.47
+      }
+    },
+    "output_tokens": 88859,
+    "input_tokens": 455,
+    "cache_read_tokens": 36069791,
+    "cache_creation_tokens": 1407520,
+    "cache_hit_ratio": 0.962,
+    "ctx_tokens_max": 361617,
+    "turns_over_threshold": 72,
+    "turns_outside_steps": 45,
+    "outside_steps": {
+      "turns": 45,
+      "tool_calls": 57,
+      "turn_classes": {
+        "read": {
+          "turns": 7,
+          "tool_calls": 7,
+          "tools_per_turn": 1.0
+        },
+        "edit": {
+          "turns": 0,
+          "tool_calls": 0,
+          "tools_per_turn": null
+        },
+        "exec": {
+          "turns": 32,
+          "tool_calls": 39,
+          "tools_per_turn": 1.22
+        },
+        "other": {
+          "turns": 4,
+          "tool_calls": 11,
+          "tools_per_turn": 2.75
+        }
+      },
+      "ctx_tokens_max": 277504
+    }
+  },
+  "subagents_unattributed": 0
+}
