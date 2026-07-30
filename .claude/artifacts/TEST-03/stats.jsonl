@@ -1,0 +1,15 @@
+{"run":"plan-feature","item":"TEST-03","step":"0","title":"Load Context","event":"start","ts":1785410053}
+{"run":"plan-feature","item":"TEST-03","step":"0","event":"end","ts":1785410088,"model":"opus"}
+{"run":"plan-feature","item":"TEST-03","step":"1","title":"MCP Verification","event":"start","ts":1785410088}
+{"run":"plan-feature","item":"TEST-03","step":"1","event":"end","ts":1785410124,"model":"opus"}
+{"run":"plan-feature","item":"TEST-03","step":"2","title":"Dependency Check","event":"start","ts":1785410124}
+{"run":"plan-feature","item":"TEST-03","step":"2","event":"end","ts":1785410131,"model":"opus"}
+{"run":"plan-feature","item":"TEST-03","step":"3","title":"Fetch Feature Details","event":"start","ts":1785410131}
+{"run":"plan-feature","item":"TEST-03","step":"3","event":"end","ts":1785410139,"model":"opus"}
+{"run":"plan-feature","item":"TEST-03","step":"4","title":"Update Status to Planning","event":"start","ts":1785410139}
+{"run":"plan-feature","item":"TEST-03","step":"4","event":"end","ts":1785410146,"model":"opus"}
+{"run":"plan-feature","item":"TEST-03","step":"5","title":"Create Branch","event":"start","ts":1785410146}
+{"run":"plan-feature","item":"TEST-03","step":"5","event":"end","ts":1785410181,"model":"opus"}
+{"run":"plan-feature","item":"TEST-03","step":"6-9","title":"Planner dispatch, Sections 6 to 9","event":"start","ts":1785410181}
+{"run":"plan-feature","item":"TEST-03","step":"6-9","event":"end","ts":1785410467,"model":"fable"}
+{"run":"plan-feature","item":"TEST-03","step":"10","title":"Commit and Push","event":"start","ts":1785410467}
