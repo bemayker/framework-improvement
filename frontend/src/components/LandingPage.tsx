@@ -1,6 +1,5 @@
 import type { CSSProperties } from "react";
 import AppFooter from "./AppFooter";
-import Notes from "./Notes";
 
 const containerStyle: CSSProperties = {
   minHeight: "100vh",
@@ -39,7 +38,6 @@ function LandingPage() {
         <p style={subtitleStyle}>
           A minimal task-notes app for keeping track of what needs doing.
         </p>
-        <Notes />
       </main>
       <AppFooter />
     </div>

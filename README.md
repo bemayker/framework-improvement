@@ -17,9 +17,7 @@ This project uses a Claude Code-driven, per-feature delivery framework: a human 
    - Backend (FastAPI): http://localhost:8000
    - Database: PostgreSQL, exposed on port 5432
 
-`docker compose up` starts three services: `db` (PostgreSQL 16), `backend` (FastAPI via uv), and `frontend` (Vite dev server). The backend creates its database tables at startup, so the `db` service must be up for the notes API to work. See [docs/DEVELOPMENT.md → Running tests locally](docs/DEVELOPMENT.md#running-tests-locally) to run the test suites without Docker.
-
-> **Upgrading an existing stack:** the backend keeps its virtualenv in an anonymous volume, so a stack created before the notes feature reuses a virtualenv without `sqlalchemy`/`psycopg` and the backend exits with `ModuleNotFoundError`. Rebuild once with `docker compose up -d --build` (or `docker compose down -v` first for a clean database).
+`docker compose up` starts three services: `db` (PostgreSQL 16), `backend` (FastAPI via uv), and `frontend` (Vite dev server). See [docs/DEVELOPMENT.md → Running tests locally](docs/DEVELOPMENT.md#running-tests-locally) to run the test suites without Docker.
 
 ---
 
