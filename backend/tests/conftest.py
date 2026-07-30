@@ -53,13 +53,30 @@ def client() -> Iterator[TestClient]:
 
 @pytest.fixture(scope="module")
 def db_engine() -> Iterator[Engine]:
-    """Module-scoped engine against a real PostgreSQL instance."""
+    """Module-scoped engine against a real PostgreSQL instance.
+
+    Isolation is at **row** level, never schema level: the target instance is
+    shared, so this fixture must own the rows and never the table. In CI, this
+    tier runs against the same `tasknotes` database the already-running compose
+    `backend` container serves, and that container creates the schema once in
+    its startup lifespan (`app.main.lifespan`); a `drop_all` here would take the
+    `notes` table away from a process that never runs `create_all` again, and
+    the Playwright step that follows would get a 500 from `GET /api/notes`.
+
+    Emptying the table at **both** ends is what keeps the tier order- and
+    state-independent (`testing_standards.md` Sections 1.2 and 5) now that the
+    schema is no longer recreated per module: the table legitimately arrives
+    holding rows left by manual use or by an earlier E2E run, and tests that
+    assert on the full list must not see them. `create_all` is idempotent, so it
+    still covers a database that has never had the schema.
+    """
     engine = create_engine(_test_database_url(), pool_pre_ping=True)
     Base.metadata.create_all(bind=engine)
+    _delete_all_notes(engine)
     try:
         yield engine
     finally:
-        Base.metadata.drop_all(bind=engine)
+        _delete_all_notes(engine)
         engine.dispose()
 
 
