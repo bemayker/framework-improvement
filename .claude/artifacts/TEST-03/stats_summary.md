@@ -1,6 +1,6 @@
 # Run statistics, TEST-03
 
-Generated 2026-07-31 09:55 UTC. Token metrics: available. Skill load: read.
+Generated 2026-07-31 10:00 UTC. Token metrics: available. Skill load: read.
 
 Subagent transcripts unattributed to any work item: 0.
 
@@ -41,13 +41,16 @@ Wall is this run's last step end minus its first step start; steps sum to 8m58s.
 | 13 | Phase F, Refactor Gate | 5m24s | 19 | 41 | 2.28 | 10 | 4.6K | 126.7K | 358.4K | 0 | 0.957 | claude-opus-5 | 2/6/9 | 8.00/1.00/2.00 | ctx>threshold |
 | 14 | Phase G, UAT Generation | 2m57s | 10 | 22 | 2.44 | 9 | 4.2K | 161.3K | 363.5K | 0 | 0.931 | claude-opus-5 | 1/2/5 | 9.00/1.00/2.00 | ctx>threshold |
 | 15 | Documentation Check | 0m47s | 5 | 5 | 1.0 | 1 | 2.9K | 366.4K | 367.4K | 0 | 0.998 | claude-opus-5 | 0/2/3 | n/a/1.00/1.00 | ctx>threshold |
-| 16 | Phase H, Artifact Re-check | 7m06s | 16 | 45 | 3.21 | 8 | 5.6K | 135.7K | 377.5K | 0 | 0.901 | claude-opus-5 | 7/1/4 | 4.86/1.00/2.00 | ctx>threshold |
-| 17 | Push | n/a | 0 | 0 | n/a | 0 | 0 | n/a | n/a | 0 | n/a | n/a | 0/0/0 | n/a/n/a/n/a |  |
-| **run total** |  | 43m00s | 129 | 289 | 2.41 | 10 | 45.4K |  | 377.5K |  | 0.948 | claude-opus-5 | 24/22/65 | 5.83/1.68/1.58 |  |
+| 16 | Phase H, Artifact Re-check | 7m06s | 17 | 46 | 3.07 | 8 | 6.9K | 150.3K | 383.8K | 0 | 0.913 | claude-opus-5 | 7/1/5 | 4.86/1.00/1.80 | ctx>threshold |
+| 17 | Push | 1m56s | 8 | 9 | 1.12 | 2 | 6.4K | 390.2K | 395.9K | 0 | 0.996 | claude-opus-5 | 0/1/7 | n/a/2.00/1.00 | ctx>threshold |
+| 18 | CI Watch | 1m31s | 3 | 3 | 1.0 | 1 | 4.4K | 398.5K | 401.2K | 0 | 0.996 | claude-opus-5 | 0/1/2 | n/a/1.00/1.00 | ctx>threshold |
+| 19 | Handover | 0m16s | 1 | 1 | 1.0 | 1 | 810 | 402.3K | 402.3K | 0 | 0.997 | claude-opus-5 | 0/0/1 | n/a/n/a/1.00 | ctx>threshold |
+| 20 | Summary | 0m02s | 0 | 0 | n/a | 0 | 0 | n/a | n/a | 0 | n/a | opus (marker, unverified) | 0/0/0 | n/a/n/a/n/a |  |
+| **run total** |  | 46m45s | 142 | 303 | 2.28 | 10 | 58.3K |  | 402.3K |  | 0.958 | claude-opus-5 | 24/24/76 | 5.83/1.67/1.50 |  |
 
-Wall is this run's last step end minus its first step start; steps sum to 43m00s.
+Wall is this run's last step end minus its first step start; steps sum to 46m45s.
 
-28 turn(s) exceeded the 200,000-token context threshold.
+41 turn(s) exceeded the 200,000-token context threshold.
 
 ## Dispatches (per subagent transcript)
 
@@ -68,8 +71,8 @@ Per-dispatch context is the grain a per-phase dispatch change is graded on: a st
 
 **10 dispatch(es):** median ctx max 118.4K, peak 138.0K, 0 above the 200,000-token threshold. Distribution: 77.7K, 96.9K, 104.8K, 115.0K, 115.0K, 121.8K, 125.0K, 128.1K, 129.7K, 138.0K.
 
-**All runs:** 2 run(s), wall 51m58s (sum of per-run walls, idle time between runs excluded), 199 turns, 397 tool calls, 95.0K output tokens, cache hit 0.956.
+**All runs:** 2 run(s), wall 55m43s (sum of per-run walls, idle time between runs excluded), 213 turns, 412 tool calls, 109.9K output tokens, cache hit 0.962.
 
-Turn classes across every bucket, read / edit / exec: 34/24/116 turns, 4.82/1.62/1.54 tools per turn. The **read** figure is the one a batching mandate can be graded on; edits batch weakly and an exec turn is serial by construction.
+Turn classes across every bucket, read / edit / exec: 34/26/128 turns, 4.82/1.62/1.49 tools per turn. The **read** figure is the one a batching mandate can be graded on; edits batch weakly and an exec turn is serial by construction.
 
-47 turn(s) fell outside every recorded step window (included in the all-runs totals; read/edit/exec 7/0/36).
+48 turn(s) fell outside every recorded step window (included in the all-runs totals; read/edit/exec 7/0/37).

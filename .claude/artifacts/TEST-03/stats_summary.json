@@ -1,6 +1,6 @@
 {
   "item": "TEST-03",
-  "generated_at": 1785491721,
+  "generated_at": 1785492002,
   "transcript": "/Users/florianserneels/.claude/projects/-Users-florianserneels-Documents-ai-development-framework-improvement/7a929890-dc79-4b3a-a08c-6a775064ff71.jsonl",
   "transcript_resolved": true,
   "token_collection": true,
@@ -23,22 +23,7 @@
   "marker_schema_notes": [],
   "collector_health": {
     "prior_failure": null,
-    "stale_summary_replaced": {
-      "generated_at": 1785489010,
-      "newest_marker_ts": 1785491721,
-      "lag_s": 2711,
-      "case": "superseded_by_new_run",
-      "reported": false,
-      "scoped": true,
-      "replaced_summary_runs": [
-        "plan-feature"
-      ],
-      "runs_stale": [],
-      "runs_new_since": [
-        "build-feature"
-      ],
-      "covered_lag_s": null
-    }
+    "stale_summary_replaced": null
   },
   "skill_load": {
     "source": "read",
@@ -1150,9 +1135,9 @@
           "model_reported": "opus",
           "model_mismatch": false,
           "retries": 0,
-          "turns": 16,
-          "tool_calls": 45,
-          "tools_per_turn": 3.21,
+          "turns": 17,
+          "tool_calls": 46,
+          "tools_per_turn": 3.07,
           "turn_classes": {
             "read": {
               "turns": 7,
@@ -1165,9 +1150,9 @@
               "tools_per_turn": 1.0
             },
             "exec": {
-              "turns": 4,
-              "tool_calls": 8,
-              "tools_per_turn": 2.0
+              "turns": 5,
+              "tool_calls": 9,
+              "tools_per_turn": 1.8
             },
             "other": {
               "turns": 2,
@@ -1176,15 +1161,15 @@
             }
           },
           "max_batch": 8,
-          "output_tokens": 5628,
-          "input_tokens": 32,
-          "cache_read_tokens": 1955642,
-          "cache_creation_tokens": 215931,
-          "cache_hit_ratio": 0.901,
-          "ctx_tokens_avg": 135725,
-          "ctx_tokens_max": 377496,
+          "output_tokens": 6915,
+          "input_tokens": 34,
+          "cache_read_tokens": 2333136,
+          "cache_creation_tokens": 222284,
+          "cache_hit_ratio": 0.913,
+          "ctx_tokens_avg": 150321,
+          "ctx_tokens_max": 383849,
           "ctx_threshold_crossed": true,
-          "turns_over_threshold": 3,
+          "turns_over_threshold": 4,
           "flags": [
             "ctx>threshold"
           ]
@@ -1192,10 +1177,160 @@
         {
           "step": "17",
           "title": "Push",
-          "duration_s": null,
+          "duration_s": 116,
+          "model": "claude-opus-5",
+          "models_observed": [
+            "claude-opus-5"
+          ],
+          "model_reported": "opus",
+          "model_mismatch": false,
+          "retries": 0,
+          "turns": 8,
+          "tool_calls": 9,
+          "tools_per_turn": 1.12,
+          "turn_classes": {
+            "read": {
+              "turns": 0,
+              "tool_calls": 0,
+              "tools_per_turn": null
+            },
+            "edit": {
+              "turns": 1,
+              "tool_calls": 2,
+              "tools_per_turn": 2.0
+            },
+            "exec": {
+              "turns": 7,
+              "tool_calls": 7,
+              "tools_per_turn": 1.0
+            },
+            "other": {
+              "turns": 0,
+              "tool_calls": 0,
+              "tools_per_turn": null
+            }
+          },
+          "max_batch": 2,
+          "output_tokens": 6376,
+          "input_tokens": 16,
+          "cache_read_tokens": 3109465,
+          "cache_creation_tokens": 12014,
+          "cache_hit_ratio": 0.996,
+          "ctx_tokens_avg": 390187,
+          "ctx_tokens_max": 395863,
+          "ctx_threshold_crossed": true,
+          "turns_over_threshold": 8,
+          "flags": [
+            "ctx>threshold"
+          ]
+        },
+        {
+          "step": "18",
+          "title": "CI Watch",
+          "duration_s": 91,
+          "model": "claude-opus-5",
+          "models_observed": [
+            "claude-opus-5"
+          ],
+          "model_reported": "opus",
+          "model_mismatch": false,
+          "retries": 0,
+          "turns": 3,
+          "tool_calls": 3,
+          "tools_per_turn": 1.0,
+          "turn_classes": {
+            "read": {
+              "turns": 0,
+              "tool_calls": 0,
+              "tools_per_turn": null
+            },
+            "edit": {
+              "turns": 1,
+              "tool_calls": 1,
+              "tools_per_turn": 1.0
+            },
+            "exec": {
+              "turns": 2,
+              "tool_calls": 2,
+              "tools_per_turn": 1.0
+            },
+            "other": {
+              "turns": 0,
+              "tool_calls": 0,
+              "tools_per_turn": null
+            }
+          },
+          "max_batch": 1,
+          "output_tokens": 4427,
+          "input_tokens": 6,
+          "cache_read_tokens": 1190143,
+          "cache_creation_tokens": 5306,
+          "cache_hit_ratio": 0.996,
+          "ctx_tokens_avg": 398485,
+          "ctx_tokens_max": 401169,
+          "ctx_threshold_crossed": true,
+          "turns_over_threshold": 3,
+          "flags": [
+            "ctx>threshold"
+          ]
+        },
+        {
+          "step": "19",
+          "title": "Handover",
+          "duration_s": 16,
+          "model": "claude-opus-5",
+          "models_observed": [
+            "claude-opus-5"
+          ],
+          "model_reported": "opus",
+          "model_mismatch": false,
+          "retries": 0,
+          "turns": 1,
+          "tool_calls": 1,
+          "tools_per_turn": 1.0,
+          "turn_classes": {
+            "read": {
+              "turns": 0,
+              "tool_calls": 0,
+              "tools_per_turn": null
+            },
+            "edit": {
+              "turns": 0,
+              "tool_calls": 0,
+              "tools_per_turn": null
+            },
+            "exec": {
+              "turns": 1,
+              "tool_calls": 1,
+              "tools_per_turn": 1.0
+            },
+            "other": {
+              "turns": 0,
+              "tool_calls": 0,
+              "tools_per_turn": null
+            }
+          },
+          "max_batch": 1,
+          "output_tokens": 810,
+          "input_tokens": 2,
+          "cache_read_tokens": 401167,
+          "cache_creation_tokens": 1100,
+          "cache_hit_ratio": 0.997,
+          "ctx_tokens_avg": 402269,
+          "ctx_tokens_max": 402269,
+          "ctx_threshold_crossed": true,
+          "turns_over_threshold": 1,
+          "flags": [
+            "ctx>threshold"
+          ]
+        },
+        {
+          "step": "20",
+          "title": "Summary",
+          "duration_s": 2,
           "model": null,
           "models_observed": [],
-          "model_reported": null,
+          "model_reported": "opus",
           "model_mismatch": false,
           "retries": 0,
           "turns": 0,
@@ -1237,11 +1372,11 @@
         }
       ],
       "totals": {
-        "wall_s": 2580,
-        "steps_sum_s": 2580,
-        "turns": 129,
-        "tool_calls": 289,
-        "tools_per_turn": 2.41,
+        "wall_s": 2805,
+        "steps_sum_s": 2805,
+        "turns": 142,
+        "tool_calls": 303,
+        "tools_per_turn": 2.28,
         "turn_classes": {
           "read": {
             "turns": 24,
@@ -1249,14 +1384,14 @@
             "tools_per_turn": 5.83
           },
           "edit": {
-            "turns": 22,
-            "tool_calls": 37,
-            "tools_per_turn": 1.68
+            "turns": 24,
+            "tool_calls": 40,
+            "tools_per_turn": 1.67
           },
           "exec": {
-            "turns": 65,
-            "tool_calls": 103,
-            "tools_per_turn": 1.58
+            "turns": 76,
+            "tool_calls": 114,
+            "tools_per_turn": 1.5
           },
           "other": {
             "turns": 9,
@@ -1265,14 +1400,14 @@
           }
         },
         "max_batch": 10,
-        "output_tokens": 45387,
-        "input_tokens": 2894,
-        "cache_read_tokens": 18833928,
-        "cache_creation_tokens": 1031742,
-        "cache_hit_ratio": 0.948,
-        "ctx_tokens_avg": 154020,
-        "ctx_tokens_max": 377496,
-        "turns_over_threshold": 28,
+        "output_tokens": 58287,
+        "input_tokens": 2920,
+        "cache_read_tokens": 23912197,
+        "cache_creation_tokens": 1056515,
+        "cache_hit_ratio": 0.958,
+        "ctx_tokens_avg": 175857,
+        "ctx_tokens_max": 402269,
+        "turns_over_threshold": 41,
         "models_observed": [
           "claude-opus-5"
         ],
@@ -1772,9 +1907,9 @@
   },
   "totals": {
     "runs": 2,
-    "wall_s": 3118,
-    "turns": 199,
-    "tool_calls": 397,
+    "wall_s": 3343,
+    "turns": 213,
+    "tool_calls": 412,
     "turn_classes": {
       "read": {
         "turns": 34,
@@ -1782,14 +1917,14 @@
         "tools_per_turn": 4.82
       },
       "edit": {
-        "turns": 24,
-        "tool_calls": 39,
+        "turns": 26,
+        "tool_calls": 42,
         "tools_per_turn": 1.62
       },
       "exec": {
-        "turns": 116,
-        "tool_calls": 179,
-        "tools_per_turn": 1.54
+        "turns": 128,
+        "tool_calls": 191,
+        "tools_per_turn": 1.49
       },
       "other": {
         "turns": 15,
@@ -1797,17 +1932,17 @@
         "tools_per_turn": 1.0
       }
     },
-    "output_tokens": 94973,
-    "input_tokens": 3033,
-    "cache_read_tokens": 31957292,
-    "cache_creation_tokens": 1452746,
-    "cache_hit_ratio": 0.956,
-    "ctx_tokens_max": 377496,
-    "turns_over_threshold": 64,
-    "turns_outside_steps": 47,
+    "output_tokens": 109874,
+    "input_tokens": 3061,
+    "cache_read_tokens": 37437828,
+    "cache_creation_tokens": 1478558,
+    "cache_hit_ratio": 0.962,
+    "ctx_tokens_max": 403308,
+    "turns_over_threshold": 78,
+    "turns_outside_steps": 48,
     "outside_steps": {
-      "turns": 47,
-      "tool_calls": 68,
+      "turns": 48,
+      "tool_calls": 69,
       "turn_classes": {
         "read": {
           "turns": 7,
@@ -1820,9 +1955,9 @@
           "tools_per_turn": null
         },
         "exec": {
-          "turns": 36,
-          "tool_calls": 56,
-          "tools_per_turn": 1.56
+          "turns": 37,
+          "tool_calls": 57,
+          "tools_per_turn": 1.54
         },
         "other": {
           "turns": 4,
@@ -1830,7 +1965,7 @@
           "tools_per_turn": 1.0
         }
       },
-      "ctx_tokens_max": 305999
+      "ctx_tokens_max": 403308
     }
   },
   "subagents_unattributed": 0
