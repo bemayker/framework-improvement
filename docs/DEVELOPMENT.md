@@ -478,6 +478,16 @@ cd backend && uv run pytest
 npx playwright test
 ```
 
+**The backend integration tier and the E2E suite need a reachable PostgreSQL.** The unit tier does not: it is designed to run with `DATABASE_URL` unset, and `cd backend && env -u DATABASE_URL uv run pytest tests/unit -q` is the way to prove that. The integration tests under `backend/tests/integration/` connect through `DATABASE_URL` and create the `notes` table if it is absent, so either bring the compose service up (`docker compose up -d db`) or point the variable at any PostgreSQL you have:
+
+```bash
+# Integration tier against the compose service
+DATABASE_URL=postgresql://tasknotes:tasknotes@localhost:5432/tasknotes \
+  cd backend && uv run pytest tests/integration -q
+```
+
+The E2E suite drives the real stack, so it needs the frontend, the backend and the database all running. With no database reachable the integration tests fail to connect and the E2E specs see the notes list error state rather than saved notes.
+
 ---
 
 ## CI/CD

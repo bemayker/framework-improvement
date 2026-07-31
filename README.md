@@ -19,6 +19,8 @@ This project uses a Claude Code-driven, per-feature delivery framework: a human 
 
 `docker compose up` starts three services: `db` (PostgreSQL 16), `backend` (FastAPI via uv), and `frontend` (Vite dev server). See [docs/DEVELOPMENT.md → Running tests locally](docs/DEVELOPMENT.md#running-tests-locally) to run the test suites without Docker.
 
+The `db` service is required at runtime, not only for tests: notes submitted on the landing page are persisted to PostgreSQL through `POST /api/notes` and read back with `GET /api/notes`. The backend reads its connection string from `DATABASE_URL` (supplied by `docker compose`; see `.env.example`) and creates the `notes` table at startup when that variable is set. Without a reachable database the app still starts, but the notes endpoints fail with a logged 500.
+
 ---
 
 ## Prerequisites
