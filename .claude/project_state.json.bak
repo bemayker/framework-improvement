@@ -28,8 +28,8 @@
     "todo": "to do",
     "planning": "in progress",
     "plan_review": "to test",
-    "ready_for_build": "on hold",
-    "in_progress": "cancelled",
+    "ready_for_build": "to do",
+    "in_progress": "in progress",
     "in_review": "to test",
     "done": "complete"
   },
@@ -37,9 +37,9 @@
     "to do": "todo",
     "in progress": "in_progress",
     "to test": "in_review",
-    "on hold": "ready_for_build",
+    "on hold": null,
     "complete": "done",
-    "cancelled": "in_progress"
+    "cancelled": null
   },
   "features": {
     "TEST-02": {
