@@ -1,4 +1,4 @@
-<!-- materialized-from: mayker-dev v0.3.58; do not edit, regenerate with /init-project refresh-rules -->
+<!-- materialized-from: mayker-dev v0.3.60; do not edit, regenerate with /init-project refresh-rules -->
 <!--
   Universal standard. Imported into CLAUDE.md (always on). Do not edit per project.
   Stack-agnostic: code quality, naming, architecture patterns, component design, test attributes.
