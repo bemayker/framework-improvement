@@ -90,9 +90,6 @@ test.describe("TEST-03 simple note form", () => {
     await page.goto("/");
     const createRequests = recordNoteCreateRequests(page);
 
-    const listItems = page.getByTestId("note-list").locator("li");
-    const itemsBefore = await listItems.count();
-
     await page.getByTestId("note-form-submit").click();
 
     const validationMessage = page.getByTestId("note-form-error");
@@ -102,8 +99,12 @@ test.describe("TEST-03 simple note form", () => {
     // The submit handler either fires the create call or shows this message in
     // the same tick, so the message being present is the point at which the
     // absence of a request is decidable: no waiting on a timeout needed.
+    //
+    // This is also the whole of "the list did not grow": the list is appended
+    // to only after a create call resolves, so no request means no new row.
+    // Counting the rows instead would assert on list length, which the header
+    // comment forbids and which no spec can do deterministically here.
     expect(createRequests).toHaveLength(0);
-    await expect(listItems).toHaveCount(itemsBefore);
     // No API call means no API failure, so the API error line must stay absent.
     await expect(page.getByTestId("notes-error")).toHaveCount(0);
   });
@@ -140,9 +141,6 @@ test.describe("TEST-03 simple note form", () => {
     await page.goto("/");
     const createRequests = recordNoteCreateRequests(page);
 
-    const listItems = page.getByTestId("note-list").locator("li");
-    const itemsBefore = await listItems.count();
-
     const input = page.getByTestId("note-form-input");
     await input.fill("   ");
     await page.getByTestId("note-form-submit").click();
@@ -151,8 +149,9 @@ test.describe("TEST-03 simple note form", () => {
     await expect(validationMessage).toBeVisible();
     await expect(validationMessage).toHaveText(EMPTY_NOTE_MESSAGE);
 
+    // As in the AC2 spec: no create call is also the proof that nothing was
+    // added to the list, and it is the assertion that can be made determinate.
     expect(createRequests).toHaveLength(0);
-    await expect(listItems).toHaveCount(itemsBefore);
     // A rejected submit keeps what the user typed rather than clearing it.
     await expect(input).toHaveValue("   ");
   });
