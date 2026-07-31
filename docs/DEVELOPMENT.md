@@ -482,8 +482,8 @@ npx playwright test
 
 ```bash
 # Integration tier against the compose service
-DATABASE_URL=postgresql://tasknotes:tasknotes@localhost:5432/tasknotes \
-  cd backend && uv run pytest tests/integration -q
+cd backend && DATABASE_URL=postgresql://tasknotes:tasknotes@localhost:5432/tasknotes \
+  uv run pytest tests/integration -q
 ```
 
 The E2E suite drives the real stack, so it needs the frontend, the backend and the database all running. With no database reachable the integration tests fail to connect and the E2E specs see the notes list error state rather than saved notes.
