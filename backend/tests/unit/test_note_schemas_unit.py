@@ -6,7 +6,7 @@ import pytest
 from pydantic import ValidationError
 
 from app.models.note import Note
-from app.schemas.note import NoteCreateRequest, NoteResponse
+from app.schemas.note import MAX_NOTE_TEXT_LENGTH, NoteCreateRequest, NoteResponse
 
 
 def test_note_create_request_accepts_non_blank_text():
@@ -30,6 +30,20 @@ def test_note_create_request_rejects_a_missing_text_field():
     """Error case: `text` is required, not defaulted to an empty note."""
     with pytest.raises(ValidationError):
         NoteCreateRequest()
+
+
+def test_note_create_request_accepts_text_at_the_length_limit():
+    """Edge case: exactly the maximum length is still a valid note."""
+    at_limit = "n" * MAX_NOTE_TEXT_LENGTH
+
+    assert NoteCreateRequest(text=at_limit).text == at_limit
+
+
+def test_note_create_request_rejects_text_over_the_length_limit():
+    """Error case: one character past the limit is rejected, so an unbounded
+    payload can never reach the unbounded TEXT column."""
+    with pytest.raises(ValidationError):
+        NoteCreateRequest(text="n" * (MAX_NOTE_TEXT_LENGTH + 1))
 
 
 def test_note_response_serialises_the_domain_dataclass():
