@@ -32,7 +32,10 @@
 
       "Skill", "Agent", "Task", "ToolSearch", "TodoWrite", "TaskCreate",
 
-      "mcp__clickup__*", "mcp__github__*"
+      "mcp__clickup__*", "mcp__github__*",
+      "mcp__claude_ai_composio__COMPOSIO_SEARCH_TOOLS",
+      "mcp__claude_ai_composio__COMPOSIO_MULTI_EXECUTE_TOOL",
+      "mcp__claude_ai_composio__COMPOSIO_REMOTE_BASH_TOOL"
     ],
     "deny": [
       "Bash(sudo:*)",
