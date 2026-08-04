@@ -30,6 +30,8 @@
 
       "Bash(docker:*)", "Bash(docker compose:*)", "Bash(docker-compose:*)",
 
+      "Skill", "Agent", "Task", "ToolSearch", "TodoWrite", "TaskCreate",
+
       "mcp__clickup__*", "mcp__github__*"
     ],
     "deny": [
