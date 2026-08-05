@@ -4,9 +4,20 @@ from typing import Annotated
 
 from pydantic import BaseModel, StringConstraints
 
-# Surrounding whitespace is stripped before the length check, so a
+# A note is one line of text, so an upper bound belongs in the contract: the
+# column is TEXT and the CHECK only forbids blanks, which left megabyte-sized
+# bodies acceptable and storable. The frontend mirrors this as the input's
+# maxLength (NoteForm.tsx).
+NOTE_TEXT_MAX_LENGTH = 500
+
+# Surrounding whitespace is stripped before the length checks, so a
 # whitespace-only body is rejected exactly like an empty one (422).
-NoteText = Annotated[str, StringConstraints(strip_whitespace=True, min_length=1)]
+NoteText = Annotated[
+    str,
+    StringConstraints(
+        strip_whitespace=True, min_length=1, max_length=NOTE_TEXT_MAX_LENGTH
+    ),
+]
 
 
 class NoteCreate(BaseModel):

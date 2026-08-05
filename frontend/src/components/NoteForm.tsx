@@ -6,6 +6,10 @@ const FIELD_PLACEHOLDER = "What needs doing?";
 const SUBMIT_LABEL = "Save note";
 const EMPTY_NOTE_MESSAGE = "Enter a note before saving.";
 const SAVE_FAILED_MESSAGE = "The note could not be saved. Please try again.";
+// Mirrors NOTE_TEXT_MAX_LENGTH in backend/app/schemas/note.py, so the field
+// stops at the bound the API enforces instead of letting the user type past it
+// and collecting a 422.
+const NOTE_TEXT_MAX_LENGTH = 500;
 
 const formStyle: CSSProperties = {
   display: "flex",
@@ -96,6 +100,7 @@ function NoteForm({ onCreated }: NoteFormProps) {
           data-testid="note-input"
           type="text"
           value={text}
+          maxLength={NOTE_TEXT_MAX_LENGTH}
           placeholder={FIELD_PLACEHOLDER}
           style={inputStyle}
           onChange={(event) => setText(event.target.value)}

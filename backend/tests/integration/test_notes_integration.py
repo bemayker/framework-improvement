@@ -11,6 +11,7 @@ import pytest
 from fastapi.testclient import TestClient
 
 from app.repositories.note_repository import NoteRepository
+from app.schemas.note import NOTE_TEXT_MAX_LENGTH
 
 
 def test_insert_note_then_list_notes_round_trips_through_postgres(
@@ -128,3 +129,28 @@ def test_post_notes_without_text_field_returns_422(
     response = client.post("/api/notes", json={})
 
     assert response.status_code == 422
+
+
+def test_post_notes_at_the_maximum_length_is_accepted_and_stored(
+    client: TestClient, notes_table: psycopg.Connection
+):
+    """Boundary case: exactly the maximum length is still a valid note."""
+    longest_allowed = "a" * NOTE_TEXT_MAX_LENGTH
+
+    response = client.post("/api/notes", json={"text": longest_allowed})
+
+    assert response.status_code == 201
+    assert response.json()["text"] == longest_allowed
+    assert [note["text"] for note in client.get("/api/notes").json()] == [
+        longest_allowed
+    ]
+
+
+def test_post_notes_over_the_maximum_length_returns_422_and_stores_nothing(
+    client: TestClient, notes_table: psycopg.Connection
+):
+    """Boundary case: one character past the bound is rejected before the insert."""
+    response = client.post("/api/notes", json={"text": "a" * (NOTE_TEXT_MAX_LENGTH + 1)})
+
+    assert response.status_code == 422
+    assert client.get("/api/notes").json() == []
