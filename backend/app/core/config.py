@@ -1,8 +1,9 @@
 """Application settings.
 
 Reads configuration from the environment. Only the database connection
-string and app metadata are defined here; TEST-01 (the scaffold feature)
-opens no database connection itself — that lands with TEST-02.
+string and app metadata are defined here; no module in this package opens a
+database connection yet — the first feature to need one brings that layer
+with it.
 """
 
 import os

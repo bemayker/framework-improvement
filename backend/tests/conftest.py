@@ -3,9 +3,9 @@
 Session-scoped FastAPI TestClient fixture used by unit and integration tests.
 
 A module-scoped real-database fixture and a migration runner are intentionally
-not wired up yet: TEST-01 (the scaffold feature) creates no DB engine/session
-code, so there is nothing for such a fixture to connect to. TEST-02 introduces
-the DB connectivity layer and wires those fixtures in here at that point.
+not wired up yet: no DB engine/session code exists in `app` yet, so there is
+nothing for such a fixture to connect to. The first feature to introduce the
+DB connectivity layer wires those fixtures in here at that point.
 """
 
 import pytest

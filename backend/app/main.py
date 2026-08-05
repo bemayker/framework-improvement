@@ -1,9 +1,8 @@
 """FastAPI application factory.
 
-TEST-01 (the scaffold feature) instantiates the app with no feature routes.
-Later features (TEST-02 health check, TEST-03 notes CRUD) register their
-routers here without restructuring this factory. TEST-05 registers the
-version router.
+TEST-01 (the scaffold feature) established this factory; TEST-05 registered
+the version router in it. Later features (TEST-02 health check, TEST-03 notes
+CRUD) register their routers here the same way, without restructuring it.
 """
 
 from fastapi import FastAPI
