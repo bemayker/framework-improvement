@@ -43,7 +43,7 @@
       "Bash(git push --force:*)", "Bash(git push -f:*)", "Bash(git push --force-with-lease:*)",
       "Bash(claude plugin:*)",
       "Read(./.env)", "Read(./.env.local)", "Read(./.env.*.local)",
-      "Write(./.git/**)"
+      "Edit(./.git/**)"
     ]
   },
   "hooks": {
