@@ -87,7 +87,16 @@ jobs:
           fi
 
       # --- Integration tests (ENABLED, blocking) ---
+      # DATABASE_URL is scoped to THIS step on purpose, not set at job level.
+      # docker-compose.yml resolves the backend container's DATABASE_URL as
+      # ${DATABASE_URL:-postgresql://...@db:5432/...}, so a job-level value
+      # would be substituted into that container, where "localhost" is the
+      # container itself and not the db service — breaking the E2E tier.
+      # The host-side form below matches .env.example and reaches the db
+      # service through its published 5432 port.
       - name: Backend integration tests
+        env:
+          DATABASE_URL: postgresql://tasknotes:tasknotes@localhost:5432/tasknotes
         run: |
           if [ -d backend/tests/integration ]; then
             (cd backend && uv run pytest tests/integration -q) || [ "$?" -eq 5 ]
