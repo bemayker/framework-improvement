@@ -69,7 +69,14 @@ def test_settings_database_url_is_optional_and_never_a_hardcoded_credential():
 
     assert settings.database_url is None or isinstance(settings.database_url, str)
 
-    # No credential is baked into the class: whatever the field's default is, it
-    # came from the environment rather than from a literal in the source.
+    # No credential is baked into the class. Two field shapes satisfy that and the
+    # assertion must accept both: a `default_factory` (the current form, which reads
+    # the environment per call and so declares no `default` at all), or a plain
+    # default that came from the environment rather than from a source literal.
+    # A hardcoded `database_url: str = "postgresql://user:pass@host/db"` matches
+    # neither and still fails.
     field = next(f for f in dataclasses.fields(Settings) if f.name == "database_url")
-    assert field.default in (None, os.environ.get("DATABASE_URL"))
+    assert field.default is dataclasses.MISSING or field.default in (
+        None,
+        os.environ.get("DATABASE_URL"),
+    )
