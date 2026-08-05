@@ -471,12 +471,21 @@ Test directory paths and naming conventions are configured in `CLAUDE.md` → Te
 # Frontend (Vitest)
 cd frontend && npm test
 
-# Backend (pytest, via uv)
-cd backend && uv run pytest
+# Backend, unit tier only — needs no database
+cd backend && uv run pytest tests/unit
+
+# Backend, full suite — the integration tier needs real PostgreSQL
+docker compose up -d db
+cd backend && DATABASE_URL=postgresql://tasknotes:tasknotes@localhost:5432/tasknotes uv run pytest
 
 # E2E (Playwright) — requires the app running (docker compose up, or the dev servers directly)
 npx playwright test
 ```
+
+**The integration tier needs a real database.** Since TEST-03 the backend talks to PostgreSQL through `psycopg` (`backend/pyproject.toml`), and `backend/tests/conftest.py` reads `DATABASE_URL` to reach it. Two things follow:
+
+- Put `DATABASE_URL` on the **pytest command itself**, not before a `cd`: in `VAR=x cd dir && pytest` the assignment applies to `cd` and never reaches pytest.
+- With `DATABASE_URL` unset, the integration tests **skip** locally so a quick `pytest tests/unit` stays frictionless — but when `CI` is set they **fail** instead, so a pipeline that forgets the variable goes red rather than green-by-skip.
 
 ---
 
