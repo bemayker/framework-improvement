@@ -8,9 +8,6 @@
       }
     }
   },
-  "enabledPlugins": {
-    "mayker-dev@mayker": true
-  },
   "permissions": {
     "defaultMode": "acceptEdits",
     "allow": [

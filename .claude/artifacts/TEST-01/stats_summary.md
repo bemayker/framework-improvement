@@ -1,6 +1,6 @@
 # Run statistics, TEST-01
 
-Generated 2026-07-28 12:40 UTC. Token metrics: available. Skill load: read.
+Generated 2026-08-10 10:19 UTC. Token metrics: available. Skill load: read.
 
 Subagent transcripts unattributed to any work item: 0.
 
@@ -61,12 +61,16 @@ Per-dispatch context is the grain a per-phase dispatch change is graded on: a st
 
 | Agent | Run | Steps | Turns | Tool calls | Tools/turn | R/E/X turns | R/E/X tools/turn | Out tok | Ctx avg | Ctx max | Cache hit | Model | Flags |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| agent-a806145691de324d8 | n/a | - (+9 outside) | 9 | 27 | 3.38 | 1/2/5 | 8.00/1.00/3.40 | 2.7K | 109.1K | 127.6K | 0.87 | claude-opus-5 |  |
+| agent-a352c87ae2bcc3354 | n/a | - (+9 outside) | 9 | 35 | 4.38 | 3/2/3 | 8.00/1.00/3.00 | 1.6K | 116.7K | 149.9K | 0.787 | claude-fable-5 |  |
+| agent-a3dc3f06b6ec0db14 | n/a | - (+8 outside) | 8 | 28 | 4.0 | 1/2/4 | 6.00/4.00/3.50 | 27 | 109.3K | 125.7K | 0.856 | claude-opus-5 |  |
+| agent-aa81e3e3cf6974474 | n/a | - (+9 outside) | 9 | 21 | 2.62 | 2/2/4 | 5.00/1.00/2.25 | 98 | 90.8K | 101.7K | 0.876 | claude-opus-5 |  |
+| agent-ac0ffd3b94df113b9 | n/a | - (+7 outside) | 7 | 45 | 7.5 | 6/0/0 | 7.50/n/a/n/a | 8.0K | 90.4K | 116.2K | 0.711 | claude-opus-5 |  |
+| agent-ad653c9b1d0bc8791 | n/a | - (+11 outside) | 11 | 24 | 2.4 | 0/2/8 | n/a/1.00/2.75 | 224 | 90.7K | 100.4K | 0.917 | claude-opus-5 |  |
 
-**1 dispatch(es):** median ctx max 127.6K, peak 127.6K, 0 above the 200,000-token threshold. Distribution: 127.6K.
+**5 dispatch(es):** median ctx max 116.2K, peak 149.9K, 0 above the 200,000-token threshold. Distribution: 100.4K, 101.7K, 116.2K, 125.7K, 149.9K.
 
-**All runs:** 2 run(s), wall 58m45s (sum of per-run walls, idle time between runs excluded), 9 turns, 27 tool calls, 2.7K output tokens, cache hit 0.87.
+**All runs:** 2 run(s), wall 58m45s (sum of per-run walls, idle time between runs excluded), 44 turns, 153 tool calls, 10.0K output tokens, cache hit 0.836.
 
-Turn classes across every bucket, read / edit / exec: 1/2/5 turns, 8.00/1.00/3.40 tools per turn. The **read** figure is the one a batching mandate can be graded on; edits batch weakly and an exec turn is serial by construction.
+Turn classes across every bucket, read / edit / exec: 12/8/19 turns, 7.08/1.75/2.84 tools per turn. The **read** figure is the one a batching mandate can be graded on; edits batch weakly and an exec turn is serial by construction.
 
-9 turn(s) fell outside every recorded step window (included in the all-runs totals; read/edit/exec 1/2/5).
+44 turn(s) fell outside every recorded step window (included in the all-runs totals; read/edit/exec 12/8/19).

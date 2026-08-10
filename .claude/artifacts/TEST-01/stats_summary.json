@@ -1,20 +1,40 @@
 {
   "item": "TEST-01",
-  "generated_at": 1785242402,
-  "transcript": "/Users/florianserneels/.claude/projects/-Users-florianserneels-Documents-ai-development-framework-improvement/61e34c1e-bd44-4320-9eb2-bbd5db313a9d.jsonl",
+  "generated_at": 1786357171,
+  "transcript": "/Users/florianserneels/.claude-second/projects/-Users-florianserneels-Documents-ai-development-framework-improvement/c262fffd-d7e9-41a6-815e-70a9124a3067.jsonl",
   "transcript_resolved": true,
   "token_collection": true,
   "metrics_available": true,
   "degraded": [],
+  "marker_schema": {
+    "markers_without_event": 0,
+    "markers_without_event_steps": [],
+    "event_alias_markers": 0,
+    "event_key_aliases": [],
+    "event_alias_steps": [],
+    "run_recovered_steps": [],
+    "run_unattributed_steps": [],
+    "no_run_field_anywhere": false,
+    "markers_without_ts": 0,
+    "markers_without_ts_steps": [],
+    "missing_titles": [],
+    "incomplete_runs": []
+  },
+  "marker_schema_notes": [],
+  "collector_health": {
+    "prior_failure": null,
+    "stale_summary_replaced": null
+  },
   "skill_load": {
     "source": "read",
-    "skill": "build-feature",
+    "skill": "watch-pr",
     "skills": [
-      "build-feature",
-      "plan-feature",
       "watch-pr",
-      "plan-features",
-      "build-features"
+      "plan-feature",
+      "build-feature",
+      "refactor",
+      "generate-tests",
+      "security-fix"
     ]
   },
   "config": {
@@ -25,6 +45,7 @@
   "runs": [
     {
       "run": "plan-feature",
+      "step_set_incomplete": false,
       "steps": [
         {
           "step": "0",
@@ -714,6 +735,7 @@
     },
     {
       "run": "build-feature",
+      "step_set_incomplete": false,
       "steps": [
         {
           "step": "0",
@@ -1634,17 +1656,17 @@
   ],
   "dispatches": [
     {
-      "agent": "agent-a806145691de324d8",
+      "agent": "agent-a352c87ae2bcc3354",
       "run": null,
       "steps": [],
       "turns_outside_steps": 9,
       "turns": 9,
-      "tool_calls": 27,
-      "tools_per_turn": 3.38,
+      "tool_calls": 35,
+      "tools_per_turn": 4.38,
       "turn_classes": {
         "read": {
-          "turns": 1,
-          "tool_calls": 8,
+          "turns": 3,
+          "tool_calls": 24,
           "tools_per_turn": 8.0
         },
         "edit": {
@@ -1653,9 +1675,99 @@
           "tools_per_turn": 1.0
         },
         "exec": {
-          "turns": 5,
-          "tool_calls": 17,
-          "tools_per_turn": 3.4
+          "turns": 3,
+          "tool_calls": 9,
+          "tools_per_turn": 3.0
+        },
+        "other": {
+          "turns": 0,
+          "tool_calls": 0,
+          "tools_per_turn": null
+        }
+      },
+      "max_batch": 16,
+      "output_tokens": 1606,
+      "input_tokens": 18,
+      "cache_read_tokens": 826676,
+      "cache_creation_tokens": 223742,
+      "cache_hit_ratio": 0.787,
+      "ctx_tokens_avg": 116715,
+      "ctx_tokens_max": 149927,
+      "ctx_threshold_crossed": false,
+      "turns_over_threshold": 0,
+      "model": "claude-fable-5",
+      "models_observed": [
+        "claude-fable-5"
+      ]
+    },
+    {
+      "agent": "agent-a3dc3f06b6ec0db14",
+      "run": null,
+      "steps": [],
+      "turns_outside_steps": 8,
+      "turns": 8,
+      "tool_calls": 28,
+      "tools_per_turn": 4.0,
+      "turn_classes": {
+        "read": {
+          "turns": 1,
+          "tool_calls": 6,
+          "tools_per_turn": 6.0
+        },
+        "edit": {
+          "turns": 2,
+          "tool_calls": 8,
+          "tools_per_turn": 4.0
+        },
+        "exec": {
+          "turns": 4,
+          "tool_calls": 14,
+          "tools_per_turn": 3.5
+        },
+        "other": {
+          "turns": 0,
+          "tool_calls": 0,
+          "tools_per_turn": null
+        }
+      },
+      "max_batch": 6,
+      "output_tokens": 27,
+      "input_tokens": 16,
+      "cache_read_tokens": 748658,
+      "cache_creation_tokens": 125685,
+      "cache_hit_ratio": 0.856,
+      "ctx_tokens_avg": 109295,
+      "ctx_tokens_max": 125687,
+      "ctx_threshold_crossed": false,
+      "turns_over_threshold": 0,
+      "model": "claude-opus-5",
+      "models_observed": [
+        "claude-opus-5"
+      ]
+    },
+    {
+      "agent": "agent-aa81e3e3cf6974474",
+      "run": null,
+      "steps": [],
+      "turns_outside_steps": 9,
+      "turns": 9,
+      "tool_calls": 21,
+      "tools_per_turn": 2.62,
+      "turn_classes": {
+        "read": {
+          "turns": 2,
+          "tool_calls": 10,
+          "tools_per_turn": 5.0
+        },
+        "edit": {
+          "turns": 2,
+          "tool_calls": 2,
+          "tools_per_turn": 1.0
+        },
+        "exec": {
+          "turns": 4,
+          "tool_calls": 9,
+          "tools_per_turn": 2.25
         },
         "other": {
           "turns": 0,
@@ -1664,13 +1776,103 @@
         }
       },
       "max_batch": 8,
-      "output_tokens": 2703,
-      "input_tokens": 17,
-      "cache_read_tokens": 854141,
-      "cache_creation_tokens": 127641,
-      "cache_hit_ratio": 0.87,
-      "ctx_tokens_avg": 109089,
-      "ctx_tokens_max": 127643,
+      "output_tokens": 98,
+      "input_tokens": 18,
+      "cache_read_tokens": 715554,
+      "cache_creation_tokens": 101697,
+      "cache_hit_ratio": 0.876,
+      "ctx_tokens_avg": 90808,
+      "ctx_tokens_max": 101699,
+      "ctx_threshold_crossed": false,
+      "turns_over_threshold": 0,
+      "model": "claude-opus-5",
+      "models_observed": [
+        "claude-opus-5"
+      ]
+    },
+    {
+      "agent": "agent-ac0ffd3b94df113b9",
+      "run": null,
+      "steps": [],
+      "turns_outside_steps": 7,
+      "turns": 7,
+      "tool_calls": 45,
+      "tools_per_turn": 7.5,
+      "turn_classes": {
+        "read": {
+          "turns": 6,
+          "tool_calls": 45,
+          "tools_per_turn": 7.5
+        },
+        "edit": {
+          "turns": 0,
+          "tool_calls": 0,
+          "tools_per_turn": null
+        },
+        "exec": {
+          "turns": 0,
+          "tool_calls": 0,
+          "tools_per_turn": null
+        },
+        "other": {
+          "turns": 0,
+          "tool_calls": 0,
+          "tools_per_turn": null
+        }
+      },
+      "max_batch": 12,
+      "output_tokens": 8022,
+      "input_tokens": 2029,
+      "cache_read_tokens": 449818,
+      "cache_creation_tokens": 180996,
+      "cache_hit_ratio": 0.711,
+      "ctx_tokens_avg": 90406,
+      "ctx_tokens_max": 116218,
+      "ctx_threshold_crossed": false,
+      "turns_over_threshold": 0,
+      "model": "claude-opus-5",
+      "models_observed": [
+        "claude-opus-5"
+      ]
+    },
+    {
+      "agent": "agent-ad653c9b1d0bc8791",
+      "run": null,
+      "steps": [],
+      "turns_outside_steps": 11,
+      "turns": 11,
+      "tool_calls": 24,
+      "tools_per_turn": 2.4,
+      "turn_classes": {
+        "read": {
+          "turns": 0,
+          "tool_calls": 0,
+          "tools_per_turn": null
+        },
+        "edit": {
+          "turns": 2,
+          "tool_calls": 2,
+          "tools_per_turn": 1.0
+        },
+        "exec": {
+          "turns": 8,
+          "tool_calls": 22,
+          "tools_per_turn": 2.75
+        },
+        "other": {
+          "turns": 0,
+          "tool_calls": 0,
+          "tools_per_turn": null
+        }
+      },
+      "max_batch": 7,
+      "output_tokens": 224,
+      "input_tokens": 1039,
+      "cache_read_tokens": 914955,
+      "cache_creation_tokens": 81627,
+      "cache_hit_ratio": 0.917,
+      "ctx_tokens_avg": 90693,
+      "ctx_tokens_max": 100371,
       "ctx_threshold_crossed": false,
       "turns_over_threshold": 0,
       "model": "claude-opus-5",
@@ -1680,34 +1882,38 @@
     }
   ],
   "dispatch_totals": {
-    "count": 1,
-    "ctx_tokens_max_median": 127643,
-    "ctx_tokens_max_max": 127643,
+    "count": 5,
+    "ctx_tokens_max_median": 116218,
+    "ctx_tokens_max_max": 149927,
     "ctx_tokens_max_distribution": [
-      127643
+      100371,
+      101699,
+      116218,
+      125687,
+      149927
     ],
     "over_threshold": 0
   },
   "totals": {
     "runs": 2,
     "wall_s": 3525,
-    "turns": 9,
-    "tool_calls": 27,
+    "turns": 44,
+    "tool_calls": 153,
     "turn_classes": {
       "read": {
-        "turns": 1,
-        "tool_calls": 8,
-        "tools_per_turn": 8.0
+        "turns": 12,
+        "tool_calls": 85,
+        "tools_per_turn": 7.08
       },
       "edit": {
-        "turns": 2,
-        "tool_calls": 2,
-        "tools_per_turn": 1.0
+        "turns": 8,
+        "tool_calls": 14,
+        "tools_per_turn": 1.75
       },
       "exec": {
-        "turns": 5,
-        "tool_calls": 17,
-        "tools_per_turn": 3.4
+        "turns": 19,
+        "tool_calls": 54,
+        "tools_per_turn": 2.84
       },
       "other": {
         "turns": 0,
@@ -1715,32 +1921,32 @@
         "tools_per_turn": null
       }
     },
-    "output_tokens": 2703,
-    "input_tokens": 17,
-    "cache_read_tokens": 854141,
-    "cache_creation_tokens": 127641,
-    "cache_hit_ratio": 0.87,
-    "ctx_tokens_max": 127643,
+    "output_tokens": 9977,
+    "input_tokens": 3120,
+    "cache_read_tokens": 3655661,
+    "cache_creation_tokens": 713747,
+    "cache_hit_ratio": 0.836,
+    "ctx_tokens_max": 149927,
     "turns_over_threshold": 0,
-    "turns_outside_steps": 9,
+    "turns_outside_steps": 44,
     "outside_steps": {
-      "turns": 9,
-      "tool_calls": 27,
+      "turns": 44,
+      "tool_calls": 153,
       "turn_classes": {
         "read": {
-          "turns": 1,
-          "tool_calls": 8,
-          "tools_per_turn": 8.0
+          "turns": 12,
+          "tool_calls": 85,
+          "tools_per_turn": 7.08
         },
         "edit": {
-          "turns": 2,
-          "tool_calls": 2,
-          "tools_per_turn": 1.0
+          "turns": 8,
+          "tool_calls": 14,
+          "tools_per_turn": 1.75
         },
         "exec": {
-          "turns": 5,
-          "tool_calls": 17,
-          "tools_per_turn": 3.4
+          "turns": 19,
+          "tool_calls": 54,
+          "tools_per_turn": 2.84
         },
         "other": {
           "turns": 0,
@@ -1748,7 +1954,7 @@
           "tools_per_turn": null
         }
       },
-      "ctx_tokens_max": 127643
+      "ctx_tokens_max": 149927
     }
   },
   "subagents_unattributed": 0
