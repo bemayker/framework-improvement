@@ -1,4 +1,4 @@
-<!-- materialized-from: mayker-dev v0.3.60; do not edit, regenerate with /init-project refresh-rules -->
+<!-- materialized-from: mayker-dev v0.3.64; do not edit, regenerate with /init-project refresh-rules -->
 <!--
   Universal standard. Imported into CLAUDE.md (always on). Do not edit per project.
   Slash-command mapping, operational behaviour, git conventions.
