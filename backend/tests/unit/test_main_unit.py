@@ -46,6 +46,16 @@ def test_create_app_registers_version_route():
     assert "/api/version" in custom_paths
 
 
+def test_create_app_registers_health_route():
+    """Edge case: the app registers the TEST-02 health route."""
+    app = create_app()
+
+    built_in_paths = {"/openapi.json", "/docs", "/docs/oauth2-redirect", "/redoc"}
+    custom_paths = _collect_route_paths(app.routes) - built_in_paths
+
+    assert "/api/health" in custom_paths
+
+
 def test_create_app_returns_independent_instances():
     """Error/robustness case: repeated calls do not share mutable state.
 
