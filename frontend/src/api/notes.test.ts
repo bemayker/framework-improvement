@@ -4,7 +4,7 @@ import { listNotes, createNote } from "./notes";
 // The component tests mock this module wholesale, so nothing executed the
 // client itself. Here `fetch` is stubbed instead of the module, so the real
 // listNotes/createNote bodies run, including their non-OK throw branches.
-const DEFAULT_NOTES_URL = "http://localhost:8000/api/notes";
+const DEFAULT_NOTES_URL = "http://localhost:8010/api/notes";
 
 function okResponse(body: unknown): Response {
   return {
@@ -47,7 +47,7 @@ describe("notes API client", () => {
 
       await expect(listNotes()).resolves.toEqual(notes);
 
-      // With VITE_API_BASE_URL unset, the client falls back to :8000.
+      // With VITE_API_BASE_URL unset, the client falls back to :8010.
       expect(fetchMock).toHaveBeenCalledTimes(1);
       expect(fetchMock).toHaveBeenCalledWith(DEFAULT_NOTES_URL);
     });

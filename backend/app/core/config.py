@@ -11,9 +11,9 @@ import (the version integration test does exactly that).
 import os
 from dataclasses import dataclass, field
 
-# The browser at :5173 calls the backend at :8000 directly (the
+# The browser at :5183 calls the backend at :8010 directly (the
 # VITE_API_BASE_URL wiring in docker-compose.yml), which is cross-origin.
-DEFAULT_CORS_ORIGINS = ("http://localhost:5173",)
+DEFAULT_CORS_ORIGINS = ("http://localhost:5183",)
 
 
 @dataclass(frozen=True)
