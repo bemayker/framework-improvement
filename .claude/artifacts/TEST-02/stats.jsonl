@@ -1,0 +1,19 @@
+{"run":"plan-feature","run_id":"plan-feature-20260810T154231Z","item":"TEST-02","step":"0","title":"Load Context","event":"start","ts":1786376582}
+{"run":"plan-feature","run_id":"plan-feature-20260810T154231Z","item":"TEST-02","step":"0","event":"end","ts":1786376606,"model":"fable"}
+{"run":"plan-feature","run_id":"plan-feature-20260810T154231Z","item":"TEST-02","step":"1","title":"MCP Verification","event":"start","ts":1786376606}
+{"run":"plan-feature","run_id":"plan-feature-20260810T154231Z","item":"TEST-02","step":"1","event":"end","ts":1786376664,"model":"fable"}
+{"run":"plan-feature","run_id":"plan-feature-20260810T154937Z","item":"TEST-02","step":"0","title":"Load Context","event":"start","ts":1786377002}
+{"run":"plan-feature","run_id":"plan-feature-20260810T154937Z","item":"TEST-02","step":"0","event":"end","ts":1786377026,"model":"fable"}
+{"run":"plan-feature","run_id":"plan-feature-20260810T154937Z","item":"TEST-02","step":"1","title":"MCP Verification","event":"start","ts":1786377026}
+{"run":"plan-feature","run_id":"plan-feature-20260810T154937Z","item":"TEST-02","step":"1","event":"end","ts":1786377026,"model":"fable"}
+{"run":"plan-feature","run_id":"plan-feature-20260810T154937Z","item":"TEST-02","step":"2","title":"Dependency Check","event":"start","ts":1786377026}
+{"run":"plan-feature","run_id":"plan-feature-20260810T154937Z","item":"TEST-02","step":"2","event":"end","ts":1786377079,"model":"fable"}
+{"run":"plan-feature","run_id":"plan-feature-20260810T154937Z","item":"TEST-02","step":"3","title":"Fetch Feature Details","event":"start","ts":1786377079}
+{"run":"plan-feature","run_id":"plan-feature-20260810T154937Z","item":"TEST-02","step":"3","event":"end","ts":1786377079,"model":"fable"}
+{"run":"plan-feature","run_id":"plan-feature-20260810T154937Z","item":"TEST-02","step":"4","title":"Update Status to Planning","event":"start","ts":1786377079}
+{"run":"plan-feature","run_id":"plan-feature-20260810T154937Z","item":"TEST-02","step":"4","event":"end","ts":1786377079,"model":"fable"}
+{"run":"plan-feature","run_id":"plan-feature-20260810T154937Z","item":"TEST-02","step":"5","title":"Create Branch","event":"start","ts":1786377079}
+{"run":"plan-feature","run_id":"plan-feature-20260810T154937Z","item":"TEST-02","step":"5","event":"end","ts":1786377118,"model":"fable"}
+{"run":"plan-feature","run_id":"plan-feature-20260810T154937Z","item":"TEST-02","step":"6-9","title":"Planner dispatch, Sections 6 to 9","event":"start","ts":1786377118}
+{"run":"plan-feature","run_id":"plan-feature-20260810T154937Z","item":"TEST-02","step":"6-9","event":"end","ts":1786377393,"model":"fable"}
+{"run":"plan-feature","run_id":"plan-feature-20260810T154937Z","item":"TEST-02","step":"10","title":"Commit and Push","event":"start","ts":1786377393}
