@@ -1,5 +1,8 @@
-import type { CSSProperties } from "react";
+import { useEffect, useState, type CSSProperties } from "react";
 import AppFooter from "./AppFooter";
+import NoteForm from "./NoteForm";
+import NoteList from "./NoteList";
+import { listNotes, type Note } from "../api/notes";
 
 const containerStyle: CSSProperties = {
   minHeight: "100vh",
@@ -26,7 +29,36 @@ const subtitleStyle: CSSProperties = {
   maxWidth: "32rem",
 };
 
+const mainStyle: CSSProperties = {
+  width: "100%",
+  maxWidth: "32rem",
+};
+
 function LandingPage() {
+  const [notes, setNotes] = useState<Note[]>([]);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    listNotes()
+      .then((savedNotes) => {
+        if (isMounted) {
+          setNotes(savedNotes);
+        }
+      })
+      .catch(() => {
+        // A failed initial load leaves the list empty rather than blocking the
+        // page: the next submit surfaces the real error through the form.
+        if (isMounted) {
+          setNotes([]);
+        }
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
   return (
     <div data-testid="landing-page" style={containerStyle}>
       <header>
@@ -34,10 +66,14 @@ function LandingPage() {
           Task Notes
         </h1>
       </header>
-      <main>
+      <main style={mainStyle}>
         <p style={subtitleStyle}>
           A minimal task-notes app for keeping track of what needs doing.
         </p>
+        <NoteForm
+          onCreated={(note) => setNotes((current) => [...current, note])}
+        />
+        <NoteList notes={notes} />
       </main>
       <AppFooter />
     </div>
