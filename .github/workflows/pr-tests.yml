@@ -93,10 +93,13 @@ jobs:
       # would be substituted into that container, where "localhost" is the
       # container itself and not the db service — breaking the E2E tier.
       # The host-side form below matches .env.example and reaches the db
-      # service through its published 5432 port.
+      # service on host port 5442, which docker-compose.yml publishes to the
+      # container's 5432 ("5442:5432"). Keep the two in step: a host port here
+      # that compose does not publish makes every integration test error at
+      # fixture setup, because nothing listens on it.
       - name: Backend integration tests
         env:
-          DATABASE_URL: postgresql://tasknotes:tasknotes@localhost:5432/tasknotes
+          DATABASE_URL: postgresql://tasknotes:tasknotes@localhost:5442/tasknotes
         run: |
           if [ -d backend/tests/integration ]; then
             (cd backend && uv run pytest tests/integration -q) || [ "$?" -eq 5 ]
