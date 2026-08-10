@@ -103,7 +103,7 @@ Minimal task-notes app used exclusively as a validation sandbox for the mayker-d
 - **Test directory:** e2e/tests/
 - **Helpers directory:** e2e/helpers/
 - **File naming:** {feature_id}_{slug}.spec.ts
-- **Base URL:** http://localhost:5173
+- **Base URL:** http://localhost:5183
 
 ### UAT Tests
 
