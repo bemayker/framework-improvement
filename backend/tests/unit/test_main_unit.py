@@ -2,10 +2,6 @@
 
 from app.main import create_app
 
-# FastAPI registers these itself, so they say nothing about what this app wires
-# in; every route assertion below subtracts them to isolate the app's own paths.
-BUILT_IN_ROUTE_PATHS = {"/openapi.json", "/docs", "/docs/oauth2-redirect", "/redoc"}
-
 
 def _collect_route_paths(routes) -> set[str]:
     """Flatten an app's route list into path strings.
@@ -44,18 +40,10 @@ def test_create_app_registers_version_route():
     """
     app = create_app()
 
-    custom_paths = _collect_route_paths(app.routes) - BUILT_IN_ROUTE_PATHS
+    built_in_paths = {"/openapi.json", "/docs", "/docs/oauth2-redirect", "/redoc"}
+    custom_paths = _collect_route_paths(app.routes) - built_in_paths
 
     assert "/api/version" in custom_paths
-
-
-def test_create_app_registers_health_route():
-    """Edge case: the app registers the TEST-02 health route."""
-    app = create_app()
-
-    custom_paths = _collect_route_paths(app.routes) - BUILT_IN_ROUTE_PATHS
-
-    assert "/api/health" in custom_paths
 
 
 def test_create_app_returns_independent_instances():

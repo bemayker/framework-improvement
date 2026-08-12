@@ -19,8 +19,8 @@
     "effective_path": {
       "path": "gh",
       "host": "github.com",
-      "verified_at": "2026-08-10T15:42:31Z",
-      "plugin_version": "0.3.64",
+      "verified_at": "2026-08-04T23:13:58Z",
+      "plugin_version": "0.3.60",
       "mcp_server_url": "https://api.githubcopilot.com/mcp/"
     }
   },
