@@ -88,6 +88,11 @@ Minimal task-notes app used exclusively as a validation sandbox for the mayker-d
 
 - **Test gate command:** cd backend && uv run pytest -q && cd ../frontend && npm test
 
+- **Handover rebuild:** auto  # auto | off — rebuild the app stack at handover when a compose file is at the repo root
+- **Handover health check:** auto  # auto (container state) | none | a command, e.g. curl -fsS http://localhost:8000/health
+- **Scoped test command:** auto  # e.g. uv run pytest -q {FILES}  — run from the repo root, `{FILES}` are root-relative paths; `auto`/`none` = off, full suite
+- **Full suite command:** auto  # runs at a `test_checkpoint` merge, not on a push; `auto` = use the gate command
+
 ### Unit & Integration Tests
 
 - **Unit test directory:** backend/tests/unit/
@@ -104,6 +109,7 @@ Minimal task-notes app used exclusively as a validation sandbox for the mayker-d
 - **Helpers directory:** e2e/helpers/
 - **File naming:** {feature_id}_{slug}.spec.ts
 - **Base URL:** http://localhost:5183
+- **Parallel workers:** auto  # integer, or auto for the runner's own default — substituted into this project's configured E2E command (build Phase D's smoke run and the CI E2E step), never into a framework-chosen flag
 
 ### UAT Tests
 

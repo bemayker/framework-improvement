@@ -1,26 +1,48 @@
 # PR Test pipeline (mayker-dev). Materialized from the plugin's canonical
-# template by /init-project (Section 6.1) and adapted to this project's stack:
-# FastAPI + Python 3.12 managed with uv (backend/), React + TypeScript + Vite
-# with Vitest (frontend/), Playwright TypeScript E2E (e2e/, config at repo
-# root), PostgreSQL via Docker Compose. All test tiers are ENABLED (blocking).
-# The scaffold feature's plan verifies the concrete service and test commands
-# and updates this file if needed.
+# template and adapted to this project's stack: FastAPI + Python 3.12 managed
+# with uv (backend/), React + TypeScript + Vite with Vitest (frontend/),
+# Playwright TypeScript E2E (e2e/, config at repo root), PostgreSQL via Docker
+# Compose. All test tiers are ENABLED (blocking).
 #
-# SCAFFOLD-SAFETY (keep this when adapting — see init-project SKILL.md 6.1):
-# The first run is the scaffold story's plan PR, when no backend/, frontend/,
-# lockfiles, or tests exist yet. This file stays green then because (a) it adds
-# NO `cache:` to setup-python/setup-node — `cache: pip` hard-errors when it
-# can't find a dependency file to hash — and (b) every install/test step is
-# guarded on its files' presence (`if [ -f … ]`, pytest exit 5 treated as
-# pass). If you expand this into a multi-job pipeline, only enable `cache:`
-# behind a presence-gated step with an explicit `cache-dependency-path`, and
-# keep the guards so the pipeline no-ops cleanly until the scaffold lands the
-# real code.
+# SHAPE (MDF-073, MDF-047) — one job per tier, a change gate in front of them,
+# one non-tier job beside them, and one always-green aggregate:
+#
+#   changes ──┬─> unit ────────┐
+#             ├─> integration ─┼─> pr-tests   (the aggregate; the REQUIRED check)
+#             └─> e2e ─────────┤
+#   feature-map ───────────────┘  (no change gate: see its own block)
+#
+# The tiers are independent jobs so E2E is not serialized behind the cheaper
+# ones, each with its own runtime setup and its own presence-gated caches.
+#
+# SCAFFOLD-SAFETY (keep this when adapting — see sync-project SKILL.md 6.1):
+# This file stays green before the scaffold lands real code because (a) no
+# `cache:` input is set on setup-python/setup-node — caching is done by
+# separate actions/cache steps GATED on the dependency file existing — and
+# (b) every install/test step is guarded on its files' presence (`if [ -f … ]`,
+# pytest exit 5 treated as pass). Keep both properties in every job you add.
+#
+# THE REQUIRED CHECK IS `pr-tests`, THE AGGREGATE JOB — never an individual
+# tier. Read the block above that job before changing anything about it.
 name: PR Tests
 
+# TRIGGERS — this list is closed. Three types, and in particular the draft →
+# ready-for-review conversion event is deliberately absent (MDF-085): drafts
+# are already tested (GitHub fires `opened` and `synchronize` for draft PRs),
+# and every PR-opening skill converts out of draft only once its CI watch is
+# green, so subscribing to the conversion would start a second run on a SHA
+# that was already tested with nothing left watching it. notify-slack.yml is
+# the workflow that legitimately subscribes to it; the two must stay in
+# disagreement about it.
+#
+# NO `paths:` / `paths-ignore:` HERE, AND THAT IS DELIBERATE (MDF-073). A
+# workflow skipped by a path filter leaves its checks PENDING forever, and a
+# PR that requires them can then never merge. The `changes` job below replaces
+# the filter — it looks at THIS push, the workflow still runs, and the
+# aggregate still reports.
 on:
   pull_request:
-    types: [opened, synchronize, reopened, ready_for_review]
+    types: [opened, synchronize, reopened]
 
 # One run per PR branch; a newer push supersedes the one in flight. This keeps
 # CI load bounded when several items and fix-cycles push in quick succession.
@@ -28,13 +50,131 @@ concurrency:
   group: pr-tests-${{ github.head_ref || github.ref }}
   cancel-in-progress: true
 
+# Nothing here writes to the repository or the API.
+permissions:
+  contents: read
+
 jobs:
-  test:
+  # ---------------------------------------------------------------------------
+  # CHANGE GATE — did THIS push change code?
+  #
+  # A path filter cannot answer that (see the `on:` block above), so this job
+  # computes it from the event: on `synchronize` from the two-dot diff of the
+  # push itself (`before`..`after`), and on `opened`/`reopened` — where there is
+  # no previous head — from the three-dot PR diff. Those are the only three
+  # types in the trigger list, so there is no fourth arm.
+  #
+  # It fails OPEN: anything it cannot resolve (a force-push whose `before` is no
+  # longer reachable, a git failure) reports `code_changed=true` and every tier
+  # runs. The cost of a needless run is minutes; the cost of a silently skipped
+  # suite is a merged regression.
+  # ---------------------------------------------------------------------------
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      code_changed: ${{ steps.gate.outputs.code_changed }}
+    steps:
+      # Full history: the push's `before` commit and the merge base with the
+      # base branch both have to be present locally for the diffs below.
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Collect this push's changed files
+        id: collect
+        env:
+          ACTION: ${{ github.event.action }}
+          BEFORE: ${{ github.event.before }}
+          AFTER: ${{ github.event.after }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          set -u
+          resolved=false
+          : > changed-files.txt
+          if [ "${ACTION:-}" = "synchronize" ] \
+            && [ -n "${BEFORE:-}" ] && [ -n "${AFTER:-}" ] \
+            && git cat-file -e "${BEFORE}^{commit}" 2>/dev/null \
+            && git cat-file -e "${AFTER}^{commit}" 2>/dev/null; then
+            # Two-dot: exactly what this push added, which is the whole point.
+            if git diff --name-only "${BEFORE}" "${AFTER}" > changed-files.txt 2>/dev/null; then
+              resolved=true
+            fi
+          elif [ -n "${BASE_SHA:-}" ] && [ -n "${HEAD_SHA:-}" ] \
+            && git cat-file -e "${BASE_SHA}^{commit}" 2>/dev/null \
+            && git cat-file -e "${HEAD_SHA}^{commit}" 2>/dev/null; then
+            # Three-dot: the PR's whole diff. Correct on `opened`/`reopened`,
+            # and the conservative fallback after a force-push.
+            if git diff --name-only "${BASE_SHA}...${HEAD_SHA}" > changed-files.txt 2>/dev/null; then
+              resolved=true
+            fi
+          fi
+          echo "resolved=${resolved}" >> "$GITHUB_OUTPUT"
+          echo "resolved=${resolved}, $(wc -l < changed-files.txt) path(s):"
+          cat changed-files.txt
+
+      # NON-CODE PATHS — keep this list identical to the one the local pre-push
+      # gate uses (`hooks/test-gate.sh`), so a diff that skips CI and a diff
+      # that skips the local gate can never disagree. Three prefixes, and every
+      # other path is code:
+      #
+      #   docs/…      project documentation
+      #   .claude/…   framework artifacts: plans, shared risks, review scopes,
+      #               run statistics, the feature map, settings
+      #   *.md        any Markdown file anywhere
+      #
+      # `.github/…` is deliberately NOT here: a change to a workflow is exactly
+      # the change whose effect you want to see run.
+      - name: Classify the changed paths
+        id: gate
+        env:
+          RESOLVED: ${{ steps.collect.outputs.resolved }}
+        run: |
+          set -u
+          code_changed=true
+          reason="the changed file set could not be resolved; running every tier"
+          if [ "${RESOLVED:-false}" = "true" ] && [ -f changed-files.txt ]; then
+            code_changed=false
+            reason="this push touched documentation and framework artifacts only"
+            while IFS= read -r f; do
+              [ -n "$f" ] || continue
+              case "$f" in
+                docs/*|.claude/*|*.md) continue ;;
+                *) code_changed=true; reason="this push changed ${f}"; break ;;
+              esac
+            done < changed-files.txt
+          fi
+          echo "code_changed=${code_changed}" >> "$GITHUB_OUTPUT"
+          echo "::notice title=pr-tests change gate::code_changed=${code_changed} — ${reason}"
+
+  # ---------------------------------------------------------------------------
+  # UNIT TESTS (always on)
+  #
+  # The checkout + detect + setup + cache + install block is textually similar
+  # in all three tier jobs on purpose: GitHub Actions jobs share no state.
+  # Change one, change all three.
+  # ---------------------------------------------------------------------------
+  unit:
+    needs: changes
+    if: needs.changes.outputs.code_changed == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
+      - name: Detect dependency files
+        id: deps
+        run: |
+          set -u
+          py=false; node=false
+          if [ -f backend/pyproject.toml ]; then py=true; fi
+          if [ -f frontend/package.json ]; then node=true; fi
+          {
+            echo "python=${py}"
+            echo "node=${node}"
+          } >> "$GITHUB_OUTPUT"
+
       # --- Runtime setup ---
+      # No `cache:` input here — see SCAFFOLD-SAFETY at the top of this file.
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
@@ -46,33 +186,32 @@ jobs:
         with:
           node-version: "20"
 
+      - name: Cache uv downloads
+        if: steps.deps.outputs.python == 'true'
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/uv
+          key: ${{ runner.os }}-uv-${{ hashFiles('backend/uv.lock', 'backend/pyproject.toml') }}
+          restore-keys: ${{ runner.os }}-uv-
+      - name: Cache npm downloads
+        if: steps.deps.outputs.node == 'true'
+        uses: actions/cache@v4
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-npm-${{ hashFiles('frontend/package-lock.json', 'frontend/package.json') }}
+          restore-keys: ${{ runner.os }}-npm-
+
       - name: Install backend dependencies
         run: |
           if [ -f backend/pyproject.toml ]; then
             (cd backend && uv sync)
           fi
-
       - name: Install frontend dependencies
         run: |
           if [ -f frontend/package.json ]; then
             (cd frontend && (npm ci || npm install))
           fi
 
-      - name: Install E2E dependencies
-        run: |
-          if [ -f playwright.config.ts ] && [ -f package.json ]; then
-            npm ci || npm install
-            npx playwright install --with-deps chromium
-          fi
-
-      # --- Services (PostgreSQL via Docker Compose) ---
-      - name: Start services
-        run: |
-          if [ -f docker-compose.yml ] || [ -f compose.yml ] || [ -f compose.yaml ]; then
-            docker compose up -d
-          fi
-
-      # --- Unit tests (ENABLED, blocking) ---
       - name: Backend unit tests
         run: |
           # pytest exits 5 when it collects no tests yet (e.g. before the
@@ -86,14 +225,59 @@ jobs:
             (cd frontend && npm test --silent)
           fi
 
-      # --- Integration tests (ENABLED, blocking) ---
+  # ---------------------------------------------------------------------------
+  # INTEGRATION TESTS (ENABLED, blocking)
+  # ---------------------------------------------------------------------------
+  integration:
+    needs: changes
+    if: needs.changes.outputs.code_changed == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Detect dependency files
+        id: deps
+        run: |
+          set -u
+          py=false
+          if [ -f backend/pyproject.toml ]; then py=true; fi
+          echo "python=${py}" >> "$GITHUB_OUTPUT"
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v5
+
+      - name: Cache uv downloads
+        if: steps.deps.outputs.python == 'true'
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/uv
+          key: ${{ runner.os }}-uv-${{ hashFiles('backend/uv.lock', 'backend/pyproject.toml') }}
+          restore-keys: ${{ runner.os }}-uv-
+
+      - name: Install backend dependencies
+        run: |
+          if [ -f backend/pyproject.toml ]; then
+            (cd backend && uv sync)
+          fi
+
+      # --- Services (PostgreSQL via Docker Compose) ---
+      - name: Start services
+        run: |
+          if [ -f docker-compose.yml ] || [ -f compose.yml ] || [ -f compose.yaml ]; then
+            docker compose up -d
+          fi
+
       # DATABASE_URL is scoped to THIS step on purpose, not set at job level.
       # docker-compose.yml resolves the backend container's DATABASE_URL as
       # ${DATABASE_URL:-postgresql://...@db:5432/...}, so a job-level value
       # would be substituted into that container, where "localhost" is the
-      # container itself and not the db service — breaking the E2E tier.
-      # The host-side form below matches .env.example and reaches the db
-      # service through its published 5432 port.
+      # container itself and not the db service. The host-side form below
+      # matches .env.example and reaches the db service through its published
+      # 5432 port.
       - name: Backend integration tests
         env:
           DATABASE_URL: postgresql://tasknotes:tasknotes@localhost:5432/tasknotes
@@ -102,7 +286,90 @@ jobs:
             (cd backend && uv run pytest tests/integration -q) || [ "$?" -eq 5 ]
           fi
 
-      # --- E2E tests (ENABLED, blocking) ---
+      - name: Stop services
+        if: always()
+        run: |
+          if [ -f docker-compose.yml ] || [ -f compose.yml ] || [ -f compose.yaml ]; then
+            docker compose down -v
+          fi
+
+  # ---------------------------------------------------------------------------
+  # E2E TESTS (ENABLED, blocking) — no longer serialized behind the cheaper
+  # tiers; that was MDF-073's first finding.
+  # ---------------------------------------------------------------------------
+  e2e:
+    needs: changes
+    if: needs.changes.outputs.code_changed == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Detect dependency files
+        id: deps
+        run: |
+          set -u
+          node=false; e2e=false
+          if [ -f package.json ]; then node=true; fi
+          if [ -f playwright.config.ts ] && [ -f package.json ]; then e2e=true; fi
+          {
+            echo "node=${node}"
+            echo "e2e=${e2e}"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Cache npm downloads
+        if: steps.deps.outputs.node == 'true'
+        uses: actions/cache@v4
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-npm-root-${{ hashFiles('package-lock.json', 'package.json') }}
+          restore-keys: ${{ runner.os }}-npm-root-
+
+      - name: Install E2E dependencies
+        run: |
+          if [ -f playwright.config.ts ] && [ -f package.json ]; then
+            npm ci || npm install
+          fi
+
+      # BROWSER CACHE — separate from the dependency cache and keyed on the
+      # Playwright version, because the browser download is usually the larger
+      # of the two and it changes only when the framework does.
+      - name: Resolve E2E framework version
+        if: steps.deps.outputs.e2e == 'true'
+        id: e2ever
+        run: |
+          set -u
+          ver=""
+          if [ -f package.json ]; then
+            ver="$(node -e 'try{var p=require("./package.json");var d=(p.devDependencies||{})["@playwright/test"]||(p.dependencies||{})["@playwright/test"]||"";console.log(String(d).replace(/[^0-9A-Za-z.\-]/g,""))}catch(e){console.log("")}')"
+          fi
+          [ -n "$ver" ] || ver="unpinned"
+          echo "version=${ver}" >> "$GITHUB_OUTPUT"
+      - name: Cache E2E browsers
+        if: steps.deps.outputs.e2e == 'true'
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: ${{ runner.os }}-playwright-${{ steps.e2ever.outputs.version }}
+          restore-keys: ${{ runner.os }}-playwright-
+      - name: Install E2E browsers
+        if: steps.deps.outputs.e2e == 'true'
+        run: npx playwright install --with-deps chromium
+
+      # --- Services (full stack via Docker Compose) ---
+      - name: Start services
+        run: |
+          if [ -f docker-compose.yml ] || [ -f compose.yml ] || [ -f compose.yaml ]; then
+            docker compose up -d
+          fi
+
+      # WORKER COUNT — CLAUDE.md -> Test Configuration -> E2E -> `Parallel
+      # workers` carries it: an integer is substituted into THIS command as
+      # `--workers=N`; `auto` (the current value) leaves the command as written.
       - name: E2E tests (Playwright)
         run: |
           if [ -f playwright.config.ts ] && [ -d e2e/tests ]; then
@@ -115,3 +382,100 @@ jobs:
           if [ -f docker-compose.yml ] || [ -f compose.yml ] || [ -f compose.yaml ]; then
             docker compose down -v
           fi
+
+  # ---------------------------------------------------------------------------
+  # FEATURE-MAP VALIDATOR — a NON-TIER job (MDF-047). Any other non-tier job
+  # goes here beside it and follows the same three rules, which are the opposite
+  # of a tier's:
+  #   * it does NOT take the `code_changed` gate — a change to the artifact it
+  #     validates is exactly the case it exists to catch, and `.claude/…` is on
+  #     the gate's non-code list, so a gated job would skip precisely then;
+  #   * it is NOT removed when a test tier is disabled — it has no toggle;
+  #   * it MAY be listed in the aggregate's `needs:` — the verdict fails only
+  #     on `failure` and `cancelled`, so a job that skips itself never turns
+  #     the aggregate red. This one IS listed, deliberately: `pr-tests` is the
+  #     check a branch rule requires, so a validator outside the aggregate
+  #     would go red beside a green required check and block nothing.
+  #
+  # `.claude/feature_map.md` IS the dependency graph. Every gate that reads it —
+  # readiness, the scaffold precedence gate, the auto-Done branch match — fails
+  # SILENTLY on a corrupt row, and every realistic corruption still renders as a
+  # perfectly fine markdown table. The in-session gates cannot see the one path
+  # that matters here: a human editing rows in an editor and pushing. This job
+  # is that path's only check.
+  #
+  # It runs the VENDORED validator, never the plugin's own copy: the plugin
+  # installs under ~/.claude/, which no runner has. /init-project Section V puts
+  # the pair in the repo, /upgrade-project's migration zero keeps it current.
+  # ---------------------------------------------------------------------------
+  feature-map:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate the dependency graph
+        run: |
+          set -u
+          map=.claude/feature_map.md
+          script=.claude/scripts/feature-map-validate.sh
+          if [ ! -f "$map" ]; then
+            echo "::notice title=feature-map::no ${map} in this repository; nothing to validate"
+            exit 0
+          fi
+          if [ ! -f "$script" ]; then
+            echo "::error title=feature-map::${map} exists but ${script} does not, so the dependency graph is unchecked. Run /upgrade-project in a local session to re-vendor it (mayker-dev /init-project Section V), then commit .claude/scripts/."
+            exit 1
+          fi
+          bash "$script" "$map"
+          rc=$?
+          if [ "$rc" -eq 0 ]; then
+            echo "feature-map: the dependency graph is valid."
+            exit 0
+          fi
+          if [ "$rc" -eq 1 ]; then
+            echo "::error title=feature-map::${map} is not a valid dependency graph. Each line above names the offending row, the rule it breaks and what it silently breaks downstream."
+            exit 1
+          fi
+          # EXIT 2 IS A FAILURE, NOT A PASS, AND THIS IS THE STRONGEST LINE IN
+          # THIS JOB. 2 means "could not check" — almost always a vendored pair
+          # that lost its schema source. A check that cannot validate must never
+          # report green: that is a green tick over an unvalidated graph, which
+          # is worse than having no job here at all.
+          echo "::error title=feature-map::the validator could not check ${map} (exit ${rc}). The vendored pair is incomplete or unreadable — .claude/scripts/feature_map.template.md is its schema source and both files are replaced together. Run /upgrade-project in a local session. This is a FAILURE and never a pass: a check that cannot validate must not report green."
+          exit 1
+
+  # ---------------------------------------------------------------------------
+  # AGGREGATE — this job's name IS the contract.
+  #
+  # `pr-tests` is the check a branch-protection rule requires, and it is never
+  # an individual tier. Do not add a `name:` to this job and do not rename its
+  # key: GitHub reports the job key as the check-run name, so either would
+  # rename the required check and leave the branch rule waiting forever on a
+  # check nothing reports.
+  #
+  # Why an aggregate exists at all: a required check belonging to a job that can
+  # legitimately skip stays PENDING when it skips, and a PR requiring it can
+  # never merge. This job runs on `if: always()`, so it reports on every push
+  # including the ones where every tier skipped — success when each needed job
+  # passed or skipped, failure when any of them failed.
+  # ---------------------------------------------------------------------------
+  pr-tests:
+    if: always()
+    needs: [changes, unit, integration, e2e, feature-map]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Verdict
+        env:
+          RESULTS: ${{ join(needs.*.result, ' ') }}
+        run: |
+          set -u
+          echo "job results: ${RESULTS}"
+          failed=0
+          for r in ${RESULTS}; do
+            case "$r" in
+              success|skipped) ;;
+              *) echo "::error title=pr-tests::a required job reported '${r}'"; failed=1 ;;
+            esac
+          done
+          if [ "$failed" -ne 0 ]; then exit 1; fi
+          echo "pr-tests: every job passed or was legitimately skipped."

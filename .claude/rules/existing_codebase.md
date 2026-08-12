@@ -1,9 +1,9 @@
-<!-- materialized-from: mayker-dev v0.3.64; do not edit, regenerate with /init-project refresh-rules -->
+<!-- materialized-from: mayker-dev v0.3.111; do not edit, regenerate with /upgrade-project -->
 # Existing-codebase mode
 
 ## 1. When this applies
 
-This rule governs behaviour when `CLAUDE.md` Project Mode is set to `existing`: an established codebase the framework was added to, rather than a greenfield project it scaffolds from nothing. In `greenfield` mode this rule is inert and the standards apply as written.
+This rule governs behaviour when `CLAUDE.md` Project Mode is set to `existing`: an established codebase the framework was added to, rather than a new project it scaffolds from nothing. In `new` mode this rule is inert and the standards apply as written.
 
 ## 2. Precedence: follow existing patterns first
 
@@ -23,4 +23,4 @@ Coverage targets apply to the code this change introduces or modifies, not the e
 
 ## 5. No scaffolding, no overwrites
 
-Existing mode never runs the scaffold phase, never generates project structure, and never overwrites the host repo's README, CI configuration, or tooling config. `init-project` discovers the existing setup instead of creating one (see the init-project skill).
+Existing mode never runs the scaffold phase, never generates project structure, and never overwrites the host repo's README, CI configuration, or tooling config. `sync-project` discovers the existing setup instead of creating one (see the init-project skill).

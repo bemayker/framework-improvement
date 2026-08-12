@@ -1,4 +1,4 @@
-<!-- materialized-from: mayker-dev v0.3.64; do not edit, regenerate with /init-project refresh-rules -->
+<!-- materialized-from: mayker-dev v0.3.111; do not edit, regenerate with /upgrade-project -->
 <!--
   Universal standard. Imported into CLAUDE.md (always on). Do not edit per project.
   Autonomous decision authority, decision log, merge policy, escalation bar,
@@ -56,7 +56,7 @@ A PR is merged, via the GitHub MCP `merge_pull_request` and by the framework's o
 1. Self-review is clean: the reviewer's verdict line reports `blocking=0` (`review_standards.md` Section 6.2), i.e. no unresolved BLOCKING findings.
 2. All CI checks on the PR have completed and are green. Never merge with checks pending or failing. The PR is opened as a draft and converted to ready for review only once they are (deliver Sections 6.6 and 6.7 step 5), so a still-draft PR at merge time means the checks never settled — and GitHub refuses to merge a draft in the first place.
 3. Every acceptance criterion of the work item is satisfied by the implementation.
-4. All PR review comments (human or bot) have been addressed in code or answered with a reply, and no unresolved change request remains.
+4. Every actionable comment on **both** of the item's feedback surfaces has been addressed in code or answered with a reply, and no unresolved PR change request remains. The two surfaces are the **PR's** review comments (human or bot), answered on the PR, and the **work item's own tracker comments**, re-read once inside the review-comment loop's existing fetch and answered on the tracker item (deliver 6.8; `mcp_integration.md` Section 2 step 3). **For the tracker half the bar is `answered`, never `resolved`** — a tracker comment carries no resolve/unresolve state, so "no unresolved tracker comment remains" would evaluate to "no tracker comment exists" and strand every commented item green and unmerged forever, unattended, with nobody in the loop to clear it: an unconditional block on a normal event, which gets switched off or routed around and is worse than a notice nobody can miss. A comment answered with a reply and a recorded assumption satisfies this condition. An actionable one the loop could not address inside its 3 rounds (Section 8) is recorded in the decision log and reported as a bounded failure, exactly like the CI-exhaustion case, and **does not withhold the merge** (MDF-141). An unresolved PR change request does, because that state is machine-readable.
 5. The Section 4 escalation bar is not triggered.
 
 The merge method is `CLAUDE.md` → Autonomy → Merge method (default `squash`). After merging, the framework verifies the work item transitioned to Done on its **authoritative** side (`work_items.md` Sections 3-4: the tracker twin for a tracker-resident item, the file for a local one) and performs the transition itself via the tracker MCP or the local frontmatter — both, for a `hybrid` item that has a twin and a shadow file — if CI could not, then recomputes the dependency graph so dependents unblock.
@@ -80,7 +80,7 @@ Autonomous loops are bounded so a run always terminates:
 
 - CI failure fixing: at most `CLAUDE.md` → Autonomy → CI fix attempts (default 3) diagnose-fix-push cycles per PR. On exhaustion, record the blocker, leave the PR unmerged, continue the run.
 - Self-review fixes: max 2 cycles (unchanged from `review_standards.md`).
-- Review-comment rounds: max 3 fetch-address-reply cycles per PR, then treat remaining threads as the CI-exhaustion case.
+- Review-comment rounds: max 3 fetch-address-reply cycles per PR, then treat remaining threads as the CI-exhaustion case. **Each cycle's fetch covers both surfaces** — the PR's comments and the work item's own tracker comments (deliver 6.8) — so the tracker read is bounded by this same budget and is never a poll of its own, and remaining comments from *either* source are the bounded failure this bullet names.
 - Status polling: poll with backoff per the waiting policy (`workflow_triggers.md` Section 2.1, applied in the deliver skill Section 6.7); a pipeline that never completes within the poll budget is treated as a failure.
 
 An item that exhausts its retries is reported as blocked, never silently dropped and never merged red.

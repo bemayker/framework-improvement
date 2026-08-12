@@ -45,5 +45,10 @@
       "external_id": "86caweme3",
       "external_identifier": "TEST-02"
     }
+  },
+  "framework": {
+    "initialized_at": "unknown",
+    "migrated_to": "0.3.111",
+    "migrated_at": "2026-08-12T22:03:29Z"
   }
 }

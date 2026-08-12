@@ -1,4 +1,4 @@
-<!-- materialized-from: mayker-dev v0.3.64; do not edit, regenerate with /init-project refresh-rules -->
+<!-- materialized-from: mayker-dev v0.3.111; do not edit, regenerate with /upgrade-project -->
 <!--
   Universal standard. Imported into CLAUDE.md (always on). Do not edit per project.
   Feature alignment and anti-hallucination: scope containment, no gold plating,
@@ -39,7 +39,7 @@ A feature is considered implementation-complete when:
 1. All acceptance criteria from the work item (tracker via MCP, or the local `docs/issues/` file) are met.
 2. The code follows `coding_standards.md`.
 3. Tests cover the happy path and relevant edge cases (per test toggles in `CLAUDE.md`).
-4. The UI matches the design reference (if applicable, per `CLAUDE.md` Design Reference mode).
+4. The UI matches the design reference (if applicable, per `CLAUDE.md` Design Reference mode). **"Matches" means the exact values**, defined once in `coding_standards.md` Section 3.4 (the Fidelity Rule) and checked against the values the plan recorded, at review time, by `review_standards.md` Section 5 — never a visual impression of the design, and never a screenshot comparison.
 5. No hardcoded credentials or secrets are present in the code.
 6. The self-review checklist from `review_standards.md` passes.
 

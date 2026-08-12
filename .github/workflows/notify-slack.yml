@@ -1,5 +1,5 @@
 # PR notification pipeline (mayker-dev), optional. Canonical template copied into
-# a project by /init-project (Section 6.3). Opt-in and OFF by default. To enable:
+# a project by /sync-project (Section 6.3). Opt-in and OFF by default. To enable:
 #   1. add a repo VARIABLE  NOTIFY_SLACK = true        (Variables tab, NOT Secrets)
 #   2. add a repo SECRET    SLACK_WEBHOOK_URL = <url>   (Slack Incoming Webhook)
 #   3. push this file from a LOCAL CLI (workflow files need the `workflow` token scope)
@@ -7,12 +7,29 @@
 #
 # The job ALWAYS runs and its log states why it did or did not post, so a
 # half-finished setup never shows as a failed check.
+#
+# WHAT THE MESSAGE SAYS IS DERIVED, NEVER ASSERTED (MDF-005). Every claim in the
+# text is read from something: the tracker status from the tracker's own REST
+# API, the CI result from this head SHA's check runs, the work item ID from the
+# branch. A fact this workflow could not read is OMITTED from the message rather
+# than guessed — a vague-but-true message beats a specific-but-wrong one, and the
+# hardcoded "Merged and marked Done" this replaced was posted unconditionally
+# while `auto-done.yml` (a separate workflow on the same `closed` event) could
+# have failed, degraded to a warning, or not run at all.
+#
+# Every resolver step is `continue-on-error: true` and every miss is a
+# `::notice::` with its reason. A notification workflow that fails a check is
+# worse than a vague notification.
 name: Notify Slack on PR
 
 on:
   pull_request:
     types: [opened, ready_for_review, closed]
   workflow_dispatch:
+
+permissions:
+  contents: read # actions/checkout, for .claude/project_state.json
+  checks: read # the CI result the message carries
 
 jobs:
   notify:
@@ -43,6 +60,162 @@ jobs:
           fi
           echo "post=true" >> "$GITHUB_OUTPUT"
 
+      # The base branch is where `/sync-project` commits .claude/project_state.json.
+      # On workflow_dispatch there is no PR, so `ref` is empty, which is
+      # actions/checkout's own default (the ref that triggered the run).
+      - name: Check out the base branch
+        if: steps.precheck.outputs.post == 'true'
+        continue-on-error: true
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.base.ref }}
+
+      # The SAME two passes auto-done.yml uses (its "Resolve feature ID from
+      # branch" step): longest match against the `features` keys, then the
+      # regex fallback. Do not invent a second parse — a message naming a
+      # different item than the one the merge transitioned is worse than one
+      # naming none. Unlike auto-done this never warns and never stops: an
+      # unresolvable branch simply drops the item ID from the message.
+      - name: Resolve work item ID from branch
+        if: steps.precheck.outputs.post == 'true'
+        id: item
+        continue-on-error: true
+        env:
+          BRANCH: ${{ github.event.pull_request.head.ref }}
+        run: |
+          set -euo pipefail
+          id=""
+          if [ -n "${BRANCH:-}" ] && [ -f .claude/project_state.json ]; then
+            best=""
+            while IFS= read -r cand; do
+              [ -n "$cand" ] || continue
+              case "$BRANCH" in
+                "feature/$cand"|"feature/$cand-"*)
+                  if [ "${#cand}" -gt "${#best}" ]; then best="$cand"; fi ;;
+              esac
+            done < <(jq -r '(.features // {}) | keys[]' .claude/project_state.json 2>/dev/null || true)
+            id="$best"
+          fi
+          if [ -z "$id" ] && [ -n "${BRANCH:-}" ]; then
+            id="$(printf '%s' "$BRANCH" | sed -nE 's#^feature/([A-Za-z]+-[0-9]+)-.*#\1#p')"
+          fi
+          if [ -z "$id" ]; then
+            echo "::notice::no work item ID resolved from branch '${BRANCH:-<none>}'; the message omits it."
+          fi
+          echo "id=$id" >> "$GITHUB_OUTPUT"
+
+      # Reads the item's CURRENT status from the tracker. /sync-project sets the
+      # right secret and curl for the configured provider, exactly as it does for
+      # auto-done.yml; the default example below is ClickUp.
+      #
+      # On a merge this polls, because `auto-done.yml` runs in PARALLEL on the
+      # same `pull_request: closed` event and there is no step-output channel
+      # between two workflows. A single read would usually catch the pre-merge
+      # status and report a truthful-but-useless "still In Review". Three reads
+      # 10s apart, stopping as soon as the status reaches the mapped `done`
+      # value, is enough for the sibling workflow's one REST call and still
+      # bounded: if the transition genuinely failed, the message reports the
+      # status that is actually there.
+      - name: Resolve the live tracker status
+        if: steps.precheck.outputs.post == 'true'
+        id: tracker
+        continue-on-error: true
+        env:
+          ID: ${{ steps.item.outputs.id }}
+          MERGED: ${{ github.event.pull_request.merged }}
+          # /sync-project sets the secret name for your tracker
+          # (CLICKUP_API_KEY / LINEAR_API_KEY / JIRA_API_TOKEN[, JIRA_EMAIL]).
+          TRACKER_API_KEY: ${{ secrets.CLICKUP_API_KEY }}
+        run: |
+          set -euo pipefail
+          state=".claude/project_state.json"
+          status=""; done_status=""; external_id=""; reason=""
+          if [ -z "${ID:-}" ]; then
+            reason="no work item ID for this branch"
+          elif [ ! -f "$state" ]; then
+            reason="no $state on the base branch"
+          else
+            wi_source="$(jq -r '(.work_item_source) // ""' "$state" 2>/dev/null || echo "")"
+            external_id="$(jq -r --arg id "$ID" '(.features[$id].external_id) // empty' "$state" 2>/dev/null || echo "")"
+            done_status="$(jq -r '(.status_mapping.done) // ""' "$state" 2>/dev/null || echo "")"
+            if [ "$wi_source" = "local" ]; then
+              reason="work item source is 'local', so there is no tracker to read"
+            elif [ -z "$external_id" ]; then
+              reason="no external_id for ${ID} in $state"
+            elif [ -z "${TRACKER_API_KEY:-}" ]; then
+              reason="TRACKER_API_KEY not set"
+            fi
+          fi
+
+          if [ -n "$reason" ]; then
+            echo "::notice::${reason}; the message omits the tracker status."
+          else
+            attempts=1
+            if [ "${MERGED:-}" = "true" ]; then attempts=3; fi
+            n=1
+            while [ "$n" -le "$attempts" ]; do
+              body="$(mktemp)"
+              code="$(curl -sS -o "$body" -w '%{http_code}' \
+                -H "Authorization: ${TRACKER_API_KEY}" \
+                "https://api.clickup.com/api/v2/task/${external_id}")" || code="000"
+              if [ "$code" = "200" ]; then
+                status="$(jq -r '(.status.status) // ""' "$body" 2>/dev/null || echo "")"
+                echo "tracker read ${external_id} (attempt ${n}/${attempts}): HTTP ${code}, status '${status}'"
+              else
+                status=""
+                echo "::notice::tracker read for ${external_id} returned HTTP ${code}; the message omits the tracker status."
+                rm -f "$body"
+                break
+              fi
+              rm -f "$body"
+              lc_status="$(printf '%s' "$status" | tr '[:upper:]' '[:lower:]')"
+              lc_done="$(printf '%s' "$done_status" | tr '[:upper:]' '[:lower:]')"
+              if [ -z "$lc_done" ] || [ "$lc_status" = "$lc_done" ]; then break; fi
+              n=$((n + 1))
+              if [ "$n" -le "$attempts" ]; then sleep 10; fi
+            done
+          fi
+          {
+            echo "status=$status"
+            echo "done_status=$done_status"
+          } >> "$GITHUB_OUTPUT"
+
+      # The PR head's check runs, minus this job's own (it is in progress by
+      # definition, so counting it would report "running" forever). GitHub names
+      # a check run after the job's key, which is `notify` here.
+      - name: Resolve the CI result
+        if: steps.precheck.outputs.post == 'true' && github.event_name == 'pull_request'
+        id: ci
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TARGET_REPO: ${{ github.repository }}
+          SHA: ${{ github.event.pull_request.head.sha }}
+          SELF: ${{ github.job }}
+        run: |
+          set -euo pipefail
+          result=""
+          body="$(mktemp)"
+          code="$(curl -sS -o "$body" -w '%{http_code}' \
+            -H "Accept: application/vnd.github+json" \
+            -H "Authorization: Bearer ${GH_TOKEN}" \
+            "https://api.github.com/repos/${TARGET_REPO}/commits/${SHA}/check-runs?per_page=100")" || code="000"
+          if [ "$code" = "200" ]; then
+            result="$(jq -r --arg self "$SELF" '
+              [ .check_runs[]? | select(.name != $self) ] as $runs
+              | if ($runs | length) == 0 then "none yet"
+                elif ($runs | map(select(.status != "completed")) | length) > 0 then "running"
+                elif ($runs | map(select(.conclusion == "failure" or .conclusion == "timed_out"
+                                         or .conclusion == "cancelled" or .conclusion == "action_required"))
+                      | length) > 0 then "failing"
+                else "passing" end' "$body" 2>/dev/null || echo "")"
+            echo "check runs for ${SHA}: ${result:-<unreadable>}"
+          else
+            echo "::notice::could not read check runs (HTTP ${code}); the message omits the CI result."
+          fi
+          rm -f "$body"
+          echo "result=$result" >> "$GITHUB_OUTPUT"
+
       - name: Build message
         if: steps.precheck.outputs.post == 'true'
         id: msg
@@ -54,24 +227,81 @@ jobs:
           TITLE: ${{ github.event.pull_request.title }}
           URL: ${{ github.event.pull_request.html_url }}
           REPO: ${{ github.repository }}
+          BRANCH: ${{ github.event.pull_request.head.ref }}
+          LABELS: ${{ toJSON(github.event.pull_request.labels.*.name) }}
+          ITEM: ${{ steps.item.outputs.id }}
+          STATUS: ${{ steps.tracker.outputs.status }}
+          DONE_STATUS: ${{ steps.tracker.outputs.done_status }}
+          CI_RESULT: ${{ steps.ci.outputs.result }}
         run: |
           set -euo pipefail
+          emit() { # emit <text>
+            {
+              echo "text<<EOF"
+              printf '%s\n' "$1"
+              echo "EOF"
+            } >> "$GITHUB_OUTPUT"
+          }
+
           if [ "$EVENT" = "workflow_dispatch" ]; then
-            text="mayker-dev Slack notifications are configured correctly ($REPO)."
-          elif [ "$ACTION" = "opened" ] && [ "$DRAFT" = "true" ]; then
-            text="Plan draft ready: $TITLE - $URL"
-          elif [ "$ACTION" = "ready_for_review" ]; then
-            text="Build ready for review: $TITLE - $URL"
-          elif [ "$ACTION" = "closed" ] && [ "$MERGED" = "true" ]; then
-            text="Merged and marked Done: $TITLE - $URL"
-          else
-            text="$TITLE - $URL"
+            emit "mayker-dev Slack notifications are configured correctly ($REPO)."
+            exit 0
           fi
-          {
-            echo "text<<EOF"
-            echo "$text"
-            echo "EOF"
-          } >> "$GITHUB_OUTPUT"
+
+          # A plan PR carries the "plan-review" label (/plan-feature Section 11).
+          # A /fix or /deliver PR is ALSO opened as a draft (MDF-045), so the
+          # draft bit alone no longer means "plan". The label is conditional in
+          # the skill ("if the Git provider supports it"), hence the neutral
+          # fallback below rather than a guess from the title prefix — the plan
+          # PR's title is `feat({ID}): ...` too, so a prefix cannot tell them
+          # apart at all.
+          plan_label="no"
+          if [ -n "${LABELS:-}" ] \
+             && printf '%s' "$LABELS" | jq -e 'if type == "array" then any(. == "plan-review") else false end' >/dev/null 2>&1; then
+            plan_label="yes"
+          fi
+
+          phase=""
+          if [ "$ACTION" = "opened" ] && [ "$DRAFT" = "true" ]; then
+            if [ "$plan_label" = "yes" ]; then
+              headline="Plan draft ready"; phase="plan draft"
+            else
+              headline="Draft PR opened"; phase="draft"
+            fi
+          elif [ "$ACTION" = "ready_for_review" ]; then
+            headline="Build ready for review"; phase="build ready"
+          elif [ "$ACTION" = "closed" ] && [ "$MERGED" = "true" ]; then
+            phase="merged"
+            lc_status="$(printf '%s' "${STATUS:-}" | tr '[:upper:]' '[:lower:]')"
+            lc_done="$(printf '%s' "${DONE_STATUS:-}" | tr '[:upper:]' '[:lower:]')"
+            if [ -z "$lc_status" ]; then
+              # The tracker could not be read. Say what IS known: it merged.
+              headline="Merged"
+            elif [ -n "$lc_done" ] && [ "$lc_status" = "$lc_done" ]; then
+              headline="Merged and marked Done"
+            else
+              headline="Merged, but the item is still '${STATUS}'"
+            fi
+          elif [ "$ACTION" = "opened" ]; then
+            headline="PR opened"; phase="open"
+          else
+            headline="PR updated"
+          fi
+
+          fields=""
+          add() { # add <label> <value> — an unknown value is omitted, never guessed
+            if [ -n "${2:-}" ]; then fields="${fields:+$fields | }$1: $2"; fi
+          }
+          add item "${ITEM:-}"
+          add phase "$phase"
+          add branch "${BRANCH:-}"
+          add checks "${CI_RESULT:-}"
+          add tracker "${STATUS:-}"
+
+          nl="$(printf '\nx')"; nl="${nl%x}"
+          text="$headline: $TITLE"
+          if [ -n "$fields" ]; then text="${text}${nl}${fields}"; fi
+          emit "${text}${nl}${URL}"
 
       - name: Post to Slack
         if: steps.precheck.outputs.post == 'true'

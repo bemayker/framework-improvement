@@ -1,4 +1,4 @@
-<!-- materialized-from: mayker-dev v0.3.64; do not edit, regenerate with /init-project refresh-rules -->
+<!-- materialized-from: mayker-dev v0.3.111; do not edit, regenerate with /upgrade-project -->
 <!--
   Universal standard. Imported into CLAUDE.md (always on). Do not edit per project.
   Stack-agnostic: code quality, naming, architecture patterns, component design, test attributes.
@@ -6,7 +6,7 @@
 
 # Coding Standards & Best Practices
 
-> **Mode-aware (existing codebase):** When `CLAUDE.md` Project Mode is `existing`, apply `existing_codebase.md` first: match the conventions already present in the code you touch, treat the rules below as the fallback for net-new code, and never restructure existing code to satisfy them. In `greenfield` mode, apply the rules below as written.
+> **Mode-aware (existing codebase):** When `CLAUDE.md` Project Mode is `existing`, apply `existing_codebase.md` first: match the conventions already present in the code you touch, treat the rules below as the fallback for net-new code, and never restructure existing code to satisfy them. In `new` mode, apply the rules below as written.
 
 ## 1. General Principles
 
@@ -79,6 +79,7 @@ When the project does not include a custom backend (e.g., frontend-only consumin
 ### 3.3 Component Design
 
 - **Atomic Design:** Break down UI into small, reusable components (Atoms → Molecules → Organisms).
+- **One base set, materialized once:** in a new project the scaffold feature builds the design tokens and the base atoms and molecules from the values the plan recorded (build-feature Section 7 step 6). **Every later feature builds on that set and never regenerates it** — import the existing component, and introduce a new atom only where none of them covers the need. A feature that re-invents its own button is both duplicated code and a second, drifting answer to the same design value.
 - **Localization:** Do not hardcode text strings; keep them ready for i18n.
 - **Functional/Compositional:** Strictly use functional patterns (no class-based components unless specified in `CLAUDE.md`).
 - **Hooks/Composables:** Use framework hooks for local state and side effects. Create custom hooks for reusable logic.
@@ -89,11 +90,13 @@ When the project does not include a custom backend (e.g., frontend-only consumin
 
 When a design reference is configured in `CLAUDE.md`:
 
-**What to extract:** Layout structure, spacing/padding relationships, color usage, typography, component hierarchy, interaction patterns (drawers, modals, dropdowns, navigation flows).
+**What to extract:** Layout structure, spacing/padding values and the relationships between them, color usage, typography, component hierarchy, interaction patterns (drawers, modals, dropdowns, navigation flows), and every state the design defines for an interactive element (default, hover, focus, active, disabled, error, empty, loading).
 
 **What to ignore:** Component structure and file organization from the design tool, state management patterns from design-to-code output, SVG import patterns, naming conventions from the design tool.
 
-**The Rewrite Rule:** When implementing from a design reference, **reimplement from scratch** using the standards in this file and the tech stack in `CLAUDE.md`. Do not adapt, refactor, or copy-paste design-to-code output.
+**The Fidelity Rule:** Exact spacing, sizes, colors, typography and states come from the design source, are recorded once in the plan's `- Design reference notes:` line, and are implemented from that record: reinterpretation is allowed only where the design is ambiguous or silent, and every deviation is listed explicitly in the PR description. Where the reference is `FIGMA_MCP` those values are the design's own variable and token values, read through the Figma MCP by the planner; where it is `REPO_DIR` they are measured from the committed export. **"Looks close" is not the bar.** An implemented value that contradicts a recorded one is a defect however it reads beside the design, and a component whose states the design defines is not finished until each of those states is implemented. The reviewer checks this by comparing the implemented values against the plan's recorded ones (`review_standards.md` Section 5); nothing here involves screenshots or pixel comparison.
+
+**The Rewrite Rule:** When implementing from a design reference, **reimplement from scratch** using the standards in this file and the tech stack in `CLAUDE.md`. Do not adapt, refactor, or copy-paste design-to-code output. **The Rewrite Rule governs code provenance, not visual outcome**, and neither rule licenses the other: the implementation is written from scratch *and* it carries the recorded values exactly. Reading the Rewrite Rule as permission to approximate the design inverts it, and the Fidelity Rule is not permission to paste design-tool output back in.
 
 When no design reference is configured (`Mode: NONE`), the AI implements a clean, professional UI following the tech stack's conventions and common design patterns.
 
@@ -123,3 +126,27 @@ When the project consumes external APIs (as defined in `CLAUDE.md` API Reference
 - **Type Safety:** Define request/response types for every endpoint consumed. Do not use `any` or untyped responses.
 - **Authentication:** Externalize API keys and tokens via environment variables. Never hardcode credentials.
 - **Retry Logic:** Implement retry with exponential backoff for transient failures (network errors, 5xx, 429) when appropriate.
+
+## 5. Configuration & Deployment-Dependent Values
+
+A **deployment-dependent value** is one that changes when the same code runs somewhere else: CORS origins and allowed hosts, service base URLs, host ports, database and broker URLs, external hostnames. They are not credentials — Section 2's rule about secrets is a different rule with a different reason — and they are the values that decide whether a scaffold can be deployed twice.
+
+**The invariant.** Within one settings module, deployment-dependent values are configured the same way: if one reads the environment, every value that varies by environment does, with a documented default.
+
+**The worked example is measured, not imagined.** A generated settings class held these two lines:
+
+```python
+database_url: str | None = field(default_factory=lambda: os.environ.get("DATABASE_URL"))
+cors_origins: tuple[str, ...] = DEFAULT_CORS_ORIGINS   # frozen constant, no env read
+```
+
+Two settings, one class, both deployment-dependent. One reads the environment; the other cannot be changed without editing source. Moving the frontend from host port 5173 to 5183 so the stack could coexist with another local project left `DEFAULT_CORS_ORIGINS` naming 5173, and the browser then blocked every call from the frontend origin to the backend.
+
+**Why this rule is worth a section of its own: the failure is invisible to every test you would reach for.** CORS is enforced by the browser and by nothing else. In the measured case `curl` against the backend was fine, 9 backend unit and integration tests passed, 7 frontend unit tests passed, and the E2E specs failed as `page.waitForResponse: Test timeout of 30000ms exceeded` with the word CORS nowhere in the output. Mixed content and cookie-domain mismatches fail the same way. **An unexplained E2E timeout on a call that works under `curl` is an origin question before it is a network question.**
+
+Four rules follow from it:
+
+- **Never widen a default to a list of likely values.** Adding 5173, 5183 and 5273 to the origin list trades a loud failure for a silent one: the next port anyone picks is still wrong, and now nothing says so.
+- **One value, one source, across generated files too.** A host port that appears in both a generated CI workflow and the compose file that publishes it has two sources. Derive it from the one that owns it — the workflow resolves the port from the compose file at run time, or declares the service and its port in the same file. **A comment instructing a human to keep the two in step is not a mechanism**, and the one measured instance of that comment went red in CI the day the ports moved.
+- **A test that asserts the fallback is not coverage of the wiring.** A frontend API client that hardcodes a fallback backend port, beside a unit test asserting that same constant, stays green while the application is broken in the browser. Assert the resolution, not the literal.
+- **Check it rather than eyeballing it.** `bash ${CLAUDE_PLUGIN_ROOT}/hooks/lib/config-consistency.sh settings <file>` reports a module that mixes the two styles, and `... ports <repo-root>` reports a host port a generated workflow names that the compose file does not publish. Both exit 1 on a violation, 0 when consistent or when there is nothing to compare, and **2 when they cannot check, which is never a pass.** The check fails open — it reports only what it can establish from the text — so a clean run is not proof of a deployable module and the review check below is the authority.
