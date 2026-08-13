@@ -2,6 +2,10 @@
 
 from app.main import create_app
 
+# FastAPI's own routes, present on every app regardless of what this project
+# registers; subtracted so a test asserts only the app's custom routes.
+BUILT_IN_ROUTE_PATHS = {"/openapi.json", "/docs", "/docs/oauth2-redirect", "/redoc"}
+
 
 def _collect_route_paths(routes) -> set[str]:
     """Flatten an app's route list into path strings.
@@ -40,8 +44,7 @@ def test_create_app_registers_version_route():
     """
     app = create_app()
 
-    built_in_paths = {"/openapi.json", "/docs", "/docs/oauth2-redirect", "/redoc"}
-    custom_paths = _collect_route_paths(app.routes) - built_in_paths
+    custom_paths = _collect_route_paths(app.routes) - BUILT_IN_ROUTE_PATHS
 
     assert "/api/version" in custom_paths
 
@@ -50,8 +53,7 @@ def test_create_app_registers_health_route():
     """Edge case: the app registers the TEST-02 health route."""
     app = create_app()
 
-    built_in_paths = {"/openapi.json", "/docs", "/docs/oauth2-redirect", "/redoc"}
-    custom_paths = _collect_route_paths(app.routes) - built_in_paths
+    custom_paths = _collect_route_paths(app.routes) - BUILT_IN_ROUTE_PATHS
 
     assert "/api/health" in custom_paths
 

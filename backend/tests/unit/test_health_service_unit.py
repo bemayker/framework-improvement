@@ -12,6 +12,7 @@ from app.services import health_service
 REACHABLE_DATABASE_URL = "postgresql://tasknotes:tasknotes@db:5432/tasknotes"
 UNREACHABLE_DATABASE_URL = "postgresql://tasknotes:tasknotes@127.0.0.1:9/tasknotes"
 PORTLESS_DATABASE_URL = "postgresql://tasknotes:tasknotes@db/tasknotes"
+NON_NUMERIC_PORT_DATABASE_URL = "postgresql://tasknotes:tasknotes@db:notaport/tasknotes"
 
 
 def test_get_health_returns_ok_with_the_live_connection_target(monkeypatch):
@@ -84,3 +85,25 @@ def test_get_health_reports_the_libpq_default_port_when_the_url_names_none(
 
     assert report.status == health_service.STATUS_DEGRADED
     assert (report.host, report.port) == ("db", health_service.DEFAULT_POSTGRES_PORT)
+
+
+def test_get_health_returns_degraded_without_a_port_when_the_url_port_is_not_numeric(
+    monkeypatch,
+):
+    """Error case: an unparseable port degrades, it does not escape as a 500.
+
+    libpq rejects a non-numeric port itself, so the probe raises and the
+    attempted target is parsed on the failure path; that parse must report the
+    host with a null port instead of raising ValueError out of get_health().
+    """
+    monkeypatch.setenv("DATABASE_URL", NON_NUMERIC_PORT_DATABASE_URL)
+
+    def raise_operational_error(url: str) -> tuple[str, int]:
+        raise psycopg.OperationalError("failed to resolve host")
+
+    monkeypatch.setattr(health_service, "probe_connection", raise_operational_error)
+
+    report = health_service.get_health()
+
+    assert report.status == health_service.STATUS_DEGRADED
+    assert (report.host, report.port) == ("db", None)

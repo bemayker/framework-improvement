@@ -65,7 +65,11 @@ def get_health() -> HealthReport:
 
 
 def _attempted_target(database_url: str) -> tuple[str | None, int | None]:
-    """Parse the target a failed probe tried to reach out of the connection string."""
+    """Parse the target a failed probe tried to reach out of the connection string.
+
+    Never raises: this runs on the failure path, so anything it cannot parse is
+    reported as a missing part of the target rather than turning a 503 into a 500.
+    """
     try:
         conninfo = conninfo_to_dict(database_url)
     except psycopg.Error as error:
@@ -78,4 +82,14 @@ def _attempted_target(database_url: str) -> tuple[str | None, int | None]:
 
     host = conninfo.get("host")
     port = conninfo.get("port")
-    return host, DEFAULT_POSTGRES_PORT if port is None else int(port)
+    if port is None:
+        return host, DEFAULT_POSTGRES_PORT
+    try:
+        return host, int(port)
+    except ValueError:
+        logger.error(
+            "DATABASE_URL names a non-numeric port %r, so the degraded report "
+            "names the host with no port.",
+            port,
+        )
+        return host, None
