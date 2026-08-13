@@ -2,7 +2,7 @@
 id: TEST-02
 type: feature
 title: Health endpoint
-status: todo
+status: done
 branch: feature/TEST-02-health-endpoint
 depends_on: [TEST-01]
 scaffold: false
