@@ -276,11 +276,11 @@ jobs:
       # ${DATABASE_URL:-postgresql://...@db:5432/...}, so a job-level value
       # would be substituted into that container, where "localhost" is the
       # container itself and not the db service. The host-side form below
-      # matches .env.example and reaches the db service through its published
-      # 5432 port.
+      # reaches the db service through the host port docker-compose.yml
+      # publishes for it (5442:5432).
       - name: Backend integration tests
         env:
-          DATABASE_URL: postgresql://tasknotes:tasknotes@localhost:5432/tasknotes
+          DATABASE_URL: postgresql://tasknotes:tasknotes@localhost:5442/tasknotes
         run: |
           if [ -d backend/tests/integration ]; then
             (cd backend && uv run pytest tests/integration -q) || [ "$?" -eq 5 ]
