@@ -93,6 +93,24 @@ Minimal task-notes app used exclusively as a validation sandbox for the mayker-d
 - **Scoped test command:** auto  # e.g. uv run pytest -q {FILES}  — run from the repo root, `{FILES}` are root-relative paths; `auto`/`none` = off, full suite
 - **Full suite command:** auto  # runs at a `test_checkpoint` merge, not on a push; `auto` = use the gate command
 
+### Backing Services
+
+<!--
+  How to bring up the backing services an integration or E2E test needs, so no
+  dispatch has to work that out from docker-compose.yml. /sync-project derives
+  these lines from the real stack (Section 0 step 5) and re-derives them on
+  every re-run; parameterized by work item ({ID}), host-assigned port read back
+  via the Port lookup line. Derived 2026-08-13 from docker-compose.yml (db:
+  postgres:16, user/password/db tasknotes) and backend/tests/conftest.py
+  (integration tier reads DATABASE_URL).
+-->
+
+- **Start command:** docker run -d --name {ID}-db -e POSTGRES_USER=tasknotes -e POSTGRES_PASSWORD=tasknotes -e POSTGRES_DB=tasknotes -p 0:5432 postgres:16
+- **Readiness check:** until docker exec {ID}-db pg_isready -q -U tasknotes; do sleep 1; done
+- **Port lookup:** docker port {ID}-db 5432 | head -n 1 | cut -d: -f2
+- **Connection string:** postgresql://tasknotes:tasknotes@localhost:{PORT}/tasknotes
+- **Teardown command:** docker rm -f {ID}-db  # run once per run, never per dispatch
+
 ### Unit & Integration Tests
 
 - **Unit test directory:** backend/tests/unit/

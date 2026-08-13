@@ -43,12 +43,19 @@
   "features": {
     "TEST-02": {
       "external_id": "86caweme3",
-      "external_identifier": "TEST-02"
+      "external_identifier": "",
+      "id_source": "framework",
+      "id_carrier": "title_prefix"
     }
   },
   "framework": {
     "initialized_at": "unknown",
     "migrated_to": "0.3.111",
     "migrated_at": "2026-08-12T22:03:29Z"
+  },
+  "discovery": {
+    "last_scan_commit": "a1cdd8ac8563b9123bdfa6dae0d228829233daba",
+    "scanned_at": "2026-08-13T14:24:54Z",
+    "scanned_by": "/sync-project"
   }
 }
