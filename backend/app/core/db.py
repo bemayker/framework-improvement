@@ -25,6 +25,36 @@ CREATE TABLE IF NOT EXISTS notes (
 );
 """
 
+# A health probe that can hang is not a probe: without an explicit bound,
+# libpq waits for the OS TCP timeout, so an unreachable database would stall
+# the request instead of answering 503 (TEST-02).
+PROBE_CONNECT_TIMEOUT_SECONDS = 2
+
+# The cheapest statement that proves the server can authenticate us and
+# answer a query, which a bare TCP connect does not.
+PROBE_SQL = "SELECT 1"
+
+
+def probe_connection(database_url: str) -> tuple[str, int]:
+    """Verify database connectivity and return the target as actually connected.
+
+    Opens a bounded connection, runs `SELECT 1`, and returns the live
+    connection's own resolved host and port (not the configured ones, which
+    differ whenever a port is remapped). Raises `psycopg.Error` when the
+    database cannot be reached, authenticated against, or queried; callers
+    decide what an unreachable database means.
+    """
+    connection = psycopg.connect(
+        database_url, connect_timeout=PROBE_CONNECT_TIMEOUT_SECONDS
+    )
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute(PROBE_SQL)
+        # Read while the connection is open: `info` is unavailable once closed.
+        return connection.info.host, connection.info.port
+    finally:
+        connection.close()
+
 
 def ensure_schema(target: psycopg.Connection | str) -> None:
     """Create the `notes` table if it does not exist.
