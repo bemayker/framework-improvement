@@ -1,4 +1,4 @@
-<!-- materialized-from: mayker-dev v0.3.111; do not edit, regenerate with /upgrade-project -->
+<!-- materialized-from: mayker-dev v0.3.132; do not edit, regenerate with /upgrade-project -->
 <!--
   Universal standard. Imported into CLAUDE.md (always on). Do not edit per project.
   Feature alignment and anti-hallucination: scope containment, no gold plating,
