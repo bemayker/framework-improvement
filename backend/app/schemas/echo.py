@@ -1,4 +1,4 @@
-"""Response schema for the echo endpoint (TEST-06)."""
+"""Request bound and response schema for the echo endpoint (TEST-06)."""
 
 from pydantic import BaseModel
 

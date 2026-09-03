@@ -1,4 +1,8 @@
-"""Unit tests for the echo response schema (backend/app/schemas/echo.py)."""
+"""Unit tests for the echo schema (backend/app/schemas/echo.py).
+
+Also covers the route's binding to it: /api/echo declares EchoResponse as
+its response_model, asserted as a structure property rather than over HTTP.
+"""
 
 import pytest
 from pydantic import BaseModel, ValidationError
