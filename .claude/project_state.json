@@ -19,8 +19,8 @@
     "effective_path": {
       "path": "gh",
       "host": "github.com",
-      "verified_at": "2026-08-13T14:58:26Z",
-      "plugin_version": "0.3.111",
+      "verified_at": "2026-09-03T07:45:53Z",
+      "plugin_version": "0.3.132",
       "mcp_server_url": "https://api.githubcopilot.com/mcp/"
     }
   },
@@ -46,17 +46,39 @@
       "external_id": "86caweme3",
       "external_identifier": "",
       "id_source": "framework",
-      "id_carrier": "title_prefix"
+      "id_carrier": "title_prefix",
+      "url": "https://app.clickup.com/t/86caweme3"
+    },
+    "TEST-06": {
+      "external_id": "123k99ctgcf",
+      "external_identifier": "",
+      "id_source": "framework",
+      "id_carrier": "title_prefix",
+      "url": "https://app.clickup.com/t/123k99ctgcf"
+    },
+    "TEST-07": {
+      "external_id": "123k99ctgcg",
+      "external_identifier": "",
+      "id_source": "framework",
+      "id_carrier": "title_prefix",
+      "url": "https://app.clickup.com/t/123k99ctgcg"
+    },
+    "TEST-08": {
+      "external_id": "123k99ctgch",
+      "external_identifier": "",
+      "id_source": "framework",
+      "id_carrier": "title_prefix",
+      "url": "https://app.clickup.com/t/123k99ctgch"
     }
   },
   "discovery": {
-    "last_scan_commit": "48e3bd8df5319bc5b41d78fd192dc83d523889fe",
-    "scanned_at": "2026-08-13T14:58:26Z",
+    "last_scan_commit": "6ab004d754e75460d751b2b0e7cb970fc2240747",
+    "scanned_at": "2026-09-03T07:45:53Z",
     "scanned_by": "/sync-project"
   },
   "framework": {
     "initialized_at": "unknown",
-    "migrated_to": "0.3.111",
-    "migrated_at": "2026-08-12T22:03:29Z"
+    "migrated_to": "0.3.132",
+    "migrated_at": "2026-09-03T07:38:46Z"
   }
 }

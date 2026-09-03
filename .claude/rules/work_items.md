@@ -1,4 +1,4 @@
-<!-- materialized-from: mayker-dev v0.3.111; do not edit, regenerate with /upgrade-project -->
+<!-- materialized-from: mayker-dev v0.3.132; do not edit, regenerate with /upgrade-project -->
 # Work items
 
 ## 1. Sources
@@ -23,6 +23,7 @@ title: Cart total miscalculates with discount codes
 status: todo         # todo | planning | plan_review | ready_for_build | in_progress | in_review | done
 severity: high       # bugs/perf only; optional otherwise
 branch: feature/BUG-014-cart-discount-total
+pr: https://github.com/acme/shop/pull/412   # optional; written once by the command that opens the PR
 depends_on: []
 scaffold: false      # optional; true marks the one foundational item built first (see Section 6)
 ---
@@ -34,7 +35,7 @@ scaffold: false      # optional; true marks the one foundational item built firs
 - [ ] ...
 ```
 
-ID prefixes by type: `FEAT-`, `BUG-`, `PERF-`, `CHORE-` (security findings from `/security-scan` use `SEC-`). Any `{WORK_ITEM_ID}` a command accepts may be a tracker ID or a local file ID. Throughout the skills, `{FEATURE_ID}` and `{WORK_ITEM_ID}` are interchangeable; feature is just the default type. The `scaffold` field is optional and defaults to `false`; it is only meaningful for `local`/`hybrid` items (Section 6). A complete, copyable sample lives at `examples/BUG-001-example.md` in the plugin.
+ID prefixes by type: `FEAT-`, `BUG-`, `PERF-`, `CHORE-` (security findings from `/security-scan` use `SEC-`). Any `{WORK_ITEM_ID}` a command accepts may be a tracker ID or a local file ID. Throughout the skills, `{FEATURE_ID}` and `{WORK_ITEM_ID}` are interchangeable; feature is just the default type. The `scaffold` field is optional and defaults to `false`; it is only meaningful for `local`/`hybrid` items (Section 6). The `pr` field is optional too and is the `local` half of the work-item-to-PR link: the command that opens a PR for the item writes the URL there instead of calling a tracker (`mcp_integration.md` Section 5.4), and a file without it is a file whose item has no PR yet. A second PR opened against the same item (a `/refactor` or `/generate-tests` run) appends its URL rather than replacing the first. A complete, copyable sample lives at `examples/BUG-001-example.md` in the plugin.
 
 ## 3. Resolve work item (used by every pipeline skill at Load Context)
 
@@ -91,7 +92,7 @@ Execution order is governed by the **dependency graph**, not by any grouping. Th
 
 **`test_checkpoint` is the one thing the graph cannot say, and it is authored rather than derived** (MDF-071). The graph says what blocks what; it has no way to say "this group of work is complete", which is what a wave used to mark and what a full local test run needs as its boundary. Nothing else provides one: the push gate runs a *scoped* suite on a feature branch and CI runs everything against one PR at a time, so the whole suite never runs against a locally integrated main. A `✅` in that column says it does, once, when that item merges — advisory in `/build-feature` and `/build-features`, blocking in `/deliver` 6.10, which admits no newly unblocked item after a red checkpoint. `/sync-project` Section 3 and `/deliver` Section 3 **propose** candidates (sinks, and items that unblock three or more rows) with the reason and a decision confirms them; **any number of rows may be flagged**, unlike `scaffold`. This is not a wave model returning: it is the primitive one would be built on, and no grouping, ordering or readiness meaning attaches to the flag.
 
-**The schema is enforced, not just documented.** `${CLAUDE_PLUGIN_ROOT}/hooks/lib/feature-map-validate.sh {path}` checks a written map against that template and exits 0 (valid), 1 (violations, each naming the row, the rule and the consequence) or 2 (it could not check). Every step that **writes** the file runs it and refuses to proceed on a non-zero exit (`sync-project` Section 4, `deliver` Section 2 step 5 and Section 3 step 3), and the `feature-map-guard` PostToolUse hook re-runs it advisorily on any other write, including a hand edit. A blank `depends_on`, a `scaffold` cell reading `true` instead of `✅`, or a `branch` missing its `feature/{ID}-` prefix all render fine and all break a different gate silently.
+**The schema is enforced, not just documented.** `${CLAUDE_PLUGIN_ROOT}/hooks/lib/feature-map-validate.sh {path}` checks a written map against that template and exits 0 (valid), 1 (violations, each naming the row, the rule and the consequence) or 2 (it could not check). Every step that **writes** the file runs it and refuses to proceed on a non-zero exit (`sync-project` Section 4, `deliver` Section 2 step 6 and Section 3 step 3), and the `feature-map-guard` PostToolUse hook re-runs it advisorily on any other write, including a hand edit. A blank `depends_on`, a `scaffold` cell reading `true` instead of `✅`, or a `branch` missing its `feature/{ID}-` prefix all render fine and all break a different gate silently.
 
 **The readers check too, and they warn rather than block.** Every write path and the repo's own CI validate the map on the way *out*; until MDF-147 nothing validated it on the way *in*, so a map corrupted between two sessions was consumed as fact by the very commands whose readiness, branch, scaffold and checkpoint decisions come out of it, and CI reported it only at push time — after the work was planned and built against the wrong edges. So the seven pipeline skills that read the graph (`build-feature`, `build-features`, `plan-feature`, `plan-features`, `fix`, `revise-feature`, `deliver`) re-run the validator at Load Context with `-q`, chained onto the rule-drift command so it costs no extra exec turn, and **warn once without blocking**. `/deliver` is the one exception and for the same reason as the status mapping in Section 4: its Load Context treats exit 1 as a **setup STOP**, because an unattended run has nobody to read a warning and Section 3 builds its whole schedule out of this table. A missing map is not a finding — `local` items legitimately have none, so a `cannot check: file not found` line is silent — and any other exit 2 is reported, because a check that could not run is never a pass. **A reader never repairs**: it names the heal below and stops there.
 
@@ -124,6 +125,7 @@ The canonical checks, applied by every pipeline skill at the section they belong
 - **Plan artifact:** `.claude/artifacts/{ID}/plan.md` exists and this is not an explicit re-plan (plan-feature Section 3.1) → skip regeneration and use the existing plan (same for `shared_risks.md`).
 - **Commits:** the section's output is already committed on the branch (clean working tree for those paths, the section's semantic commit present in `git log`) → skip the commit; already pushed → skip the push (but still run the upstream assertion where the skill requires it).
 - **PR:** a PR already exists for the branch → update it; never open a duplicate.
+- **The work-item link comment:** the item already carries a framework comment naming **this PR's URL** → post nothing. **The key is the PR URL, not the item** (`mcp_integration.md` Section 5.4). Dedup on the item would suppress the legitimate second comment when `/refactor` or `/generate-tests` opens its own PR against an item that already has one; dedup on the URL gives exactly one comment per distinct PR, which is the correct granularity. A re-plan, a resumed run, a batch re-dispatch, a body update, a draft to ready conversion and a `/deliver` retry therefore all add nothing. An item carrying six identical bot comments is worse than one carrying none, and it is the observable failure mode of this link.
 
 Reads are not the concern — a fresh session must re-derive where it stands, and does so with the **one** batched read pass of `mcp_integration.md` Section 1.3 (which doubles as the auth pre-flight, Section 1.4 there). What must never repeat is a **mutation**: a second status write to the same value, a duplicated commit, a second PR, a regenerated plan.
 

@@ -2,7 +2,7 @@
 
 A minimal task-notes app used exclusively as a validation sandbox for the mayker-dev framework. See below for setup instructions and [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md) for the full AI development workflow.
 
-This project uses a Claude Code-driven, per-feature delivery framework: a human installs the `mayker-dev` plugin, runs `/init-project` (which generates `CLAUDE.md` and the rest of the config from the plugin), fills in `CLAUDE.md`, then dispatches autonomous Claude Code sessions (one per feature) through a fixed pipeline: plan → review → build → review → revise → merge → Done.
+This project uses a Claude Code-driven, per-feature delivery framework: a human installs the `mayker-dev` plugin, runs `/init-project` (which generates `CLAUDE.md` and `.claude/settings.json` from the plugin), fills in `CLAUDE.md`, runs `/sync-project` to finish setup, then dispatches autonomous Claude Code sessions (one per feature) through a fixed pipeline: plan → review → build → review → revise → merge → Done.
 
 ---
 
@@ -13,9 +13,9 @@ This project uses a Claude Code-driven, per-feature delivery framework: a human 
 1. Copy the environment template: `cp .env.example .env` (defaults work as-is for local development).
 2. From the repository root, start all services: `docker compose up`.
 3. Once the services are up:
-   - Frontend (React/Vite dev server): http://localhost:5173
-   - Backend (FastAPI): http://localhost:8000
-   - Database: PostgreSQL, exposed on port 5432
+   - Frontend (React/Vite dev server): http://localhost:5183
+   - Backend (FastAPI): http://localhost:8010
+   - Database: PostgreSQL, exposed on host port 5442
 
 `docker compose up` starts three services: `db` (PostgreSQL 16), `backend` (FastAPI via uv), and `frontend` (Vite dev server). See [docs/DEVELOPMENT.md → Running tests locally](docs/DEVELOPMENT.md#running-tests-locally) to run the test suites without Docker.
 
@@ -27,10 +27,11 @@ This project uses a Claude Code-driven, per-feature delivery framework: a human 
 
 This project's framework requires two MCP connections: an **issue tracker** (reading features, status, dependencies) and a **Git provider** (PRs, review comments, branches). Add both at **project scope** with `claude mcp add --scope project <name> ...` so they are written to `.mcp.json` and shared with the team via git. The template ships a `.mcp.json.example` (ClickUp + GitHub shape) for reference; `claude mcp add` writes the real `.mcp.json`. With Work Item Source `local` you can skip the issue-tracker connection entirely.
 
-Two things to know before you run it, because they trip people up:
+Three things to know before you run it, because they trip people up:
 
 - **GitHub authenticates with a Personal Access Token in a header, not OAuth** (Claude Code's OAuth flow needs Dynamic Client Registration, which the GitHub MCP endpoint does not support). Reference the token as `'${GITHUB_PAT}'` so `.mcp.json` stores only the variable name, never the secret.
 - **ClickUp (and Linear/Jira) use OAuth**, so there is no token to store; you approve in the browser via `/mcp`.
+- **On GitHub Enterprise** (GHES or a `*.ghe.com` tenant) the default hosted MCP URL serves github.com only and its repo tools 404. Use your tenant's `https://copilot-api.<subdomain>.ghe.com/mcp` endpoint (ghe.com) or the local `github-mcp-server` with `GITHUB_HOST` (GHES), and run `gh auth login --hostname <host>` once for the `gh` fallback (`/init-project` writes the matching `GH_HOST` into `.claude/settings.json`). See **[docs/DEVELOPMENT.md → GitHub Enterprise](docs/DEVELOPMENT.md#github-enterprise-ghes-and-ghecom)**.
 
 Verify with `claude mcp list` (or `/mcp` inside a session). The full `claude mcp add` forms, worked ClickUp and GitHub examples, secret handling, and the optional Figma MCP are documented once in **[docs/DEVELOPMENT.md → MCP connections](docs/DEVELOPMENT.md#1-mcp-connections-mandatory)**; follow that for setup rather than repeating it here.
 
@@ -46,12 +47,13 @@ The CI pipelines require these secrets to be configured in your repository:
 
 | Secret | Purpose | Where to get it | Where to add it |
 | --- | --- | --- | --- |
+| `CLICKUP_API_KEY` | Auto-transition features to Done on merge | ClickUp → Settings → Apps → API Token | GitHub → Settings → Secrets and variables → Actions |
 
 > The secret name matches your tracker (`CLICKUP_API_KEY` / `LINEAR_API_KEY` / `JIRA_API_TOKEN` + `JIRA_EMAIL`). With `local` work-item source there is no tracker secret. Optional Slack notifications need a `NOTIFY_SLACK` Variable + `SLACK_WEBHOOK_URL` Secret; optional security scanning needs `AIKIDO_API_KEY`. Full names, locations, and the Slack three-step setup are in [docs/DEVELOPMENT.md → Repository Secrets](docs/DEVELOPMENT.md#3-repository-secrets-for-cicd).
 
 ### Development environment
 
-> Specific requirements (Docker, Node.js, Python versions, etc.) will be documented here after the scaffold feature is built.
+Docker and Docker Compose, Node.js 20, Python 3.12 and uv. See [docs/DEVELOPMENT.md → Development Environment](docs/DEVELOPMENT.md#4-development-environment).
 
 ---
 
@@ -64,12 +66,12 @@ The CI pipelines require these secrets to be configured in your repository:
 ├── .mcp.json                       # Live MCP server config you create with `claude mcp add` (committed, project scope)
 ├── .env.example                    # Env var template (DB connection + frontend API base URL); copy to .env
 ├── docker-compose.yml              # db (postgres:16) + backend + frontend services
-├── playwright.config.ts            # Playwright E2E config (baseURL http://localhost:5173)
+├── playwright.config.ts            # Playwright E2E config (baseURL http://localhost:5183)
 ├── package.json                    # Root: Playwright dev dependency + `e2e` script
 ├── .claude/
 │   ├── settings.json               # Bootstrap (marketplace + enabled plugins) committed; permissions added by /init-project
 │   ├── rules/                      # Engineering standards, materialized from the plugin by /init-project (do not edit)
-│   ├── project_state.json          # Status map + feature registry for tracker source; tracker-less for local source (generated)
+│   ├── project_state.json          # Pinned tracker IDs + status map + feature registry for tracker source; tracker-less for local source (generated)
 │   ├── feature_map.md              # Flat feature dependency table; flat or absent for local source (generated)
 │   └── artifacts/                  # Per-feature plans, reports, and scripts (generated)
 ├── backend/                        # FastAPI app (Python 3.12, managed with uv)
@@ -85,7 +87,7 @@ The CI pipelines require these secrets to be configured in your repository:
 └── design-reference/               # Figma-to-code export: you add this only if CLAUDE.md Design Reference mode is REPO_DIR (not shipped in the template)
 ```
 
-> The commands, skills, subagents, and hooks are **not** files in this repo: they are provided by the `mayker-dev` plugin once it is installed. This repo keeps only configuration and generated state. `CLAUDE.md`, the `.claude/settings.json` permissions, and the `.claude/rules/` standards are all generated or materialized into the repo by `/init-project` from the plugin (the single source of truth), so a fresh clone holds only the bootstrap `.claude/settings.json` plus this scaffold until you run it. The `docs/issues/` directory (for `local` work-item source) is created on demand by `/fix` and `/diagnose`; the plugin ships a copyable example work item.
+> The commands, skills, subagents, and hooks are **not** files in this repo: they are provided by the `mayker-dev` plugin once it is installed. This repo keeps only configuration and generated state. `CLAUDE.md`, the `.claude/settings.json` permissions, and the `.claude/rules/` standards are all generated or materialized into the repo by `/init-project` from the plugin, and `.claude/project_state.json`, `.claude/feature_map.md` and the CI workflows by `/sync-project` (the single source of truth), so a fresh clone holds only the bootstrap `.claude/settings.json` plus this scaffold until you run it. The `docs/issues/` directory (for `local` work-item source) is created on demand by `/fix` and `/diagnose`; the plugin ships a copyable example work item.
 
 ---
 
@@ -93,8 +95,8 @@ The CI pipelines require these secrets to be configured in your repository:
 
 See [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md) for the complete guide. Quick summary:
 
-1. Install the plugin (see Install below), then run `/init-project` locally (one-time setup). It generates `CLAUDE.md`; fill in your project details and re-run it to finish.
-2. **Build the scaffold feature first** (greenfield): plan, review, mark Ready for Build, build, and merge the feature flagged `scaffold` in `feature_map.md`. It creates the project structure, test infrastructure, and CI that every other feature depends on, and the precedence gate blocks every other item until it is Done.
+1. Install the plugin (see Install below), then run `/init-project` locally (one-time setup). It generates `CLAUDE.md`; fill in your project details and run `/sync-project` to finish. Re-run `/sync-project` whenever the tracker backlog or the codebase moves.
+2. **Build the scaffold feature first** (`new` mode): plan, review, mark Ready for Build, build, and merge the feature flagged `scaffold` in `feature_map.md`. It creates the project structure, test infrastructure, and CI that every other feature depends on, and the precedence gate blocks every other item until it is Done.
 3. Dispatch `/plan-feature {ID}` sessions for every item whose dependencies are Done (Claude Code on the web)
 4. Review plan PRs
 5. Mark approved features as "Ready for Build" in the tracker
@@ -102,6 +104,8 @@ See [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md) for the complete guide. Quick sum
 7. Review implementation PRs
 8. Merge → CI auto-transitions features to Done
 9. Repeat for newly-unblocked items (or set `Autonomy: autonomous` in CLAUDE.md and run `/deliver` once to automate steps 3 to 9)
+
+Steps 3 and 6 also have batch forms that keep every review gate: `/plan-features {IDs | ready}` and `/build-features {IDs | ready}` run the same procedure for a whole selection from one session, each item in its own git worktree.
 
 ---
 
@@ -124,10 +128,10 @@ Team members are prompted to add the marketplace and install the plugin when the
 
 ### Modes (in CLAUDE.md)
 
-- Project mode: `greenfield` (scaffold a new app) or `existing` (adapt to an established codebase).
+- Project mode: `new` (scaffold a new app) or `existing` (adapt to an established codebase).
 - Work item source: `tracker` (ClickUp/Linear/Jira via MCP), `local` (issue files in `docs/issues/`, no tracker needed), or `hybrid`.
 
 ### Commands
 
-Type `/mayker-dev:<command>`, or the bare `/<command>` when no other plugin claims the same name: `init-project`, `plan-feature`, `build-feature`, `revise-feature`, `refactor`, `generate-tests`, plus `diagnose` (find bugs/perf issues in existing code) and `fix` (quick single-issue plan+build).
+Type `/mayker-dev:<command>`, or the bare `/<command>` when no other plugin claims the same name: `init-project`, `sync-project`, `plan-feature`, `build-feature`, `revise-feature`, `refactor`, `generate-tests`, plus `diagnose` (find bugs/perf issues in existing code), `fix` (quick single-issue plan+build), and the batch forms `plan-features` / `build-features` (`{IDs | ready}`, several items at once in per-item worktrees, same gates).
 
