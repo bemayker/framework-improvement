@@ -19,7 +19,7 @@
     "effective_path": {
       "path": "mcp",
       "host": "github.com",
-      "verified_at": "2026-09-03T08:23:18Z",
+      "verified_at": "2026-09-03T08:36:30Z",
       "plugin_version": "0.3.132",
       "mcp_server_url": "https://api.githubcopilot.com/mcp/"
     }
@@ -72,8 +72,8 @@
     }
   },
   "discovery": {
-    "last_scan_commit": "40a41f71346ff8f6f57c8b14436020571a5531c8",
-    "scanned_at": "2026-09-03T08:23:18Z",
+    "last_scan_commit": "2a4237e7ad364105c4f75e3ed011c6bc534d84c1",
+    "scanned_at": "2026-09-03T08:36:30Z",
     "scanned_by": "/sync-project"
   },
   "framework": {
