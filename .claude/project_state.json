@@ -17,9 +17,9 @@
     "provider": "github",
     "repository": "bemayker/framework-improvement",
     "effective_path": {
-      "path": "gh",
+      "path": "mcp",
       "host": "github.com",
-      "verified_at": "2026-09-03T07:45:53Z",
+      "verified_at": "2026-09-03T08:23:18Z",
       "plugin_version": "0.3.132",
       "mcp_server_url": "https://api.githubcopilot.com/mcp/"
     }
@@ -72,8 +72,8 @@
     }
   },
   "discovery": {
-    "last_scan_commit": "6ab004d754e75460d751b2b0e7cb970fc2240747",
-    "scanned_at": "2026-09-03T07:45:53Z",
+    "last_scan_commit": "40a41f71346ff8f6f57c8b14436020571a5531c8",
+    "scanned_at": "2026-09-03T08:23:18Z",
     "scanned_by": "/sync-project"
   },
   "framework": {
