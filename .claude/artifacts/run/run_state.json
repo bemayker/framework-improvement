@@ -1,0 +1,71 @@
+{
+  "run_id": "deliver-20260903T125824Z",
+  "updated_at": "2026-09-03T15:25:00Z",
+  "max_parallel_items": 3,
+  "round": 4,
+  "items": {
+    "TEST-07": {
+      "source": "tracker",
+      "external_id": "123k99ctgcg",
+      "framework_status": "done",
+      "phase": "done",
+      "next_subagent": "planner",
+      "branch": "feature/TEST-07-uptime-endpoint",
+      "worktree": null,
+      "pr": 26,
+      "repo": "bemayker/framework-improvement",
+      "retries": {
+        "ci_fix": 0,
+        "self_review": 0,
+        "review_comment_rounds": 0,
+        "replan": 0
+      },
+      "holds": [],
+      "blocked_reason": null,
+      "resumed": [],
+      "pr_url": "https://github.com/bemayker/framework-improvement/pull/26",
+      "ci": "green 7/7 at 15:28Z",
+      "merged_sha": "ffbfc12784d83715a5695133295006d4ef119cf4",
+      "checkpoint": "pass"
+    },
+    "TEST-08": {
+      "source": "tracker",
+      "external_id": "123k99ctgch",
+      "framework_status": "done",
+      "framework_status_note": "tracker reads 'to test' which reverse-maps to in_review; reinterpreted as plan_review from PR #25 (draft, plan artifacts only, label plan-review)",
+      "phase": "done",
+      "next_subagent": "orchestrator (plan verdict), then builder",
+      "branch": "feature/TEST-08-footer-app-version",
+      "branch_head": "4c424ad",
+      "worktree": null,
+      "pr": 25,
+      "pr_url": "https://github.com/bemayker/framework-improvement/pull/25",
+      "pr_reuse": "update_pull_request; never open a second PR",
+      "repo": "bemayker/framework-improvement",
+      "retries": {
+        "ci_fix": 0,
+        "self_review": 0,
+        "review_comment_rounds": 0,
+        "replan": 0
+      },
+      "holds": [],
+      "blocked_reason": null,
+      "resumed": [
+        "6.1 plan artifact",
+        "6.3 branch and worktree",
+        "PR #25",
+        "tracker link comment"
+      ],
+      "merged_sha": "a9695cc4489c498c4800b752fb388583f4417dea"
+    }
+  },
+  "done_before_run": [
+    "TEST-01",
+    "TEST-02",
+    "TEST-03",
+    "TEST-04",
+    "TEST-05",
+    "TEST-06"
+  ],
+  "repositories_created": []
+}

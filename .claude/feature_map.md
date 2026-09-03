@@ -82,6 +82,6 @@ time is not computable from the graph.
 | TEST-05 | Backend version endpoint | [TEST-01] | feature/TEST-05-version-endpoint | | ⚠️ TEST-05 and TEST-02 both modify backend/app/main.py and backend/tests/unit/test_main_unit.py; serialize if run concurrently. Disjoint from TEST-04 (frontend only) | ✅ |
 | TEST-06 | Echo endpoint | [TEST-01] | feature/TEST-06-echo-endpoint | | ⚠️ TEST-06 and TEST-07 both register a router in backend/app/main.py; serialize if run concurrently. Disjoint from TEST-08 (frontend only) | ✅ |
 | TEST-07 | Uptime endpoint | [TEST-01] | feature/TEST-07-uptime-endpoint | | ⚠️ TEST-07 and TEST-06 both register a router in backend/app/main.py; serialize if run concurrently. Disjoint from TEST-08 (frontend only) | ✅ |
-| TEST-08 | Footer shows the app version | [TEST-04] | feature/TEST-08-footer-app-version | | | ✅ |
+| TEST-08 | Footer shows the app version | [TEST-04, TEST-05] | feature/TEST-08-footer-app-version | | | ✅ |
 
 Scaffold gate: TEST-01 (`scaffold: true` in its frontmatter) is **done**, so the gate passes. TEST-01 through TEST-05 are done; TEST-06, TEST-07 and TEST-08 are ready (TEST-06 and TEST-07 share `backend/app/main.py`, serialize them; TEST-08 is independent of both).

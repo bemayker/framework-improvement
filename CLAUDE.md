@@ -20,7 +20,7 @@
   The settings below apply only when Autonomy is `autonomous`.
 -->
 
-- **Autonomy:** assisted          # assisted | autonomous
+- **Autonomy:** autonomous        # assisted | autonomous
 - **Max parallel items:** 3       # concurrency cap for the /deliver scheduler
 - **Merge method:** squash        # squash | merge | rebase (used by merge_pull_request)
 - **CI fix attempts:** 3          # diagnose-fix-push cycles per PR before marking the item blocked
