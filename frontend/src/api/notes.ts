@@ -1,21 +1,14 @@
 // Single client layer for the notes API: components never call fetch directly
 // (coding_standards.md Section 4, applied to this project's own backend).
 
+import { API_BASE_URL, requestFailed } from "./http";
+
 export type Note = {
   id: number;
   text: string;
 };
 
-const DEFAULT_API_BASE_URL = "http://localhost:8010";
-
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? DEFAULT_API_BASE_URL;
 const NOTES_URL = `${API_BASE_URL}/api/notes`;
-
-function requestFailed(operation: string, response: Response): Error {
-  return new Error(
-    `${operation} failed: ${response.status} ${response.statusText}`,
-  );
-}
 
 /** Fetches every saved note, oldest first, as returned by the backend. */
 export async function listNotes(): Promise<Note[]> {
