@@ -1,38 +1,17 @@
-import { test, expect, type Page } from "@playwright/test";
+import { readFileSync } from "node:fs";
+import path from "node:path";
+import { test, expect } from "@playwright/test";
 
-const VERSION_PATH = "/api/version";
-
-/**
- * Opens the landing page and returns the version its own `GET /api/version`
- * response carried.
- *
- * The footer shows the backend's version rather than the frontend bundle's
- * (TEST-08), and the two legitimately differ, so `frontend/package.json` is no
- * longer the expected value. Matching on the exact pathname keeps the module
- * fetch for `src/api/version.ts`, whose URL contains the same substring, out of
- * the match.
- */
-async function openLandingPageAndReadVersion(page: Page): Promise<string> {
-  const versionResponse = page.waitForResponse(
-    (response) =>
-      new URL(response.request().url()).pathname === VERSION_PATH &&
-      response.ok(),
-  );
-
-  await page.goto("/");
-
-  const { version } = (await (await versionResponse).json()) as {
-    version: string;
-  };
-
-  return version;
-}
+const frontendPackageJsonPath = path.resolve(__dirname, "../../frontend/package.json");
+const { version } = JSON.parse(readFileSync(frontendPackageJsonPath, "utf-8")) as {
+  version: string;
+};
 
 test.describe("TEST-04 page footer", () => {
-  test("shows a footer with the app name and the version reported by GET /api/version", async ({
+  test("shows a footer with the app name and the version from frontend/package.json", async ({
     page,
   }) => {
-    const version = await openLandingPageAndReadVersion(page);
+    await page.goto("/");
 
     const footer = page.getByTestId("app-footer");
     await expect(footer).toBeVisible();
@@ -41,7 +20,7 @@ test.describe("TEST-04 page footer", () => {
   });
 
   test("exposes the footer as a contentinfo landmark", async ({ page }) => {
-    const version = await openLandingPageAndReadVersion(page);
+    await page.goto("/");
 
     await expect(page.getByRole("contentinfo")).toContainText(version);
   });
@@ -59,7 +38,7 @@ test.describe("TEST-04 page footer", () => {
 
   test("keeps the footer visible on a mobile viewport", async ({ page }) => {
     await page.setViewportSize({ width: 375, height: 667 });
-    const version = await openLandingPageAndReadVersion(page);
+    await page.goto("/");
 
     const footer = page.getByTestId("app-footer");
     await expect(footer).toBeVisible();
