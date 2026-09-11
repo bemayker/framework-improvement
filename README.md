@@ -135,3 +135,4 @@ Team members are prompted to add the marketplace and install the plugin when the
 
 Type `/mayker-dev:<command>`, or the bare `/<command>` when no other plugin claims the same name: `init-project`, `sync-project`, `plan-feature`, `build-feature`, `revise-feature`, `refactor`, `generate-tests`, plus `diagnose` (find bugs/perf issues in existing code), `fix` (quick single-issue plan+build), and the batch forms `plan-features` / `build-features` (`{IDs | ready}`, several items at once in per-item worktrees, same gates).
 
+
