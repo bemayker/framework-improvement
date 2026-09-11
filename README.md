@@ -23,17 +23,20 @@ This project uses a Claude Code-driven, per-feature delivery framework: a human 
 
 ## Prerequisites
 
-### Required MCP connections
+### Required connections: one MCP, one CLI
 
-This project's framework requires two MCP connections: an **issue tracker** (reading features, status, dependencies) and a **Git provider** (PRs, review comments, branches). Add both at **project scope** with `claude mcp add --scope project <name> ...` so they are written to `.mcp.json` and shared with the team via git. The template ships a `.mcp.json.example` (ClickUp + GitHub shape) for reference; `claude mcp add` writes the real `.mcp.json`. With Work Item Source `local` you can skip the issue-tracker connection entirely.
+This project's framework needs an **issue tracker** MCP connection (reading features, status, dependencies) and a working **Git provider path** (PRs, review comments, branches). They are set up differently, and that is the thing to get right first.
 
-Three things to know before you run it, because they trip people up:
+- **The issue tracker is an MCP server.** Add it at **project scope** with `claude mcp add --scope project <name> ...` so it is written to `.mcp.json` and shared with the team via git. The template ships a `.mcp.json.example` for reference; `claude mcp add` writes the real file. With Work Item Source `local` you can skip it entirely.
+- **The Git provider on GitHub is the `gh` CLI, not an MCP server.** Install the GitHub CLI and run `gh auth login` once (or set `GH_TOKEN` for an unattended surface). **Do not add a `github` MCP server: nothing reads it.** Every remote git operation — branches, pushes, PRs, checks, review comments, merges, repository creation — runs through `gh`, `gh api` and `git`, and a command that needs the remote stops with a named message rather than degrading. *(mayker-dev 0.3.141 retired the hosted GitHub MCP for this framework; `docs/DEVELOPMENT.md` has the two reasons.)*
+- **On GitLab or Bitbucket the Git provider is that provider's MCP**, added exactly like the tracker. Know one consequence before choosing it: the framework's branch-guard and test-gate hooks match `Bash`, so a push made through a provider MCP's own write tools is **not** gated.
 
-- **GitHub authenticates with a Personal Access Token in a header, not OAuth** (Claude Code's OAuth flow needs Dynamic Client Registration, which the GitHub MCP endpoint does not support). Reference the token as `'${GITHUB_PAT}'` so `.mcp.json` stores only the variable name, never the secret.
-- **ClickUp (and Linear/Jira) use OAuth**, so there is no token to store; you approve in the browser via `/mcp`.
-- **On GitHub Enterprise** (GHES or a `*.ghe.com` tenant) the default hosted MCP URL serves github.com only and its repo tools 404. Use your tenant's `https://copilot-api.<subdomain>.ghe.com/mcp` endpoint (ghe.com) or the local `github-mcp-server` with `GITHUB_HOST` (GHES), and run `gh auth login --hostname <host>` once for the `gh` fallback (`/init-project` writes the matching `GH_HOST` into `.claude/settings.json`). See **[docs/DEVELOPMENT.md → GitHub Enterprise](docs/DEVELOPMENT.md#github-enterprise-ghes-and-ghecom)**.
+Two things to know before you run it, because they trip people up:
 
-Verify with `claude mcp list` (or `/mcp` inside a session). The full `claude mcp add` forms, worked ClickUp and GitHub examples, secret handling, and the optional Figma MCP are documented once in **[docs/DEVELOPMENT.md → MCP connections](docs/DEVELOPMENT.md#1-mcp-connections-mandatory)**; follow that for setup rather than repeating it here.
+- **ClickUp (and Linear/Jira) use OAuth**, so there is no token to store; you approve in the browser via `/mcp`. A token-authenticated server instead references its secret as `'${SOME_TOKEN}'`, so `.mcp.json` stores only the variable name.
+- **On GitHub Enterprise** (GHES or a `*.ghe.com` tenant), `gh` needs the host: `/init-project` detects a non-github.com remote and writes `GH_HOST=<your-host>` into `.claude/settings.json`, and you run `gh auth login --hostname <host>` once per machine. See **[docs/DEVELOPMENT.md → GitHub Enterprise](docs/DEVELOPMENT.md#github-enterprise-ghes-and-ghecom)**.
+
+Verify the tracker with `claude mcp list` (or `/mcp` inside a session) and the Git path with `gh auth status`. The full `claude mcp add` forms, the worked ClickUp and GitHub examples, secret handling, and the optional Figma MCP are documented once in **[docs/DEVELOPMENT.md → MCP connections](docs/DEVELOPMENT.md#1-mcp-connections-mandatory)**; follow that for setup rather than repeating it here.
 
 > In Claude Code on the web / Routines, the same project-scoped `.mcp.json` is used and credentials are supplied by the environment rather than your local machine.
 
@@ -105,7 +108,7 @@ See [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md) for the complete guide. Quick sum
 8. Merge → CI auto-transitions features to Done
 9. Repeat for newly-unblocked items (or set `Autonomy: autonomous` in CLAUDE.md and run `/deliver` once to automate steps 3 to 9)
 
-Steps 3 and 6 also have batch forms that keep every review gate: `/plan-features {IDs | ready}` and `/build-features {IDs | ready}` run the same procedure for a whole selection from one session, each item in its own git worktree.
+Steps 3 and 6 also have batch forms that keep every review gate: `/plan-features {IDs | ready | wave N}` and `/build-features {IDs | ready | wave N}` run the same procedure for a whole selection from one session, each item in its own git worktree. `wave N` takes the front you authored in `feature_map.md`; `/waves` prints those fronts.
 
 ---
 
@@ -133,6 +136,5 @@ Team members are prompted to add the marketplace and install the plugin when the
 
 ### Commands
 
-Type `/mayker-dev:<command>`, or the bare `/<command>` when no other plugin claims the same name: `init-project`, `sync-project`, `plan-feature`, `build-feature`, `revise-feature`, `refactor`, `generate-tests`, plus `diagnose` (find bugs/perf issues in existing code), `fix` (quick single-issue plan+build), and the batch forms `plan-features` / `build-features` (`{IDs | ready}`, several items at once in per-item worktrees, same gates).
-
+Type `/mayker-dev:<command>`, or the bare `/<command>` when no other plugin claims the same name: `init-project`, `sync-project`, `plan-feature`, `build-feature`, `revise-feature`, `refactor`, `generate-tests`, plus `diagnose` (find bugs/perf issues in existing code), `fix` (quick single-issue plan+build), `waves` (the read-only grouped wave view of the dependency graph), and the batch forms `plan-features` / `build-features` (`{IDs | ready | wave N}`, several items at once in per-item worktrees, same gates).
 

@@ -75,13 +75,14 @@ time is not computable from the graph.
 
 | Feature ID | Title | depends_on | branch | scaffold | shared_risk_notes | test_checkpoint | wave |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| TEST-01 | Static landing page | [] | feature/TEST-01-static-landing-page | ✅ | | | |
-| TEST-02 | Health endpoint | [TEST-01] | feature/TEST-02-health-endpoint | | ⚠️ both TEST-02 and TEST-03 touch the FastAPI app entry (router registration); serialize if run concurrently | | |
-| TEST-03 | Simple note form | [TEST-01] | feature/TEST-03-simple-note-form | | ⚠️ both TEST-02 and TEST-03 touch the FastAPI app entry (router registration); serialize if run concurrently | ✅ | |
-| TEST-04 | Page footer with app version | [TEST-01] | feature/TEST-04-page-footer | | ⚠️ TEST-04 and TEST-03 both modify frontend/src/components/LandingPage.tsx; serialize if run concurrently. Disjoint from TEST-02 (backend only) | ✅ | |
-| TEST-05 | Backend version endpoint | [TEST-01] | feature/TEST-05-version-endpoint | | ⚠️ TEST-05 and TEST-02 both modify backend/app/main.py and backend/tests/unit/test_main_unit.py; serialize if run concurrently. Disjoint from TEST-04 (frontend only) | ✅ | |
-| TEST-06 | Echo endpoint | [TEST-01] | feature/TEST-06-echo-endpoint | | ⚠️ TEST-06 and TEST-07 both register a router in backend/app/main.py; serialize if run concurrently. Disjoint from TEST-08 (frontend only) | ✅ | |
-| TEST-07 | Uptime endpoint | [TEST-01] | feature/TEST-07-uptime-endpoint | | ⚠️ TEST-07 and TEST-06 both register a router in backend/app/main.py; serialize if run concurrently. Disjoint from TEST-08 (frontend only) | ✅ | |
-| TEST-08 | Footer shows the app version | [TEST-04, TEST-05] | feature/TEST-08-footer-app-version | | | ✅ | |
+| TEST-01 | Static landing page | [] | feature/TEST-01-static-landing-page | ✅ | | | 1 |
+| TEST-02 | Health endpoint | [TEST-01] | feature/TEST-02-health-endpoint | | ⚠️ both TEST-02 and TEST-03 touch the FastAPI app entry (router registration); serialize if run concurrently | | 2 |
+| TEST-03 | Simple note form | [TEST-01] | feature/TEST-03-simple-note-form | | ⚠️ both TEST-02 and TEST-03 touch the FastAPI app entry (router registration); serialize if run concurrently | ✅ | 2 |
+| TEST-04 | Page footer with app version | [TEST-01] | feature/TEST-04-page-footer | | ⚠️ TEST-04 and TEST-03 both modify frontend/src/components/LandingPage.tsx; serialize if run concurrently. Disjoint from TEST-02 (backend only) | ✅ | 2 |
+| TEST-05 | Backend version endpoint | [TEST-01] | feature/TEST-05-version-endpoint | | ⚠️ TEST-05 and TEST-02 both modify backend/app/main.py and backend/tests/unit/test_main_unit.py; serialize if run concurrently. Disjoint from TEST-04 (frontend only) | ✅ | 2 |
+| TEST-06 | Echo endpoint | [TEST-01] | feature/TEST-06-echo-endpoint | | ⚠️ TEST-06 and TEST-07 both register a router in backend/app/main.py; serialize if run concurrently. Disjoint from TEST-08 (frontend only). Also shares backend/app/main.py with FEAT-1 | ✅ | 2 |
+| TEST-07 | Uptime endpoint | [TEST-01] | feature/TEST-07-uptime-endpoint | | ⚠️ TEST-07 and TEST-06 both register a router in backend/app/main.py; serialize if run concurrently. Disjoint from TEST-08 (frontend only). Also shares backend/app/main.py with FEAT-1 | ✅ | 2 |
+| TEST-08 | Footer shows the app version | [TEST-04, TEST-05] | feature/TEST-08-footer-app-version | | | ✅ | 3 |
+| FEAT-1 | Server time endpoint | [TEST-01] | feature/FEAT-1-server-time-endpoint | | ⚠️ FEAT-1, TEST-06 and TEST-07 all register a router in backend/app/main.py; serialize if run concurrently. Disjoint from TEST-08 (frontend only) | ✅ | 2 |
 
 Scaffold gate: TEST-01 (`scaffold: true` in its frontmatter) is **done**, so the gate passes. TEST-01 through TEST-05 are done; TEST-06, TEST-07 and TEST-08 are ready (TEST-06 and TEST-07 share `backend/app/main.py`, serialize them; TEST-08 is independent of both).
