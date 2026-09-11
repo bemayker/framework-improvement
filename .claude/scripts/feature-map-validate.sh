@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# materialized-from: mayker-dev v0.3.132; do not edit, regenerate with /upgrade-project
+# materialized-from: mayker-dev v0.3.167; do not edit, regenerate with /upgrade-project
 #
 # Schema validator for a consuming repo's `.claude/feature_map.md` (MDF-044).
 #
@@ -64,11 +64,20 @@
 # repo's CI ever objected — at push time, after the work was built.
 #
 # READERS OF THE COLUMNS, which is why the schema grows by APPENDING and never by
-# inserting: `hooks/lib/test-scope.sh` reads the first six positionally, and
-# `hooks/lib/checkpoint-suite.sh` reads the seventh (`test_checkpoint`, MDF-071).
-# A column inserted rather than appended silently re-points both of them, and
-# both fail in the quiet direction — a scoped test run against the wrong closure,
-# and a checkpoint that never fires.
+# inserting: `hooks/lib/test-scope.sh` reads the first six positionally,
+# `hooks/lib/checkpoint-suite.sh` reads the seventh (`test_checkpoint`, MDF-071),
+# and `hooks/lib/feature-map-waves.sh` and `hooks/lib/feature-map-propose.sh` read
+# the eighth (`wave`, MDF-179). A column inserted rather than appended silently
+# re-points all of them, and they fail in the quiet direction — a scoped test run
+# against the wrong closure, a checkpoint that never fires, and a wave view of the
+# shared-risk notes.
+#
+# THE WAVE RULE IS THE ONE CROSS-ROW RULE THAT IS NOT ABOUT THE GRAPH'S SHAPE.
+# `wave` is authored sequencing intent, not readiness: a waved row's every
+# `depends_on` must be waved with a STRICTLY SMALLER wave, so a human can pull an
+# item forward only as far as its dependencies allow. Readiness is unchanged and
+# stays computed from `depends_on` alone; this rule only stops the map from
+# recording an order the graph forbids.
 
 set -uo pipefail
 
@@ -167,6 +176,7 @@ BEGIN {
   hdrSeen = 0; sepSeen = 0; ncols = 0; ntpl = 0
   scaffoldCount = 0; scaffoldRow = 0; scaffoldId = ""
   checkpointCount = 0; checkpointIds = ""
+  waveCount = 0; maxWave = 0
   structural = 0; bail = 0
 
   # --- schema from the SSOT template -----------------------------------------
@@ -249,6 +259,7 @@ function missingcols(cnt,    i, s) {
 
   id[nrows] = cell[1]; title[nrows] = cell[2]; deps[nrows] = cell[3]
   branch[nrows] = cell[4]; scaf[nrows] = cell[5]; chk[nrows] = cell[7]
+  wave[nrows] = (ncols >= 8 ? cell[8] : "")
 
   # illustrative template rows must not survive generation
   sig = join(cell, cnt)
@@ -330,6 +341,20 @@ function missingcols(cnt,    i, s) {
       else checkpointIds = checkpointIds "," id[nrows]
     }
   }
+
+  # wave (MDF-179). Authored ordering intent, never derived at read time. Empty is
+  # legal and means "unwaved"; the cross-row invariant is checked in END, because
+  # the wave of a dependency may be declared on a row not yet read.
+  if (wave[nrows] != "") {
+    if (wave[nrows] !~ /^[0-9]+$/ || wave[nrows] + 0 < 1) {
+      err(FNR, "wave-format", rowref(nrows) ": wave is \"" wave[nrows] "\", expected a positive integer or an empty cell. " \
+        "Every reader parses this cell as a number, so a non-integer is not an ordering key that sorts oddly, it is a row that drops out of the wave view and out of the `wave N` selector entirely")
+      structural = 1
+    } else {
+      waveOf[id[nrows]] = wave[nrows] + 0
+      waveCount++
+    }
+  }
 }
 
 END {
@@ -339,6 +364,29 @@ END {
   else if (!hdrSeen) err0("header", "the \"## Work items\" section has no table header row")
 
   if (!sawSchema) err0("schema-block", "no \"## Schema\" section. Materialize the template verbatim and keep its schema block intact")
+
+  # --- the wave invariant (MDF-179) ------------------------------------------
+  # For every waved row, every depends_on is waved and strictly smaller. An edge
+  # whose target is unknown is reported by depends-on-unknown below and skipped
+  # here, so one broken edge produces one message.
+  for (k = 1; k <= nedges; k++) {
+    if (!(ef[k] in seen)) continue
+    child = et[k]; parent = ef[k]
+    if (!(child in waveOf)) continue                 # an unwaved row may depend on anything
+    if (!(parent in waveOf)) {
+      err(eline[k], "wave-order", rowref(erow[k]) ": " child " is in wave " waveOf[child] \
+        " and depends on " parent ", which has no wave. Give " parent " a wave below " waveOf[child] \
+        ", or clear the wave on " child ". A wave is an authored order over the graph, so it may not run ahead of an edge")
+    } else if (waveOf[parent] >= waveOf[child]) {
+      err(eline[k], "wave-order", rowref(erow[k]) ": " child " is in wave " waveOf[child] \
+        " and depends on " parent ", which is in wave " waveOf[parent] \
+        ". A dependency must carry a strictly smaller wave; move " parent " below " waveOf[child] \
+        " or move " child " above " waveOf[parent])
+    }
+    if (waveOf[child] > maxWave) maxWave = waveOf[child]
+    if (waveOf[parent] > maxWave) maxWave = waveOf[parent]
+  }
+  for (i = 1; i <= nrows; i++) if ((id[i] in waveOf) && waveOf[id[i]] > maxWave) maxWave = waveOf[id[i]]
 
   # unresolved depends_on
   for (k = 1; k <= nedges; k++) {
@@ -401,9 +449,10 @@ END {
     exit 1
   }
   if (!QUIET)
-    printf "[feature-map] %s: valid (%d row%s, %d edge%s, scaffold %s%s%s)\n", FILE, nrows, (nrows == 1 ? "" : "s"), \
+    printf "[feature-map] %s: valid (%d row%s, %d edge%s, scaffold %s%s%s%s)\n", FILE, nrows, (nrows == 1 ? "" : "s"), \
       nedges, (nedges == 1 ? "" : "s"), (scaffoldId == "" ? "none" : scaffoldId), \
       (checkpointCount > 0 ? ", checkpoint " checkpointIds : ""), \
+      (waveCount > 0 ? ", waves 1-" maxWave " on " waveCount " row" (waveCount == 1 ? "" : "s") : ", no waves"), \
       (nwarn > 0 ? ", " nwarn " warning" (nwarn == 1 ? "" : "s") : "")
   exit 0
 }

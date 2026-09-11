@@ -1,8 +1,10 @@
-<!-- materialized-from: mayker-dev v0.3.132; do not edit, regenerate with /upgrade-project -->
+<!-- materialized-from: mayker-dev v0.3.167; do not edit, regenerate with /upgrade-project -->
 <!--
   Universal standard. Imported into CLAUDE.md (always on). Do not edit per project.
   MCP usage is gated by Work Item Source: issue tracker + Git provider patterns,
-  status flow, dependency checking, feature reading.
+  status flow, dependency checking, feature reading. The Git provider path is
+  keyed on the provider: GitHub is the `gh` CLI, always; GitLab and Bitbucket
+  are the provider MCP.
 -->
 
 # MCP Integration
@@ -10,19 +12,19 @@
 This framework uses two MCP (Model Context Protocol) connections, and how mandatory each one is depends on `CLAUDE.md` Work Item Source (see the gate below):
 
 1. **Issue tracker MCP** (Linear, ClickUp, Jira), reading features, checking dependencies, updating status. Required for `tracker` and `hybrid`; not needed for `local`.
-2. **Git provider MCP** (GitHub, GitLab, Bitbucket), creating branches, PRs, reading PR review comments. Recommended, and it degrades to the `gh` CLI, so it is hard-required only when a PR or review-comment operation is needed and `gh` cannot stand in. Whether the MCP actually works is established by a **functional probe**, and the resulting working path (`mcp` or `gh`) is recorded in `project_state.json` and reused by later sessions (Section 5.0).
+2. **Git provider path** (creating branches, PRs, reading PR review comments), and it is **keyed on the provider rather than on availability** (Section 5.0). On **`github`** — github.com and GitHub Enterprise alike — every remote operation goes through the **`gh` CLI** (`gh`, `gh api`, and `git` for the transport), in both modes, and **no `mcp__github__*` call is ever made**; there is no Git provider MCP on that path and none is configured. On **`gitlab`** and **`bitbucket`** the provider MCP is the path, established by a **functional probe** and degrading per Section 6. The resolved working path (`gh` or `mcp`) is recorded in `project_state.json` and reused by later sessions (Section 5.0).
 
-> **Work item source gates the issue tracker MCP.** The above is the default (`Work Item Source: tracker`). When `CLAUDE.md` Work Item Source is `local`, work items live in `docs/issues/` (see `work_items.md`) and the issue tracker MCP is **not required**. The Git provider MCP stays recommended for PRs and review comments but degrades to the `gh` CLI; if neither is available, PR steps fall back to a manual note. For `hybrid`, the tracker MCP is required only to resolve items that live in the tracker.
+> **Work item source gates the issue tracker MCP.** The above is the default (`Work Item Source: tracker`). When `CLAUDE.md` Work Item Source is `local`, work items live in `docs/issues/` (see `work_items.md`) and the issue tracker MCP is **not required**. The Git provider path is unaffected by Work Item Source: it is decided by the provider (Section 5.0), so a `local`-source GitHub project still runs its PR and review-comment operations through `gh`. For `hybrid`, the tracker MCP is required only to resolve items that live in the tracker.
 
 The live connections are defined in `.mcp.json` (project scope, committed to the repo). Set them up with `claude mcp add --scope project <name> ...` and verify with `claude mcp list` or `/mcp` inside a session. **You create this file by hand: it is written by `claude mcp add`, never by `/init-project` or `/sync-project`.** That is why `/init-project`'s Section 9 report names it as the step between filling in `CLAUDE.md` and running `/sync-project` — `/sync-project` Section 0 verifies the MCPs before it does anything else, so a repo that reaches it without this file stops there. The report keeps the tracker half conditional, for the same reason the gate below is: a `local` source needs no tracker MCP. In unattended cloud surfaces (Claude Code on the web / Routines), the same project-scoped `.mcp.json` is used, and the servers' credentials are supplied by the environment rather than a local machine.
 
-If a *required* MCP is unavailable when an agent starts (the issue tracker MCP only when Work Item Source is `tracker` or `hybrid`; the Git provider MCP when a PR or review-comment operation is needed and the `gh` CLI cannot stand in), the agent must **stop immediately** with a clear error:
+If a *required* MCP is unavailable when an agent starts (the issue tracker MCP only when Work Item Source is `tracker` or `hybrid`; the Git provider MCP on a `gitlab` or `bitbucket` project when a PR or review-comment operation is needed), the agent must **stop immediately** with a clear error:
 
 > "⛔ **MCP ERROR:** {Issue tracker | Git provider} MCP is not available. This connection is required for the current Work Item Source and operation (see the source gate above). Run `claude mcp list` to check, and see `docs/DEVELOPMENT.md` for setup instructions."
 
 ## 0. Pre-Requisite: `project_state.json`
 
-The **pipeline commands** (`/plan-feature`, `/build-feature`, `/plan-features`, `/build-features`, `/revise-feature`, `/refactor`, `/generate-tests`) require `.claude/project_state.json` to exist; it is generated by `/sync-project` and committed to the repo. **Seven commands require it and five are deliberate exceptions**, which accounts for all fourteen; the same seven and five are listed in `workflow_triggers.md` Section 3 and the two lists must agree. The exceptions do **not** require it: `/diagnose` (analysis only, no MCP), `/fix` (which can create and act on a fresh local work item with nothing else present), `/watch-pr` (which polls a PR's checks and needs no project state), and `/security-scan` / `/security-fix` (which scan or remediate any directory or PR branch with no project state needed). `/sync-project` generates the file rather than requiring it, `/init-project` runs before it exists and never reads it, and `/upgrade-project` **reads it if present and reports its absence rather than stopping** — a repo whose state file is missing or unparseable is exactly a repo that needs maintenance, so refusing to run there would withhold the heal from the case that needs it.
+The **pipeline commands** (`/plan-feature`, `/build-feature`, `/plan-features`, `/build-features`, `/revise-feature`, `/refactor`, `/generate-tests`) require `.claude/project_state.json` to exist; it is generated by `/sync-project` and committed to the repo. **Seven commands require it and six are deliberate exceptions**, which with the four that generate, precede or report on the file accounts for all seventeen; the same seven and six are listed in `workflow_triggers.md` Section 3 and the two lists must agree. The exceptions do **not** require it: `/diagnose` (analysis only, no MCP), `/fix` (which can create and act on a fresh local work item with nothing else present), `/watch-pr` (which polls a PR's checks and needs no project state), `/security-scan` / `/security-fix` (which scan or remediate any directory or PR branch with no project state needed), and `/waves` (which renders `feature_map.md` plus `docs/issues/` frontmatter and writes nothing). `/sync-project` generates the file rather than requiring it, `/init-project` runs before it exists and never reads it, and `/upgrade-project` **reads it if present and reports its absence rather than stopping** — a repo whose state file is missing or unparseable is exactly a repo that needs maintenance, so refusing to run there would withhold the heal from the case that needs it.
 
 **Before reading any MCP configuration, a command that needs `project_state.json` checks:**
 
@@ -52,9 +54,9 @@ Generated by `/sync-project`. Committed to the repo. Read by the pipeline agents
     "provider": "<github | gitlab | bitbucket>",
     "repository": "<owner/repo-name>",
     "effective_path": {
-      "path": "<mcp | gh>",
+      "path": "<gh | mcp>",   // always `gh` when provider is `github`
       "host": "<git host, e.g. github.com or agristo.ghe.com>",
-      "verified_at": "<UTC ISO 8601 timestamp of the probe>",
+      "verified_at": "<UTC ISO 8601: when the recorded path was last ESTABLISHED, not when a probe last ran>",
       "plugin_version": "<mayker-dev version that ran the probe>",
       "mcp_server_url": "<the Git MCP server URL or command from .mcp.json at probe time; empty string if none configured>"
     }
@@ -83,13 +85,13 @@ Generated by `/sync-project`. Committed to the repo. Read by the pipeline agents
   },
   "discovery": {
     "last_scan_commit": "<the base-branch commit the last discovery scan read this project at>",
-    "scanned_at": "<UTC ISO 8601 timestamp of that scan>",
+    "scanned_at": "<UTC ISO 8601: when last_scan_commit was last ESTABLISHED, not when a scan last ran>",
     "scanned_by": "<the command that ran it, diagnostic only>"
   },
   "framework": {
     "initialized_at": "<plugin version whose /sync-project first wrote this file, or \"unknown\">",
     "migrated_to": "<plugin version /upgrade-project last migrated this repo to>",
-    "migrated_at": "<UTC ISO 8601 timestamp of that migration>",
+    "migrated_at": "<UTC ISO 8601: when migrated_to was last ESTABLISHED, not when /upgrade-project last ran>",
     "declined": [ { "id": "<migration id>", "reason": "<why this repo refuses it>" } ]
   },
   "autonomy": {
@@ -111,9 +113,11 @@ Generated by `/sync-project`. Committed to the repo. Read by the pipeline agents
 }
 ```
 
-> **`discovery` is written by whichever command owns discovery, and it is the only thing the re-scan trigger reads.** That command is `/sync-project` (Section 5), and it writes the block on every run — but it re-derives less than that sounds like. Codebase discovery is that skill's Section E step 1, and it runs only in `existing` mode and only into a field that is still a placeholder; the Backing Services block is the one thing re-derived on every run and in both modes (Section 0 step 5). The block records when discovery last ran, not that every discoverable field was recomputed. Ownership moved there from `/init-project` when the two halves split, and it moved without touching a reader, which is the property the next paragraph protects. `last_scan_commit` is the base-branch commit the project was read at, and `/plan-feature`'s Summary compares `origin/main` against it to **suggest** a re-scan past the `CLAUDE.md` → Codebase scan threshold (default 20 commits). Three properties are deliberate: the trigger reads `last_scan_commit` **only**, never `scanned_by`, so the field's owner can change without touching any reader; a file with no `discovery` block behaves exactly like one whose distance is under the threshold, which is why it needs no backfill; and nothing is ever re-scanned automatically, because discovery rewrites the state a running command is reading. `scanned_at` and `scanned_by` are diagnostic.
+> **Every `_at` field in this file records when the recorded value was last ESTABLISHED, never when the command last ran, and no writer may stamp one unconditionally** (MDF-168). `verified_at` moves when `path`, `host`, `plugin_version` or `mcp_server_url` moves; `scanned_at` moves when `last_scan_commit` or `scanned_by` moves; `migrated_at` moves when `migrated_to`, `initialized_at` or `declined` moves. A block whose non-timestamp fields are identical to what the file already holds is **not written at all** — not rewritten with a fresh stamp, not touched. **The rule is a property of the file, not of one command**, because a wall-clock field that moves on every run makes `/sync-project` Section 10's "rewrites no file" claim and `/upgrade-project`'s equivalent unreachable, leaves a dirty tree that Section P's ruleset can only clear through a pull request, and hands `/build-feature` Section 3's clean-tree STOP a repo to refuse. Measured at plugin 0.3.132 before the fix: three consecutive `/sync-project` runs on an unchanged repo, one modified file every time, two of the three changed fields pure wall clock. **The mechanism is `hooks/lib/project-state-write.sh`** for the two blocks a skill writes, and the same rule inline in `hooks/lib/migration-run.sh` for `framework`, which already holds this file parsed and replaces it whole. **`last_scan_commit` is the one field that legitimately moves on a re-run**, and only when the base branch moved since the last sync — a true state change, committed as such.
 
-> **Optional blocks (backward compatible).** `git_provider.effective_path` is the recorded Git-provider working path (written by the Section 5.0 probe; files without it stay valid — the next pipeline session probes and adds it). `framework` is written by `/upgrade-project` and is **diagnostic only**: `initialized_at` is written once by `/sync-project` and never touched again (`"unknown"` on a repo that predates the field — never a guess), `migrated_to` and `migrated_at` record the last migration run, and `declined` is human-maintained and never written by any command. **Nothing reads `migrated_to` to decide whether to run a migration**, because every detector runs on every invocation, so a file without the block behaves identically to one with a current block and needs no backfill. `autonomy` and `repositories` are written only for autonomous projects: `autonomy` mirrors the `CLAUDE.md` → Autonomy settings so unattended runs have them even if `CLAUDE.md` parsing fails, and `repositories` records every secondary repository the run created (per `autonomy.md` Section 7) plus which items target it. `git_provider` remains the primary repository. Files without these keys stay valid; readers must treat both as absent-able.
+> **`discovery` is written by whichever command owns discovery, and it is the only thing the re-scan trigger reads.** That command is `/sync-project` (Section 5), and it re-evaluates the block on every run and writes it when it moved (the `_at` rule above) — but it re-derives less than either of those sounds like. Codebase discovery is that skill's Section E step 1, and it runs only in `existing` mode and only into a field that is still a placeholder; the Backing Services block is the one thing re-derived on every run and in both modes (Section 0 step 5). The block records when discovery last ran, not that every discoverable field was recomputed. Ownership moved there from `/init-project` when the two halves split, and it moved without touching a reader, which is the property the next paragraph protects. `last_scan_commit` is the base-branch commit the project was read at, and `/plan-feature`'s Summary compares `origin/main` against it to **suggest** a re-scan past the `CLAUDE.md` → Codebase scan threshold (default 20 commits). Three properties are deliberate: the trigger reads `last_scan_commit` **only**, never `scanned_by`, so the field's owner can change without touching any reader; a file with no `discovery` block behaves exactly like one whose distance is under the threshold, which is why it needs no backfill; and nothing is ever re-scanned automatically, because discovery rewrites the state a running command is reading. `scanned_at` and `scanned_by` are diagnostic, and neither is read by anything.
+
+> **Optional blocks (backward compatible).** `git_provider.effective_path` is the recorded Git-provider working path (written by the Section 5.0 probe; files without it stay valid — the next pipeline session probes and adds it). **A record whose `provider` is `github` and whose `path` is `mcp` is stale by definition** and needs no migration to become correct: Section 5.0 point 1 already marks every record stale on a plugin version bump, so the first session after the upgrade re-probes and writes `gh`. `framework` is written by `/upgrade-project` and is **diagnostic only**: `initialized_at` is written once by `/sync-project` and never touched again (`"unknown"` on a repo that predates the field — never a guess), `migrated_to` and `migrated_at` record the last migration run, and `declined` is human-maintained and never written by any command. **Nothing reads `migrated_to` to decide whether to run a migration**, because every detector runs on every invocation, so a file without the block behaves identically to one with a current block and needs no backfill. `autonomy` and `repositories` are written only for autonomous projects: `autonomy` mirrors the `CLAUDE.md` → Autonomy settings so unattended runs have them even if `CLAUDE.md` parsing fails, and `repositories` records every secondary repository the run created (per `autonomy.md` Section 7) plus which items target it. `git_provider` remains the primary repository. Files without these keys stay valid; readers must treat both as absent-able.
 
 > **The three `id_*` keys in a registry entry are absent-able too, and their absence has one reading, not a guess.** An entry written before plugin 0.3.91 carries `external_id` and `external_identifier` only. Read such an entry as `id_source: tracker` when `external_identifier` is non-empty, and as `id_source: framework` with `id_carrier: none` when it is empty — which is exactly what it was: an ID the framework made up and never wrote anywhere. Nothing stops on the absence, because the next `/sync-project` run fills all three in (Section 1.5, and that skill's Section 10). `id_carrier_field` is present only when `id_carrier` is `custom_field`.
 
@@ -149,7 +153,7 @@ The logical flow is identical in both modes; autonomy changes only **who** perfo
 
 **Minimum viable mapping:** the tracker must have at least statuses that can represent "not started", "in progress", "in review", "done", **and a distinct one for `ready_for_build`** — five, not four. Other framework statuses can share these. A tracker with fewer than five usable statuses cannot run the assisted lifecycle at all, and `/sync-project` stops rather than writing a mapping that collapses the approval gate.
 
-**Enforced, not documented.** `${CLAUDE_PLUGIN_ROOT}/hooks/lib/status-mapping-validate.sh {path-to-project_state.json}` checks a written mapping and exits 0 (valid), 1 (at least one of the three cannot be observed, each violation naming the colliding pair and the free tracker statuses available) or 2 (it could not check). `/sync-project` Section 1 refuses to present a colliding proposal and Section 5 validates the file it wrote; `/deliver` Section 2 applies the same rule to the mapping it adopts without asking; every pipeline skill that reads or writes an item's status re-runs it at Load Context and **warns once without blocking**, except `/deliver`, which stops there because an unattended run has nobody to read a warning. There is deliberately no repair command: the heal is a human editing `.claude/project_state.json` (`work_items.md` Section 4, which also records who deliberately does not run it).
+**Enforced, not documented.** `~/.mayker/mayker-dev/hooks/lib/status-mapping-validate.sh {path-to-project_state.json}` checks a written mapping and exits 0 (valid), 1 (at least one of the three cannot be observed, each violation naming the colliding pair and the free tracker statuses available) or 2 (it could not check). `/sync-project` Section 1 refuses to present a colliding proposal and Section 5 validates the file it wrote; `/deliver` Section 2 applies the same rule to the mapping it adopts without asking; every pipeline skill that reads or writes an item's status re-runs it at Load Context and **warns once without blocking**, except `/deliver`, which stops there because an unattended run has nobody to read a warning. There is deliberately no repair command: the heal is a human editing `.claude/project_state.json` (`work_items.md` Section 4, which also records who deliberately does not run it).
 
 ### 1.3 Identifiers always come from `project_state.json`
 
@@ -242,42 +246,67 @@ For a **local** item there is no MCP call: write the new framework status direct
 
 ## 5. Git Provider MCP Operations
 
-### 5.0 Functional verification and the recorded working path
+### 5.0 The working path is keyed on the provider, then verified
 
-Presence in the tool list is **not** verification: a misconfigured Git MCP (for example the hosted github.com endpoint pointed at a GitHub Enterprise repo) connects cleanly and then 404s on every repo call. Skills that need Git provider operations therefore verify with one cheap **functional call** and persist the outcome in `project_state.json` → `git_provider.effective_path` (schema in Section 1.1), so sessions after the first stop paying the try-MCP-fail-fallback tax:
+**The provider decides which mechanism is used; the probe only decides whether that mechanism works.** Presence in a tool list was never verification, and for GitHub the tool list is no longer the question at all:
 
-1. **Use the record when it is current.** The record is current when it exists, its `plugin_version` matches the installed plugin version (`${CLAUDE_PLUGIN_ROOT}/.claude-plugin/plugin.json`), and its `mcp_server_url` matches the Git provider server entry in `.mcp.json` (both absent counts as a match). If current, use `path` directly: `mcp` → the Git provider MCP; `gh` → the CLI, with **zero** MCP attempts. Do not re-probe a current record.
-2. **Probe when the record is missing or stale.** Issue one cheap read against the configured repository — for GitHub, `list_pull_requests` with page size 1 (any equivalent single-item read is fine). Success → `path: "mcp"`. Failure, or no Git MCP configured → check the `gh` CLI (`gh auth status`); usable → `path: "gh"` with the host.
-3. **Persist the outcome.** Write `effective_path` with `path`, `host`, `verified_at` (`date -u +%Y-%m-%dT%H:%M:%SZ`), the installed `plugin_version`, and the current `mcp_server_url`, and commit it with the session's branch. If **neither** path works, write nothing (there is nothing verified) and degrade per Section 6.
-4. **Recover in use.** If the recorded path fails mid-session (an MCP or CLI that has newly broken), fall back per Section 6 for the current operation, then re-probe and update the record so the next session starts on the working path.
-5. **Autonomous mode is unaffected in substance** (Section 7): the startup probe must be functional, but there is no `gh` fallback — a failing GitHub MCP probe stops the run, and a recorded `effective_path: "gh"` never licenses CLI use in autonomous mode; those runs re-probe the MCP at startup regardless of the record.
+- **`provider: github`** (github.com **and** GitHub Enterprise): the path is **`gh`**, by definition. `effective_path.path` is always `gh`, no `mcp__github__*` call is ever made in either mode, and there is no MCP attempt to degrade from.
+- **`provider: gitlab` / `bitbucket`**: the path is the provider MCP, established by a functional call, recorded, and degraded per Section 6 exactly as before.
 
-All operations below run through the recorded working path: the Git provider MCP when `effective_path.path` is `mcp`, the `gh` CLI when it is `gh`.
+Skills that need Git provider operations resolve it once and persist the outcome in `project_state.json` → `git_provider.effective_path` (schema in Section 1.1), so sessions after the first stop paying the verification tax:
+
+1. **Use the record when it is current.** The record is current when it exists, its `plugin_version` matches the installed plugin version (`~/.mayker/mayker-dev/.claude-plugin/plugin.json`), and its `mcp_server_url` matches the Git provider server entry in `.mcp.json` (both absent counts as a match — which is the normal state of a GitHub project). If current, use `path` directly: `gh` → the CLI, with **zero** MCP attempts; `mcp` → the provider MCP. Do not re-probe a current record. **A current record reading `path: "mcp"` on a `github` project is not honoured** — it predates this rule, and point 2 applies.
+2. **Probe when the record is missing, stale, or contradicts the provider.**
+   - **GitHub:** `gh auth status` against `git_provider.host` (`GH_HOST=<host>` for an Enterprise host, per the `env` block `/init-project` writes). Usable → `path: "gh"`. **Unusable → STOP the command, in both modes:**
+
+     > "⛔ **GIT PROVIDER:** GitHub projects require an authenticated `gh` CLI; run `gh auth login` or set `GH_TOKEN`."
+
+     There is no MCP attempt on this path and no Section 6 degrade: `gh` is the only mechanism, so an unusable `gh` is a setup failure and not a condition to work around.
+   - **GitLab / Bitbucket:** one cheap read against the configured repository through the provider MCP (any single-item read is fine). Success → `path: "mcp"`. Failure, or no provider MCP configured → degrade per Section 6.
+3. **Persist the outcome through the write-if-changed helper, never by hand.** One Bash call writes the block and decides its stamp:
+
+   ```bash
+   bash ~/.mayker/mayker-dev/hooks/lib/project-state-write.sh --apply \
+     --block git_provider.effective_path --stamp verified_at \
+     --data '{"path": "<gh|mcp>", "host": "<host>", "plugin_version": "<installed>", "mcp_server_url": "<url or empty string>"}' \
+     .claude/project_state.json
+   ```
+
+   Then commit it with the session's branch. **`verified_at` is the helper's and never yours** — it restamps only when `path`, `host`, `plugin_version` or `mcp_server_url` moved, which is the Section 1.1 rule above, and a re-probe that confirms the recorded answer therefore writes no file and leaves nothing to commit. Passing `verified_at` inside `--data` is exit 2. Exit 2 is never a pass: report the reason the helper printed rather than treating the record as written. Where nothing is verified, run nothing and write nothing.
+4. **Recover in use.** If the recorded path fails mid-session, re-probe and update the record so the next session starts on the working path. On a `gitlab` or `bitbucket` project the current operation degrades per Section 6; on GitHub a broken `gh` degrades to nothing and the command stops per point 2.
+5. **Autonomous mode uses the same rule and no other.** `/deliver` resolves the working path exactly as above, and on a GitHub project that path is `gh`. **There is no MCP-only clause any more** (retired 2026-09-08 by MDF-175, at plugin 0.3.141): what autonomy requires is that `gh` be usable **headlessly**, which means `GH_TOKEN` in the environment or a credential `gh auth status` accepts with no browser. An unattended run cannot complete an interactive login, so an unusable `gh` stops the run at startup per point 2 rather than prompting.
+
+All operations below run through the recorded working path: the `gh` CLI when `effective_path.path` is `gh`, the provider MCP when it is `mcp`.
 
 ### 5.1 Branch and PR Operations
 
-- **Create branch:** Use Git provider MCP or `git` CLI (both are acceptable).
-- **Create PR:** Use Git provider MCP. Include feature ID in the PR title.
-- **Update PR:** Use Git provider MCP to convert draft → ready, update title, update description, add labels. **The draft → ready conversion is gated on a settled CI watch** in every skill that performs it (build-feature Sections 18-19, fix Sections 9-10, deliver 6.6-6.7, refactor and generate-tests Sections 10-11): it fires the Slack announcement, so it happens after the checks are green, never on the push that starts them. **The announcement is the only thing it fires:** `pr-tests.yml` is deliberately not subscribed to `ready_for_review` (MDF-085), so the conversion starts no pipeline of its own, the watch that gated it is the last word on the PR's checks, and no skill re-watches or re-polls after converting. Title, description and label edits fire nothing and are unrestricted.
-- **Every command that opens a PR opens it as a draft and watches before converting.** There is exactly one exception, and it is explicit rather than a default: `/refactor` and `/generate-tests` accept `--no-watch`, and on that path they open the PR ready for review directly (one `opened` announcement instead of an `opened` plus a `ready_for_review`) and say in their summary that the checks were not watched. A command must never *silently* skip the watch, and no skill converts a PR out of draft without a settled watch behind it.
+- **Create branch:** `git` (`git switch -c`, or `git push -u` of a local branch) on either path; the provider MCP's branch tool is also acceptable when the path is `mcp`.
+- **Create PR:** `gh pr create` on the `gh` path, the provider MCP on the `mcp` path. Include the feature ID in the PR title.
+- **Update PR:** `gh pr ready` to convert draft → ready and `gh pr edit` for title, description and labels on the `gh` path; the provider MCP's update tool on the `mcp` path. **The draft → ready conversion is gated on a settled CI watch** in every skill that performs it (build-feature Sections 18-19, fix Sections 9-10, deliver 6.6-6.7, refactor and generate-tests Sections 10-11): it fires the Slack announcement, so it happens after the checks are green, never on the push that starts them. **The announcement is the only thing it fires:** `pr-tests.yml` is deliberately not subscribed to `ready_for_review` (MDF-085), so the conversion starts no pipeline of its own, the watch that gated it is the last word on the PR's checks, and no skill re-watches or re-polls after converting. Title, description and label edits fire nothing and are unrestricted.
+- **Every LIFECYCLE command that opens a PR opens it as a draft and watches before converting.** There are exactly two exceptions, both explicit rather than default:
+  - `/refactor` and `/generate-tests` accept `--no-watch`, and on that path they open the PR ready for review directly (one `opened` announcement instead of an `opened` plus a `ready_for_review`) and say in their summary that the checks were not watched.
+  - **The two MAINTENANCE commands are outside the rule rather than exempt from it** (MDF-164). `/upgrade-project` Step 13 and `/sync-project` Section G open one pull request each for the run's own generated artifacts, ready for review and unwatched. The draft-then-watch rule exists to gate a Slack announcement on green CI, and these two dispatch nothing, watch nothing and announce nothing; a draft they never convert would sit there forever, because neither command has a later phase to convert it in. **The scope word is what makes this readable: the rule is about the lifecycle, and a maintenance pull request is not a lifecycle deliverable.**
+  - **`/deliver`'s publish pull request is outside it on the same scope word, and differs from the two above in what follows the opening** (MDF-176). Section L lands everything an autonomous run writes to the default branch that is not an item's own deliverable — its initialization, a CI bootstrap, a local work item's Done flip, the run report — ready for review rather than as a draft, because that run **merges what it opens** through 6.9's gates and a draft is unmergeable. So it *is* watched, which the two maintenance pull requests are not; what it shares with them is carrying no work item, announcing nothing, and having no later phase in which a draft would ever be converted.
+
+  A command must never *silently* skip the watch, and no skill converts a PR out of draft without a settled watch behind it.
 
 ### 5.2 Reading PR Review Comments
 
 Used by `/revise-feature` and `/plan-feature` (when re-planning). **These are the PR's comments and they are only one of two feedback sources:** the tracker item's own comments are read through Section 2 step 3, they exist before any PR does, and neither source excuses skipping the other. A missing PR is therefore not the end of the feedback check in either command.
 
-1. Identify the PR for the feature branch via Git provider MCP.
-2. Fetch all review comments (both inline and general).
+1. Identify the PR for the feature branch through the working path: `gh pr view --json number,url,state` on the `gh` path, the provider MCP on the `mcp` path.
+2. Fetch all review comments, both inline and general: `gh api repos/{owner}/{repo}/pulls/{n}/comments` for the inline threads plus `gh pr view {n} --json comments,reviews` for the general ones, or the provider MCP's PR-read tool.
 3. Parse comments to extract actionable feedback.
-4. If the Git provider MCP is unavailable, fall back to the `gh` CLI to read the comments (`gh pr view --comments`, or `gh api`). Only if neither the MCP nor `gh` is available, stop: "Git provider MCP or `gh` required to read PR comments. Connect the MCP (`claude mcp add`), install `gh`, or paste the feedback into the task prompt."
+4. If the path cannot read them, stop: "Cannot read PR comments through the recorded working path ({path}). Fix it per Section 5.0 (GitHub: `gh auth login` or `GH_TOKEN`; GitLab/Bitbucket: `claude mcp add`), or paste the feedback into the task prompt." On a `gitlab` or `bitbucket` project a failed MCP read degrades per Section 6; on GitHub it is the Section 5.0 stop, because `gh` is the only mechanism.
 
 ### 5.3 Reading PR Checks and CI Logs
 
 Used by the `watch-pr` skill (the CI watch `/build-feature`, `/revise-feature`, and `/fix` run after their push and **before** handing the PR over) and by `/deliver` Section 6.7:
 
-1. Read the PR's check runs via the working path: GitHub MCP `pull_request_read` (status / check runs) plus `get_commit`, or the `gh` CLI (`gh pr checks {PR}`).
-2. For a failing check, fetch the failing job's log: `gh run view {RUN_ID} --log-failed` on the CLI path; on the MCP path use the check's output summary from `pull_request_read` when no job-log tool is available.
+1. Read the PR's check runs via the working path: `gh pr checks {PR}` (add `--json name,state,link` for a machine-readable answer) on the `gh` path, the provider MCP's PR-read tool on the `mcp` path.
+2. For a failing check, fetch the failing job's log: `gh run view {RUN_ID} --log-failed` on the `gh` path; on the `mcp` path use the check's output summary the PR-read tool returns when no job-log tool is available.
 3. Poll per the waiting policy (`workflow_triggers.md` Section 2.1): short exponential backoff, never a busy-loop, never one long fixed timer.
-4. If neither the MCP nor `gh` can read checks, the watch stops with a report; it never blocks or reverts the push that already happened (Section 6 semantics).
+4. If the working path cannot read checks, the watch stops with a report; it never blocks or reverts the push that already happened (Section 6 semantics).
 
 ### 5.4 Linking a PR to its work item, in both directions
 
@@ -287,12 +316,12 @@ A PR names its work item's location and the work item names its PR's. Both links
 
 **Absence is silent, and that is what keeps this migration-free.** A `project_state.json` written before the field existed has no `url`, and so does an item whose tracker returned none. That is a legitimate state, not a defect to announce in every PR body: the reader emits no line and posts no comment, and says nothing. A reader that assumes the field is present breaks every repo that has not re-synced.
 
-Two obligations follow, and each is stated verbatim in the skills that carry it:
+Two obligations follow, and each is stated verbatim in the skills that carry it. **The obligation set is every command that opens a PR *for a work item*, and the three pull requests outside it are named here rather than left as a gap** (MDF-164, MDF-176): `/upgrade-project` Step 13, `/sync-project` Section G and `/deliver` Section L each open a pull request for a run's own generated artifacts, and all three are **inapplicable** to everything below, because none of them has a work item — no `Work item:` line to write, no tracker item to comment on, and nothing to deduplicate a comment against. **`/deliver` Section L is the one that needs saying twice**, because `/deliver` 6.6 *is* in the set below: the same command opens both kinds of pull request, and only the item's carries these obligations. A future reader who finds any of the three missing from the six has found the arm, not an oversight (`REPO-34`).
 
 1. **The PR body's first line**, in every command that writes or regenerates a PR body: `/plan-feature` Section 11, `/build-feature` Section 19, `/deliver` 6.6, `/fix` Section 8, `/refactor` Section 9 and `/generate-tests` Section 9. It goes in the body template rather than being appended once, because three of those six regenerate the body wholesale and would destroy an appended line.
 2. **One comment on the work item carrying the PR's URL**, from the command that **creates** the PR, which is the five of those six that open one. `/build-feature` opens none (it updates and converts the PR `/plan-feature` opened), so it writes the line and posts no comment. The comment is deduplicated on the **PR URL** rather than on the item: `/plan-feature` and `/build-feature` share one PR and therefore one comment, while `/refactor` and `/generate-tests` open their own PRs against the same item and each legitimately gets its own. It is fail-soft, and never blocks a PR, a handover or a merge — so the failure reaches nothing else, and each of the five names the **report line** it surfaces on rather than promising "the summary": `/deliver` Section 8's `Item-to-PR link:`, and the `Item link:` line of the other four's closing summary block. Fail-soft without a named line is "never blocks" shipped as "never mentioned" (MDF-159, MDF-160).
 
-**Nothing Git-provider-specific, on either side.** No `Closes #`, `Fixes #` or `Resolves #`, and no issue-reference syntax: those keywords do nothing on GitLab or Bitbucket for an item in an external tracker, and on GitHub they would try to close a repository issue that does not exist. A plain markdown link renders on all three. **Every write goes through the recorded working path** (`git_provider.effective_path`, Section 5.0); the `gh` CLI is GitHub-only, so no step may reach for it directly instead of the recorded path.
+**Nothing Git-provider-specific, on either side.** No `Closes #`, `Fixes #` or `Resolves #`, and no issue-reference syntax: those keywords do nothing on GitLab or Bitbucket for an item in an external tracker, and on GitHub they would try to close a repository issue that does not exist. A plain markdown link renders on all three. **Every write goes through the recorded working path** (`git_provider.effective_path`, Section 5.0); `gh` is GitHub-only, so no step may reach for it on a `gitlab` or `bitbucket` project instead of the recorded path — and equally no step may reach for a provider MCP on a `github` project, where `gh` *is* the recorded path.
 
 **Do not lean on a tracker's native Git integration** (the ClickUp GitHub app, Jira's DVCS connector, Linear's GitHub sync) as the mechanism for the second direction. They are per-provider, separately installed and invisible to the framework, so a repo without one gets nothing and nothing reports the absence. Where one *is* installed the framework's comment is mildly redundant, which is the correct failure direction: do not build a detection branch for it.
 
@@ -304,30 +333,44 @@ Two obligations follow, and each is stated verbatim in the skills that carry it:
 
 1. **Status update failures:** Warn but continue. The implementation matters more than the status label.
 2. **Feature not in manifest:** Stop, the feature hasn't been imported.
-3. **Required MCP server unavailable — or failing its functional probe — at startup:** a Git MCP that is present but 404s on the Section 5.0 probe counts as unavailable. Stop only if the missing MCP is required for the current Work Item Source and operation (the issue tracker MCP for `tracker`/`hybrid`; the Git provider MCP for reading PR review comments). For `local` source with no tracker, or when the `gh` CLI can stand in for Git provider PR operations, do not stop: record the working path per Section 5.0 and continue on it.
+3. **Required MCP server unavailable — or failing its functional probe — at startup:** a provider MCP that is present but 404s on the Section 5.0 probe counts as unavailable. Stop only if the missing MCP is required for the current Work Item Source and operation (the issue tracker MCP for `tracker`/`hybrid`; the provider MCP for reading PR review comments on a `gitlab` or `bitbucket` project). For `local` source with no tracker, do not stop: record the working path per Section 5.0 and continue on it. **This point says nothing about a GitHub project**, which configures no Git provider MCP at all: there the mechanism is `gh` and an unusable `gh` is Section 5.0 point 2's stop, never a degrade.
 4. **MCP server becomes unavailable mid-operation:** Complete the current step, then warn. Do not block commits or pushes on MCP failures.
 5. **`project_state.json` missing:** Stop, run `/sync-project` first (or `/deliver`, which initializes non-interactively in autonomous mode).
-6. **Autonomous exception:** in autonomous mode (`CLAUDE.md` Autonomy: `autonomous`) points 3 and 4 do not soften the GitHub MCP: it is hard-required at startup and there is no `gh` fallback (Section 7). A GitHub MCP failure mid-run is retried with backoff; if it stays down, the run records the blocker and ends with a report rather than degrading to the CLI.
+6. **Autonomous exception:** in autonomous mode (`CLAUDE.md` Autonomy: `autonomous`) points 3 and 4 do not soften the **working path**: it is verified at startup per Section 5.0 and a failure there stops the run before it does anything, because an unattended run has nobody to read a degraded-mode warning. On GitHub that means an unusable `gh` (Section 5.0 point 2); on a `gitlab` or `bitbucket` project it means a provider MCP that fails its probe. A transport failure mid-run is retried with backoff; if it stays down, the run records the blocker and ends with a report rather than switching mechanisms mid-flight. *(Before MDF-175 this point read "there is no `gh` fallback" and made the GitHub MCP hard-required. That is retired: on GitHub `gh` is the only path there has ever been a fallback to, and it is now the path itself.)*
 
-## 7. Autonomous mode: all remote git through the GitHub MCP
+## 7. Autonomous mode: remote git through the provider's working path
 
-When `CLAUDE.md` → Autonomy is `autonomous`, the custom GitHub MCP (server name `github` in `.mcp.json`) is the **mandatory and only** path for every remote git action. The assisted-mode degradation to the `gh` CLI does not apply, and `git push`/`git fetch`-for-write and `gh` are not used for remote operations. Local git stays available for worktrees, local branches, local commits, and running tests; local read-only inspection of files is always fine. The deterministic hooks enforce the same gates on this path: `push_files`, `create_or_update_file`, and `delete_file` trigger the branch guard and the test gate exactly as `git push` does.
+When `CLAUDE.md` → Autonomy is `autonomous`, every remote git action goes through the working path Section 5.0 resolved — and **nothing else**. There is no second mechanism to fall back to and no mode-specific override: the path is the same one the assisted commands use, which is the whole point of recording it.
 
-Operation → tool mapping:
+**On a `github` project the path is `gh`, always.** `gh`, `gh api` and `git` for the transport are the entire remote surface, and **no `mcp__github__*` tool is called in either mode**. *(Reversed 2026-09-08 by MDF-175, at plugin 0.3.141. This section used to make the GitHub MCP the "mandatory and only" path with no `gh` fallback. Two facts retired it: the hosted github.com endpoint connects cleanly and 404s on every Enterprise host, which is why a functional probe and a persisted path had to exist at all, and `gh` with `GH_HOST` has no such failure mode; and a `Bash` write is gated by one matcher and one payload parser, while an MCP write surface is a moving set of tool names the hooks matched three of. Do not reinstate it.)*
 
-| Operation | GitHub MCP tool |
+Local git is used for worktrees, local branches, local commits, and running tests, exactly as before. The deterministic hooks gate the push: a `git push` — including the `git -C <dir> push` spelling a worktree run uses — triggers the branch guard and the test gate.
+
+Operation → command mapping on the `gh` path:
+
+| Operation | `gh` / `git` |
 | --- | --- |
-| Create a branch | `create_branch` |
-| Push changes to a branch | `push_files` (batched) / `create_or_update_file` / `delete_file` |
-| Open a PR | `create_pull_request` |
-| Update a PR (title, body, state) | `update_pull_request` |
-| Read PR state, checks, comments, reviews, diff | `pull_request_read` |
-| List PRs / branches / commits | `list_pull_requests` / `list_branches` / `list_commits` |
-| Commit and check status | `get_commit` |
-| Reply to review comments | `add_reply_to_pull_request_comment`, `add_issue_comment` |
-| Update a stale PR branch from base | `update_pull_request_branch` (only on staleness or conflict) |
-| Merge a PR | `merge_pull_request` (merge method per `CLAUDE.md` Autonomy) |
-| Create a repository (under `bemayker`) | `create_repository` |
-| Read remote files | `get_file_contents` |
+| Create a branch | `git switch -c {branch}`, then `git push -u origin {branch}` |
+| Push changes to a branch | `git -C {tree} push origin {branch}` (the ignore entries are the filter; see below) |
+| Open a PR | `gh pr create --draft --base {base} --head {branch} --title ... --body-file ...` |
+| Update a PR (title, body) | `gh pr edit {n} --title ... --body-file ...` |
+| Convert a draft to ready | `gh pr ready {n}` |
+| Read PR state and metadata | `gh pr view {n} --json state,isDraft,mergeable,mergeStateStatus,reviewDecision` |
+| Read PR checks | `gh pr checks {n} --json name,state,link` |
+| Read a failing job's log | `gh run view {run_id} --log-failed` |
+| Read review comments | `gh api repos/{owner}/{repo}/pulls/{n}/comments` plus `gh pr view {n} --json comments,reviews` |
+| Reply to a review comment | `gh api --method POST repos/{owner}/{repo}/pulls/{n}/comments/{comment_id}/replies -f body=@{file}` |
+| Comment on a PR | `gh pr comment {n} --body-file {file}` |
+| List PRs / branches / commits | `gh pr list --json ...` / `git ls-remote --heads origin` / `git log` |
+| Update a stale PR branch from base | `gh api --method PUT repos/{owner}/{repo}/pulls/{n}/update-branch` (only on staleness or conflict) |
+| Merge a PR | `gh pr merge {n} --squash` (the method per `CLAUDE.md` Autonomy → Merge method: `--squash`, `--merge` or `--rebase`) |
+| Create a repository | `gh repo create {org}/{name} --private --add-readme` |
+| Read remote files | `git show origin/{branch}:{path}`, or `gh api repos/{owner}/{repo}/contents/{path}` |
 
-If the GitHub MCP is not connected when an autonomous run starts, the run **stops before doing anything**: "⛔ The GitHub MCP is required for autonomous delivery. Add it with `claude mcp add --scope project github ...`." This is the setup gate, not a mid-run prompt.
+**Two mechanics differ from an API push and are not translations of it.** First, **`git push` obeys `.gitignore`**: the framework's ignore entries are what keep statistics files off a feature branch, so no step re-states an exclusion list, and no step uses `git add -f` or `git add -A` — a push stages the explicit file list the run itself wrote (`work_items.md` Section 9). Second, **a pushed file is only tracked content if git tracks it**, so anything a run publishes to the default branch is committed at a tracked path rather than written under an ignored tree (`/deliver` Section 8).
+
+**Every command a skill writes on this path must satisfy the Bash command shape rule** (`workflow_triggers.md` Section 5): no `$(…)`, no `cd` segment before `git` or `gh`, no trailing operator. `git -C <dir>` is how a command reaches a worktree, and `gh` takes `--repo {owner}/{repo}` where the target is not the current checkout.
+
+**On a `gitlab` or `bitbucket` project the path is that provider's MCP**, probed per Section 5.0 and mandatory in the same sense: a failing probe stops the run at startup rather than degrading. **One consequence is stated rather than papered over:** the framework's push hooks are `PreToolUse` matchers on `Bash`, so a provider MCP's own write tools are **not gated by the branch guard or the test gate**. No project, fixture or example configures either server today, so no arm is written against tool names nobody has run; when such a project exists, a ticket enumerates that server's write tools and adds the matcher and the arms back. On GitHub the question is moot: every write is a `Bash` call.
+
+If the working path cannot be verified when an autonomous run starts, the run **stops before doing anything** — the Section 5.0 point 2 message for GitHub, or "⛔ The {provider} MCP is required for autonomous delivery on a {provider} project. Add it with `claude mcp add --scope project {provider} ...`." for the other two. This is the setup gate, not a mid-run prompt.

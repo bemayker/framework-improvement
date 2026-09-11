@@ -1,9 +1,9 @@
-<!-- materialized-from: mayker-dev v0.3.132; do not edit, regenerate with /upgrade-project -->
+<!-- materialized-from: mayker-dev v0.3.167; do not edit, regenerate with /upgrade-project -->
 <!--
   Universal standard. Imported into CLAUDE.md (always on). Do not edit per project.
   Autonomous decision authority, decision log, merge policy, escalation bar,
-  GitHub-MCP-only git, repository creation policy. Inert unless CLAUDE.md
-  Autonomy is `autonomous`.
+  remote git through the provider's working path, repository creation policy.
+  Inert unless CLAUDE.md Autonomy is `autonomous`.
 -->
 
 # Autonomy standard
@@ -51,7 +51,7 @@ When only one condition holds, act: an ambiguous but reversible choice is decide
 
 ## 5. Merge policy (autonomous)
 
-A PR is merged, via the GitHub MCP `merge_pull_request` and by the framework's own decision, when **all** of the following hold:
+A PR is merged, through the Git provider working path (`mcp_integration.md` Section 5.0 — `gh pr merge` on a GitHub project) and by the framework's own decision, when **all** of the following hold:
 
 1. Self-review is clean: the reviewer's verdict line reports `blocking=0` (`review_standards.md` Section 6.2), i.e. no unresolved BLOCKING findings.
 2. All CI checks on the PR have completed and are green. Never merge with checks pending or failing. The PR is opened as a draft and converted to ready for review only once they are (deliver Sections 6.6 and 6.7 step 5), so a still-draft PR at merge time means the checks never settled — and GitHub refuses to merge a draft in the first place.
@@ -61,17 +61,23 @@ A PR is merged, via the GitHub MCP `merge_pull_request` and by the framework's o
 
 The merge method is `CLAUDE.md` → Autonomy → Merge method (default `squash`). After merging, the framework verifies the work item transitioned to Done on its **authoritative** side (`work_items.md` Sections 3-4: the tracker twin for a tracker-resident item, the file for a local one) and performs the transition itself via the tracker MCP or the local frontmatter — both, for a `hybrid` item that has a twin and a shadow file — if CI could not, then recomputes the dependency graph so dependents unblock.
 
-## 6. Git operations: GitHub MCP only
+## 6. Git operations: the provider's working path, and nothing else
 
-In autonomous mode, **every remote git operation goes through the custom GitHub MCP** (registered as `github` in `.mcp.json`). No `git push`, `git fetch` from remotes for write purposes, and no `gh` CLI for remote actions. The assisted-mode degradation to the `gh` CLI does not apply: if the GitHub MCP is unavailable, the run stops before starting (this is a setup failure, not a mid-run prompt). The exact operation-to-tool mapping is in `mcp_integration.md` Section 7.
+In autonomous mode, **every remote git operation goes through the Git provider working path** recorded in `.claude/project_state.json` → `git_provider.effective_path` (`mcp_integration.md` Section 5.0). There is no second mechanism and no mode-specific override — the path is the same one the assisted commands use.
 
-Local, non-remote git remains allowed and expected: reading files, `git worktree` for per-item isolation (always on in an autonomous run, whatever `CLAUDE.md` → Worktrees says — that toggle governs the assisted commands, `workflow_triggers.md` Section 4.1), local branches, local commits, and local test runs. The deterministic hooks gate both push paths: a Bash `git push` and a GitHub MCP push (`push_files`, `create_or_update_file`, `delete_file`) each trigger the branch guard and the test gate.
+**On a `github` project that path is the `gh` CLI**, always: `gh`, `gh api`, and `git` for the transport. No `mcp__github__*` call is made, in either mode. `/deliver` therefore requires `gh` to be usable **headlessly** — `GH_TOKEN` in the environment, or a credential `gh auth status` accepts with no browser — and an unusable `gh` stops the run before it starts (a setup failure, not a mid-run prompt). On a `gitlab` or `bitbucket` project the path is that provider's MCP, and a failing startup probe stops the run the same way. The exact operation-to-command mapping is in `mcp_integration.md` Section 7.
+
+*(This section said "GitHub MCP only … no `git push` … and no `gh` CLI for remote actions" until MDF-175 reversed it at plugin 0.3.141. The reasons are on that section; the one that matters here is that a `Bash` write is gated by the framework's own two push hooks and an MCP write is gated only where a matcher happens to name the tool.)*
+
+**The default branch is reached through a pull request the run opens and merges, and never through a direct push** (MDF-176). That is not only the item lifecycle: the run's own artifacts — the initialization it writes, a CI pipeline it bootstraps, a local work item's Done flip, the final run report — land through `skills/deliver/SKILL.md` **Section L**, which cuts a `chore/mayker-deliver-{run_id}-{purpose}` branch (MDF-164's namespace, never a second prefix), commits the explicit path list, opens one pull request and merges it through Section 5's conditions. **The direct push is not kept as an optimisation for an unprotected branch:** `/sync-project` Section P's reference ruleset makes a pull request the only way onto that branch, `/deliver` never runs Section P, and a behaviour that depends on a server-side setting the run does not control fails at the worst moment — at the end of an otherwise successful run, taking the report, the decision log and the final state file with it. **One exception, and it is a necessity rather than a preference:** the first commit of a repository the run itself created (Section 7) has no base to branch from and carries no protection. Section L reports which arm every publish took, on the run report's `Run publish:` line.
+
+Local git remains allowed and expected: reading files, `git worktree` for per-item isolation (always on in an autonomous run, whatever `CLAUDE.md` → Worktrees says — that toggle governs the assisted commands, `workflow_triggers.md` Section 4.1), local branches, local commits, and local test runs. **The deterministic hooks gate the push:** a `git push`, including the `git -C <dir> push` spelling a worktree run uses, triggers the branch guard and the test gate.
 
 ## 7. Repository policy
 
 - **Default target:** the repository in `CLAUDE.md` → MCP Configuration → Repository. New work lands there on `feature/{ID}-{slug}` branches.
 - **New repository:** created only when a work item (or a coherent group of items) is a genuinely separately-deployable product or service: its own runtime and deploy lifecycle, no shared code with the primary repository, and the item or architecture notes say so or clearly imply it. Ambiguous cases default to a branch on the primary repository (reversible; extraction to a repo later is cheap, merging repos back is not). Record the call either way.
-- **Organization:** new repositories are always created under the **`bemayker`** organization (or the `CLAUDE.md` → Autonomy → Default organization override) via the GitHub MCP `create_repository`, then initialized per `skills/deliver/SKILL.md`: default branch, base structure, the PR-tests and auto-Done pipelines, and a record in `project_state.json` → `repositories` so later items target the right repo.
+- **Organization:** new repositories are always created under the **`bemayker`** organization (or the `CLAUDE.md` → Autonomy → Default organization override) through the working path (`gh repo create` on a GitHub project), then initialized per `skills/deliver/SKILL.md`: default branch, base structure, the PR-tests and auto-Done pipelines, and a record in `project_state.json` → `repositories` so later items target the right repo. **That initialization commit is the one direct push to a default branch an autonomous run makes** (Section 6): the repository is seconds old, nothing has applied protection to it, and there is no base to open a pull request against. Everything the run writes to it afterwards goes through Section L like any other landing.
 - **Repository creation toggle:** `CLAUDE.md` → Autonomy → Repository creation (`allowed` | `primary-only`). Under `primary-only`, everything is a branch on the primary repository and would-be-new-repo work is flagged in the decision log instead.
 
 ## 8. Bounded retries

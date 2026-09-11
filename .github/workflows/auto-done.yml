@@ -35,6 +35,11 @@ jobs:
       - uses: actions/checkout@v4
         with:
           ref: ${{ github.event.pull_request.base.ref }}
+          # The work-item file flip below pushes straight to the default branch.
+          # On a protected branch the default GITHUB_TOKEN cannot, and the
+          # built-in github-actions bot is not selectable as a ruleset bypass
+          # actor, so the flip rides a repository admin PAT when one is set.
+          token: ${{ secrets.MAYKER_FLIP_TOKEN || github.token }}
 
       - name: Resolve feature ID from branch
         id: fid
