@@ -46,6 +46,17 @@ on:
 
 # One run per PR branch; a newer push supersedes the one in flight. This keeps
 # CI load bounded when several items and fix-cycles push in quick succession.
+#
+# CANCELLATION IS ONLY SOUND BECAUSE THE CHANGE GATE IS PR-SCOPED, AND THE TWO
+# MAY NEVER BE CHANGED INDEPENDENTLY (MDF-170). Cancelling a run destroys its
+# conclusion, so the only conclusion GitHub ever reads is the LAST run's — and a
+# required status check is evaluated per head commit. That is safe only while
+# every run is self-sufficient about the whole PR, which is what the three-dot
+# diff below guarantees. Reintroduce a per-push (two-dot) diff range there and
+# this line silently becomes a way for a docs-only push landing seconds after a
+# code push to report green having tested nothing. `cancel-in-progress: false`
+# is not the fix either: push A's completed run reports on A's SHA, never on the
+# head that gets merged.
 concurrency:
   group: pr-tests-${{ github.head_ref || github.ref }}
   cancel-in-progress: true
@@ -56,55 +67,58 @@ permissions:
 
 jobs:
   # ---------------------------------------------------------------------------
-  # CHANGE GATE — did THIS push change code?
+  # CHANGE GATE — does THIS PR contain code?
   #
-  # A path filter cannot answer that (see the `on:` block above), so this job
-  # computes it from the event: on `synchronize` from the two-dot diff of the
-  # push itself (`before`..`after`), and on `opened`/`reopened` — where there is
-  # no previous head — from the three-dot PR diff. Those are the only three
-  # types in the trigger list, so there is no fourth arm.
+  # ONE DIFF RANGE, THREE-DOT, ON EVERY EVENT TYPE (MDF-170). The question is
+  # about the PR, not about the push: `git diff BASE_SHA...HEAD_SHA`, the merge
+  # base against the base branch, on `opened`, `synchronize` and `reopened`
+  # alike. There is no per-push arm and there must never be one again.
   #
-  # It fails OPEN: anything it cannot resolve (a force-push whose `before` is no
-  # longer reachable, a git failure) reports `code_changed=true` and every tier
-  # runs. The cost of a needless run is minutes; the cost of a silently skipped
-  # suite is a merged regression.
+  # It asked "what did THIS PUSH change?" until 0.3.134, from the two-dot
+  # `before`..`after` diff on `synchronize`. That answer is correct about the
+  # push and WRONG about the head, and `cancel-in-progress: true` above turns
+  # the difference into a hollow green: a docs-only push landing seconds after a
+  # code push cancels the code run, and its own run — the only one left with a
+  # conclusion, on the new head — skips every tier. The code was in the PR, was
+  # merged, and no completed run ever covered it. Every framework command that
+  # writes a work-item link or a handover artifact after pushing code produces
+  # exactly that pair of pushes.
+  #
+  # The rule the three-dot range implements: SKIP ONLY WHEN THE PR AS A WHOLE
+  # CONTAINS NO CODE. A PR that carries code runs the tiers on every push,
+  # whatever that push happened to touch.
+  #
+  # It fails OPEN: anything it cannot resolve (a missing base or head SHA, a
+  # git failure) reports `code_changed=true` and every tier runs. The cost of a
+  # needless run is minutes; the cost of a silently skipped suite is a merged
+  # regression.
   # ---------------------------------------------------------------------------
   changes:
     runs-on: ubuntu-latest
     outputs:
       code_changed: ${{ steps.gate.outputs.code_changed }}
     steps:
-      # Full history: the push's `before` commit and the merge base with the
-      # base branch both have to be present locally for the diffs below.
+      # Full history: the merge base with the base branch has to be present
+      # locally for the three-dot diff below to resolve.
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - name: Collect this push's changed files
+      - name: Collect this PR's changed files
         id: collect
         env:
-          ACTION: ${{ github.event.action }}
-          BEFORE: ${{ github.event.before }}
-          AFTER: ${{ github.event.after }}
           BASE_SHA: ${{ github.event.pull_request.base.sha }}
           HEAD_SHA: ${{ github.event.pull_request.head.sha }}
         run: |
           set -u
           resolved=false
           : > changed-files.txt
-          if [ "${ACTION:-}" = "synchronize" ] \
-            && [ -n "${BEFORE:-}" ] && [ -n "${AFTER:-}" ] \
-            && git cat-file -e "${BEFORE}^{commit}" 2>/dev/null \
-            && git cat-file -e "${AFTER}^{commit}" 2>/dev/null; then
-            # Two-dot: exactly what this push added, which is the whole point.
-            if git diff --name-only "${BEFORE}" "${AFTER}" > changed-files.txt 2>/dev/null; then
-              resolved=true
-            fi
-          elif [ -n "${BASE_SHA:-}" ] && [ -n "${HEAD_SHA:-}" ] \
+          if [ -n "${BASE_SHA:-}" ] && [ -n "${HEAD_SHA:-}" ] \
             && git cat-file -e "${BASE_SHA}^{commit}" 2>/dev/null \
             && git cat-file -e "${HEAD_SHA}^{commit}" 2>/dev/null; then
-            # Three-dot: the PR's whole diff. Correct on `opened`/`reopened`,
-            # and the conservative fallback after a force-push.
+            # Three-dot, on every event type: the PR's whole diff against the
+            # merge base. NEVER a two-dot per-push range — see the block above
+            # the `concurrency:` key and the one above this job (MDF-170).
             if git diff --name-only "${BASE_SHA}...${HEAD_SHA}" > changed-files.txt 2>/dev/null; then
               resolved=true
             fi
@@ -115,16 +129,28 @@ jobs:
 
       # NON-CODE PATHS — keep this list identical to the one the local pre-push
       # gate uses (`hooks/test-gate.sh`), so a diff that skips CI and a diff
-      # that skips the local gate can never disagree. Three prefixes, and every
-      # other path is code:
+      # that skips the local gate can never disagree. Four prefixes, one
+      # carve-out, and every other path is code:
       #
       #   docs/…      project documentation
       #   .claude/…   framework artifacts: plans, shared risks, review scopes,
       #               run statistics, the feature map, settings
+      #   .github/…   workflows and repository configuration (MDF-170)
       #   *.md        any Markdown file anywhere
       #
-      # `.github/…` is deliberately NOT here: a change to a workflow is exactly
-      # the change whose effect you want to see run.
+      #   .github/workflows/pr-tests.yml is the ONE carve-out and stays code:
+      #   it is the only workflow whose edit is exercised by the very tiers it
+      #   defines, so running them proves the edit. An edit to auto-done.yml or
+      #   notify-slack.yml is proved by nothing these tiers run, which is why
+      #   the rest of `.github/…` is non-code — it also keeps the framework's
+      #   own maintenance and publish PRs, which carry workflow edits and no
+      #   application code, mergeable under a ruleset that requires `pr-tests`.
+      #
+      # THE LIST IS SHARED WITH THE PRE-PUSH GATE; THE DIFF RANGE IS NOT, AND
+      # THAT ASYMMETRY IS DELIBERATE (MDF-170). `hooks/test-gate.sh` resolves a
+      # two-dot range (`@{u}..HEAD`) because it makes a claim about THE PUSH it
+      # is about to allow. CI resolves a three-dot range because a required
+      # check makes a claim about THE HEAD. Same list, different question.
       - name: Classify the changed paths
         id: gate
         env:
@@ -135,12 +161,13 @@ jobs:
           reason="the changed file set could not be resolved; running every tier"
           if [ "${RESOLVED:-false}" = "true" ] && [ -f changed-files.txt ]; then
             code_changed=false
-            reason="this push touched documentation and framework artifacts only"
+            reason="this PR touches documentation, framework artifacts and repository configuration only"
             while IFS= read -r f; do
               [ -n "$f" ] || continue
               case "$f" in
-                docs/*|.claude/*|*.md) continue ;;
-                *) code_changed=true; reason="this push changed ${f}"; break ;;
+                .github/workflows/pr-tests.yml) code_changed=true; reason="this PR changes ${f}"; break ;;
+                docs/*|.claude/*|.github/*|*.md) continue ;;
+                *) code_changed=true; reason="this PR changes ${f}"; break ;;
               esac
             done < changed-files.txt
           fi
@@ -181,18 +208,15 @@ jobs:
           python-version: "3.12"
       - name: Set up uv
         uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+          cache-dependency-glob: backend/uv.lock
+          prune-cache: false
       - name: Set up Node
         uses: actions/setup-node@v4
         with:
           node-version: "20"
 
-      - name: Cache uv downloads
-        if: steps.deps.outputs.python == 'true'
-        uses: actions/cache@v4
-        with:
-          path: ~/.cache/uv
-          key: ${{ runner.os }}-uv-${{ hashFiles('backend/uv.lock', 'backend/pyproject.toml') }}
-          restore-keys: ${{ runner.os }}-uv-
       - name: Cache npm downloads
         if: steps.deps.outputs.node == 'true'
         uses: actions/cache@v4
@@ -249,14 +273,10 @@ jobs:
           python-version: "3.12"
       - name: Set up uv
         uses: astral-sh/setup-uv@v5
-
-      - name: Cache uv downloads
-        if: steps.deps.outputs.python == 'true'
-        uses: actions/cache@v4
         with:
-          path: ~/.cache/uv
-          key: ${{ runner.os }}-uv-${{ hashFiles('backend/uv.lock', 'backend/pyproject.toml') }}
-          restore-keys: ${{ runner.os }}-uv-
+          enable-cache: true
+          cache-dependency-glob: backend/uv.lock
+          prune-cache: false
 
       - name: Install backend dependencies
         run: |
