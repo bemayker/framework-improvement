@@ -27,7 +27,7 @@
   "status_mapping": {
     "todo": "to do",
     "planning": "to do",
-    "plan_review": "to test",
+    "plan_review": "plan review",
     "ready_for_build": "on hold",
     "in_progress": "in progress",
     "in_review": "to test",
@@ -39,7 +39,8 @@
     "to test": "in_review",
     "on hold": "ready_for_build",
     "complete": "done",
-    "cancelled": null
+    "cancelled": null,
+    "plan review": "plan_review"
   },
   "features": {
     "TEST-02": {
