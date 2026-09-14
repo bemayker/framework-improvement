@@ -1,6 +1,22 @@
 import { test, expect, type Page } from "@playwright/test";
 
-const VERSION_ENDPOINT = "**/api/version";
+/**
+ * The backend route the footer reads its version from, compared as a WHOLE
+ * pathname.
+ *
+ * A substring or glob match is not merely loose here, it is wrong: under the
+ * Vite dev server — which is what CI serves — the browser also requests the
+ * source module `/src/api/version.ts`, and that path contains "/api/version".
+ * A substring matcher therefore resolves on the JavaScript module, and
+ * `response.json()` parses `import { API_BASE_URL } ...` and throws. Comparing
+ * the whole pathname accepts the real API call, cross-origin
+ * (http://localhost:8010/api/version) or same-origin, and rejects the module.
+ */
+const VERSION_PATHNAME = "/api/version";
+
+function isVersionUrl(url: URL): boolean {
+  return url.pathname === VERSION_PATHNAME;
+}
 
 /**
  * Opens the landing page and returns the version the browser itself received
@@ -12,7 +28,8 @@ async function gotoLandingPageAndReadVersion(page: Page): Promise<string> {
   const [response] = await Promise.all([
     page.waitForResponse(
       (candidate) =>
-        candidate.url().includes("/api/version") && candidate.request().method() === "GET",
+        isVersionUrl(new URL(candidate.url())) &&
+        candidate.request().method() === "GET",
     ),
     page.goto("/"),
   ]);
@@ -35,7 +52,7 @@ test.describe("TEST-08 footer app version", () => {
   test("shows the version-unavailable marker when the endpoint is unreachable", async ({
     page,
   }) => {
-    await page.route(VERSION_ENDPOINT, (route) => route.abort());
+    await page.route(isVersionUrl, (route) => route.abort());
 
     await page.goto("/");
 
@@ -53,7 +70,7 @@ test.describe("TEST-08 footer app version", () => {
   });
 
   test("shows the same marker when the endpoint answers 500", async ({ page }) => {
-    await page.route(VERSION_ENDPOINT, (route) =>
+    await page.route(isVersionUrl, (route) =>
       route.fulfill({
         status: 500,
         contentType: "application/json",
