@@ -1,6 +1,6 @@
 # UAT Script: TEST-08 Footer shows the app version
 
-Criteria 1 to 3 are verifiable in a browser against a running stack. Criterion 4 is a criterion about the test suite itself, so it is verified by running that suite. Two steps read source files (2.4 and 4.2's reporter reading is not one of them): the "never a string typed into the component" half of criterion 2 is observable only in the source, because a browser cannot tell a fetched version from a typed one.
+Criteria 1 to 3 are verifiable in a browser against a running stack. Criterion 4 is a criterion about the test suite itself, so it is verified by running that suite. One step reads a source file (2.4; 4.2's reporter reading is not one of them): the "never a string typed into the component" half of criterion 2 is observable only in the source, because a browser cannot tell a fetched version from a typed one.
 
 **The expected version is whatever the backend reports.** It is `[project].version` in `backend/pyproject.toml` — `0.1.0` at the time of writing — and it is read from `GET /api/version`, never from this document and never from `frontend/package.json`. A version bump changes the expected text without changing this script.
 

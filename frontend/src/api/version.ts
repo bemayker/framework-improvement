@@ -9,8 +9,8 @@ export type VersionResponse = {
   version: string;
 };
 
-/** The request is abandoned after this, so a hung backend cannot pin the footer
- *  in its loading state forever. */
+/** The request is abandoned after this — headers *and* body — so a hung backend
+ *  cannot pin the footer in its loading state forever. */
 export const VERSION_REQUEST_TIMEOUT_MS = 5000;
 
 const VERSION_URL = `${API_BASE_URL}/api/version`;
@@ -19,6 +19,12 @@ const FAILURE_PREFIX = "Loading the version failed";
 
 function describeError(error: unknown): string {
   return error instanceof Error ? error.message : String(error);
+}
+
+function timedOutError(): Error {
+  return new Error(
+    `${FAILURE_PREFIX}: timed out after ${VERSION_REQUEST_TIMEOUT_MS} ms`,
+  );
 }
 
 function isVersionResponse(body: unknown): body is VersionResponse {
@@ -49,40 +55,45 @@ export async function fetchVersion(): Promise<string> {
     VERSION_REQUEST_TIMEOUT_MS,
   );
 
-  let response: Response;
+  // The timer is cleared only once the whole response — headers and body — has
+  // been read. Clearing it when the headers arrive would leave `response.json()`
+  // reading a stream nothing can abandon, so a backend that answers headers and
+  // then stalls the body would pin the caller forever.
   try {
-    response = await fetch(VERSION_URL, { signal: controller.signal });
-  } catch (error) {
-    if (controller.signal.aborted) {
+    let response: Response;
+    try {
+      response = await fetch(VERSION_URL, { signal: controller.signal });
+    } catch (error) {
+      if (controller.signal.aborted) {
+        throw timedOutError();
+      }
+      throw new Error(`${FAILURE_PREFIX}: ${describeError(error)}`);
+    }
+
+    if (!response.ok) {
       throw new Error(
-        `${FAILURE_PREFIX}: timed out after ${VERSION_REQUEST_TIMEOUT_MS} ms`,
+        `${FAILURE_PREFIX}: ${response.status} ${response.statusText}`,
       );
     }
-    throw new Error(`${FAILURE_PREFIX}: ${describeError(error)}`);
+
+    let body: unknown;
+    try {
+      body = await response.json();
+    } catch {
+      if (controller.signal.aborted) {
+        throw timedOutError();
+      }
+      throw new Error(`${FAILURE_PREFIX}: the response body was not JSON`);
+    }
+
+    if (!isVersionResponse(body)) {
+      throw new Error(
+        `${FAILURE_PREFIX}: the response carried no version string`,
+      );
+    }
+
+    return body.version;
   } finally {
-    // Cleared as soon as the request settles, so a late abort cannot cut off
-    // the body read below.
     clearTimeout(timeoutId);
   }
-
-  if (!response.ok) {
-    throw new Error(
-      `${FAILURE_PREFIX}: ${response.status} ${response.statusText}`,
-    );
-  }
-
-  let body: unknown;
-  try {
-    body = await response.json();
-  } catch {
-    throw new Error(`${FAILURE_PREFIX}: the response body was not JSON`);
-  }
-
-  if (!isVersionResponse(body)) {
-    throw new Error(
-      `${FAILURE_PREFIX}: the response carried no version string`,
-    );
-  }
-
-  return body.version;
 }

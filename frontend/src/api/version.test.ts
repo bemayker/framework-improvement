@@ -108,6 +108,37 @@ describe("version API client", () => {
     expect(abortedSignal?.aborted).toBe(true);
   });
 
+  it("abandons a body that stalls after the headers arrive", async () => {
+    // The timeout's documented guarantee is that a hung backend cannot pin the
+    // caller forever. Headers arriving is not the request settling: without the
+    // timer still armed over the body read, this promise never resolves at all.
+    vi.useFakeTimers();
+    fetchMock.mockImplementation((_input, init) => {
+      const signal = init?.signal ?? undefined;
+
+      return Promise.resolve({
+        ok: true,
+        status: 200,
+        statusText: "OK",
+        json: () =>
+          new Promise<unknown>((_resolve, reject) => {
+            signal?.addEventListener("abort", () => {
+              reject(
+                new DOMException("The operation was aborted.", "AbortError"),
+              );
+            });
+          }),
+      } as Response);
+    });
+
+    const pending = fetchVersion();
+    const assertion = expect(pending).rejects.toThrow(
+      `Loading the version failed: timed out after ${VERSION_REQUEST_TIMEOUT_MS} ms`,
+    );
+    await vi.advanceTimersByTimeAsync(VERSION_REQUEST_TIMEOUT_MS);
+    await assertion;
+  });
+
   it("rejects when the response body is not JSON", async () => {
     fetchMock.mockResolvedValue(nonJsonResponse());
 
