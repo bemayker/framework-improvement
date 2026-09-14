@@ -62,11 +62,15 @@ def test_get_uptime_returns_the_elapsed_monotonic_seconds(monkeypatch, known_sta
 
     assert isinstance(response, UptimeResponse)
     assert response.uptime_seconds == 5.5
-    # Identity, not equality: pydantic passes an already-aware datetime through
-    # `AwareDatetime` unchanged (verified in this build), so `is` proves the
-    # handler hands over the captured constant rather than an equal value it
-    # recomputed. That is criterion 3's "captured once" in its sharpest form.
-    assert response.started_at is uptime_module.STARTED_AT
+    # Equality against the import-time constant is what excludes a per-request
+    # clock read: `STARTED_AT` is captured once at import, so a handler that
+    # recomputed `datetime.now(timezone.utc)` would return a strictly later
+    # instant and fail this assertion just as loudly. `is` would prove the same
+    # property only because pydantic currently hands an already-aware datetime
+    # through `AwareDatetime` without copying it — observed behaviour of the
+    # pinned version rather than a documented guarantee, so a minor release
+    # that normalised aware datetimes would redden a correct implementation.
+    assert response.started_at == uptime_module.STARTED_AT
 
 
 def test_get_uptime_returns_zero_when_no_time_has_elapsed(monkeypatch, known_start):
