@@ -1,0 +1,35 @@
+{
+  "run_id": "deliver-20260914T095103Z",
+  "round": 1,
+  "items": {
+    "FEAT-1": {
+      "phase": "6.4 build, Phase B dispatched",
+      "branch": "feature/FEAT-1-server-time-endpoint",
+      "worktree": ".claude/worktrees/FEAT-1",
+      "pr": 36,
+      "pr_state": "open draft",
+      "retries_used": 0,
+      "blocked_reason": null,
+      "notes": "plan self-approved at 6.2; branch reconciled with origin/main (merge a344be8); merged-since verdict=clean"
+    },
+    "TEST-07": {
+      "phase": "6.1 plan dispatched",
+      "branch": "feature/TEST-07-uptime-endpoint",
+      "worktree": null,
+      "pr": null,
+      "retries_used": 0,
+      "blocked_reason": null,
+      "notes": "build held behind FEAT-1 merge: both register a router in backend/app/main.py (shared_risk_notes, whole-manifest union)"
+    },
+    "TEST-08": {
+      "phase": "6.1 plan dispatched",
+      "branch": "feature/TEST-08-footer-app-version",
+      "worktree": null,
+      "pr": null,
+      "retries_used": 0,
+      "blocked_reason": null,
+      "notes": "frontend only, disjoint from both backend items; tracker correction comment overrides criterion 2 (version fetched from backend at runtime)"
+    }
+  },
+  "done_before_run": ["TEST-01", "TEST-02", "TEST-03", "TEST-04", "TEST-05", "TEST-06"]
+}
