@@ -1,21 +1,30 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import LandingPage from "./LandingPage";
-import { version } from "../../package.json";
 import { listNotes, createNote } from "../api/notes";
+import { fetchVersion } from "../api/version";
 
 vi.mock("../api/notes", () => ({
   listNotes: vi.fn(),
   createNote: vi.fn(),
 }));
 
+// The footer fetches the version from the backend at runtime, so the page test
+// stubs that client too rather than asserting a build-time constant.
+vi.mock("../api/version", () => ({
+  fetchVersion: vi.fn(),
+}));
+
 const listNotesMock = vi.mocked(listNotes);
 const createNoteMock = vi.mocked(createNote);
+const fetchVersionMock = vi.mocked(fetchVersion);
+const MOCKED_VERSION = "4.5.6";
 
-/** Renders the page and waits for the mount-time notes load to settle. */
+/** Renders the page and waits for both mount-time loads to settle. */
 async function renderLandingPage() {
   render(<LandingPage />);
   await waitFor(() => expect(listNotesMock).toHaveBeenCalledTimes(1));
+  await screen.findByTestId("app-footer-version");
 }
 
 describe("LandingPage", () => {
@@ -23,6 +32,8 @@ describe("LandingPage", () => {
     listNotesMock.mockReset();
     createNoteMock.mockReset();
     listNotesMock.mockResolvedValue([]);
+    fetchVersionMock.mockReset();
+    fetchVersionMock.mockResolvedValue(MOCKED_VERSION);
   });
 
   it("renders the app title 'Task Notes'", async () => {
@@ -43,11 +54,13 @@ describe("LandingPage", () => {
     expect(screen.getByRole("heading", { name: "Task Notes" })).toBeInTheDocument();
   });
 
-  it("renders the footer with the app name and version", async () => {
+  it("renders the footer with the app name and the version from the backend", async () => {
     await renderLandingPage();
 
     expect(screen.getByTestId("app-footer")).toHaveTextContent("Task Notes");
-    expect(screen.getByTestId("app-footer")).toHaveTextContent(version);
+    expect(screen.getByTestId("app-footer-version")).toHaveTextContent(
+      `v${MOCKED_VERSION}`,
+    );
   });
 
   it("renders the note form and the note list", async () => {
