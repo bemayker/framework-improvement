@@ -1,4 +1,4 @@
-<!-- materialized-from: mayker-dev v0.3.167; do not edit, regenerate with /upgrade-project -->
+<!-- materialized-from: mayker-dev v0.3.185; do not edit, regenerate with /upgrade-project -->
 <!--
   CANONICAL TEMPLATE — this file is the single source of truth for the shape of
   `.claude/feature_map.md`. `/sync-project` (Section 4) and `/deliver` (Section 2
@@ -28,12 +28,23 @@
   vendored validator pair, because the ROWS below are the project's own data. It
   exists so a map can say which plugin version shaped its structure.
 
-  Nothing re-materializes an existing map's structure: /sync-project Section 10
-  preserves rows and does not rewrite the scaffolding, and /deliver Section 2
-  skips setup entirely once project_state.json exists. So a map written before
-  this file gained `## Schema` and `## Work items` stays invalid forever, and the
-  heal for it is `hooks/lib/feature-map-repair.sh <path>` — named by migration
-  entry `0.3.107-01-feature-map-structure` — never a hand edit of the table.
+  Nothing re-materializes an existing map's structure, with ONE exception:
+  /sync-project Section 10 preserves rows and does not rewrite the scaffolding,
+  and /deliver Section 2 skips setup entirely once project_state.json exists. So
+  a map written before this file gained `## Schema` and `## Work items` stays
+  invalid forever, and the heal for it is `hooks/lib/feature-map-repair.sh
+  <path>` — named by migration entry `0.3.107-01-feature-map-structure` — never a
+  hand edit of the table.
+
+  THE EXCEPTION IS THE `## Schema` SECTION BELOW, since 0.3.179 (MDF-207).
+  /sync-project Section 5.3 runs `hooks/lib/feature-map-schema-reconcile.sh
+  --apply` on every run, in both modes, replacing that one section of an existing
+  map with this file's copy of it — so a block still documenting a column set
+  this file has since widened heals by a re-run, and a change confined to that
+  section owes no ledger entry (`REPO-13`'s test). Nothing else in an existing
+  map is touched by it: the rows, the preamble and the note below the table are
+  the project's, a section the project WROTE itself is left byte-for-byte and
+  reported, and an ABSENT section is still the repair script's to insert.
 -->
 
 # Feature Map, Dependencies
@@ -75,7 +86,7 @@ is why the script is **vendored** into `.claude/scripts/` rather than read from
 | `branch` | yes | `feature/{Feature ID}-{slug}` | The `feature/{ID}` prefix is a hard requirement: the auto-Done pipeline matches it on merge. Slug is lowercase, hyphenated, max 40 chars. |
 | `scaffold` | no | `✅` or empty | At most one row may be flagged. `new` mode only. The literal `scaffold: true` form is for local frontmatter, **not** this column. |
 | `shared_risk_notes` | no | `⚠️ {note}` or empty | **Derived, never authored.** Flags independent items likely to touch the same files. Flag both rows of a pair. Serialize rather than run these concurrently. Every route that writes rows infers it over the rows whose cell is still empty and appends to — never replaces — a cell that already carries a note; an empty cell means "not yet inferred", not "no overlap", so the run report says which (`work_items.md` Section 7). |
-| `test_checkpoint` | no | `✅` or empty | **Authored, never derived.** Marks an item whose merge is a boundary worth running the whole local suite at. **Any number of rows may be flagged**, unlike `scaffold`. See below. |
+| `test_checkpoint` | no | `✅`, `➖`, or empty | **Authored, never derived.** Marks an item whose merge is a boundary worth running the whole local suite at. **Any number of rows may be flagged**, unlike `scaffold`. `➖` is a **declined** proposal, which is a decision and not a gap: only `✅` runs a suite, and an empty cell is the one that gets proposed again. See below. |
 | `wave` | no | a positive integer, or empty | **Authored, never derived at read time.** The human's sequencing intent: which items form one front. Numbers need not be contiguous. Empty means *unwaved* — the row sorts after every waved row and renders under `Unwaved`. Every `depends_on` of a waved row must itself be waved, with a **strictly smaller** wave. See below. |
 
 ### `test_checkpoint`, the boundary the graph cannot express
@@ -104,6 +115,18 @@ accepts or amends them in assisted mode, an autonomous run accepts its own
 proposal and records it. The cell itself stays authored either way — readiness is
 computed and never stored here, but a judgement about where a full run earns its
 time is not computable from the graph.
+
+**Three states, not two, and the third is why a decline is not re-asked forever**
+(MDF-205). `✅` is accepted, `➖` is **declined**, and empty means *no decision has
+been recorded* — the proposal routine runs over empty cells only, so an empty cell
+is a request to be proposed again and a `➖` is not. Before `➖` existed a declined
+proposal was written back as an empty cell, byte-identical to a cell a human had
+deliberately cleared, so every re-run on an unchanged backlog re-proposed the same
+items and the answer had to be given again every time — observed on measured run 3
+Arm B, where two merged items were proposed and declined on four consecutive runs.
+**Clearing a cell is still how you re-open the question**, in either direction, and
+that is the whole point of keeping the two states visibly different in the file.
+Every reader matches `✅` literally, so a `➖` runs no suite and gates nothing.
 
 ### `wave`, the authored ordering view over the graph
 
