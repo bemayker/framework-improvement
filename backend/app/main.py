@@ -3,8 +3,8 @@
 TEST-01 (the scaffold feature) instantiates the app with no feature routes.
 Later features register their routers here without restructuring this factory:
 TEST-05 registers the version router, TEST-03 the notes router plus the
-startup schema initialisation and the CORS middleware the browser needs, and
-TEST-02 the health router.
+startup schema initialisation and the CORS middleware the browser needs,
+TEST-02 the health router, and FEAT-1 the time router.
 """
 
 import logging
@@ -18,6 +18,7 @@ from app.core.config import get_settings
 from app.core.db import ensure_schema
 from app.routers.health import router as health_router
 from app.routers.notes import router as notes_router
+from app.routers.time import router as time_router
 from app.routers.version import router as version_router
 
 logger = logging.getLogger(__name__)
@@ -54,6 +55,7 @@ def create_app() -> FastAPI:
     app.include_router(version_router)
     app.include_router(notes_router)
     app.include_router(health_router)
+    app.include_router(time_router)
     return app
 
 
