@@ -13,7 +13,7 @@ None of the four acceptance criteria is verifiable through the UI: nothing in `f
 
 1. From the repository root, run:
    ```bash
-   docker compose up -d --build
+   docker compose up -d --build db backend
    ```
 2. Run `docker compose ps` until the `db` service reports healthy and the `backend` service reports running.
 
@@ -49,7 +49,7 @@ None of the four acceptance criteria is verifiable through the UI: nothing in `f
 | # | Step | Expected Result | Pass/Fail |
 |---|------|------------------|-----------|
 | 11 | Open `backend/app/schemas/echo.py` | It defines `class EchoResponse(BaseModel)` with the single field `echo: str`, and `backend/app/routers/echo.py` declares `response_model=EchoResponse` on the route and returns `EchoResponse(echo=msg)` rather than `{"echo": msg}` | [ ] Pass [ ] Fail |
-| 12 | Run `curl -s http://localhost:8010/openapi.json | python3 -m json.tool | grep -A4 '"EchoResponse"'` | The generated OpenAPI document contains a named `EchoResponse` schema with the one property `echo` of type `string`. A handler returning a bare dict produces no named schema here, so this output is the observable difference | [ ] Pass [ ] Fail |
+| 12 | Run `curl -s http://localhost:8010/openapi.json \| python3 -m json.tool \| grep -A4 '"EchoResponse"'` | The generated OpenAPI document contains a named `EchoResponse` schema with the one property `echo` of type `string`. A handler returning a bare dict produces no named schema here, so this output is the observable difference | [ ] Pass [ ] Fail |
 
 ## Summary
 
