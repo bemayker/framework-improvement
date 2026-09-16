@@ -86,7 +86,7 @@ Minimal task-notes app used exclusively as a validation sandbox for the mayker-d
   Agents use these paths when generating and locating test files.
 -->
 
-- **Test gate command:** cd backend && uv run pytest -q && cd ../frontend && npm test
+- **Test gate command:** uv run --directory backend pytest -q && npm --prefix frontend test
 
 - **Handover rebuild:** auto  # auto | off — rebuild the app stack at handover when a compose file is at the repo root
 - **Handover health check:** auto  # auto (container state) | none | a command, e.g. curl -fsS http://localhost:8000/health
