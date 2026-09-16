@@ -8,13 +8,9 @@ module to unit-test. Those cases are covered at the integration tier
 (`test_echo_integration.py`) instead of being fabricated here.
 """
 
-import inspect
-from typing import get_args, get_origin
-
-from annotated_types import MaxLen
-from fastapi.params import Query
 from pydantic import BaseModel
 
+from app.main import create_app
 from app.routers.echo import get_echo, router
 from app.schemas.echo import EchoResponse
 
@@ -36,21 +32,19 @@ def test_get_echo_with_empty_string_round_trips_unchanged():
 def test_echo_query_parameter_declares_max_length_200():
     """Criterion 3: the 200-character bound is declared on the parameter.
 
-    Asserted structurally, on the `Query` metadata attached to the `msg`
-    parameter's annotation, rather than by calling the handler with a
-    long string: the handler itself performs no length check (see the
-    module docstring), so the declaration site is the only place this
-    bound exists.
+    Asserted through FastAPI's own public output, the generated OpenAPI
+    document, rather than through `annotated_types`/`fastapi.params`
+    introspection of the annotation's internals: the document's
+    `maxLength: 200` on the `msg` query parameter of `/api/echo` is what a
+    caller of this API actually sees, and it exists only because the bound
+    is declared on the parameter rather than checked in the handler body
+    (see the module docstring).
     """
-    signature = inspect.signature(get_echo)
-    msg_annotation = signature.parameters["msg"].annotation
+    schema = create_app().openapi()
+    parameters = schema["paths"]["/api/echo"]["get"]["parameters"]
+    msg_parameter = next(p for p in parameters if p["name"] == "msg")
 
-    assert get_origin(msg_annotation) is not None
-    _, *metadata = get_args(msg_annotation)
-    query_info = next(item for item in metadata if isinstance(item, Query))
-    max_len_constraint = next(m for m in query_info.metadata if isinstance(m, MaxLen))
-
-    assert max_len_constraint.max_length == 200
+    assert msg_parameter["schema"]["maxLength"] == 200
 
 
 def test_echo_response_model_is_pydantic_schema_with_one_field():
