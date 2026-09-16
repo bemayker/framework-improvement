@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# materialized-from: mayker-dev v0.3.167; do not edit, regenerate with /upgrade-project
+# materialized-from: mayker-dev v0.3.185; do not edit, regenerate with /upgrade-project
 #
 # Schema validator for a consuming repo's `.claude/feature_map.md` (MDF-044).
 #
@@ -331,9 +331,15 @@ function missingcols(cnt,    i, s) {
   # test_checkpoint (MDF-071). DELIBERATELY NOT COUNTED: unlike scaffold, any
   # number of rows may be flagged — a project has one scaffold and as many
   # completion boundaries as it has groups of work.
-  if (chk[nrows] != "") {
+  #
+  # THREE STATES SINCE MDF-205: ✅ accepted, ➖ DECLINED, empty = no decision
+  # recorded. Only the empty cell is proposed over, so ➖ is what stops a declined
+  # proposal being re-asked on every re-run while a cleared cell still asks. ➖
+  # gates nothing and runs nothing: every reader matches ✅ literally, so it is
+  # counted here exactly like an empty cell and appears in no checkpoint list.
+  if (chk[nrows] != "" && chk[nrows] != "➖") {
     if (chk[nrows] != "✅") {
-      err(FNR, "checkpoint-marker", rowref(nrows) ": test_checkpoint is \"" chk[nrows] "\", the only accepted marker is ✅. " \
+      err(FNR, "checkpoint-marker", rowref(nrows) ": test_checkpoint is \"" chk[nrows] "\", the only accepted markers are ✅ (accepted) and ➖ (declined). " \
         "Every reader of this column matches ✅ literally, so any other value (true, yes, x) silently disables the full-suite checkpoint at this item: /build-feature and /build-features report nothing and /deliver keeps admitting newly ready items without ever running the whole suite against the integrated main")
     } else {
       checkpointCount++

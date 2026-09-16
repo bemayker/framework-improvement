@@ -1,7 +1,7 @@
 # Project Configuration
 
 ## Project mode
-- **Mode:** greenfield            # greenfield | existing
+- **Mode:** new            # new | existing
 
 ## Work item source
 - **Source:** hybrid               # tracker | local | hybrid
