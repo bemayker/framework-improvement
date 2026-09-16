@@ -22,7 +22,7 @@
 
 ## Schema
 
-Exactly seven columns, in this order. Every row must have all seven cells
+Exactly eight columns, in this order. Every row must have all eight cells
 (trailing cells may be empty, the pipes may not be omitted).
 
 Enforced, not just documented: `bash .claude/scripts/feature-map-validate.sh {path}`
@@ -32,7 +32,7 @@ generator runs it and stops on failure; the `feature-map-guard` PostToolUse hook
 re-runs it on any other write; and the `feature-map` job in `pr-tests.yml` runs it on
 every pull request, so a row edited by hand and pushed is checked too. That last one
 is why the script is **vendored** into `.claude/scripts/` rather than read from
-`${CLAUDE_PLUGIN_ROOT}/hooks/lib/feature-map-validate.sh`: the plugin installs under
+`~/.mayker/mayker-dev/hooks/lib/feature-map-validate.sh`: the plugin installs under
 `~/.claude/`, which no CI runner has. Inside a Claude session either path works.
 
 | Column | Required | Format | Notes |
@@ -42,17 +42,19 @@ is why the script is **vendored** into `.claude/scripts/` rather than read from
 | `depends_on` | yes | `[]` or `[ID]` or `[ID, ID]` | **Direct** dependencies only, never transitive. Literal `[]` when none, never blank. No cycles. |
 | `branch` | yes | `feature/{Feature ID}-{slug}` | The `feature/{ID}` prefix is a hard requirement: the auto-Done pipeline matches it on merge. Slug is lowercase, hyphenated, max 40 chars. |
 | `scaffold` | no | `✅` or empty | At most one row may be flagged. `new` mode only. The literal `scaffold: true` form is for local frontmatter, **not** this column. |
-| `shared_risk_notes` | no | `⚠️ {note}` or empty | Flags independent items likely to touch the same files. Flag both rows of a pair. Serialize rather than run these concurrently. |
-| `test_checkpoint` | no | `✅` or empty | **Authored, never derived.** Marks an item whose merge is a boundary worth running the whole local suite at. **Any number of rows may be flagged**, unlike `scaffold`. See below. |
+| `shared_risk_notes` | no | `⚠️ {note}` or empty | **Derived, never authored.** Flags independent items likely to touch the same files. Flag both rows of a pair. Serialize rather than run these concurrently. Every route that writes rows infers it over the rows whose cell is still empty and appends to — never replaces — a cell that already carries a note; an empty cell means "not yet inferred", not "no overlap", so the run report says which (`work_items.md` Section 7). |
+| `test_checkpoint` | no | `✅`, `➖`, or empty | **Authored, never derived.** Marks an item whose merge is a boundary worth running the whole local suite at. **Any number of rows may be flagged**, unlike `scaffold`. `➖` is a **declined** proposal, which is a decision and not a gap: only `✅` runs a suite, and an empty cell is the one that gets proposed again. See below. |
+| `wave` | no | a positive integer, or empty | **Authored, never derived at read time.** The human's sequencing intent: which items form one front. Numbers need not be contiguous. Empty means *unwaved* — the row sorts after every waved row and renders under `Unwaved`. Every `depends_on` of a waved row must itself be waved, with a **strictly smaller** wave. See below. |
 
 ### `test_checkpoint`, the boundary the graph cannot express
 
 The push-time gate runs a **scoped** suite on a `feature/{ID}-{slug}` branch (the
 item's dependant closure, `CLAUDE.md` → `Scoped test command:`), and CI runs
 everything against one PR at a time. Neither ever runs the whole suite against a
-**locally integrated** main. Waves used to be that boundary and are gone by
-design (`work_items.md` Section 7): the graph says what blocks what, and nothing
-in it says "this group of work is complete".
+**locally integrated** main. The `wave` column below does not supply it either:
+a wave says which items a human wants taken together, not that a line of work is
+finished, and it carries no status (`work_items.md` Section 7). The graph says
+what blocks what, and nothing in it says "this group of work is complete".
 
 This column says it. Flag the item whose merge closes a meaningful group, and the
 full suite runs once at that point:
@@ -71,12 +73,63 @@ proposal and records it. The cell itself stays authored either way — readiness
 computed and never stored here, but a judgement about where a full run earns its
 time is not computable from the graph.
 
+**Three states, not two, and the third is why a decline is not re-asked forever**
+(MDF-205). `✅` is accepted, `➖` is **declined**, and empty means *no decision has
+been recorded* — the proposal routine runs over empty cells only, so an empty cell
+is a request to be proposed again and a `➖` is not. Before `➖` existed a declined
+proposal was written back as an empty cell, byte-identical to a cell a human had
+deliberately cleared, so every re-run on an unchanged backlog re-proposed the same
+items and the answer had to be given again every time — observed on measured run 3
+Arm B, where two merged items were proposed and declined on four consecutive runs.
+**Clearing a cell is still how you re-open the question**, in either direction, and
+that is the whole point of keeping the two states visibly different in the file.
+Every reader matches `✅` literally, so a `➖` runs no suite and gates nothing.
+
+### `wave`, the authored ordering view over the graph
+
+The graph answers "what blocks X". It does not answer "which six items are this
+fortnight's front", and it has no place for a human to say so. `wave` is that
+place. It is an **ordering key that a human writes**, and it changes nothing the
+framework computes:
+
+- **Readiness is unchanged and stays the only gate.** An item is ready when every
+  `depends_on` is Done, whatever the waves say (`work_items.md` Section 7).
+  `/deliver` dispatches the lowest wave first **among ready items** and never
+  withholds a ready item because a lower wave is still in flight — a hard stop is
+  expressed with `depends_on`, which is what the graph is for.
+- **No status ever enters this file.** A wave is never marked complete here,
+  nothing writes a `✅` beside it, and the grouped overview is rendered on demand
+  from this table plus live status (`bash .claude/scripts/feature-map-waves.sh`,
+  or the `/waves` command). That is the first of the two properties that retired
+  the old wave model, and it stays retired.
+- **The wave is authored and editable throughout development**, not computed once
+  at init. That is the second retired property. `/sync-project` and `/deliver`
+  **propose** waves for rows that have none — the longest-path level in the graph:
+  1 for a row with no dependencies, otherwise one more than the largest wave among
+  its dependencies — and a generator **never rewrites a cell that already carries a
+  wave**. Re-plan by editing the cells; clear a cell to be proposed a fresh value
+  on the next `/sync-project`.
+
+**The invariant, and it is enforced rather than advised:** for every waved row,
+**every** `depends_on` is waved and carries a **strictly smaller** wave. That is
+the hard dependency stop — a human may pull an item earlier only as far as its
+dependencies allow, and the validator says no, naming the edge, rather than the
+model deciding case by case. A non-integer or non-positive cell is an error too.
+A map with no waves at all is valid: the column is optional, and an all-unwaved
+map is exactly what a project that has not sequenced anything yet should have.
+
+**`local` and `hybrid` items carry `wave: N` in their `docs/issues/{ID}.md`
+frontmatter instead**, beside `depends_on` and `scaffold: true`, hand-authored and
+never proposed. Nothing validates that frontmatter, so the invariant is reported
+there as a **warning** naming the edge — by the overview at render, and by the
+batch `wave N` selector at admission — never as a validation error.
+
 ## Work items
 
 | Feature ID | Title | depends_on | branch | scaffold | shared_risk_notes | test_checkpoint | wave |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| TEST-01 | Static landing page | [] | feature/TEST-01-static-landing-page | ✅ | | | 1 |
-| TEST-02 | Health endpoint | [TEST-01] | feature/TEST-02-health-endpoint | | ⚠️ both TEST-02 and TEST-03 touch the FastAPI app entry (router registration); serialize if run concurrently | | 2 |
+| TEST-01 | Static landing page | [] | feature/TEST-01-static-landing-page | ✅ | | ✅ | 1 |
+| TEST-02 | Health endpoint | [TEST-01] | feature/TEST-02-health-endpoint | | ⚠️ both TEST-02 and TEST-03 touch the FastAPI app entry (router registration); serialize if run concurrently | ➖ | 2 |
 | TEST-03 | Simple note form | [TEST-01] | feature/TEST-03-simple-note-form | | ⚠️ both TEST-02 and TEST-03 touch the FastAPI app entry (router registration); serialize if run concurrently | ✅ | 2 |
 | TEST-04 | Page footer with app version | [TEST-01] | feature/TEST-04-page-footer | | ⚠️ TEST-04 and TEST-03 both modify frontend/src/components/LandingPage.tsx; serialize if run concurrently. Disjoint from TEST-02 (backend only) | ✅ | 2 |
 | TEST-05 | Backend version endpoint | [TEST-01] | feature/TEST-05-version-endpoint | | ⚠️ TEST-05 and TEST-02 both modify backend/app/main.py and backend/tests/unit/test_main_unit.py; serialize if run concurrently. Disjoint from TEST-04 (frontend only) | ✅ | 2 |

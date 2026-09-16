@@ -81,7 +81,6 @@
       "TodoWrite",
       "TaskCreate",
       "mcp__clickup__*",
-      "mcp__github__*",
       "Bash(set:*)",
       "Bash(perl:*)",
       "Bash(curl:*)"

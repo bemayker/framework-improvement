@@ -48,3 +48,7 @@ CLAUDE.local.md
 .claude/artifacts/*/stats.jsonl
 .claude/artifacts/*/stats_summary.json
 .claude/artifacts/*/stats_summary.md
+
+# Claude Code / mayker-dev — personal overrides and machine-local run state (never commit)
+.claude/artifacts/refactor-*/
+.claude/artifacts/generate-tests-*/
