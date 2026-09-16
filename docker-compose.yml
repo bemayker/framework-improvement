@@ -20,6 +20,16 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
+      # Migration 0.3.181-01 (MDF-208) arm 1, workflow-side half. The cache
+      # mount in backend/Dockerfile lives in the builder's own store, and a
+      # GitHub runner starts with an empty builder, so the mount is only warm
+      # if something persists it across runs. COMPOSE_BAKE=true routes the
+      # build through Buildx, which is what reads this block.
+      x-bake:
+        cache-from:
+          - type=gha,scope=backend
+        cache-to:
+          - type=gha,scope=backend,mode=max
     restart: unless-stopped
     depends_on:
       db:
@@ -36,6 +46,11 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile
+      x-bake:
+        cache-from:
+          - type=gha,scope=frontend
+        cache-to:
+          - type=gha,scope=frontend,mode=max
     restart: unless-stopped
     environment:
       VITE_API_BASE_URL: ${VITE_API_BASE_URL:-http://localhost:8010}

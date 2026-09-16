@@ -284,6 +284,26 @@ jobs:
             (cd backend && uv sync)
           fi
 
+      # --- Container build cache (migration 0.3.181-01, MDF-208) ---
+      # setup-uv's cache covers the RUNNER's uv install. The backend image
+      # runs the same package manager again INSIDE the image build, where the
+      # UV_CACHE_DIR that setup-uv relocated does not exist, so every push
+      # re-downloaded every wheel under a log whose runner-side cache reported
+      # a clean hit. The BuildKit mounts live in backend/Dockerfile and
+      # frontend/Dockerfile; a GitHub runner starts with an empty builder, so
+      # this is the carrier that makes them survive a run. cache-from and
+      # cache-to are in docker-compose.yml's x-bake blocks, which COMPOSE_BAKE
+      # routes the build through.
+      - uses: docker/setup-buildx-action@v3
+      - name: Build services
+        env:
+          DOCKER_BUILDKIT: "1"
+          COMPOSE_BAKE: "true"
+        run: |
+          if [ -f docker-compose.yml ] || [ -f compose.yml ] || [ -f compose.yaml ]; then
+            docker compose build
+          fi
+
       # --- Services (PostgreSQL via Docker Compose) ---
       - name: Start services
         run: |
@@ -379,6 +399,26 @@ jobs:
       - name: Install E2E browsers
         if: steps.deps.outputs.e2e == 'true'
         run: npx playwright install --with-deps chromium
+
+      # --- Container build cache (migration 0.3.181-01, MDF-208) ---
+      # setup-uv's cache covers the RUNNER's uv install. The backend image
+      # runs the same package manager again INSIDE the image build, where the
+      # UV_CACHE_DIR that setup-uv relocated does not exist, so every push
+      # re-downloaded every wheel under a log whose runner-side cache reported
+      # a clean hit. The BuildKit mounts live in backend/Dockerfile and
+      # frontend/Dockerfile; a GitHub runner starts with an empty builder, so
+      # this is the carrier that makes them survive a run. cache-from and
+      # cache-to are in docker-compose.yml's x-bake blocks, which COMPOSE_BAKE
+      # routes the build through.
+      - uses: docker/setup-buildx-action@v3
+      - name: Build services
+        env:
+          DOCKER_BUILDKIT: "1"
+          COMPOSE_BAKE: "true"
+        run: |
+          if [ -f docker-compose.yml ] || [ -f compose.yml ] || [ -f compose.yaml ]; then
+            docker compose build
+          fi
 
       # --- Services (full stack via Docker Compose) ---
       - name: Start services

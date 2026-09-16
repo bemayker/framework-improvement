@@ -1,3 +1,4 @@
+# syntax=docker/dockerfile:1
 FROM python:3.12-slim
 
 WORKDIR /app
@@ -5,10 +6,12 @@ WORKDIR /app
 RUN pip install --no-cache-dir uv
 
 COPY pyproject.toml uv.lock ./
-RUN uv sync --no-install-project --frozen
+RUN --mount=type=cache,target=/root/.cache/uv \
+    uv sync --no-install-project --frozen
 
 COPY . .
-RUN uv sync
+RUN --mount=type=cache,target=/root/.cache/uv \
+    uv sync
 
 EXPOSE 8010
 
