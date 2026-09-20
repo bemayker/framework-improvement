@@ -1,4 +1,4 @@
-<!-- materialized-from: mayker-dev v0.3.185; do not edit, regenerate with /upgrade-project -->
+<!-- materialized-from: mayker-dev v0.3.191; do not edit, regenerate with /upgrade-project -->
 <!--
   Universal standard. Imported into CLAUDE.md (always on). Do not edit per project.
   MCP usage is gated by Work Item Source: issue tracker + Git provider patterns,

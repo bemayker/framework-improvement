@@ -1,4 +1,4 @@
-<!-- materialized-from: mayker-dev v0.3.185; do not edit, regenerate with /upgrade-project -->
+<!-- materialized-from: mayker-dev v0.3.191; do not edit, regenerate with /upgrade-project -->
 <!--
   CANONICAL TEMPLATE — this file is the single source of truth for the shape of
   `.claude/feature_map.md`. `/sync-project` (Section 4) and `/deliver` (Section 2
