@@ -80,8 +80,8 @@
     }
   },
   "discovery": {
-    "last_scan_commit": "81a49a319e11b63b57da2ed2b82b1a4fa575eabb",
-    "scanned_at": "2026-09-16T18:36:43Z",
+    "last_scan_commit": "be81cdf10d8f7081b2f331636ab564caa369b3c6",
+    "scanned_at": "2026-09-20T20:15:28Z",
     "scanned_by": "/sync-project"
   },
   "framework": {
@@ -89,8 +89,8 @@
     "migrated_to": "0.3.191",
     "migrated_at": "2026-09-20T20:02:42Z",
     "synced": {
-      "plugin_version": "0.3.185",
-      "synced_at": "2026-09-16T18:36:43Z"
+      "plugin_version": "0.3.191",
+      "synced_at": "2026-09-20T20:15:32Z"
     }
   }
 }
