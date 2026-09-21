@@ -2,10 +2,10 @@
 
 The route's declared contract is read off the app `create_app()` builds, in
 the shape `test_echo_unit.py` already uses (recursing through the
-`include_router` wrapper's `original_router`): the `/api/time` route's
-`response_model` is `TimeResponse`, which is criterion 3's "defined by a
-Pydantic schema, not a bare dict" stated as an assertion no status code could
-distinguish.
+`include_router` wrapper's `original_router`, via the shared `_find_route`
+helper in `tests/conftest.py`): the `/api/time` route's `response_model` is
+`TimeResponse`, which is criterion 3's "defined by a Pydantic schema, not a
+bare dict" stated as an assertion no status code could distinguish.
 """
 
 from datetime import datetime, timedelta, timezone
@@ -16,6 +16,7 @@ from pydantic import ValidationError
 from app.main import create_app
 from app.routers.time import get_time
 from app.schemas.time import TimeResponse
+from tests.conftest import _find_route
 
 
 def test_time_response_serializes_with_exact_plus_zero_offset_suffix():
@@ -60,19 +61,6 @@ def test_time_response_raises_validation_error_when_now_is_missing():
     """Error case: constructing without the required field raises."""
     with pytest.raises(ValidationError):
         TimeResponse()
-
-
-def _find_route(routes, path: str):
-    """Locate a route by path, recursing through `include_router` wrappers."""
-    for route in routes:
-        if getattr(route, "path", None) == path:
-            return route
-        original_router = getattr(route, "original_router", None)
-        if original_router is not None:
-            found = _find_route(original_router.routes, path)
-            if found is not None:
-                return found
-    return None
 
 
 def test_get_time_route_uses_time_response_as_response_model():

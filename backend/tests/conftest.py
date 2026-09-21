@@ -82,3 +82,24 @@ def notes_table(db_connection: psycopg.Connection) -> psycopg.Connection:
     db_connection.commit()
     yield db_connection
     db_connection.rollback()
+
+
+def _find_route(routes, path: str):
+    """Locate a route by path, recursing through `include_router` wrappers.
+
+    The installed FastAPI represents `app.include_router(...)` as a wrapper
+    object (no `.path` of its own) holding an `original_router` whose own
+    `.routes` carry the real routes, rather than flattening included routes
+    directly onto `app.routes`. Shared by every unit test module that needs
+    to locate one route by path (mirrors `test_main_unit.py`'s
+    `_collect_route_paths`, which needs the same recursion for paths alone).
+    """
+    for route in routes:
+        if getattr(route, "path", None) == path:
+            return route
+        original_router = getattr(route, "original_router", None)
+        if original_router is not None:
+            found = _find_route(original_router.routes, path)
+            if found is not None:
+                return found
+    return None
