@@ -65,3 +65,19 @@ def test_uptime_route_declares_uptime_response_model():
 
     schema = UptimeResponse.model_json_schema(mode="serialization")
     assert schema["properties"]["started_at"]["format"] == "date-time"
+
+
+def test_openapi_document_declares_started_at_format_date_time():
+    """Criterion 4, against the artifact the plan's manual verification
+    script and the tracker comment are actually about: the generated
+    OpenAPI document (`/openapi.json`), not the model schema one step
+    removed from it. A prior run reported the model schema carrying
+    `format: date-time` while the served document still showed a bare
+    `{"type": "string"}` for this field; this asserts the document itself.
+    """
+    app = create_app()
+
+    openapi_schema = app.openapi()["components"]["schemas"]["UptimeResponse"]
+    started_at_property = openapi_schema["properties"]["started_at"]
+
+    assert started_at_property["format"] == "date-time"

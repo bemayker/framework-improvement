@@ -45,8 +45,16 @@ def record_start() -> None:
     global _started_at, _monotonic_start
     if _started_at is not None:
         return
-    _started_at = datetime.now(timezone.utc)
-    _monotonic_start = time.monotonic()
+    # Assign _monotonic_start before _started_at: both guards in this module
+    # key on _started_at alone (this one and the one in get_uptime()), so
+    # _started_at must be the *last* write. Writing it first would make
+    # "_started_at set, _monotonic_start None" a real intermediate state that
+    # a re-entered record_start() could observe and early-return from without
+    # repairing.
+    captured_monotonic = time.monotonic()
+    captured_started_at = datetime.now(timezone.utc)
+    _monotonic_start = captured_monotonic
+    _started_at = captured_started_at
 
 
 def get_uptime() -> UptimeSnapshot:
@@ -69,7 +77,10 @@ def get_uptime() -> UptimeSnapshot:
     started_at = _started_at
     monotonic_start = _monotonic_start
     if started_at is None or monotonic_start is None:
-        # Unreachable: record_start() above always sets both module globals.
+        # Type-narrowing guard, not an unreachable branch: record_start()
+        # above always leaves both globals set once it returns, but this
+        # reads them into locals only after that call, so mypy cannot see
+        # the invariant across the two statements without the guard.
         raise RuntimeError("uptime start was not captured")
 
     uptime_seconds = round(time.monotonic() - monotonic_start, 3)
