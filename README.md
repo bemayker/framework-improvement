@@ -17,7 +17,7 @@ This project uses a Claude Code-driven, per-feature delivery framework: a human 
    - Backend (FastAPI): http://localhost:8010
    - Database: PostgreSQL, exposed on host port 5442
 
-`docker compose up` starts three services: `db` (PostgreSQL 16), `backend` (FastAPI via uv), and `frontend` (Vite dev server). See [docs/DEVELOPMENT.md → Running tests locally](docs/DEVELOPMENT.md#running-tests-locally) to run the test suites without Docker.
+`docker compose up` starts three services: `db` (PostgreSQL 16), `backend` (FastAPI via uv), and `frontend` (Vite dev server). The backend reports the commit passed as `BUILD_COMMIT` at build time (for example `BUILD_COMMIT=<sha> docker compose build backend`; it defaults to `unknown`, see `.env.example`). See [docs/DEVELOPMENT.md → Running tests locally](docs/DEVELOPMENT.md#running-tests-locally) to run the test suites without Docker.
 
 ---
 
