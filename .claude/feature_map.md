@@ -163,7 +163,7 @@ its API marks the story Done early. The merge order above is what prevents it.
 | TEST-07 | Uptime endpoint | [TEST-01] | feature/TEST-07-uptime-endpoint | | ⚠️ TEST-07 and TEST-06 both register a router in backend/app/main.py; serialize if run concurrently. Disjoint from TEST-08 (frontend only). Also shares backend/app/main.py with FEAT-1; also TEST-09 registers a router in backend/app/main.py | ✅ | 2 | |
 | TEST-08 | Footer shows the app version | [TEST-04, TEST-05] | feature/TEST-08-footer-app-version | | | ✅ | 3 | |
 | FEAT-1 | Server time endpoint | [TEST-01] | feature/FEAT-1-server-time-endpoint | | ⚠️ FEAT-1, TEST-06 and TEST-07 all register a router in backend/app/main.py; serialize if run concurrently. Disjoint from TEST-08 (frontend only); also TEST-09 registers a router in backend/app/main.py | ✅ | 2 | |
-| TEST-09 | Version endpoint reports the build commit | [TEST-01] | feature/TEST-09-version-build-commit | | ⚠️ TEST-09 registers a router in backend/app/main.py, shared with TEST-06, TEST-07 and FEAT-1 (all complete). Disjoint from BUG-01 (server_time.py only) | | 2 | |
+| TEST-09 | Version endpoint reports the build commit | [TEST-01] | feature/TEST-09-version-build-commit | | ⚠️ TEST-09 registers a router in backend/app/main.py, shared with TEST-06, TEST-07 and FEAT-1 (all complete). Disjoint from BUG-01 (server_time.py only) | ➖ | 2 | |
 | TEST-10 | Footer shows the build commit | [TEST-08, TEST-09] | feature/TEST-10-footer-build-commit | | | ✅ | 4 | |
 | BUG-01 | Server time is served stale from the edge cache on the deployed environment | [FEAT-1] | feature/BUG-01-server-time-edge-cache | | | ✅ | 3 | |
 
