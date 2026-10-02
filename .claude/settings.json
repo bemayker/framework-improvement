@@ -105,5 +105,8 @@
       "~/.claude/plugins/cache/mayker/mayker-dev",
       "~/.mayker/mayker-dev"
     ]
+  },
+  "enabledPlugins": {
+    "mayker-dev@mayker": true
   }
 }
