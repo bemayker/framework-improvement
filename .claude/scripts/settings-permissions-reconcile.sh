@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# materialized-from: mayker-dev v0.3.191; do not edit, regenerate with /upgrade-project
+# materialized-from: mayker-dev v0.3.250; do not edit, regenerate with /upgrade-project
 #
 # Additive reconciler for a consuming repo's `.claude/settings.json` permissions
 # block (MDF-178).
@@ -10,7 +10,7 @@
 # "never clobber a user-tuned `permissions` block: only add it when absent" — and
 # `/sync-project` Section 5.1 reconciled only the `mcp__<server>__*` entries. So
 # every change to the shipped block reached new repos and no existing one, and
-# `migrations/0.3.104-01-development-md-settings-add-only` documented that rule
+# the ledger entry `0.3.104-01` (retired below the floor by MDF-244) documented that rule
 # without implementing a heal for it. This script is the heal.
 #
 # THE ONE SOURCE OF SHIPPED GRANTS IS `templates/settings.json`. This script
@@ -123,6 +123,8 @@
 # by the human that entry's `## Manual` text names (`--apply`).
 
 set -u
+# Stay on the plugin version this session loaded (MDF-225, hooks/lib/pointer-guard.sh).
+[ -z "${BASH_VERSION:-}" ] || [ ! -f "${BASH_SOURCE[0]%/*}/pointer-guard.sh" ] || { . "${BASH_SOURCE[0]%/*}/pointer-guard.sh"; mayker_pointer_guard "${BASH_SOURCE[0]}" "$@"; }
 
 MODE=""
 TARGET=""

@@ -67,8 +67,201 @@ jobs:
           fi
           echo "id=$id" >> "$GITHUB_OUTPUT"
 
-      - name: Mark Done
+      # A story that spans several repositories (MDF-226) is Done only when its
+      # LAST half merges: `repos` in `.claude/feature_map.md` lists them in merge
+      # order, and only the last one listed marks it. An empty cell, no row, or no
+      # map at all is a single-repository story, marked here as before.
+      - name: Decide whether this repository closes the story
+        id: last
         if: steps.fid.outputs.id != ''
+        env:
+          ID: ${{ steps.fid.outputs.id }}
+          REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          map=".claude/feature_map.md"
+          repos=""
+          if [ -f "$map" ]; then
+            # Columns by NAME, as every other reader does; `\|` inside a cell is a
+            # literal pipe, not a separator.
+            repos="$(awk -v id="$ID" '
+              function trim(s) { sub(/^[ \t]+/, "", s); sub(/[ \t]+$/, "", s); return s }
+              /^## Work items/ { w = 1; next }
+              w && /^## / { w = 0 }
+              w && /^\|/ {
+                line = $0; gsub(/\\\|/, "\001", line)
+                n = split(line, c, "|")
+                if (!hdr) { hdr = 1; for (i = 2; i < n; i++) { h = trim(c[i]); if (h == "Feature ID") fi = i; if (h == "repos") ri = i }; next }
+                if (!sep) { sep = 1; next }
+                if (fi && trim(c[fi]) == id) { if (ri) print trim(c[ri]); exit }
+              }' "$map")"
+          fi
+          if [ -z "$repos" ]; then
+            echo "last=yes" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          here="$(printf '%s' "${REPO#*/}" | tr '[:upper:]' '[:lower:]')"
+          final="$(printf '%s' "$repos" | awk -F',' '{ s = $NF; sub(/^[ \t]+/, "", s); sub(/[ \t]+$/, "", s); sub(/^.*\//, "", s); print tolower(s) }')"
+          listed="$(printf '%s' "$repos" | awk -F',' -v h="$here" '{ for (i = 1; i <= NF; i++) { s = $i; sub(/^[ \t]+/, "", s); sub(/[ \t]+$/, "", s); sub(/^.*\//, "", s); if (tolower(s) == h) { print "yes"; exit } } }')"
+          if [ "$here" = "$final" ]; then
+            echo "$ID spans: $repos. This repository is the last, so it marks the story Done."
+            echo "last=yes" >> "$GITHUB_OUTPUT"
+          elif [ "$listed" = "yes" ]; then
+            echo "::notice::$ID spans: $repos. '$here' is not the last repository, so the story stays open until '$final' merges its half."
+            echo "last=no" >> "$GITHUB_OUTPUT"
+          else
+            echo "::warning::$ID lists repos '$repos', which does not name this repository ('$here'). Not marking Done: fix the repos cell of this row in .claude/feature_map.md."
+            echo "last=no" >> "$GITHUB_OUTPUT"
+          fi
+
+      # A fix whose reproduction runs only on the deployed environment (MDF-267)
+      # merges with the pull request label `mayker:to-verify`, which a human may
+      # remove before the merge once verified. With the label, this step marks the
+      # item awaiting verification instead of Done, and Mark Done does not run:
+      # the tracker item moves to `status_mapping.to_verify`, or, where the
+      # project maps none, to Done with the tracker label `mayker:to-verify`; a
+      # local file gets `status: to_verify`. Without the label it only logs, and
+      # Mark Done marks the item Done exactly as before.
+      - name: Decide Done or To verify
+        id: verify
+        if: steps.fid.outputs.id != '' && steps.last.outputs.last == 'yes'
+        env:
+          ID: ${{ steps.fid.outputs.id }}
+          PR_LABELS: ${{ toJSON(github.event.pull_request.labels.*.name) }}
+          TRACKER_API_KEY: ${{ secrets.CLICKUP_API_KEY }}
+          FLIP_TOKEN_SET: ${{ secrets.MAYKER_FLIP_TOKEN != '' }}
+        run: |
+          set -euo pipefail
+          label="mayker:to-verify"
+          if ! printf '%s' "${PR_LABELS:-[]}" | jq -e --arg l "$label" 'any(.[]; . == $l)' >/dev/null 2>&1; then
+            echo "The merged pull request does not carry '${label}'; Mark Done marks ${ID} done."
+            echo "arm=done" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          echo "arm=to-verify" >> "$GITHUB_OUTPUT"
+          echo "The merged pull request carries '${label}': ${ID} is merged and awaits verification on the deployed environment."
+          state=".claude/project_state.json"
+          issue_file="docs/issues/${ID}.md"
+
+          # ---- routing: Work Item Source, not file presence (MDF-040) ----
+          wi_source=""
+          in_registry="no"
+          if [ -f "$state" ]; then
+            wi_source="$(jq -r '(.work_item_source) // ""' "$state")"
+            in_registry="$(jq -r --arg id "$ID" 'if ((.features // {}) | has($id)) then "yes" else "no" end' "$state")"
+          fi
+          case "$wi_source" in
+            local)
+              do_tracker="no"; do_file="yes" ;;
+            tracker)
+              do_tracker="yes"; do_file="no" ;;
+            hybrid)
+              # The tracker twin is authoritative (work_items.md Section 3); a
+              # local file for the same ID is a shadow copy, kept consistent.
+              if [ "$in_registry" = "yes" ]; then
+                do_tracker="yes"
+                if [ -f "$issue_file" ]; then do_file="yes"; else do_file="no"; fi
+              else
+                do_tracker="no"; do_file="yes"
+              fi ;;
+            *)
+              # No project_state.json (or one predating work_item_source):
+              # legacy presence-based routing.
+              if [ -f "$issue_file" ]; then
+                do_tracker="no"; do_file="yes"
+              else
+                do_tracker="yes"; do_file="no"
+              fi ;;
+          esac
+          echo "source='${wi_source:-unknown}' in_registry=$in_registry -> tracker=$do_tracker file=$do_file"
+
+          updated=""
+
+          # ---- tracker side: the ci-set-status row, and ci-add-label where no status is mapped ----
+          if [ "$do_tracker" = "yes" ]; then
+            external_id=""
+            target=""
+            done_status="done"
+            if [ -f "$state" ]; then
+              external_id="$(jq -r --arg id "$ID" '(.features[$id].external_id) // empty' "$state")"
+              target="$(jq -r '(.status_mapping.to_verify) // ""' "$state")"
+              done_status="$(jq -r '(.status_mapping.done) // "done"' "$state")"
+            fi
+            add_label="no"
+            if [ -z "$target" ]; then
+              # No spare tracker status: Done, plus the label a human removes once verified.
+              target="$done_status"
+              add_label="yes"
+            fi
+            blocked=""
+            if [ -z "${TRACKER_API_KEY:-}" ]; then
+              blocked="TRACKER_API_KEY not set"
+            elif [ -z "$external_id" ]; then
+              blocked="no external_id for ${ID} in project_state.json"
+            fi
+            if [ -n "$blocked" ] && [ "$do_file" = "yes" ]; then
+              echo "::warning::$blocked; skipping the tracker transition for ${ID} (flipping the local file only)."
+              do_tracker="no"
+            elif [ -n "$blocked" ]; then
+              echo "::error::$blocked; cannot mark ${ID} awaiting verification."
+              exit 1
+            fi
+          fi
+          if [ "$do_tracker" = "yes" ]; then
+            code="$(curl -sS -o /dev/null -w '%{http_code}' \
+              -X PUT "https://api.clickup.com/api/v2/task/${external_id}" \
+              -H "Authorization: ${TRACKER_API_KEY}" \
+              -H "Content-Type: application/json" \
+              -d "$(jq -nc --arg s "$target" '{status:$s}')")"
+            if [ "$code" != "200" ]; then
+              echo "::error::tracker transition failed (HTTP $code) for ${ID}"; exit 1
+            fi
+            updated="tracker (${external_id} -> '${target}')"
+            if [ "$add_label" = "yes" ]; then
+              code="$(curl -sS -o /dev/null -w '%{http_code}' \
+                -X POST "https://api.clickup.com/api/v2/task/${external_id}/tag/$(jq -rn --arg t "$label" '$t|@uri')" \
+                -H "Authorization: ${TRACKER_API_KEY}")"
+              if [ "$code" != "200" ]; then
+                echo "::error::${ID} is '${target}' but the '${label}' label could not be added (HTTP $code). Add it on the item by hand, or it reads as verified."; exit 1
+              fi
+              updated="${updated} + label '${label}'"
+            fi
+          fi
+
+          # ---- local side: status: to_verify, committed back (no tracker API) ----
+          if [ "$do_file" = "yes" ]; then
+            if [ ! -f "$issue_file" ] && [ -n "$updated" ]; then
+              echo "::warning::$issue_file not found; the tracker side was updated, no shadow file to flip."
+            elif [ ! -f "$issue_file" ]; then
+              echo "::error::$issue_file not found and no tracker side to update; cannot mark ${ID} awaiting verification."
+              exit 1
+            elif ! grep -qiE '^status:' "$issue_file"; then
+              echo "::warning::$issue_file has no status: field; leaving as-is."
+            else
+              sed -i -E 's/^[Ss]tatus:.*/status: to_verify/' "$issue_file"
+              git config user.name "github-actions[bot]"
+              git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+              git add "$issue_file"
+              if git commit -m "chore(${ID}): mark to verify on merge [skip ci]"; then
+                if [ "${FLIP_TOKEN_SET:-false}" != "true" ]; then
+                  echo "::warning::MAYKER_FLIP_TOKEN is not set; pushing the flip with the default GITHUB_TOKEN. If the default branch is protected this push is rejected — add a repository admin's fine-grained PAT (contents: write) as that secret. See docs/DEVELOPMENT.md -> When auto-Done fails after a merge."
+                fi
+                git push
+                updated="${updated:+$updated + }local file ($issue_file)"
+              else
+                echo "$issue_file is already at status: to_verify; nothing to commit."
+              fi
+            fi
+          fi
+
+          if [ -n "$updated" ]; then
+            echo "Marked ${ID} awaiting verification on: ${updated}."
+          else
+            echo "::warning::nothing was updated for ${ID} (source='${wi_source:-unknown}')."
+          fi
+
+      - name: Mark Done
+        if: steps.fid.outputs.id != '' && steps.last.outputs.last == 'yes' && steps.verify.outputs.arm != 'to-verify'
         env:
           ID: ${{ steps.fid.outputs.id }}
           # Tracker source only. /init-project sets the secret name for your tracker

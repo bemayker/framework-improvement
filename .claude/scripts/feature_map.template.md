@@ -1,4 +1,4 @@
-<!-- materialized-from: mayker-dev v0.3.191; do not edit, regenerate with /upgrade-project -->
+<!-- materialized-from: mayker-dev v0.3.250; do not edit, regenerate with /upgrade-project -->
 <!--
   CANONICAL TEMPLATE — this file is the single source of truth for the shape of
   `.claude/feature_map.md`. `/sync-project` (Section 4) and `/deliver` (Section 2
@@ -33,8 +33,8 @@
   and /deliver Section 2 skips setup entirely once project_state.json exists. So
   a map written before this file gained `## Schema` and `## Work items` stays
   invalid forever, and the heal for it is `hooks/lib/feature-map-repair.sh
-  <path>` — named by migration entry `0.3.107-01-feature-map-structure` — never a
-  hand edit of the table.
+  <path>` — named by the ledger's floor, `migrations/FLOOR.md` (MDF-244) — never
+  a hand edit of the table.
 
   THE EXCEPTION IS THE `## Schema` SECTION BELOW, since 0.3.179 (MDF-207).
   /sync-project Section 5.3 runs `hooks/lib/feature-map-schema-reconcile.sh
@@ -65,7 +65,7 @@ To update: re-run `/sync-project`, re-run `/deliver`, or edit rows by hand.
 
 ## Schema
 
-Exactly eight columns, in this order. Every row must have all eight cells
+Exactly nine columns, in this order. Every row must have all nine cells
 (trailing cells may be empty, the pipes may not be omitted).
 
 Enforced, not just documented: `bash .claude/scripts/feature-map-validate.sh {path}`
@@ -88,6 +88,7 @@ is why the script is **vendored** into `.claude/scripts/` rather than read from
 | `shared_risk_notes` | no | `⚠️ {note}` or empty | **Derived, never authored.** Flags independent items likely to touch the same files. Flag both rows of a pair. Serialize rather than run these concurrently. Every route that writes rows infers it over the rows whose cell is still empty and appends to — never replaces — a cell that already carries a note; an empty cell means "not yet inferred", not "no overlap", so the run report says which (`work_items.md` Section 7). |
 | `test_checkpoint` | no | `✅`, `➖`, or empty | **Authored, never derived.** Marks an item whose merge is a boundary worth running the whole local suite at. **Any number of rows may be flagged**, unlike `scaffold`. `➖` is a **declined** proposal, which is a decision and not a gap: only `✅` runs a suite, and an empty cell is the one that gets proposed again. See below. |
 | `wave` | no | a positive integer, or empty | **Authored, never derived at read time.** The human's sequencing intent: which items form one front. Numbers need not be contiguous. Empty means *unwaved* — the row sorts after every waved row and renders under `Unwaved`. Every `depends_on` of a waved row must itself be waved, with a **strictly smaller** wave. See below. |
+| `repos` | no | empty, or `repo, repo` | **Authored.** The repositories one story spans, **in merge order**, when it spans more than one (an API and a UI, MDF-226). Each is a repository name, optionally `owner/name`, with no duplicates. Empty means *this repository only*, which is every single-repository story. Only the **last** repository listed marks the story Done on merge. See below. |
 
 ### `test_checkpoint`, the boundary the graph cannot express
 
@@ -167,14 +168,39 @@ never proposed. Nothing validates that frontmatter, so the invariant is reported
 there as a **warning** naming the edge — by the overview at render, and by the
 batch `wave N` selector at admission — never as a validation error.
 
+### `repos`, a story that spans two repositories
+
+Some stories cannot live in one repository: a module's API is in the module's
+repository and its screens in a separate shell repository, so one story is two
+pull requests. The convention the framework holds such a story to:
+
+- **One story ID and one branch name in every repository it spans.** Both pull
+  requests are cut from `feature/{ID}-{slug}`, the `branch` cell above, so the
+  auto-Done pipeline resolves the same work item from either merge.
+- **Merge in the order `repos` lists.** The API first, the UI after it: a UI
+  merged against an API that is not deployed calls endpoints that do not exist.
+- **Only the last repository marks the story Done.** `auto-done.yml` reads this
+  cell for the merged story. When this repository is listed and is not the last
+  one, it skips the Done transition and says so in the job log; the last one
+  marks the story Done. So the story stays open until its last half lands.
+
+The same row, with the same `repos` cell, belongs in the map of **every**
+repository listed, because each repository's auto-done job reads its own map.
+
+"Last" is the **declared** order, not the observed one, and that is a deliberate
+trade. Checking the other repository's merge state would need a token that can
+read it, and on a plan where organization secrets do not reach private
+repositories that is one more secret per repository. The cost: a UI merged before
+its API marks the story Done early. The merge order above is what prevents it.
+
 ## Work items
 
-| Feature ID | Title | depends_on | branch | scaffold | shared_risk_notes | test_checkpoint | wave |
-| --- | --- | --- | --- | --- | --- | --- | --- |
-| US-101 | User login | [] | feature/US-101-user-login | ✅ | | | 1 |
-| US-102 | Dashboard layout | [] | feature/US-102-dashboard | | | | 1 |
-| US-103 | User management | [US-101] | feature/US-103-user-mgmt | | ⚠️ shares routes.ts with US-104 | | 2 |
-| US-104 | Team settings | [US-101] | feature/US-104-team-settings | | ⚠️ shares routes.ts with US-103 | ✅ | 2 |
+| Feature ID | Title | depends_on | branch | scaffold | shared_risk_notes | test_checkpoint | wave | repos |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| US-101 | User login | [] | feature/US-101-user-login | ✅ | | | 1 | |
+| US-102 | Dashboard layout | [] | feature/US-102-dashboard | | | | 1 | |
+| US-103 | User management | [US-101] | feature/US-103-user-mgmt | | ⚠️ shares routes.ts with US-104 | | 2 | |
+| US-104 | Team settings | [US-101] | feature/US-104-team-settings | | ⚠️ shares routes.ts with US-103 | ✅ | 2 | |
 
 > The four rows above are **illustrative**. `/sync-project` and `/deliver` replace
 > them with the project's real items. If they are still present after init, the

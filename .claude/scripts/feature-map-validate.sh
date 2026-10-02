@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# materialized-from: mayker-dev v0.3.191; do not edit, regenerate with /upgrade-project
+# materialized-from: mayker-dev v0.3.250; do not edit, regenerate with /upgrade-project
 #
 # Schema validator for a consuming repo's `.claude/feature_map.md` (MDF-044).
 #
@@ -67,7 +67,7 @@
 # inserting: `hooks/lib/test-scope.sh` reads the first six positionally,
 # `hooks/lib/checkpoint-suite.sh` reads the seventh (`test_checkpoint`, MDF-071),
 # and `hooks/lib/feature-map-waves.sh` and `hooks/lib/feature-map-propose.sh` read
-# the eighth (`wave`, MDF-179). A column inserted rather than appended silently
+# the eighth (`wave`, MDF-179). `auto-done.yml` reads the ninth (`repos`, MDF-226). A column inserted rather than appended silently
 # re-points all of them, and they fail in the quiet direction — a scoped test run
 # against the wrong closure, a checkpoint that never fires, and a wave view of the
 # shared-risk notes.
@@ -80,6 +80,8 @@
 # recording an order the graph forbids.
 
 set -uo pipefail
+# Stay on the plugin version this session loaded (MDF-225, hooks/lib/pointer-guard.sh).
+[ -z "${BASH_VERSION:-}" ] || [ ! -f "${BASH_SOURCE[0]%/*}/pointer-guard.sh" ] || { . "${BASH_SOURCE[0]%/*}/pointer-guard.sh"; mayker_pointer_guard "${BASH_SOURCE[0]}" "$@"; }
 
 QUIET=0
 MAP=""
@@ -260,6 +262,7 @@ function missingcols(cnt,    i, s) {
   id[nrows] = cell[1]; title[nrows] = cell[2]; deps[nrows] = cell[3]
   branch[nrows] = cell[4]; scaf[nrows] = cell[5]; chk[nrows] = cell[7]
   wave[nrows] = (ncols >= 8 ? cell[8] : "")
+  repos[nrows] = (ncols >= 9 ? cell[9] : "")
 
   # illustrative template rows must not survive generation
   sig = join(cell, cnt)
@@ -359,6 +362,31 @@ function missingcols(cnt,    i, s) {
     } else {
       waveOf[id[nrows]] = wave[nrows] + 0
       waveCount++
+    }
+  }
+
+  # repos (MDF-226). Authored: the repositories a story spans, in merge order.
+  # Empty is legal and means "this repository only". auto-done.yml compares the
+  # LAST entry against the repository it runs in, so an entry it cannot compare
+  # (a space inside a name, an empty element, a duplicate) would make the job skip
+  # Done in every repository and leave the story open forever.
+  if (repos[nrows] != "") {
+    nrep = split(repos[nrows], rep, ",")
+    delete seenRepo
+    for (r = 1; r <= nrep; r++) {
+      name = trim(rep[r])
+      if (name !~ /^([A-Za-z0-9._-]+\/)?[A-Za-z0-9._-]+$/) {
+        err(FNR, "repos-format", rowref(nrows) ": repos entry " r " is \"" name "\", expected a repository name or owner/name, comma-separated, in merge order. " \
+          "auto-done.yml matches the last entry against the repository it runs in, so an entry it cannot read leaves the story open in every repository")
+        structural = 1
+      } else {
+        short = name; sub(/^.*\//, "", short)
+        if (short in seenRepo) {
+          err(FNR, "repos-format", rowref(nrows) ": repos lists \"" short "\" twice. Each repository appears once, in the order its half merges")
+          structural = 1
+        }
+        seenRepo[short] = 1
+      }
     }
   }
 }
