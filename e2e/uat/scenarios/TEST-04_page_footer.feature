@@ -6,7 +6,7 @@ Feature: TEST-04 Page footer
 
   Background:
     Given the Task Notes project infrastructure (frontend, backend, database) is set up per docker-compose.yml
-    And the application is running at "http://localhost:5173"
+    And the application is running at "http://localhost:5183"
 
   Scenario: Footer shows the app name
     Given the app is running
