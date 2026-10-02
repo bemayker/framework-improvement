@@ -6,15 +6,12 @@ FastAPI instance in `create_app()` and `database_url` is the only credential-
 shaped value in the package, so an unnoticed change to either is a silent
 production-configuration change.
 
-One thing is deliberately NOT asserted here, and the reason is a source defect
-rather than a gap in these tests. `Settings.database_url`'s default is written
-as a plain dataclass field default, so it is evaluated **once at class
-definition**, while `get_settings()`'s own docstring promises a value "read
-fresh from the environment". Those two cannot both be true. Asserting either
-one would encode a contested contract: asserting freshness fails today, and
-asserting import-time capture would pin the defect and break the moment it is
-fixed. So these tests cover the part of the contract that holds either way and
-the mismatch is reported instead (see the generate-tests report and PR).
+Contract: every field that reads the environment (`database_url`,
+`cors_origins`, `build_commit`) is declared with a `default_factory`, so its
+value is resolved on each `Settings()` construction, that is on every
+`get_settings()` call, and never captured at import or class definition. The
+tests below pin that per-call behaviour for `cors_origins` and `build_commit`,
+and the absence of a baked-in literal default for `database_url`.
 """
 
 import dataclasses
