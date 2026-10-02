@@ -22,7 +22,7 @@ import os
 
 import pytest
 
-from app.core.config import Settings, get_settings
+from app.core.config import DEFAULT_BUILD_COMMIT, Settings, get_settings
 
 
 def test_get_settings_returns_the_configured_app_title():
@@ -80,3 +80,42 @@ def test_settings_database_url_is_optional_and_never_a_hardcoded_credential():
         None,
         os.environ.get("DATABASE_URL"),
     )
+
+
+def test_settings_build_commit_returns_env_value_verbatim_when_set(monkeypatch):
+    """Happy path: the build-time value is reported as supplied."""
+    monkeypatch.setenv("BUILD_COMMIT", "3f9c2a1b7e0d4c5a")
+
+    assert get_settings().build_commit == "3f9c2a1b7e0d4c5a"
+
+
+def test_settings_build_commit_defaults_to_unknown_when_unset(monkeypatch):
+    """Edge case: an unset variable resolves to the declared default."""
+    monkeypatch.delenv("BUILD_COMMIT", raising=False)
+
+    assert get_settings().build_commit == DEFAULT_BUILD_COMMIT == "unknown"
+
+
+@pytest.mark.parametrize("blank", ["", "   ", "\t\n"])
+def test_settings_build_commit_treats_blank_value_as_unset(monkeypatch, blank):
+    """Edge case: an unset Docker build arg arrives empty and must not leak as ''."""
+    monkeypatch.setenv("BUILD_COMMIT", blank)
+
+    assert get_settings().build_commit == DEFAULT_BUILD_COMMIT
+
+
+def test_settings_build_commit_is_reread_on_every_call(monkeypatch):
+    """Edge case: the value is read per call, not captured at import."""
+    monkeypatch.setenv("BUILD_COMMIT", "aaa")
+    first = get_settings().build_commit
+    monkeypatch.setenv("BUILD_COMMIT", "bbb")
+
+    assert (first, get_settings().build_commit) == ("aaa", "bbb")
+
+
+def test_settings_build_commit_declares_no_literal_default():
+    """Error case guard: the field uses a factory, so no commit literal is baked in."""
+    field = next(f for f in dataclasses.fields(Settings) if f.name == "build_commit")
+
+    assert field.default is dataclasses.MISSING
+    assert field.default_factory is not dataclasses.MISSING
