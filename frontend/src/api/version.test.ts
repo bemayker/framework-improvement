@@ -34,19 +34,43 @@ describe("fetchBackendVersion", () => {
     vi.unstubAllEnvs();
   });
 
-  it("returns the version from GET /api/version", async () => {
-    fetchMock.mockResolvedValue(okResponse({ version: "0.1.0" }));
+  it("returns the version and commit from GET /api/version", async () => {
+    fetchMock.mockResolvedValue(
+      okResponse({ version: "0.1.0", commit: "abcdef1234567890" }),
+    );
 
-    await expect(fetchBackendVersion()).resolves.toBe("0.1.0");
+    await expect(fetchBackendVersion()).resolves.toEqual({
+      version: "0.1.0",
+      commit: "abcdef1234567890",
+    });
+    expect(fetchMock).toHaveBeenCalledTimes(1);
     expect(fetchMock).toHaveBeenCalledWith(DEFAULT_VERSION_URL);
   });
 
-  it("tolerates and ignores extra response fields", async () => {
+  it("tolerates and ignores response fields other than version and commit", async () => {
     fetchMock.mockResolvedValue(
-      okResponse({ version: "0.1.0", commit: "abc1234" }),
+      okResponse({ version: "0.1.0", commit: "abc1234", extra: "ignored" }),
     );
 
-    await expect(fetchBackendVersion()).resolves.toBe("0.1.0");
+    await expect(fetchBackendVersion()).resolves.toEqual({
+      version: "0.1.0",
+      commit: "abc1234",
+    });
+  });
+
+  it.each([
+    ["a missing commit", { version: "0.1.0" }],
+    ["an empty commit", { version: "0.1.0", commit: "" }],
+    ["a non-string commit", { version: "0.1.0", commit: 1234567 }],
+    ["a null commit", { version: "0.1.0", commit: null }],
+    ["the unknown commit sentinel", { version: "0.1.0", commit: "unknown" }],
+  ])("resolves the version with a null commit on %s", async (_label, body) => {
+    fetchMock.mockResolvedValue(okResponse(body));
+
+    await expect(fetchBackendVersion()).resolves.toEqual({
+      version: "0.1.0",
+      commit: null,
+    });
   });
 
   it("rejects with the status when the response is not OK", async () => {
@@ -90,7 +114,10 @@ describe("fetchBackendVersion", () => {
     const { fetchBackendVersion: freshFetch } = await import("./version");
     fetchMock.mockResolvedValue(okResponse({ version: "1.2.3" }));
 
-    await expect(freshFetch()).resolves.toBe("1.2.3");
+    await expect(freshFetch()).resolves.toEqual({
+      version: "1.2.3",
+      commit: null,
+    });
     expect(fetchMock).toHaveBeenCalledWith(
       "https://api.example.test/api/version",
     );
