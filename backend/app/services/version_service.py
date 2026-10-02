@@ -8,6 +8,8 @@ any code change when that value is bumped.
 import logging
 from importlib.metadata import PackageNotFoundError, version
 
+from app.core.config import get_settings
+
 logger = logging.getLogger(__name__)
 
 DISTRIBUTION_NAME = "task-notes-backend"
@@ -33,3 +35,12 @@ def get_app_version() -> str:
             UNKNOWN_VERSION,
         )
         return UNKNOWN_VERSION
+
+
+def get_build_commit() -> str:
+    """Return the commit the running build was made from (TEST-09).
+
+    The single source is the BUILD_COMMIT environment variable, resolved by
+    `Settings.build_commit`, which yields "unknown" when it is unset or blank.
+    """
+    return get_settings().build_commit
