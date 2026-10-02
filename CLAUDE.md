@@ -39,6 +39,14 @@
   @-imported below or loaded on demand by the skill that needs it.
 -->
 
+## Merge policy
+
+- **Feature code:** human
+- **Plans:** human
+- **Framework artifacts:** auto
+- **Done flips:** auto
+- **Docs:** auto
+
 ## Project Description
 
 Minimal task-notes app used exclusively as a validation sandbox for the mayker-dev framework. Features are deliberately trivial; the point is exercising the framework lifecycle, not the product.
@@ -183,13 +191,6 @@ Keep every feature as small as possible.
   run. Do not edit them here; edit them in the plugin and re-run /init-project.
 -->
 
-@.claude/rules/coding_standards.md
-@.claude/rules/user_story_alignment.md
-@.claude/rules/workflow_triggers.md
-@.claude/rules/mcp_integration.md
-@.claude/rules/existing_codebase.md
-@.claude/rules/work_items.md
-@.claude/rules/autonomy.md
 
 Phase-specific standards (read on demand straight from the mayker-dev plugin, not materialized into this repo):
 
