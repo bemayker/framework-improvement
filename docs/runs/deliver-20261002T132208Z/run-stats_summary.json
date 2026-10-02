@@ -1,0 +1,2101 @@
+{
+  "item": "run",
+  "generated_at": 1790950074,
+  "source_digest": {
+    "sha256": "c025a4af60361ff2e343e69248380f3995d1b1231c2dc224a13c6ca9fb230d03",
+    "lines": 5,
+    "last_marker_ts": 1790950074.0
+  },
+  "transcript": "/Users/florianserneels/.claude/projects/-Users-florianserneels-Documents-ai-development-framework-improvement/fed30305-af86-4f7b-8938-8fac88edf723.jsonl",
+  "transcript_resolved": true,
+  "token_collection": true,
+  "metrics_available": true,
+  "degraded": [],
+  "marker_schema": {
+    "markers_without_event": 0,
+    "markers_without_event_steps": [],
+    "event_alias_markers": 0,
+    "event_key_aliases": [],
+    "event_alias_steps": [],
+    "run_recovered_steps": [],
+    "run_unattributed_steps": [],
+    "no_run_field_anywhere": false,
+    "markers_without_ts": 0,
+    "markers_without_ts_steps": [],
+    "missing_titles": [],
+    "incomplete_runs": []
+  },
+  "marker_schema_notes": [],
+  "collector_health": {
+    "prior_failure": null,
+    "stale_summary_replaced": {
+      "generated_at": 1790947739,
+      "newest_marker_ts": 1790950074,
+      "lag_s": 2335,
+      "case": "recollected_same_session",
+      "reported": false,
+      "scoped": true,
+      "replaced_summary_runs": [
+        "deliver"
+      ],
+      "runs_stale": [
+        "deliver"
+      ],
+      "runs_new_since": [],
+      "covered_lag_s": 2335
+    }
+  },
+  "skill_load": {
+    "source": "read",
+    "skill": "deliver",
+    "skills": [
+      "deliver",
+      "build-feature"
+    ]
+  },
+  "config": {
+    "context_threshold": null,
+    "context_threshold_mode": "auto",
+    "context_window_headroom": 0.8,
+    "model_windows_checked": "2026-10-01",
+    "model_windows": {
+      "claude-opus-5-5": 1000000,
+      "claude-opus-5": 1000000,
+      "claude-opus-4-8": 1000000,
+      "claude-opus-4-7": 1000000,
+      "claude-opus-4-6": 1000000,
+      "claude-fable-5-1": 1000000,
+      "claude-fable-5": 1000000,
+      "claude-sonnet-5-5": 1000000,
+      "claude-sonnet-5": 1000000,
+      "claude-sonnet-4-6": 1000000,
+      "claude-haiku-4-5": 200000
+    },
+    "models_without_window": [],
+    "threshold_note": "Context threshold: auto, so a turn is flagged when its context exceeded 80% of the context window of the model that SERVED it, not a fixed token count (window table checked 2026-10-01; a model the table has no row for is never flagged and is named below). No cost is estimated: per-token pricing depends on commercial terms this framework cannot know, so tokens and wall time are recorded and money is left to whoever knows the rates (decision record 0004)."
+  },
+  "overlapping_windows": [],
+  "inverted_windows": [],
+  "unverified_model_steps": [],
+  "runs": [
+    {
+      "run": "deliver",
+      "run_id": "deliver-20261002T132208Z",
+      "step_set_incomplete": false,
+      "steps": [
+        {
+          "step": "3",
+          "title": "Ingest the backlog",
+          "duration_s": 228,
+          "model": "claude-opus-5-5",
+          "models_observed": [
+            "claude-opus-5-5",
+            "claude-fable-5-1"
+          ],
+          "model_reported": null,
+          "model_mismatch": false,
+          "model_check": null,
+          "models_dispatched": [
+            "claude-fable-5-1"
+          ],
+          "retries": 0,
+          "turns": 19,
+          "tool_calls": 29,
+          "tools_per_turn": 1.61,
+          "turn_classes": {
+            "read": {
+              "turns": 2,
+              "tool_calls": 6,
+              "tools_per_turn": 3.0
+            },
+            "edit": {
+              "turns": 2,
+              "tool_calls": 2,
+              "tools_per_turn": 1.0
+            },
+            "exec": {
+              "turns": 10,
+              "tool_calls": 15,
+              "tools_per_turn": 1.5
+            },
+            "other": {
+              "turns": 4,
+              "tool_calls": 6,
+              "tools_per_turn": 1.5
+            }
+          },
+          "max_batch": 5,
+          "output_tokens": 5270,
+          "input_tokens": 158,
+          "cache_read_tokens": 2034370,
+          "cache_creation_tokens": 141091,
+          "cache_hit_ratio": 0.935,
+          "ctx_tokens_avg": 114506,
+          "ctx_tokens_max": 140379,
+          "ctx_threshold_crossed": false,
+          "turns_over_threshold": 0,
+          "flags": []
+        },
+        {
+          "step": "5",
+          "title": "The scheduler loop",
+          "duration_s": 2474,
+          "model": "claude-opus-5-5",
+          "models_observed": [
+            "claude-opus-5-5",
+            "claude-sonnet-5-5",
+            "claude-fable-5-1"
+          ],
+          "model_reported": null,
+          "model_mismatch": false,
+          "model_check": null,
+          "models_dispatched": [
+            "claude-fable-5-1",
+            "claude-opus-5-5",
+            "claude-sonnet-5-5"
+          ],
+          "retries": 0,
+          "turns": 355,
+          "tool_calls": 660,
+          "tools_per_turn": 1.98,
+          "turn_classes": {
+            "read": {
+              "turns": 47,
+              "tool_calls": 229,
+              "tools_per_turn": 4.87
+            },
+            "edit": {
+              "turns": 13,
+              "tool_calls": 46,
+              "tools_per_turn": 3.54
+            },
+            "exec": {
+              "turns": 227,
+              "tool_calls": 328,
+              "tools_per_turn": 1.44
+            },
+            "other": {
+              "turns": 47,
+              "tool_calls": 57,
+              "tools_per_turn": 1.21
+            }
+          },
+          "max_batch": 13,
+          "output_tokens": 112914,
+          "input_tokens": 1520,
+          "cache_read_tokens": 53291848,
+          "cache_creation_tokens": 2469598,
+          "cache_hit_ratio": 0.956,
+          "ctx_tokens_avg": 157079,
+          "ctx_tokens_max": 431578,
+          "ctx_threshold_crossed": false,
+          "turns_over_threshold": 0,
+          "flags": []
+        },
+        {
+          "step": "8",
+          "title": "Final report",
+          "duration_s": null,
+          "model": null,
+          "models_observed": [],
+          "model_reported": null,
+          "model_mismatch": false,
+          "model_check": null,
+          "models_dispatched": [],
+          "retries": 0,
+          "turns": 0,
+          "tool_calls": 0,
+          "tools_per_turn": null,
+          "turn_classes": {
+            "read": {
+              "turns": 0,
+              "tool_calls": 0,
+              "tools_per_turn": null
+            },
+            "edit": {
+              "turns": 0,
+              "tool_calls": 0,
+              "tools_per_turn": null
+            },
+            "exec": {
+              "turns": 0,
+              "tool_calls": 0,
+              "tools_per_turn": null
+            },
+            "other": {
+              "turns": 0,
+              "tool_calls": 0,
+              "tools_per_turn": null
+            }
+          },
+          "max_batch": 0,
+          "output_tokens": 0,
+          "input_tokens": 0,
+          "cache_read_tokens": 0,
+          "cache_creation_tokens": 0,
+          "cache_hit_ratio": null,
+          "ctx_tokens_avg": null,
+          "ctx_tokens_max": null,
+          "ctx_threshold_crossed": false,
+          "turns_over_threshold": 0,
+          "flags": []
+        }
+      ],
+      "totals": {
+        "wall_s": 2702,
+        "steps_sum_s": 2702,
+        "turns": 374,
+        "tool_calls": 689,
+        "tools_per_turn": 1.96,
+        "turn_classes": {
+          "read": {
+            "turns": 49,
+            "tool_calls": 235,
+            "tools_per_turn": 4.8
+          },
+          "edit": {
+            "turns": 15,
+            "tool_calls": 48,
+            "tools_per_turn": 3.2
+          },
+          "exec": {
+            "turns": 237,
+            "tool_calls": 343,
+            "tools_per_turn": 1.45
+          },
+          "other": {
+            "turns": 51,
+            "tool_calls": 63,
+            "tools_per_turn": 1.24
+          }
+        },
+        "max_batch": 13,
+        "output_tokens": 118184,
+        "input_tokens": 1678,
+        "cache_read_tokens": 55326218,
+        "cache_creation_tokens": 2610689,
+        "cache_hit_ratio": 0.955,
+        "ctx_tokens_avg": 154916,
+        "ctx_tokens_max": 431578,
+        "turns_over_threshold": 0,
+        "models_observed": [
+          "claude-opus-5-5",
+          "claude-sonnet-5-5",
+          "claude-fable-5-1"
+        ],
+        "model": "claude-opus-5-5"
+      }
+    }
+  ],
+  "dispatches": [
+    {
+      "agent": "agent-a0f5f3391003f1e94",
+      "role": "mayker-dev:orchestrator",
+      "run": "deliver",
+      "run_id": "deliver-20261002T132208Z",
+      "steps": [
+        "5"
+      ],
+      "turns_outside_steps": 0,
+      "turns": 3,
+      "tool_calls": 9,
+      "tools_per_turn": 3.0,
+      "turn_classes": {
+        "read": {
+          "turns": 0,
+          "tool_calls": 0,
+          "tools_per_turn": null
+        },
+        "edit": {
+          "turns": 0,
+          "tool_calls": 0,
+          "tools_per_turn": null
+        },
+        "exec": {
+          "turns": 2,
+          "tool_calls": 8,
+          "tools_per_turn": 4.0
+        },
+        "other": {
+          "turns": 1,
+          "tool_calls": 1,
+          "tools_per_turn": 1.0
+        }
+      },
+      "max_batch": 5,
+      "output_tokens": 6,
+      "input_tokens": 66,
+      "cache_read_tokens": 115634,
+      "cache_creation_tokens": 71567,
+      "cache_hit_ratio": 0.617,
+      "ctx_tokens_avg": 62422,
+      "ctx_tokens_max": 71599,
+      "ctx_threshold_crossed": false,
+      "turns_over_threshold": 0,
+      "model": "claude-fable-5-1",
+      "models_observed": [
+        "claude-fable-5-1"
+      ]
+    },
+    {
+      "agent": "agent-a221518d0ebd88dc2",
+      "role": "mayker-dev:planner",
+      "run": "deliver",
+      "run_id": "deliver-20261002T132208Z",
+      "steps": [
+        "5"
+      ],
+      "turns_outside_steps": 0,
+      "turns": 11,
+      "tool_calls": 15,
+      "tools_per_turn": 1.36,
+      "turn_classes": {
+        "read": {
+          "turns": 0,
+          "tool_calls": 0,
+          "tools_per_turn": null
+        },
+        "edit": {
+          "turns": 0,
+          "tool_calls": 0,
+          "tools_per_turn": null
+        },
+        "exec": {
+          "turns": 10,
+          "tool_calls": 14,
+          "tools_per_turn": 1.4
+        },
+        "other": {
+          "turns": 1,
+          "tool_calls": 1,
+          "tools_per_turn": 1.0
+        }
+      },
+      "max_batch": 4,
+      "output_tokens": 117,
+      "input_tokens": 22,
+      "cache_read_tokens": 916779,
+      "cache_creation_tokens": 119894,
+      "cache_hit_ratio": 0.884,
+      "ctx_tokens_avg": 94245,
+      "ctx_tokens_max": 119896,
+      "ctx_threshold_crossed": false,
+      "turns_over_threshold": 0,
+      "model": "claude-opus-5-5",
+      "models_observed": [
+        "claude-opus-5-5"
+      ]
+    },
+    {
+      "agent": "agent-a25376a3451f85ee1",
+      "role": "mayker-dev:builder",
+      "run": "deliver",
+      "run_id": "deliver-20261002T132208Z",
+      "steps": [
+        "5"
+      ],
+      "turns_outside_steps": 0,
+      "turns": 4,
+      "tool_calls": 7,
+      "tools_per_turn": 1.75,
+      "turn_classes": {
+        "read": {
+          "turns": 1,
+          "tool_calls": 4,
+          "tools_per_turn": 4.0
+        },
+        "edit": {
+          "turns": 1,
+          "tool_calls": 1,
+          "tools_per_turn": 1.0
+        },
+        "exec": {
+          "turns": 1,
+          "tool_calls": 1,
+          "tools_per_turn": 1.0
+        },
+        "other": {
+          "turns": 1,
+          "tool_calls": 1,
+          "tools_per_turn": 1.0
+        }
+      },
+      "max_batch": 4,
+      "output_tokens": 80,
+      "input_tokens": 8,
+      "cache_read_tokens": 211640,
+      "cache_creation_tokens": 48387,
+      "cache_hit_ratio": 0.814,
+      "ctx_tokens_avg": 65009,
+      "ctx_tokens_max": 70678,
+      "ctx_threshold_crossed": false,
+      "turns_over_threshold": 0,
+      "model": "claude-sonnet-5-5",
+      "models_observed": [
+        "claude-sonnet-5-5"
+      ]
+    },
+    {
+      "agent": "agent-a28142a3b65705a26",
+      "role": "mayker-dev:reviewer",
+      "run": "deliver",
+      "run_id": "deliver-20261002T132208Z",
+      "steps": [
+        "5"
+      ],
+      "turns_outside_steps": 0,
+      "turns": 4,
+      "tool_calls": 23,
+      "tools_per_turn": 5.75,
+      "turn_classes": {
+        "read": {
+          "turns": 3,
+          "tool_calls": 22,
+          "tools_per_turn": 7.33
+        },
+        "edit": {
+          "turns": 0,
+          "tool_calls": 0,
+          "tools_per_turn": null
+        },
+        "exec": {
+          "turns": 0,
+          "tool_calls": 0,
+          "tools_per_turn": null
+        },
+        "other": {
+          "turns": 1,
+          "tool_calls": 1,
+          "tools_per_turn": 1.0
+        }
+      },
+      "max_batch": 13,
+      "output_tokens": 34,
+      "input_tokens": 8,
+      "cache_read_tokens": 150202,
+      "cache_creation_tokens": 59347,
+      "cache_hit_ratio": 0.717,
+      "ctx_tokens_avg": 52389,
+      "ctx_tokens_max": 68222,
+      "ctx_threshold_crossed": false,
+      "turns_over_threshold": 0,
+      "model": "claude-opus-5-5",
+      "models_observed": [
+        "claude-opus-5-5"
+      ]
+    },
+    {
+      "agent": "agent-a31c35c81a7e83a06",
+      "role": "mayker-dev:planner",
+      "run": "deliver",
+      "run_id": "deliver-20261002T132208Z",
+      "steps": [
+        "5"
+      ],
+      "turns_outside_steps": 0,
+      "turns": 13,
+      "tool_calls": 18,
+      "tools_per_turn": 1.38,
+      "turn_classes": {
+        "read": {
+          "turns": 0,
+          "tool_calls": 0,
+          "tools_per_turn": null
+        },
+        "edit": {
+          "turns": 0,
+          "tool_calls": 0,
+          "tools_per_turn": null
+        },
+        "exec": {
+          "turns": 12,
+          "tool_calls": 17,
+          "tools_per_turn": 1.42
+        },
+        "other": {
+          "turns": 1,
+          "tool_calls": 1,
+          "tools_per_turn": 1.0
+        }
+      },
+      "max_batch": 4,
+      "output_tokens": 134,
+      "input_tokens": 26,
+      "cache_read_tokens": 1084255,
+      "cache_creation_tokens": 110047,
+      "cache_hit_ratio": 0.908,
+      "ctx_tokens_avg": 91871,
+      "ctx_tokens_max": 110049,
+      "ctx_threshold_crossed": false,
+      "turns_over_threshold": 0,
+      "model": "claude-opus-5-5",
+      "models_observed": [
+        "claude-opus-5-5"
+      ]
+    },
+    {
+      "agent": "agent-a374f98b02db22410",
+      "role": "mayker-dev:builder",
+      "run": "deliver",
+      "run_id": "deliver-20261002T132208Z",
+      "steps": [
+        "5"
+      ],
+      "turns_outside_steps": 0,
+      "turns": 6,
+      "tool_calls": 10,
+      "tools_per_turn": 1.67,
+      "turn_classes": {
+        "read": {
+          "turns": 1,
+          "tool_calls": 2,
+          "tools_per_turn": 2.0
+        },
+        "edit": {
+          "turns": 0,
+          "tool_calls": 0,
+          "tools_per_turn": null
+        },
+        "exec": {
+          "turns": 4,
+          "tool_calls": 7,
+          "tools_per_turn": 1.75
+        },
+        "other": {
+          "turns": 1,
+          "tool_calls": 1,
+          "tools_per_turn": 1.0
+        }
+      },
+      "max_batch": 4,
+      "output_tokens": 109,
+      "input_tokens": 12,
+      "cache_read_tokens": 360125,
+      "cache_creation_tokens": 54427,
+      "cache_hit_ratio": 0.869,
+      "ctx_tokens_avg": 69094,
+      "ctx_tokens_max": 76718,
+      "ctx_threshold_crossed": false,
+      "turns_over_threshold": 0,
+      "model": "claude-sonnet-5-5",
+      "models_observed": [
+        "claude-sonnet-5-5"
+      ]
+    },
+    {
+      "agent": "agent-a3927fa932567d850",
+      "role": "mayker-dev:builder",
+      "run": "deliver",
+      "run_id": "deliver-20261002T132208Z",
+      "steps": [
+        "5"
+      ],
+      "turns_outside_steps": 0,
+      "turns": 7,
+      "tool_calls": 11,
+      "tools_per_turn": 1.57,
+      "turn_classes": {
+        "read": {
+          "turns": 2,
+          "tool_calls": 5,
+          "tools_per_turn": 2.5
+        },
+        "edit": {
+          "turns": 1,
+          "tool_calls": 2,
+          "tools_per_turn": 2.0
+        },
+        "exec": {
+          "turns": 3,
+          "tool_calls": 3,
+          "tools_per_turn": 1.0
+        },
+        "other": {
+          "turns": 1,
+          "tool_calls": 1,
+          "tools_per_turn": 1.0
+        }
+      },
+      "max_batch": 4,
+      "output_tokens": 241,
+      "input_tokens": 14,
+      "cache_read_tokens": 415803,
+      "cache_creation_tokens": 49982,
+      "cache_hit_ratio": 0.893,
+      "ctx_tokens_avg": 66543,
+      "ctx_tokens_max": 72273,
+      "ctx_threshold_crossed": false,
+      "turns_over_threshold": 0,
+      "model": "claude-sonnet-5-5",
+      "models_observed": [
+        "claude-sonnet-5-5"
+      ]
+    },
+    {
+      "agent": "agent-a48a7bd986ca9af30",
+      "role": "mayker-dev:builder",
+      "run": "deliver",
+      "run_id": "deliver-20261002T132208Z",
+      "steps": [
+        "5"
+      ],
+      "turns_outside_steps": 0,
+      "turns": 6,
+      "tool_calls": 12,
+      "tools_per_turn": 2.0,
+      "turn_classes": {
+        "read": {
+          "turns": 2,
+          "tool_calls": 8,
+          "tools_per_turn": 4.0
+        },
+        "edit": {
+          "turns": 0,
+          "tool_calls": 0,
+          "tools_per_turn": null
+        },
+        "exec": {
+          "turns": 3,
+          "tool_calls": 3,
+          "tools_per_turn": 1.0
+        },
+        "other": {
+          "turns": 1,
+          "tool_calls": 1,
+          "tools_per_turn": 1.0
+        }
+      },
+      "max_batch": 4,
+      "output_tokens": 87,
+      "input_tokens": 12,
+      "cache_read_tokens": 338086,
+      "cache_creation_tokens": 46142,
+      "cache_hit_ratio": 0.88,
+      "ctx_tokens_avg": 64040,
+      "ctx_tokens_max": 68433,
+      "ctx_threshold_crossed": false,
+      "turns_over_threshold": 0,
+      "model": "claude-sonnet-5-5",
+      "models_observed": [
+        "claude-sonnet-5-5"
+      ]
+    },
+    {
+      "agent": "agent-a497c9cf3176408bd",
+      "role": "mayker-dev:builder",
+      "run": "deliver",
+      "run_id": "deliver-20261002T132208Z",
+      "steps": [
+        "5"
+      ],
+      "turns_outside_steps": 0,
+      "turns": 5,
+      "tool_calls": 11,
+      "tools_per_turn": 2.2,
+      "turn_classes": {
+        "read": {
+          "turns": 2,
+          "tool_calls": 8,
+          "tools_per_turn": 4.0
+        },
+        "edit": {
+          "turns": 0,
+          "tool_calls": 0,
+          "tools_per_turn": null
+        },
+        "exec": {
+          "turns": 2,
+          "tool_calls": 2,
+          "tools_per_turn": 1.0
+        },
+        "other": {
+          "turns": 1,
+          "tool_calls": 1,
+          "tools_per_turn": 1.0
+        }
+      },
+      "max_batch": 4,
+      "output_tokens": 71,
+      "input_tokens": 10,
+      "cache_read_tokens": 276725,
+      "cache_creation_tokens": 49084,
+      "cache_hit_ratio": 0.849,
+      "ctx_tokens_avg": 65164,
+      "ctx_tokens_max": 71375,
+      "ctx_threshold_crossed": false,
+      "turns_over_threshold": 0,
+      "model": "claude-sonnet-5-5",
+      "models_observed": [
+        "claude-sonnet-5-5"
+      ]
+    },
+    {
+      "agent": "agent-a4b5b61f55a3a5ce0",
+      "role": "mayker-dev:builder",
+      "run": "deliver",
+      "run_id": "deliver-20261002T132208Z",
+      "steps": [
+        "5"
+      ],
+      "turns_outside_steps": 0,
+      "turns": 8,
+      "tool_calls": 20,
+      "tools_per_turn": 2.5,
+      "turn_classes": {
+        "read": {
+          "turns": 2,
+          "tool_calls": 14,
+          "tools_per_turn": 7.0
+        },
+        "edit": {
+          "turns": 0,
+          "tool_calls": 0,
+          "tools_per_turn": null
+        },
+        "exec": {
+          "turns": 5,
+          "tool_calls": 5,
+          "tools_per_turn": 1.0
+        },
+        "other": {
+          "turns": 1,
+          "tool_calls": 1,
+          "tools_per_turn": 1.0
+        }
+      },
+      "max_batch": 10,
+      "output_tokens": 104,
+      "input_tokens": 16,
+      "cache_read_tokens": 556498,
+      "cache_creation_tokens": 88557,
+      "cache_hit_ratio": 0.863,
+      "ctx_tokens_avg": 80634,
+      "ctx_tokens_max": 88559,
+      "ctx_threshold_crossed": false,
+      "turns_over_threshold": 0,
+      "model": "claude-sonnet-5-5",
+      "models_observed": [
+        "claude-sonnet-5-5"
+      ]
+    },
+    {
+      "agent": "agent-a4b86a3686bda3edb",
+      "role": "mayker-dev:builder",
+      "run": "deliver",
+      "run_id": "deliver-20261002T132208Z",
+      "steps": [
+        "5"
+      ],
+      "turns_outside_steps": 0,
+      "turns": 12,
+      "tool_calls": 29,
+      "tools_per_turn": 2.42,
+      "turn_classes": {
+        "read": {
+          "turns": 2,
+          "tool_calls": 5,
+          "tools_per_turn": 2.5
+        },
+        "edit": {
+          "turns": 3,
+          "tool_calls": 13,
+          "tools_per_turn": 4.33
+        },
+        "exec": {
+          "turns": 6,
+          "tool_calls": 10,
+          "tools_per_turn": 1.67
+        },
+        "other": {
+          "turns": 1,
+          "tool_calls": 1,
+          "tools_per_turn": 1.0
+        }
+      },
+      "max_batch": 6,
+      "output_tokens": 416,
+      "input_tokens": 24,
+      "cache_read_tokens": 896346,
+      "cache_creation_tokens": 88865,
+      "cache_hit_ratio": 0.91,
+      "ctx_tokens_avg": 82103,
+      "ctx_tokens_max": 88867,
+      "ctx_threshold_crossed": false,
+      "turns_over_threshold": 0,
+      "model": "claude-sonnet-5-5",
+      "models_observed": [
+        "claude-sonnet-5-5"
+      ]
+    },
+    {
+      "agent": "agent-a4d28c41179fd5877",
+      "role": "mayker-dev:orchestrator",
+      "run": "deliver",
+      "run_id": "deliver-20261002T132208Z",
+      "steps": [
+        "3"
+      ],
+      "turns_outside_steps": 0,
+      "turns": 6,
+      "tool_calls": 14,
+      "tools_per_turn": 2.33,
+      "turn_classes": {
+        "read": {
+          "turns": 1,
+          "tool_calls": 5,
+          "tools_per_turn": 5.0
+        },
+        "edit": {
+          "turns": 1,
+          "tool_calls": 1,
+          "tools_per_turn": 1.0
+        },
+        "exec": {
+          "turns": 3,
+          "tool_calls": 7,
+          "tools_per_turn": 2.33
+        },
+        "other": {
+          "turns": 1,
+          "tool_calls": 1,
+          "tools_per_turn": 1.0
+        }
+      },
+      "max_batch": 5,
+      "output_tokens": 48,
+      "input_tokens": 132,
+      "cache_read_tokens": 415042,
+      "cache_creation_tokens": 103360,
+      "cache_hit_ratio": 0.8,
+      "ctx_tokens_avg": 86422,
+      "ctx_tokens_max": 103486,
+      "ctx_threshold_crossed": false,
+      "turns_over_threshold": 0,
+      "model": "claude-fable-5-1",
+      "models_observed": [
+        "claude-fable-5-1"
+      ]
+    },
+    {
+      "agent": "agent-a51eddefd7a2f75e4",
+      "role": "mayker-dev:builder",
+      "run": "deliver",
+      "run_id": "deliver-20261002T132208Z",
+      "steps": [
+        "5"
+      ],
+      "turns_outside_steps": 0,
+      "turns": 7,
+      "tool_calls": 16,
+      "tools_per_turn": 2.29,
+      "turn_classes": {
+        "read": {
+          "turns": 1,
+          "tool_calls": 6,
+          "tools_per_turn": 6.0
+        },
+        "edit": {
+          "turns": 2,
+          "tool_calls": 6,
+          "tools_per_turn": 3.0
+        },
+        "exec": {
+          "turns": 3,
+          "tool_calls": 3,
+          "tools_per_turn": 1.0
+        },
+        "other": {
+          "turns": 1,
+          "tool_calls": 1,
+          "tools_per_turn": 1.0
+        }
+      },
+      "max_batch": 6,
+      "output_tokens": 133,
+      "input_tokens": 14,
+      "cache_read_tokens": 401624,
+      "cache_creation_tokens": 45447,
+      "cache_hit_ratio": 0.898,
+      "ctx_tokens_avg": 63869,
+      "ctx_tokens_max": 67738,
+      "ctx_threshold_crossed": false,
+      "turns_over_threshold": 0,
+      "model": "claude-sonnet-5-5",
+      "models_observed": [
+        "claude-sonnet-5-5"
+      ]
+    },
+    {
+      "agent": "agent-a532c3330800dcc18",
+      "role": "mayker-dev:orchestrator",
+      "run": "deliver",
+      "run_id": "deliver-20261002T132208Z",
+      "steps": [
+        "5"
+      ],
+      "turns_outside_steps": 0,
+      "turns": 6,
+      "tool_calls": 12,
+      "tools_per_turn": 2.0,
+      "turn_classes": {
+        "read": {
+          "turns": 1,
+          "tool_calls": 6,
+          "tools_per_turn": 6.0
+        },
+        "edit": {
+          "turns": 0,
+          "tool_calls": 0,
+          "tools_per_turn": null
+        },
+        "exec": {
+          "turns": 4,
+          "tool_calls": 5,
+          "tools_per_turn": 1.25
+        },
+        "other": {
+          "turns": 1,
+          "tool_calls": 1,
+          "tools_per_turn": 1.0
+        }
+      },
+      "max_batch": 6,
+      "output_tokens": 162,
+      "input_tokens": 162,
+      "cache_read_tokens": 322300,
+      "cache_creation_tokens": 73926,
+      "cache_hit_ratio": 0.813,
+      "ctx_tokens_avg": 66065,
+      "ctx_tokens_max": 73958,
+      "ctx_threshold_crossed": false,
+      "turns_over_threshold": 0,
+      "model": "claude-fable-5-1",
+      "models_observed": [
+        "claude-fable-5-1"
+      ]
+    },
+    {
+      "agent": "agent-a54f659dd3729d085",
+      "role": "mayker-dev:planner",
+      "run": "deliver",
+      "run_id": "deliver-20261002T132208Z",
+      "steps": [
+        "5"
+      ],
+      "turns_outside_steps": 0,
+      "turns": 13,
+      "tool_calls": 13,
+      "tools_per_turn": 1.0,
+      "turn_classes": {
+        "read": {
+          "turns": 1,
+          "tool_calls": 1,
+          "tools_per_turn": 1.0
+        },
+        "edit": {
+          "turns": 0,
+          "tool_calls": 0,
+          "tools_per_turn": null
+        },
+        "exec": {
+          "turns": 11,
+          "tool_calls": 11,
+          "tools_per_turn": 1.0
+        },
+        "other": {
+          "turns": 1,
+          "tool_calls": 1,
+          "tools_per_turn": 1.0
+        }
+      },
+      "max_batch": 1,
+      "output_tokens": 282,
+      "input_tokens": 26,
+      "cache_read_tokens": 1016866,
+      "cache_creation_tokens": 109456,
+      "cache_hit_ratio": 0.903,
+      "ctx_tokens_avg": 86642,
+      "ctx_tokens_max": 109458,
+      "ctx_threshold_crossed": false,
+      "turns_over_threshold": 0,
+      "model": "claude-opus-5-5",
+      "models_observed": [
+        "claude-opus-5-5"
+      ]
+    },
+    {
+      "agent": "agent-a594f60a7654b128e",
+      "role": "mayker-dev:orchestrator",
+      "run": "deliver",
+      "run_id": "deliver-20261002T132208Z",
+      "steps": [
+        "5"
+      ],
+      "turns_outside_steps": 0,
+      "turns": 4,
+      "tool_calls": 8,
+      "tools_per_turn": 2.0,
+      "turn_classes": {
+        "read": {
+          "turns": 1,
+          "tool_calls": 4,
+          "tools_per_turn": 4.0
+        },
+        "edit": {
+          "turns": 0,
+          "tool_calls": 0,
+          "tools_per_turn": null
+        },
+        "exec": {
+          "turns": 2,
+          "tool_calls": 3,
+          "tools_per_turn": 1.5
+        },
+        "other": {
+          "turns": 1,
+          "tool_calls": 1,
+          "tools_per_turn": 1.0
+        }
+      },
+      "max_batch": 4,
+      "output_tokens": 183,
+      "input_tokens": 98,
+      "cache_read_tokens": 166936,
+      "cache_creation_tokens": 60772,
+      "cache_hit_ratio": 0.733,
+      "ctx_tokens_avg": 56952,
+      "ctx_tokens_max": 60804,
+      "ctx_threshold_crossed": false,
+      "turns_over_threshold": 0,
+      "model": "claude-fable-5-1",
+      "models_observed": [
+        "claude-fable-5-1"
+      ]
+    },
+    {
+      "agent": "agent-a5dcdd768c0134db1",
+      "role": "mayker-dev:orchestrator",
+      "run": "deliver",
+      "run_id": "deliver-20261002T132208Z",
+      "steps": [
+        "5"
+      ],
+      "turns_outside_steps": 0,
+      "turns": 3,
+      "tool_calls": 6,
+      "tools_per_turn": 2.0,
+      "turn_classes": {
+        "read": {
+          "turns": 1,
+          "tool_calls": 4,
+          "tools_per_turn": 4.0
+        },
+        "edit": {
+          "turns": 0,
+          "tool_calls": 0,
+          "tools_per_turn": null
+        },
+        "exec": {
+          "turns": 1,
+          "tool_calls": 1,
+          "tools_per_turn": 1.0
+        },
+        "other": {
+          "turns": 1,
+          "tool_calls": 1,
+          "tools_per_turn": 1.0
+        }
+      },
+      "max_batch": 4,
+      "output_tokens": 33,
+      "input_tokens": 66,
+      "cache_read_tokens": 128395,
+      "cache_creation_tokens": 38662,
+      "cache_hit_ratio": 0.768,
+      "ctx_tokens_avg": 55708,
+      "ctx_tokens_max": 59931,
+      "ctx_threshold_crossed": false,
+      "turns_over_threshold": 0,
+      "model": "claude-fable-5-1",
+      "models_observed": [
+        "claude-fable-5-1"
+      ]
+    },
+    {
+      "agent": "agent-a6f8df3f790fbdcb6",
+      "role": "mayker-dev:builder",
+      "run": "deliver",
+      "run_id": "deliver-20261002T132208Z",
+      "steps": [
+        "5"
+      ],
+      "turns_outside_steps": 0,
+      "turns": 7,
+      "tool_calls": 18,
+      "tools_per_turn": 2.57,
+      "turn_classes": {
+        "read": {
+          "turns": 1,
+          "tool_calls": 6,
+          "tools_per_turn": 6.0
+        },
+        "edit": {
+          "turns": 1,
+          "tool_calls": 7,
+          "tools_per_turn": 7.0
+        },
+        "exec": {
+          "turns": 4,
+          "tool_calls": 4,
+          "tools_per_turn": 1.0
+        },
+        "other": {
+          "turns": 1,
+          "tool_calls": 1,
+          "tools_per_turn": 1.0
+        }
+      },
+      "max_batch": 7,
+      "output_tokens": 133,
+      "input_tokens": 14,
+      "cache_read_tokens": 412521,
+      "cache_creation_tokens": 48627,
+      "cache_hit_ratio": 0.895,
+      "ctx_tokens_avg": 65880,
+      "ctx_tokens_max": 70918,
+      "ctx_threshold_crossed": false,
+      "turns_over_threshold": 0,
+      "model": "claude-sonnet-5-5",
+      "models_observed": [
+        "claude-sonnet-5-5"
+      ]
+    },
+    {
+      "agent": "agent-a6fa094c51ab3585b",
+      "role": "mayker-dev:builder",
+      "run": "deliver",
+      "run_id": "deliver-20261002T132208Z",
+      "steps": [
+        "5"
+      ],
+      "turns_outside_steps": 0,
+      "turns": 11,
+      "tool_calls": 18,
+      "tools_per_turn": 1.64,
+      "turn_classes": {
+        "read": {
+          "turns": 1,
+          "tool_calls": 4,
+          "tools_per_turn": 4.0
+        },
+        "edit": {
+          "turns": 1,
+          "tool_calls": 2,
+          "tools_per_turn": 2.0
+        },
+        "exec": {
+          "turns": 8,
+          "tool_calls": 11,
+          "tools_per_turn": 1.38
+        },
+        "other": {
+          "turns": 1,
+          "tool_calls": 1,
+          "tools_per_turn": 1.0
+        }
+      },
+      "max_batch": 4,
+      "output_tokens": 123,
+      "input_tokens": 22,
+      "cache_read_tokens": 658278,
+      "cache_creation_tokens": 47220,
+      "cache_hit_ratio": 0.933,
+      "ctx_tokens_avg": 64138,
+      "ctx_tokens_max": 69511,
+      "ctx_threshold_crossed": false,
+      "turns_over_threshold": 0,
+      "model": "claude-sonnet-5-5",
+      "models_observed": [
+        "claude-sonnet-5-5"
+      ]
+    },
+    {
+      "agent": "agent-a6fbb8adcc1fc5f59",
+      "role": "mayker-dev:orchestrator",
+      "run": "deliver",
+      "run_id": "deliver-20261002T132208Z",
+      "steps": [
+        "5"
+      ],
+      "turns_outside_steps": 0,
+      "turns": 6,
+      "tool_calls": 16,
+      "tools_per_turn": 2.67,
+      "turn_classes": {
+        "read": {
+          "turns": 1,
+          "tool_calls": 8,
+          "tools_per_turn": 8.0
+        },
+        "edit": {
+          "turns": 0,
+          "tool_calls": 0,
+          "tools_per_turn": null
+        },
+        "exec": {
+          "turns": 4,
+          "tool_calls": 7,
+          "tools_per_turn": 1.75
+        },
+        "other": {
+          "turns": 1,
+          "tool_calls": 1,
+          "tools_per_turn": 1.0
+        }
+      },
+      "max_batch": 8,
+      "output_tokens": 38,
+      "input_tokens": 162,
+      "cache_read_tokens": 386945,
+      "cache_creation_tokens": 71392,
+      "cache_hit_ratio": 0.844,
+      "ctx_tokens_avg": 76416,
+      "ctx_tokens_max": 92661,
+      "ctx_threshold_crossed": false,
+      "turns_over_threshold": 0,
+      "model": "claude-fable-5-1",
+      "models_observed": [
+        "claude-fable-5-1"
+      ]
+    },
+    {
+      "agent": "agent-a71581111bf03eccc",
+      "role": "mayker-dev:builder",
+      "run": "deliver",
+      "run_id": "deliver-20261002T132208Z",
+      "steps": [
+        "5"
+      ],
+      "turns_outside_steps": 0,
+      "turns": 6,
+      "tool_calls": 15,
+      "tools_per_turn": 2.5,
+      "turn_classes": {
+        "read": {
+          "turns": 2,
+          "tool_calls": 7,
+          "tools_per_turn": 3.5
+        },
+        "edit": {
+          "turns": 1,
+          "tool_calls": 2,
+          "tools_per_turn": 2.0
+        },
+        "exec": {
+          "turns": 2,
+          "tool_calls": 5,
+          "tools_per_turn": 2.5
+        },
+        "other": {
+          "turns": 1,
+          "tool_calls": 1,
+          "tools_per_turn": 1.0
+        }
+      },
+      "max_batch": 5,
+      "output_tokens": 82,
+      "input_tokens": 12,
+      "cache_read_tokens": 417364,
+      "cache_creation_tokens": 69721,
+      "cache_hit_ratio": 0.857,
+      "ctx_tokens_avg": 81183,
+      "ctx_tokens_max": 92012,
+      "ctx_threshold_crossed": false,
+      "turns_over_threshold": 0,
+      "model": "claude-sonnet-5-5",
+      "models_observed": [
+        "claude-sonnet-5-5"
+      ]
+    },
+    {
+      "agent": "agent-a718ec9ffee20257c",
+      "role": "mayker-dev:orchestrator",
+      "run": "deliver",
+      "run_id": "deliver-20261002T132208Z",
+      "steps": [
+        "5"
+      ],
+      "turns_outside_steps": 0,
+      "turns": 5,
+      "tool_calls": 11,
+      "tools_per_turn": 2.2,
+      "turn_classes": {
+        "read": {
+          "turns": 1,
+          "tool_calls": 6,
+          "tools_per_turn": 6.0
+        },
+        "edit": {
+          "turns": 0,
+          "tool_calls": 0,
+          "tools_per_turn": null
+        },
+        "exec": {
+          "turns": 3,
+          "tool_calls": 4,
+          "tools_per_turn": 1.33
+        },
+        "other": {
+          "turns": 1,
+          "tool_calls": 1,
+          "tools_per_turn": 1.0
+        }
+      },
+      "max_batch": 6,
+      "output_tokens": 126,
+      "input_tokens": 130,
+      "cache_read_tokens": 276342,
+      "cache_creation_tokens": 51548,
+      "cache_hit_ratio": 0.842,
+      "ctx_tokens_avg": 65604,
+      "ctx_tokens_max": 72851,
+      "ctx_threshold_crossed": false,
+      "turns_over_threshold": 0,
+      "model": "claude-fable-5-1",
+      "models_observed": [
+        "claude-fable-5-1"
+      ]
+    },
+    {
+      "agent": "agent-a87724c4e55e064f9",
+      "role": "mayker-dev:planner",
+      "run": "deliver",
+      "run_id": "deliver-20261002T132208Z",
+      "steps": [
+        "5"
+      ],
+      "turns_outside_steps": 0,
+      "turns": 14,
+      "tool_calls": 21,
+      "tools_per_turn": 1.5,
+      "turn_classes": {
+        "read": {
+          "turns": 2,
+          "tool_calls": 3,
+          "tools_per_turn": 1.5
+        },
+        "edit": {
+          "turns": 0,
+          "tool_calls": 0,
+          "tools_per_turn": null
+        },
+        "exec": {
+          "turns": 11,
+          "tool_calls": 17,
+          "tools_per_turn": 1.55
+        },
+        "other": {
+          "turns": 1,
+          "tool_calls": 1,
+          "tools_per_turn": 1.0
+        }
+      },
+      "max_batch": 4,
+      "output_tokens": 288,
+      "input_tokens": 28,
+      "cache_read_tokens": 1224646,
+      "cache_creation_tokens": 113300,
+      "cache_hit_ratio": 0.915,
+      "ctx_tokens_avg": 95570,
+      "ctx_tokens_max": 113302,
+      "ctx_threshold_crossed": false,
+      "turns_over_threshold": 0,
+      "model": "claude-opus-5-5",
+      "models_observed": [
+        "claude-opus-5-5"
+      ]
+    },
+    {
+      "agent": "agent-a8db54e57c2f6e8ae",
+      "role": "mayker-dev:builder",
+      "run": "deliver",
+      "run_id": "deliver-20261002T132208Z",
+      "steps": [
+        "5"
+      ],
+      "turns_outside_steps": 0,
+      "turns": 5,
+      "tool_calls": 11,
+      "tools_per_turn": 2.2,
+      "turn_classes": {
+        "read": {
+          "turns": 1,
+          "tool_calls": 4,
+          "tools_per_turn": 4.0
+        },
+        "edit": {
+          "turns": 1,
+          "tool_calls": 4,
+          "tools_per_turn": 4.0
+        },
+        "exec": {
+          "turns": 2,
+          "tool_calls": 2,
+          "tools_per_turn": 1.0
+        },
+        "other": {
+          "turns": 1,
+          "tool_calls": 1,
+          "tools_per_turn": 1.0
+        }
+      },
+      "max_batch": 4,
+      "output_tokens": 87,
+      "input_tokens": 10,
+      "cache_read_tokens": 278696,
+      "cache_creation_tokens": 48989,
+      "cache_hit_ratio": 0.85,
+      "ctx_tokens_avg": 65539,
+      "ctx_tokens_max": 71280,
+      "ctx_threshold_crossed": false,
+      "turns_over_threshold": 0,
+      "model": "claude-sonnet-5-5",
+      "models_observed": [
+        "claude-sonnet-5-5"
+      ]
+    },
+    {
+      "agent": "agent-a93c30e23420def7f",
+      "role": "mayker-dev:builder",
+      "run": "deliver",
+      "run_id": "deliver-20261002T132208Z",
+      "steps": [
+        "5"
+      ],
+      "turns_outside_steps": 0,
+      "turns": 7,
+      "tool_calls": 13,
+      "tools_per_turn": 1.86,
+      "turn_classes": {
+        "read": {
+          "turns": 1,
+          "tool_calls": 4,
+          "tools_per_turn": 4.0
+        },
+        "edit": {
+          "turns": 0,
+          "tool_calls": 0,
+          "tools_per_turn": null
+        },
+        "exec": {
+          "turns": 5,
+          "tool_calls": 8,
+          "tools_per_turn": 1.6
+        },
+        "other": {
+          "turns": 1,
+          "tool_calls": 1,
+          "tools_per_turn": 1.0
+        }
+      },
+      "max_batch": 4,
+      "output_tokens": 93,
+      "input_tokens": 14,
+      "cache_read_tokens": 439363,
+      "cache_creation_tokens": 80354,
+      "cache_hit_ratio": 0.845,
+      "ctx_tokens_avg": 74247,
+      "ctx_tokens_max": 80356,
+      "ctx_threshold_crossed": false,
+      "turns_over_threshold": 0,
+      "model": "claude-sonnet-5-5",
+      "models_observed": [
+        "claude-sonnet-5-5"
+      ]
+    },
+    {
+      "agent": "agent-a95780c7694cfbf67",
+      "role": "mayker-dev:reviewer",
+      "run": "deliver",
+      "run_id": "deliver-20261002T132208Z",
+      "steps": [
+        "5"
+      ],
+      "turns_outside_steps": 0,
+      "turns": 4,
+      "tool_calls": 24,
+      "tools_per_turn": 6.0,
+      "turn_classes": {
+        "read": {
+          "turns": 3,
+          "tool_calls": 23,
+          "tools_per_turn": 7.67
+        },
+        "edit": {
+          "turns": 0,
+          "tool_calls": 0,
+          "tools_per_turn": null
+        },
+        "exec": {
+          "turns": 0,
+          "tool_calls": 0,
+          "tools_per_turn": null
+        },
+        "other": {
+          "turns": 1,
+          "tool_calls": 1,
+          "tools_per_turn": 1.0
+        }
+      },
+      "max_batch": 12,
+      "output_tokens": 20,
+      "input_tokens": 8,
+      "cache_read_tokens": 143396,
+      "cache_creation_tokens": 55446,
+      "cache_hit_ratio": 0.721,
+      "ctx_tokens_avg": 49712,
+      "ctx_tokens_max": 64321,
+      "ctx_threshold_crossed": false,
+      "turns_over_threshold": 0,
+      "model": "claude-opus-5-5",
+      "models_observed": [
+        "claude-opus-5-5"
+      ]
+    },
+    {
+      "agent": "agent-aa2d16deaea4dd524",
+      "role": "mayker-dev:reviewer",
+      "run": "deliver",
+      "run_id": "deliver-20261002T132208Z",
+      "steps": [
+        "5"
+      ],
+      "turns_outside_steps": 0,
+      "turns": 4,
+      "tool_calls": 15,
+      "tools_per_turn": 3.75,
+      "turn_classes": {
+        "read": {
+          "turns": 3,
+          "tool_calls": 14,
+          "tools_per_turn": 4.67
+        },
+        "edit": {
+          "turns": 0,
+          "tool_calls": 0,
+          "tools_per_turn": null
+        },
+        "exec": {
+          "turns": 0,
+          "tool_calls": 0,
+          "tools_per_turn": null
+        },
+        "other": {
+          "turns": 1,
+          "tool_calls": 1,
+          "tools_per_turn": 1.0
+        }
+      },
+      "max_batch": 7,
+      "output_tokens": 68,
+      "input_tokens": 8,
+      "cache_read_tokens": 129966,
+      "cache_creation_tokens": 56200,
+      "cache_hit_ratio": 0.698,
+      "ctx_tokens_avg": 46544,
+      "ctx_tokens_max": 56202,
+      "ctx_threshold_crossed": false,
+      "turns_over_threshold": 0,
+      "model": "claude-opus-5-5",
+      "models_observed": [
+        "claude-opus-5-5"
+      ]
+    },
+    {
+      "agent": "agent-ab1acba0836261621",
+      "role": "mayker-dev:builder",
+      "run": "deliver",
+      "run_id": "deliver-20261002T132208Z",
+      "steps": [
+        "5"
+      ],
+      "turns_outside_steps": 0,
+      "turns": 5,
+      "tool_calls": 9,
+      "tools_per_turn": 1.8,
+      "turn_classes": {
+        "read": {
+          "turns": 1,
+          "tool_calls": 4,
+          "tools_per_turn": 4.0
+        },
+        "edit": {
+          "turns": 1,
+          "tool_calls": 2,
+          "tools_per_turn": 2.0
+        },
+        "exec": {
+          "turns": 2,
+          "tool_calls": 2,
+          "tools_per_turn": 1.0
+        },
+        "other": {
+          "turns": 1,
+          "tool_calls": 1,
+          "tools_per_turn": 1.0
+        }
+      },
+      "max_batch": 4,
+      "output_tokens": 81,
+      "input_tokens": 10,
+      "cache_read_tokens": 271196,
+      "cache_creation_tokens": 45897,
+      "cache_hit_ratio": 0.855,
+      "ctx_tokens_avg": 63421,
+      "ctx_tokens_max": 68188,
+      "ctx_threshold_crossed": false,
+      "turns_over_threshold": 0,
+      "model": "claude-sonnet-5-5",
+      "models_observed": [
+        "claude-sonnet-5-5"
+      ]
+    },
+    {
+      "agent": "agent-ab5d8c280ee736b3d",
+      "role": "mayker-dev:builder",
+      "run": "deliver",
+      "run_id": "deliver-20261002T132208Z",
+      "steps": [
+        "5"
+      ],
+      "turns_outside_steps": 0,
+      "turns": 14,
+      "tool_calls": 21,
+      "tools_per_turn": 1.5,
+      "turn_classes": {
+        "read": {
+          "turns": 1,
+          "tool_calls": 6,
+          "tools_per_turn": 6.0
+        },
+        "edit": {
+          "turns": 0,
+          "tool_calls": 0,
+          "tools_per_turn": null
+        },
+        "exec": {
+          "turns": 12,
+          "tool_calls": 14,
+          "tools_per_turn": 1.17
+        },
+        "other": {
+          "turns": 1,
+          "tool_calls": 1,
+          "tools_per_turn": 1.0
+        }
+      },
+      "max_batch": 6,
+      "output_tokens": 204,
+      "input_tokens": 28,
+      "cache_read_tokens": 1111178,
+      "cache_creation_tokens": 68484,
+      "cache_hit_ratio": 0.942,
+      "ctx_tokens_avg": 84264,
+      "ctx_tokens_max": 90775,
+      "ctx_threshold_crossed": false,
+      "turns_over_threshold": 0,
+      "model": "claude-sonnet-5-5",
+      "models_observed": [
+        "claude-sonnet-5-5"
+      ]
+    },
+    {
+      "agent": "agent-ab6e56cab51aff7f3",
+      "role": "mayker-dev:builder",
+      "run": "deliver",
+      "run_id": "deliver-20261002T132208Z",
+      "steps": [
+        "5"
+      ],
+      "turns_outside_steps": 0,
+      "turns": 6,
+      "tool_calls": 20,
+      "tools_per_turn": 3.33,
+      "turn_classes": {
+        "read": {
+          "turns": 1,
+          "tool_calls": 4,
+          "tools_per_turn": 4.0
+        },
+        "edit": {
+          "turns": 1,
+          "tool_calls": 7,
+          "tools_per_turn": 7.0
+        },
+        "exec": {
+          "turns": 3,
+          "tool_calls": 8,
+          "tools_per_turn": 2.67
+        },
+        "other": {
+          "turns": 1,
+          "tool_calls": 1,
+          "tools_per_turn": 1.0
+        }
+      },
+      "max_batch": 7,
+      "output_tokens": 122,
+      "input_tokens": 12,
+      "cache_read_tokens": 379751,
+      "cache_creation_tokens": 89280,
+      "cache_hit_ratio": 0.81,
+      "ctx_tokens_avg": 78174,
+      "ctx_tokens_max": 89282,
+      "ctx_threshold_crossed": false,
+      "turns_over_threshold": 0,
+      "model": "claude-sonnet-5-5",
+      "models_observed": [
+        "claude-sonnet-5-5"
+      ]
+    },
+    {
+      "agent": "agent-aceaab36d78974821",
+      "role": "mayker-dev:orchestrator",
+      "run": "deliver",
+      "run_id": "deliver-20261002T132208Z",
+      "steps": [
+        "5"
+      ],
+      "turns_outside_steps": 0,
+      "turns": 3,
+      "tool_calls": 6,
+      "tools_per_turn": 2.0,
+      "turn_classes": {
+        "read": {
+          "turns": 1,
+          "tool_calls": 4,
+          "tools_per_turn": 4.0
+        },
+        "edit": {
+          "turns": 0,
+          "tool_calls": 0,
+          "tools_per_turn": null
+        },
+        "exec": {
+          "turns": 1,
+          "tool_calls": 1,
+          "tools_per_turn": 1.0
+        },
+        "other": {
+          "turns": 1,
+          "tool_calls": 1,
+          "tools_per_turn": 1.0
+        }
+      },
+      "max_batch": 4,
+      "output_tokens": 30,
+      "input_tokens": 66,
+      "cache_read_tokens": 128826,
+      "cache_creation_tokens": 39153,
+      "cache_hit_ratio": 0.767,
+      "ctx_tokens_avg": 56015,
+      "ctx_tokens_max": 60422,
+      "ctx_threshold_crossed": false,
+      "turns_over_threshold": 0,
+      "model": "claude-fable-5-1",
+      "models_observed": [
+        "claude-fable-5-1"
+      ]
+    },
+    {
+      "agent": "agent-adbaa9c702079c590",
+      "role": "mayker-dev:reviewer",
+      "run": "deliver",
+      "run_id": "deliver-20261002T132208Z",
+      "steps": [
+        "5"
+      ],
+      "turns_outside_steps": 0,
+      "turns": 4,
+      "tool_calls": 21,
+      "tools_per_turn": 5.25,
+      "turn_classes": {
+        "read": {
+          "turns": 3,
+          "tool_calls": 20,
+          "tools_per_turn": 6.67
+        },
+        "edit": {
+          "turns": 0,
+          "tool_calls": 0,
+          "tools_per_turn": null
+        },
+        "exec": {
+          "turns": 0,
+          "tool_calls": 0,
+          "tools_per_turn": null
+        },
+        "other": {
+          "turns": 1,
+          "tool_calls": 1,
+          "tools_per_turn": 1.0
+        }
+      },
+      "max_batch": 8,
+      "output_tokens": 18,
+      "input_tokens": 8,
+      "cache_read_tokens": 140649,
+      "cache_creation_tokens": 54506,
+      "cache_hit_ratio": 0.721,
+      "ctx_tokens_avg": 48791,
+      "ctx_tokens_max": 63381,
+      "ctx_threshold_crossed": false,
+      "turns_over_threshold": 0,
+      "model": "claude-opus-5-5",
+      "models_observed": [
+        "claude-opus-5-5"
+      ]
+    },
+    {
+      "agent": "agent-adc8ac31a7de14987",
+      "role": "mayker-dev:reviewer",
+      "run": "deliver",
+      "run_id": "deliver-20261002T132208Z",
+      "steps": [
+        "5"
+      ],
+      "turns_outside_steps": 0,
+      "turns": 4,
+      "tool_calls": 18,
+      "tools_per_turn": 4.5,
+      "turn_classes": {
+        "read": {
+          "turns": 3,
+          "tool_calls": 17,
+          "tools_per_turn": 5.67
+        },
+        "edit": {
+          "turns": 0,
+          "tool_calls": 0,
+          "tools_per_turn": null
+        },
+        "exec": {
+          "turns": 0,
+          "tool_calls": 0,
+          "tools_per_turn": null
+        },
+        "other": {
+          "turns": 1,
+          "tool_calls": 1,
+          "tools_per_turn": 1.0
+        }
+      },
+      "max_batch": 8,
+      "output_tokens": 33,
+      "input_tokens": 8,
+      "cache_read_tokens": 134632,
+      "cache_creation_tokens": 61702,
+      "cache_hit_ratio": 0.686,
+      "ctx_tokens_avg": 49086,
+      "ctx_tokens_max": 61704,
+      "ctx_threshold_crossed": false,
+      "turns_over_threshold": 0,
+      "model": "claude-opus-5-5",
+      "models_observed": [
+        "claude-opus-5-5"
+      ]
+    },
+    {
+      "agent": "agent-adfa45bf8db08a7f0",
+      "role": "mayker-dev:orchestrator",
+      "run": "deliver",
+      "run_id": "deliver-20261002T132208Z",
+      "steps": [
+        "5"
+      ],
+      "turns_outside_steps": 0,
+      "turns": 5,
+      "tool_calls": 14,
+      "tools_per_turn": 2.8,
+      "turn_classes": {
+        "read": {
+          "turns": 1,
+          "tool_calls": 6,
+          "tools_per_turn": 6.0
+        },
+        "edit": {
+          "turns": 0,
+          "tool_calls": 0,
+          "tools_per_turn": null
+        },
+        "exec": {
+          "turns": 3,
+          "tool_calls": 7,
+          "tools_per_turn": 2.33
+        },
+        "other": {
+          "turns": 1,
+          "tool_calls": 1,
+          "tools_per_turn": 1.0
+        }
+      },
+      "max_batch": 6,
+      "output_tokens": 19,
+      "input_tokens": 130,
+      "cache_read_tokens": 279751,
+      "cache_creation_tokens": 62018,
+      "cache_hit_ratio": 0.818,
+      "ctx_tokens_avg": 68380,
+      "ctx_tokens_max": 83287,
+      "ctx_threshold_crossed": false,
+      "turns_over_threshold": 0,
+      "model": "claude-fable-5-1",
+      "models_observed": [
+        "claude-fable-5-1"
+      ]
+    }
+  ],
+  "dispatch_totals": {
+    "count": 34,
+    "count_by_role": {
+      "mayker-dev:builder": 16,
+      "mayker-dev:orchestrator": 9,
+      "mayker-dev:planner": 4,
+      "mayker-dev:reviewer": 5
+    },
+    "ctx_tokens_max_median": 71936,
+    "ctx_tokens_max_max": 119896,
+    "ctx_tokens_max_distribution": [
+      56202,
+      59931,
+      60422,
+      60804,
+      61704,
+      63381,
+      64321,
+      67738,
+      68188,
+      68222,
+      68433,
+      69511,
+      70678,
+      70918,
+      71280,
+      71375,
+      71599,
+      72273,
+      72851,
+      73958,
+      76718,
+      80356,
+      83287,
+      88559,
+      88867,
+      89282,
+      90775,
+      92012,
+      92661,
+      103486,
+      109458,
+      110049,
+      113302,
+      119896
+    ],
+    "over_threshold": 0
+  },
+  "totals": {
+    "runs": 1,
+    "wall_s": 2702,
+    "turns": 374,
+    "tool_calls": 689,
+    "turn_classes": {
+      "read": {
+        "turns": 49,
+        "tool_calls": 235,
+        "tools_per_turn": 4.8
+      },
+      "edit": {
+        "turns": 15,
+        "tool_calls": 48,
+        "tools_per_turn": 3.2
+      },
+      "exec": {
+        "turns": 237,
+        "tool_calls": 343,
+        "tools_per_turn": 1.45
+      },
+      "other": {
+        "turns": 51,
+        "tool_calls": 63,
+        "tools_per_turn": 1.24
+      }
+    },
+    "output_tokens": 118184,
+    "input_tokens": 1678,
+    "cache_read_tokens": 55326218,
+    "cache_creation_tokens": 2610689,
+    "cache_hit_ratio": 0.955,
+    "ctx_tokens_max": 431578,
+    "turns_over_threshold": 0,
+    "turns_outside_steps": 0,
+    "outside_steps": {
+      "turns": 0,
+      "tool_calls": 0,
+      "turn_classes": {
+        "read": {
+          "turns": 0,
+          "tool_calls": 0,
+          "tools_per_turn": null
+        },
+        "edit": {
+          "turns": 0,
+          "tool_calls": 0,
+          "tools_per_turn": null
+        },
+        "exec": {
+          "turns": 0,
+          "tool_calls": 0,
+          "tools_per_turn": null
+        },
+        "other": {
+          "turns": 0,
+          "tool_calls": 0,
+          "tools_per_turn": null
+        }
+      },
+      "ctx_tokens_max": null
+    },
+    "turns_outside_runs": 11,
+    "outside_runs": {
+      "turns": 11,
+      "tool_calls": 17,
+      "turn_classes": {
+        "read": {
+          "turns": 2,
+          "tool_calls": 2,
+          "tools_per_turn": 1.0
+        },
+        "edit": {
+          "turns": 0,
+          "tool_calls": 0,
+          "tools_per_turn": null
+        },
+        "exec": {
+          "turns": 7,
+          "tool_calls": 13,
+          "tools_per_turn": 1.86
+        },
+        "other": {
+          "turns": 2,
+          "tool_calls": 2,
+          "tools_per_turn": 1.0
+        }
+      }
+    }
+  },
+  "dispatch_attribution": {
+    "owner": "run",
+    "rule": "run-unit",
+    "subagent_transcripts": 34
+  }
+}

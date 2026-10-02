@@ -1,0 +1,1 @@
+{"run_id": "deliver-20261002T132208Z", "round": 6, "state": "complete", "items": {"TEST-08": {"phase": "done", "pr": 68, "merge": "bbb1cc5"}, "TEST-09": {"phase": "done", "pr": 69, "merge": "b079522"}, "TEST-10": {"phase": "done", "pr": 71, "merge": "cdc9f72"}, "BUG-01": {"phase": "to_verify", "pr": 67, "merge": "6f99f70"}}}
