@@ -22,7 +22,12 @@ import os
 
 import pytest
 
-from app.core.config import DEFAULT_BUILD_COMMIT, Settings, get_settings
+from app.core.config import (
+    DEFAULT_BUILD_COMMIT,
+    DEFAULT_CORS_ORIGINS,
+    Settings,
+    get_settings,
+)
 
 
 def test_get_settings_returns_the_configured_app_title():
@@ -111,6 +116,40 @@ def test_settings_build_commit_is_reread_on_every_call(monkeypatch):
     monkeypatch.setenv("BUILD_COMMIT", "bbb")
 
     assert (first, get_settings().build_commit) == ("aaa", "bbb")
+
+
+def test_settings_cors_origins_parses_comma_separated_env_value(monkeypatch):
+    """Happy path: entries are split, stripped, and blank entries dropped."""
+    monkeypatch.setenv("CORS_ORIGINS", " https://a.example , ,https://b.example,")
+
+    assert get_settings().cors_origins == ("https://a.example", "https://b.example")
+
+
+def test_settings_cors_origins_defaults_when_unset(monkeypatch):
+    """Edge case: an unset variable resolves to the single declared default."""
+    monkeypatch.delenv("CORS_ORIGINS", raising=False)
+
+    assert get_settings().cors_origins == DEFAULT_CORS_ORIGINS == ("http://localhost:5183",)
+
+
+@pytest.mark.parametrize("blank", ["", "   ", " , ,"])
+def test_settings_cors_origins_treats_blank_value_as_unset(monkeypatch, blank):
+    """Edge case: an empty or separator-only value falls back to the default."""
+    monkeypatch.setenv("CORS_ORIGINS", blank)
+
+    assert get_settings().cors_origins == DEFAULT_CORS_ORIGINS
+
+
+def test_settings_cors_origins_is_reread_on_every_call(monkeypatch):
+    """Edge case: the value is read per call, not captured at import."""
+    monkeypatch.setenv("CORS_ORIGINS", "https://a.example")
+    first = get_settings().cors_origins
+    monkeypatch.setenv("CORS_ORIGINS", "https://b.example")
+
+    assert (first, get_settings().cors_origins) == (
+        ("https://a.example",),
+        ("https://b.example",),
+    )
 
 
 def test_settings_build_commit_declares_no_literal_default():
