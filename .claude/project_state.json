@@ -77,11 +77,32 @@
       "id_source": "framework",
       "id_carrier": "title_prefix",
       "url": "https://app.clickup.com/t/123k99ctzxk"
+    },
+    "TEST-09": {
+      "external_id": "123k99cwybk",
+      "external_identifier": "",
+      "id_source": "framework",
+      "id_carrier": "title_prefix",
+      "url": "https://app.clickup.com/t/123k99cwybk"
+    },
+    "TEST-10": {
+      "external_id": "123k99cwybm",
+      "external_identifier": "",
+      "id_source": "framework",
+      "id_carrier": "title_prefix",
+      "url": "https://app.clickup.com/t/123k99cwybm"
+    },
+    "BUG-01": {
+      "external_id": "123k99cwybn",
+      "external_identifier": "",
+      "id_source": "framework",
+      "id_carrier": "title_prefix",
+      "url": "https://app.clickup.com/t/123k99cwybn"
     }
   },
   "discovery": {
-    "last_scan_commit": "36d8f0d60adb320056f579ef5e5ed23c92f9b9e9",
-    "scanned_at": "2026-10-02T09:06:55Z",
+    "last_scan_commit": "763354965a758b33768bc41d0ab71ce6964fb1e8",
+    "scanned_at": "2026-10-02T13:12:10Z",
     "scanned_by": "/sync-project"
   },
   "framework": {
