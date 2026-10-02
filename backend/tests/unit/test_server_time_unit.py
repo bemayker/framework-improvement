@@ -3,9 +3,10 @@
 from datetime import UTC, datetime, timedelta, timezone
 
 import pytest
+from fastapi import Response
 from pydantic import ValidationError
 
-from app.routers.server_time import get_time
+from app.routers.server_time import NO_STORE, get_time
 from app.schemas.server_time import ServerTimeResponse
 
 
@@ -39,13 +40,22 @@ def test_server_time_response_rejects_non_utc_timezone_label():
 
 def test_get_time_returns_now_within_call_window_and_increases():
     before_first = datetime.now(UTC)
-    first = get_time()
+    first = get_time(Response())
     after_first = datetime.now(UTC)
     before_second = datetime.now(UTC)
-    second = get_time()
+    second = get_time(Response())
     after_second = datetime.now(UTC)
 
     assert before_first <= first.now <= after_first
     assert before_second <= second.now <= after_second
     assert second.now > first.now
     assert first.now.utcoffset() == timedelta(0)
+
+
+def test_get_time_sets_cache_control_no_store_on_response():
+    response = Response()
+
+    get_time(response)
+
+    assert NO_STORE == "no-store"
+    assert response.headers["cache-control"] == NO_STORE
