@@ -122,6 +122,20 @@ def test_settings_cors_origins_parses_comma_separated_env_value(monkeypatch):
     assert get_settings().cors_origins == ("https://a.example", "https://b.example")
 
 
+def test_settings_cors_origins_strips_trailing_slash(monkeypatch):
+    """BUG-02: an entry configured with a trailing slash matches the browser's origin."""
+    monkeypatch.setenv("CORS_ORIGINS", "http://localhost:5183/")
+
+    assert get_settings().cors_origins == ("http://localhost:5183",)
+
+
+def test_settings_cors_origins_strips_trailing_slash_in_mixed_list(monkeypatch):
+    """Edge case: slashes are stripped per entry, with and without surrounding spaces."""
+    monkeypatch.setenv("CORS_ORIGINS", " https://a.example/ ,https://b.example")
+
+    assert get_settings().cors_origins == ("https://a.example", "https://b.example")
+
+
 def test_settings_cors_origins_defaults_when_unset(monkeypatch):
     """Edge case: an unset variable resolves to the single declared default."""
     monkeypatch.delenv("CORS_ORIGINS", raising=False)
