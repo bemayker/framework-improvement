@@ -105,11 +105,18 @@
       "id_source": "framework",
       "id_carrier": "title_prefix",
       "url": "https://app.clickup.com/t/123k99cx1jp"
+    },
+    "TEST-11": {
+      "external_id": "123k99cx1mn",
+      "external_identifier": "",
+      "id_source": "framework",
+      "id_carrier": "title_prefix",
+      "url": "https://app.clickup.com/t/123k99cx1mn"
     }
   },
   "discovery": {
-    "last_scan_commit": "a6156a6226cfa1ca27d506450c085b72f0f28232",
-    "scanned_at": "2026-10-03T14:15:51Z",
+    "last_scan_commit": "ad5c8a8ca9c00308402f3149779154089ea5dcd2",
+    "scanned_at": "2026-10-03T15:18:25Z",
     "scanned_by": "/sync-project"
   },
   "framework": {

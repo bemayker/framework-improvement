@@ -167,5 +167,6 @@ its API marks the story Done early. The merge order above is what prevents it.
 | TEST-10 | Footer shows the build commit | [TEST-08, TEST-09] | feature/TEST-10-footer-build-commit | | | ✅ | 4 | |
 | BUG-01 | Server time is served stale from the edge cache on the deployed environment | [FEAT-1] | feature/BUG-01-server-time-edge-cache | | | ✅ | 3 | |
 | BUG-02 | CORS origin with a trailing slash silently blocks the frontend | [TEST-09] | feature/BUG-02-cors-trailing-slash | | | ✅ | 3 | |
+| TEST-11 | Echo endpoint trims surrounding whitespace | [TEST-06] | feature/TEST-11-echo-trims-whitespace | | | ✅ | 3 | |
 
 Scaffold gate: TEST-01 (`scaffold: true` in its frontmatter) is **done**, so the gate passes. TEST-01 through TEST-07 and FEAT-1 are done; TEST-08, TEST-09 and BUG-01 are ready (TEST-09 registers a router in `backend/app/main.py`, BUG-01 edits only `server_time.py`, TEST-08 is frontend only); TEST-10 waits on TEST-08 and TEST-09.
