@@ -9,5 +9,5 @@ router = APIRouter(prefix="/api", tags=["echo"])
 
 @router.get("/echo", response_model=EchoResponse)
 def get_echo(msg: EchoMessage) -> EchoResponse:
-    """Return the given message unchanged."""
-    return EchoResponse(echo=msg)
+    """Return the given message with surrounding whitespace removed."""
+    return EchoResponse(echo=msg.strip())

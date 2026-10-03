@@ -57,6 +57,44 @@ def test_get_echo_round_trips_url_encoded_text(client: TestClient):
     assert response.json() == {"echo": message}
 
 
+def test_get_echo_with_surrounding_spaces_returns_trimmed_echo(client: TestClient):
+    """TEST-11 criterion 1: surrounding whitespace is removed."""
+    response = client.get("/api/echo", params={"msg": "  hello  "})
+
+    assert response.status_code == 200
+    assert response.json() == {"echo": "hello"}
+
+
+def test_get_echo_with_whitespace_only_returns_empty_echo(client: TestClient):
+    """TEST-11 criterion 2: a whitespace-only message echoes as an empty string."""
+    response = client.get("/api/echo", params={"msg": "   "})
+
+    assert response.status_code == 200
+    assert response.json() == {"echo": ""}
+
+
+def test_get_echo_over_limit_as_sent_returns_422_even_if_trimmed_fits(client: TestClient):
+    """TEST-11 criterion 3: 201 characters as sent is rejected before trimming."""
+    message = " " + "a" * (ECHO_MSG_MAX_LENGTH - 1) + " "
+
+    response = client.get("/api/echo", params={"msg": message})
+
+    assert response.status_code == 422
+    detail = response.json()["detail"][0]
+    assert detail["type"] == "string_too_long"
+    assert detail["loc"] == ["query", "msg"]
+
+
+def test_get_echo_at_limit_as_sent_returns_trimmed_echo(client: TestClient):
+    """TEST-11 criterion 3 boundary: 200 characters as sent is accepted, then trimmed."""
+    message = " " + "a" * (ECHO_MSG_MAX_LENGTH - 2) + " "
+
+    response = client.get("/api/echo", params={"msg": message})
+
+    assert response.status_code == 200
+    assert response.json() == {"echo": "a" * (ECHO_MSG_MAX_LENGTH - 2)}
+
+
 def test_echo_openapi_response_schema_is_echo_response():
     """Criterion 4: the 200 response is defined by the EchoResponse schema."""
     schema = create_app().openapi()
