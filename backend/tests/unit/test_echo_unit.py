@@ -1,4 +1,4 @@
-"""Unit tests for the echo schema module (TEST-06)."""
+"""Unit tests for the echo schema and router handler (TEST-06, TEST-11)."""
 
 import pytest
 from pydantic import ValidationError

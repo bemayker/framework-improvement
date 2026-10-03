@@ -1,4 +1,4 @@
-"""Integration tests for GET /api/echo (TEST-06), full HTTP request/response cycle.
+"""Integration tests for GET /api/echo (TEST-06, TEST-11), full HTTP request/response cycle.
 
 The endpoint uses no database, so these tests need no DATABASE_URL.
 """
