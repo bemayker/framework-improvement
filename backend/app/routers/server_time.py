@@ -5,7 +5,10 @@ neither business logic nor a transactional boundary, so the router calls
 ``datetime.now`` directly, like the echo router (stakeholder instruction).
 
 BUG-01: the response carries ``Cache-Control: no-store`` so a shared cache (the
-CDN on the deployed environment) never replays a stale time.
+CDN on the deployed environment) never replays a stale time. That CDN ignores
+the origin ``Cache-Control`` directive, so the same ``no-store`` is also sent in
+the CDN-targeted ``CDN-Cache-Control`` (RFC 9213) and ``Surrogate-Control``
+(Fastly/Akamai) headers, which shared caches do honour.
 """
 
 from datetime import UTC, datetime
@@ -26,4 +29,6 @@ def get_time(response: Response) -> ServerTimeResponse:
     The value changes on every request, so no shared cache may store it (BUG-01).
     """
     response.headers["Cache-Control"] = NO_STORE
+    response.headers["CDN-Cache-Control"] = NO_STORE
+    response.headers["Surrogate-Control"] = NO_STORE
     return ServerTimeResponse(now=datetime.now(UTC))

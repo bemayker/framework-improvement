@@ -52,10 +52,12 @@ def test_get_time_returns_now_within_call_window_and_increases():
     assert first.now.utcoffset() == timedelta(0)
 
 
-def test_get_time_sets_cache_control_no_store_on_response():
+def test_get_time_sets_no_store_on_origin_and_cdn_cache_headers():
     response = Response()
 
     get_time(response)
 
     assert NO_STORE == "no-store"
     assert response.headers["cache-control"] == NO_STORE
+    assert response.headers["cdn-cache-control"] == NO_STORE
+    assert response.headers["surrogate-control"] == NO_STORE

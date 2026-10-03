@@ -55,16 +55,21 @@ def test_post_time_returns_405(client: TestClient):
     assert client.post("/api/time").status_code == 405
 
 
-def test_get_time_sets_cache_control_no_store(client: TestClient):
+NO_STORE_HEADERS = ("cache-control", "cdn-cache-control", "surrogate-control")
+
+
+def test_get_time_sets_no_store_on_origin_and_cdn_cache_headers(client: TestClient):
     response = client.get("/api/time")
 
     assert response.status_code == 200
-    assert response.headers["cache-control"] == "no-store"
+    for header in NO_STORE_HEADERS:
+        assert response.headers[header] == "no-store"
 
 
-def test_get_time_sets_cache_control_no_store_on_every_request(client: TestClient):
+def test_get_time_sets_no_store_headers_on_every_request(client: TestClient):
     first = client.get("/api/time")
     second = client.get("/api/time")
 
-    assert first.headers["cache-control"] == "no-store"
-    assert second.headers["cache-control"] == "no-store"
+    for header in NO_STORE_HEADERS:
+        assert first.headers[header] == "no-store"
+        assert second.headers[header] == "no-store"
