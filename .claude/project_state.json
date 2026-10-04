@@ -112,11 +112,18 @@
       "id_source": "framework",
       "id_carrier": "title_prefix",
       "url": "https://app.clickup.com/t/123k99cx1mn"
+    },
+    "BUG-03": {
+      "external_id": "123k99cx294",
+      "external_identifier": "",
+      "id_source": "framework",
+      "id_carrier": "title_prefix",
+      "url": "https://app.clickup.com/t/123k99cx294"
     }
   },
   "discovery": {
-    "last_scan_commit": "ad5c8a8ca9c00308402f3149779154089ea5dcd2",
-    "scanned_at": "2026-10-03T15:18:25Z",
+    "last_scan_commit": "3d03f1fcd02c52ef63e012391d462decebe145d9",
+    "scanned_at": "2026-10-04T10:28:28Z",
     "scanned_by": "/sync-project"
   },
   "framework": {
