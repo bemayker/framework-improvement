@@ -1,9 +1,25 @@
-"""Unit tests for the echo schema module (TEST-06)."""
+"""Unit tests for the echo schema and router handler (TEST-06, TEST-11)."""
 
 import pytest
 from pydantic import ValidationError
 
+from app.routers.echo import get_echo
 from app.schemas.echo import ECHO_MSG_MAX_LENGTH, EchoResponse
+
+
+@pytest.mark.parametrize(
+    ("message", "expected"),
+    [
+        ("  hello  ", "hello"),
+        ("   ", ""),
+        ("\t\n ", ""),
+        ("\t hello  world \n", "hello  world"),
+        ("hello", "hello"),
+    ],
+)
+def test_get_echo_trims_surrounding_whitespace(message: str, expected: str):
+    """TEST-11 criteria 1 and 2: surrounding whitespace goes, inner whitespace stays."""
+    assert get_echo(message).echo == expected
 
 
 def test_echo_response_serialises_to_echo_key():
