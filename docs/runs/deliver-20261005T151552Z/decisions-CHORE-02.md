@@ -1,0 +1,8 @@
+# Decisions (CHORE-02, after its final push): deliver-20261005T151552Z
+
+The entries `.claude/artifacts/CHORE-02/decisions.md` received after the last push of its branch (1622437), the head its pull request merged. The entries before them reached the default branch in that file.
+
+- 2026-10-05 [CHORE-02] run=deliver-20261005T151552Z 6.6 pushed 1622437; upstream verified. Gate verdict: test-gate: verdict recorded for this push (gated head 5da5e72: full after 6s; pytest 118, vitest 43; pushed head 1622437). Step 2a gate-recheck skipped. Draft PR #100 opened.
+- 2026-10-05 [CHORE-02] run=deliver-20261005T151552Z 6.7 CI: 7/7 green (poll 8, 11m58s; the `unit` check read in_progress on the PR for ~10 min after its job had completed success at 16:31:36 — stale GitHub status, not a failure; never merged while pending). Handover rebuild: status=rebuilt sha=1622437+dirty project=framework-improvement-chore-02-handover health=pass. PR #100 ready; PR label: #100 mayker:in-review; tracker → to test. 6.8: PR 0/0/0; tracker 1 framework notice.
+- 2026-10-05 [CHORE-02] run=deliver-20261005T151552Z 6.9 merge verdict: MERGE (orchestrator, autonomy.md Section 5, all five conditions met). Self-review clean (OPTIONAL in PR body); every check COMPLETED/SUCCESS on 1622437 (unit's earlier in_progress was a stale status); not draft, MERGEABLE, origin/main still 9d8aee3; both derived criteria met; no PR comments or change request, tracker only a framework notice; reversible. Squash.
+- 2026-10-05 [CHORE-02] run=deliver-20261005T151552Z merged PR #100 squash → 2f92a8b. 6.10: tracker complete, PR label mayker:done. Checkpoint: [checkpoint] due=yes items=CHORE-02 verdict=pass. Primary-checkout plan copies removed. TEST-10 hold released.
