@@ -49,3 +49,11 @@ def test_get_time_two_requests_differ_and_increase(client: TestClient):
 def test_post_time_returns_405_method_not_allowed(client: TestClient):
     """Error case: the endpoint is GET only."""
     assert client.post("/api/time").status_code == 405
+
+
+def test_get_time_response_carries_cache_control_no_store(client: TestClient):
+    """BUG-01 criteria 1 and 2: the response header keeps edge caches from storing it."""
+    response = client.get("/api/time")
+
+    assert response.status_code == 200
+    assert response.headers["cache-control"] == "no-store"
