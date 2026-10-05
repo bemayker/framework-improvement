@@ -100,8 +100,8 @@ framework computes:
   expressed with `depends_on`, which is what the graph is for.
 - **No status ever enters this file.** A wave is never marked complete here,
   nothing writes a `✅` beside it, and the grouped overview is rendered on demand
-  from this table plus live status (`bash .claude/scripts/feature-map-waves.sh`,
-  or the `/waves` command). That is the first of the two properties that retired
+  from this table plus live status (the `/waves` command, which runs
+  `bash ~/.mayker/mayker-dev/hooks/lib/feature-map-waves.sh .claude/feature_map.md`). That is the first of the two properties that retired
   the old wave model, and it stays retired.
 - **The wave is authored and editable throughout development**, not computed once
   at init. That is the second retired property. `/sync-project` and `/deliver`
@@ -169,5 +169,6 @@ its API marks the story Done early. The merge order above is what prevents it.
 | BUG-02 | CORS origin with a trailing slash silently blocks the frontend | [TEST-09] | feature/BUG-02-cors-trailing-slash | | | ✅ | 3 | |
 | TEST-11 | Echo endpoint trims surrounding whitespace | [TEST-06] | feature/TEST-11-echo-trims-whitespace | | | ✅ | 3 | |
 | BUG-03 | Footer sometimes shows 'unknown' instead of the build commit | [TEST-10] | feature/BUG-03-footer-unknown-build-commit | | | ✅ | 5 | |
+| BUG-04 | Saving a note twice quickly stores it twice | [TEST-03] | feature/BUG-04-double-submit-note | | | ✅ | 3 | |
 
 Scaffold gate: TEST-01 (`scaffold: true` in its frontmatter) is **done**, so the gate passes. TEST-01 through TEST-07 and FEAT-1 are done; TEST-08, TEST-09 and BUG-01 are ready (TEST-09 registers a router in `backend/app/main.py`, BUG-01 edits only `server_time.py`, TEST-08 is frontend only); TEST-10 waits on TEST-08 and TEST-09.
