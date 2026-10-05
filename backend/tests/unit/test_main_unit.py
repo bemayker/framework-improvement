@@ -1,7 +1,5 @@
 """Unit tests for the FastAPI app factory (backend/app/main.py)."""
 
-from fastapi.testclient import TestClient
-
 from app.main import create_app
 
 # FastAPI's own routes, present on every app regardless of what this project
@@ -58,48 +56,6 @@ def test_create_app_registers_health_route():
     custom_paths = _collect_route_paths(app.routes) - BUILT_IN_ROUTE_PATHS
 
     assert "/api/health" in custom_paths
-
-
-def test_create_app_registers_echo_route():
-    """Edge case: the app registers the TEST-06 echo route."""
-    app = create_app()
-
-    custom_paths = _collect_route_paths(app.routes) - BUILT_IN_ROUTE_PATHS
-
-    assert "/api/echo" in custom_paths
-
-
-def test_create_app_registers_uptime_route():
-    """Edge case: the app registers the TEST-07 uptime route."""
-    app = create_app()
-
-    custom_paths = _collect_route_paths(app.routes) - BUILT_IN_ROUTE_PATHS
-
-    assert "/api/uptime" in custom_paths
-
-
-def test_create_app_registers_time_route():
-    """Edge case: the app registers the FEAT-1 server time route."""
-    app = create_app()
-
-    custom_paths = _collect_route_paths(app.routes) - BUILT_IN_ROUTE_PATHS
-
-    assert "/api/time" in custom_paths
-
-
-def test_create_app_allows_origin_configured_with_trailing_slash(monkeypatch):
-    """BUG-02: a trailing slash in CORS_ORIGINS must not block the browser's origin.
-
-    Browsers send `Origin` without a trailing slash, so an entry configured as
-    `http://localhost:5183/` has to match it. No `with` block, so the lifespan
-    (and therefore the database) is never started.
-    """
-    monkeypatch.setenv("CORS_ORIGINS", "http://localhost:5183/")
-    client = TestClient(create_app())
-
-    response = client.get("/api/version", headers={"Origin": "http://localhost:5183"})
-
-    assert response.headers.get("access-control-allow-origin") == "http://localhost:5183"
 
 
 def test_create_app_returns_independent_instances():

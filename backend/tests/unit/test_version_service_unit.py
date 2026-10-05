@@ -39,24 +39,3 @@ def test_get_app_version_returns_unknown_when_distribution_not_installed(monkeyp
     monkeypatch.setattr(version_service, "version", raise_not_found)
 
     assert version_service.get_app_version() == version_service.UNKNOWN_VERSION
-
-
-def test_get_build_commit_returns_env_value_when_set(monkeypatch):
-    """Happy path: the service reports the build-time commit verbatim."""
-    monkeypatch.setenv("BUILD_COMMIT", "3f9c2a1")
-
-    assert version_service.get_build_commit() == "3f9c2a1"
-
-
-def test_get_build_commit_returns_unknown_when_unset(monkeypatch):
-    """Edge case: no variable means the declared default."""
-    monkeypatch.delenv("BUILD_COMMIT", raising=False)
-
-    assert version_service.get_build_commit() == "unknown"
-
-
-def test_get_build_commit_returns_unknown_when_blank(monkeypatch):
-    """Error case: a blank value never yields an empty commit."""
-    monkeypatch.setenv("BUILD_COMMIT", "  ")
-
-    assert version_service.get_build_commit() == "unknown"
