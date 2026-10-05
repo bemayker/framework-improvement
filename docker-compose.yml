@@ -38,6 +38,9 @@ services:
         condition: service_healthy
     environment:
       DATABASE_URL: postgresql://tasknotes:tasknotes@db:5432/tasknotes
+      # The browser's origin. A handover rebuild on free ports (MDF-284) rewrites
+      # this localhost URL to the moved frontend port, so it must live here.
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:5183}
     ports:
       - "8010:8010"
     volumes:
