@@ -6,7 +6,7 @@
 - Repository checked out locally on branch `feature/BUG-04-double-submit-note` (or `main` once merged).
 - Copy `.env.example` to `.env` in the repository root if you have not already (defaults are usable as-is).
 - Chrome with DevTools available. The **Network** tab is needed to count requests, and its throttling dropdown set to **Slow 3G** makes the save slow enough to click twice (criterion 1).
-- No other process bound to the frontend (`5183`), backend (`8000`) or PostgreSQL (`5432`) ports.
+- No other process bound to the frontend (`5183`), backend (`8010`) or PostgreSQL (`5442`) ports.
 
 ## Test Environment Setup
 
