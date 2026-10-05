@@ -5,7 +5,7 @@
 - Docker and Docker Compose installed and running.
 - Repository checked out locally, on branch `feature/TEST-04-page-footer` (or later, once merged, on `main`).
 - Copy `.env.example` to `.env` in the repository root (defaults are usable as-is for local UAT).
-- No other process bound to ports `5173` (frontend) or `8000` (backend).
+- No other process bound to ports `5183` (frontend) or `8010` (backend).
 - Open `http://localhost:8010/api/version` in a browser tab (or `curl` it) so the tester can read the current `version` value — the footer's expected version comes from the backend's response, not from this document and not from `frontend/package.json`. A later version bump changes the expected text without changing this script.
 
 ## Test Environment Setup
@@ -14,13 +14,13 @@
    ```bash
    docker compose up --build
    ```
-2. Wait until the `db`, `backend`, and `frontend` services report as started (the `frontend` log shows the Vite dev server listening on port 5173).
+2. Wait until the `db`, `backend`, and `frontend` services report as started (the `frontend` log shows the Vite dev server listening on port 5183).
 
 ## Steps
 
 | # | Step | Expected Result | Pass/Fail |
 |---|------|------------------|-----------|
-| 1 | Open a browser and navigate to `http://localhost:5173` | Page loads without errors | [ ] Pass [ ] Fail |
+| 1 | Open a browser and navigate to `http://localhost:5183` | Page loads without errors | [ ] Pass [ ] Fail |
 | 2 | Scroll to the bottom of the page | A footer is visible below the subtitle | [ ] Pass [ ] Fail |
 | 3 | Read the footer text | The footer reads "Task Notes v" followed by a version number | [ ] Pass [ ] Fail |
 | 4 | Compare the version number in the footer to the `version` value returned by `http://localhost:8010/api/version` | The two values match exactly | [ ] Pass [ ] Fail |
