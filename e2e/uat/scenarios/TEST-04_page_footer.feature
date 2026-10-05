@@ -5,14 +5,14 @@ Feature: TEST-04 Page footer with app version
 
   Background:
     Given the Task Notes project infrastructure (frontend, backend, database) is set up per docker-compose.yml
-    And the application is running at "http://localhost:5173"
+    And the application is running at "http://localhost:5183"
 
   Scenario: Footer shows the app name and the deployed version
     Given the app is running
-    When I open "http://localhost:5173" in a browser
+    When I open "http://localhost:5183" in a browser
     Then I see a footer identified by "app-footer" at the bottom of the page
     And the footer shows "Task Notes" and a version number
-    And that version number matches the "version" field of frontend/package.json
+    And that version number matches the version reported by GET /api/version
 
   Scenario: Footer is announced as a landmark, not as plain text
     Given the landing page is open
