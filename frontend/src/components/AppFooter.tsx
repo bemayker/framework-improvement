@@ -1,14 +1,15 @@
 import { useEffect, useState } from "react";
 import type { CSSProperties } from "react";
-import { getBackendVersion } from "../api/version";
+import { getBackendBuildInfo } from "../api/version";
 
 const APP_NAME = "Task Notes";
 const VERSION_UNAVAILABLE_TEXT = "version unavailable";
 const SEPARATOR = " · ";
+const SHORT_COMMIT_LENGTH = 7;
 
 type VersionStatus =
   | { kind: "loading" }
-  | { kind: "ready"; version: string }
+  | { kind: "ready"; version: string; commit: string | null }
   | { kind: "unavailable" };
 
 const footerStyle: CSSProperties = {
@@ -23,13 +24,13 @@ function AppFooter() {
   useEffect(() => {
     let isMounted = true;
 
-    getBackendVersion()
-      .then((version) => {
+    getBackendBuildInfo()
+      .then((info) => {
         if (!isMounted) return;
         setStatus(
-          version === null
+          info === null
             ? { kind: "unavailable" }
-            : { kind: "ready", version },
+            : { kind: "ready", version: info.version, commit: info.commit },
         );
       })
       .catch(() => {
@@ -48,6 +49,14 @@ function AppFooter() {
         <>
           {" v"}
           <span data-testid="app-footer-version">{status.version}</span>
+          {status.commit !== null && (
+            <>
+              {SEPARATOR}
+              <span data-testid="app-footer-commit">
+                {status.commit.slice(0, SHORT_COMMIT_LENGTH)}
+              </span>
+            </>
+          )}
         </>
       )}
       {status.kind === "unavailable" &&

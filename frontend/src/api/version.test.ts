@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { getBackendVersion, VERSION_REQUEST_TIMEOUT_MS } from "./version";
+import { getBackendBuildInfo, VERSION_REQUEST_TIMEOUT_MS } from "./version";
 
 const DEFAULT_VERSION_URL = "http://localhost:8010/api/version";
 
@@ -28,7 +28,7 @@ describe("version API client", () => {
   it("calls /api/version on the default base URL", async () => {
     fetchMock.mockResolvedValue(okResponse({ version: "0.1.0" }));
 
-    await getBackendVersion();
+    await getBackendBuildInfo();
 
     expect(fetchMock).toHaveBeenCalledTimes(1);
     expect(fetchMock).toHaveBeenCalledWith(
@@ -52,7 +52,7 @@ describe("version API client", () => {
         }),
     );
 
-    const pending = getBackendVersion();
+    const pending = getBackendBuildInfo();
     expect(timeoutSpy).toHaveBeenCalledWith(VERSION_REQUEST_TIMEOUT_MS);
     controller.abort(new DOMException("timed out", "TimeoutError"));
 
@@ -65,18 +65,26 @@ describe("version API client", () => {
     expect(VERSION_REQUEST_TIMEOUT_MS).toBeLessThanOrEqual(10_000);
   });
 
-  it("returns the version and ignores other fields such as commit", async () => {
+  it("returns the version and the commit", async () => {
     fetchMock.mockResolvedValue(
       okResponse({ version: "0.1.0", commit: "abc123def456" }),
     );
 
-    await expect(getBackendVersion()).resolves.toBe("0.1.0");
+    await expect(getBackendBuildInfo()).resolves.toEqual({
+      version: "0.1.0",
+      commit: "abc123def456",
+    });
   });
 
-  it("trims surrounding whitespace from the version", async () => {
-    fetchMock.mockResolvedValue(okResponse({ version: "  1.2.3 " }));
+  it("trims surrounding whitespace from the version and the commit", async () => {
+    fetchMock.mockResolvedValue(
+      okResponse({ version: "  1.2.3 ", commit: " abc123def456  " }),
+    );
 
-    await expect(getBackendVersion()).resolves.toBe("1.2.3");
+    await expect(getBackendBuildInfo()).resolves.toEqual({
+      version: "1.2.3",
+      commit: "abc123def456",
+    });
   });
 
   it.each([
@@ -85,9 +93,23 @@ describe("version API client", () => {
     ["non-string", { version: 3 }],
     ["the unknown sentinel", { version: "unknown" }],
   ])("returns null when the version is %s", async (_label, body) => {
-    fetchMock.mockResolvedValue(okResponse(body));
+    fetchMock.mockResolvedValue(okResponse({ commit: "abc123def456", ...body }));
 
-    await expect(getBackendVersion()).resolves.toBeNull();
+    await expect(getBackendBuildInfo()).resolves.toBeNull();
+  });
+
+  it.each([
+    ["missing", {}],
+    ["blank", { commit: "  " }],
+    ["non-string", { commit: 42 }],
+    ["the unknown sentinel", { commit: "unknown" }],
+  ])("returns a null commit when the commit is %s", async (_label, body) => {
+    fetchMock.mockResolvedValue(okResponse({ version: "0.1.0", ...body }));
+
+    await expect(getBackendBuildInfo()).resolves.toEqual({
+      version: "0.1.0",
+      commit: null,
+    });
   });
 
   it("throws with the status and reason when the response is not OK", async () => {
@@ -98,7 +120,7 @@ describe("version API client", () => {
       json: async () => ({}),
     } as Response);
 
-    await expect(getBackendVersion()).rejects.toThrow(
+    await expect(getBackendBuildInfo()).rejects.toThrow(
       "Loading the version failed: 503 Service Unavailable",
     );
   });
