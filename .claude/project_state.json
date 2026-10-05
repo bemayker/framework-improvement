@@ -126,6 +126,14 @@
       "id_source": "framework",
       "id_carrier": "title_prefix",
       "url": "https://app.clickup.com/t/123k99cx47m"
+    },
+    "CHORE-01": {
+      "external_id": "123k99cx6hc",
+      "external_identifier": "",
+      "id_source": "framework",
+      "id_carrier": "none",
+      "url": "https://app.clickup.com/t/123k99cx6hc",
+      "registered_at": "2026-10-05T15:42:19Z"
     }
   },
   "discovery": {
