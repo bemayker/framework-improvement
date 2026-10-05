@@ -22,7 +22,7 @@ import os
 
 import pytest
 
-from app.core.config import Settings, get_settings
+from app.core.config import DEFAULT_CORS_ORIGINS, Settings, get_settings
 
 
 def test_get_settings_returns_the_configured_app_title():
@@ -80,3 +80,25 @@ def test_settings_database_url_is_optional_and_never_a_hardcoded_credential():
         None,
         os.environ.get("DATABASE_URL"),
     )
+
+
+def test_settings_cors_origins_parses_comma_separated_env_value(monkeypatch):
+    """CORS_ORIGINS is split on commas, entries stripped, empty entries dropped."""
+    monkeypatch.setenv("CORS_ORIGINS", " https://a.example , ,https://b.example,")
+
+    assert get_settings().cors_origins == ("https://a.example", "https://b.example")
+
+
+def test_settings_cors_origins_defaults_when_unset(monkeypatch):
+    """With CORS_ORIGINS unset the frontend's default origin is allowed."""
+    monkeypatch.delenv("CORS_ORIGINS", raising=False)
+
+    assert get_settings().cors_origins == DEFAULT_CORS_ORIGINS == ("http://localhost:5183",)
+
+
+@pytest.mark.parametrize("blank", ["", "   ", " , "])
+def test_settings_cors_origins_treats_blank_value_as_unset(monkeypatch, blank):
+    """A blank CORS_ORIGINS falls back to the default rather than allowing nothing."""
+    monkeypatch.setenv("CORS_ORIGINS", blank)
+
+    assert get_settings().cors_origins == DEFAULT_CORS_ORIGINS

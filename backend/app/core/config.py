@@ -16,6 +16,12 @@ from dataclasses import dataclass, field
 DEFAULT_CORS_ORIGINS = ("http://localhost:5183",)
 
 
+def _read_cors_origins() -> tuple[str, ...]:
+    """Return CORS_ORIGINS split on commas, or the default when none are given."""
+    entries = (entry.strip() for entry in (os.environ.get("CORS_ORIGINS") or "").split(","))
+    return tuple(entry for entry in entries if entry) or DEFAULT_CORS_ORIGINS
+
+
 @dataclass(frozen=True)
 class Settings:
     app_title: str = "Task Notes API"
@@ -24,7 +30,8 @@ class Settings:
     database_url: str | None = field(
         default_factory=lambda: os.environ.get("DATABASE_URL")
     )
-    cors_origins: tuple[str, ...] = DEFAULT_CORS_ORIGINS
+    # CORS_ORIGINS (comma-separated), read per call; unset or blank uses the default.
+    cors_origins: tuple[str, ...] = field(default_factory=_read_cors_origins)
 
 
 def get_settings() -> Settings:
