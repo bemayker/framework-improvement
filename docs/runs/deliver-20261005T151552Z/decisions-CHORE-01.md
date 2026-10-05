@@ -1,0 +1,8 @@
+# Decisions (CHORE-01, after its final push): deliver-20261005T151552Z
+
+The entries `.claude/artifacts/CHORE-01/decisions.md` received after the last push of its branch (c14c88d), the head its pull request merged. The entries before them reached the default branch in that file.
+
+- 2026-10-05 [CHORE-01] run=deliver-20261005T151552Z 6.6 pushed c14c88d; upstream verified. Gate verdict: test-gate: verdict recorded for this push (gated head bab84fb: full after 4s; pytest 118, vitest 30; pushed head c14c88d). Step 2a gate-recheck skipped. Draft PR #97 opened.
+- 2026-10-05 [CHORE-01] run=deliver-20261005T151552Z 6.7 CI: 7/7 green (poll 2, 17m53s). Handover rebuild: status=rebuilt sha=c14c88d+dirty project=framework-improvement-chore-01-handover health=pass. PR #97 ready; PR label: #97 mayker:in-review; tracker → to test. 6.8: PR 0/0/0 reviews; tracker 1 comment (framework PR-link notice).
+- 2026-10-05 [CHORE-01] run=deliver-20261005T151552Z 6.9 merge verdict: merge (orchestrator). Rationale: autonomy.md Section 5 holds on all five conditions — self-review PASS blocking=0; PR #97 ready with every check SUCCESS, mergeable, base 5cc6196 still origin/main head; the derived criterion is met by the diff itself (1 addition, 1 deletion on line 1); zero PR comments and only the framework PR-link notice on the tracker; docstring-only edit is reversible and unambiguous.
+- 2026-10-05 [CHORE-01] run=deliver-20261005T151552Z merged PR #97 squash → 3d4b9ef. 6.10 auto-done fired: tracker complete, PR label mayker:done. Checkpoint: [checkpoint] due=yes items=CHORE-01 verdict=pass. Primary-checkout plan copies (nothing beyond main) removed.
