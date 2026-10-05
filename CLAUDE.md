@@ -41,7 +41,6 @@
 
 ## Merge policy
 
-- **Feature code:** human
 - **Plans:** human
 - **Framework artifacts:** auto
 - **Done flips:** auto

@@ -124,7 +124,7 @@ This repo runs on the `mayker-dev` Claude Code plugin from the private `mayker` 
 
 ```bash
 claude plugin marketplace add bemayker/mayker-marketplace
-claude plugin install mayker-dev@mayker
+claude plugin install mayker-dev@mayker --scope project
 ```
 
 Team members are prompted to add the marketplace and install the plugin when they open the repo, since it is declared in the committed `.claude/settings.json` (this is what makes the install automatic; the prompt is a one-time approval per person).

@@ -248,7 +248,7 @@ jobs:
             exit 0
           fi
 
-          # A plan PR carries the "plan-review" label (/plan-feature Section 11).
+          # A plan PR carries the "mayker:plan-review" label (/plan-feature Section 11).
           # A /fix or /deliver PR is ALSO opened as a draft (MDF-045), so the
           # draft bit alone no longer means "plan". The label is conditional in
           # the skill ("if the Git provider supports it"), hence the neutral
@@ -257,7 +257,7 @@ jobs:
           # apart at all.
           plan_label="no"
           if [ -n "${LABELS:-}" ] \
-             && printf '%s' "$LABELS" | jq -e 'if type == "array" then any(. == "plan-review") else false end' >/dev/null 2>&1; then
+             && printf '%s' "$LABELS" | jq -e 'if type == "array" then any(. == "mayker:plan-review") else false end' >/dev/null 2>&1; then
             plan_label="yes"
           fi
 

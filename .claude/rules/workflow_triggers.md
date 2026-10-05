@@ -1,4 +1,4 @@
-<!-- materialized-from: mayker-dev v0.3.250; do not edit, regenerate with /upgrade-project -->
+<!-- materialized-from: mayker-dev v0.3.273; do not edit, regenerate with /upgrade-project -->
 <!--
   Universal standard. Loaded at launch from .claude/rules/ (always on). Do not edit per project.
   Slash-command mapping, operational behaviour, git conventions.
@@ -66,7 +66,7 @@ The reviewer only reports; the builder fixes. Each reviewer dispatch carries the
 
 ## 4. Git Conventions
 
-- **Branching:** One branch per work item, prefix `feature/`, named in `feature_map.md` (tracker features) or the work item's frontmatter (local items). `/refactor` and `/generate-tests` use `refactor/` and `test/`. `/upgrade-project`, `/sync-project` and `/diagnose` land their output on `chore/mayker-{command}-...`, and `/deliver` its own non-item landings on `chore/mayker-deliver-{run_id}-{purpose}`. `branch-guard.sh` allows those prefixes and `main`/`master`/`develop`, and blocks every other branch, including a `chore/` name outside `mayker-`.
+- **Branching:** One branch per work item, prefix `feature/`, named in `feature_map.md` (tracker features) or the work item's frontmatter (local items). `/refactor` and `/generate-tests` use `refactor/` and `test/`. `/upgrade-project`, `/sync-project` and `/diagnose` land their output on `chore/mayker-{command}-...`, and `/deliver` its own non-item landings on `chore/mayker-{run_id}-{purpose}` (the run id begins `deliver-`). `branch-guard.sh` allows those prefixes and `main`/`master`/`develop`, and blocks every other branch, including a `chore/` name outside `mayker-`.
 - **Commits:** Use semantic commit messages:
   - `feat({FEATURE_ID}): ...` for new features
   - `fix({FEATURE_ID}): ...` for bug fixes
@@ -94,6 +94,7 @@ No prefix rule grants these shapes, and the framework does not ship the bare `Ba
 - **No variable expansion other than `$HOME` and `$PWD`:** not an assigned variable, `"$@"`, `$1` or `$?`. Put the value in as a literal, or compute it inside a script. A `$` inside single quotes is not an expansion.
 - **No compact JSON, or brace group holding a quote and a comma, outside single quotes, and a heredoc body counts as outside.** Pass a JSON record as a single-quoted argument or on a `printf` pipe into the script. Space a JSON example inside a document (`{"now": "…", "timezone": "UTC"}`).
 - **No environment-assignment prefix** (`NAME=value command`), and no leading `env`. A recorded backing service reaches a test command through `bash ~/.mayker/mayker-dev/hooks/lib/run-env.sh --id {ID} --run-id {RUN_ID} -- <test command>`.
+- **No tool-call write under `.claude/`**, by `Write`, `Edit` or a redirect, and **no `sleep`, loop or background watch of your own for CI**. Write through `bash ~/.mayker/mayker-dev/hooks/lib/run-dir.sh write-item|write-run|append-item|append-run <dir> <name>` on a quoted heredoc, and wait with `ci-poll.sh --wait` (2.1).
 - **No trailing `&&` or `||`, and no command over 10,000 characters.** Write a long document as one `write-*` call, then `append-*` calls, each under 10,000 characters and split at a heading (5.3).
 
 ### 5.2 What composes fine, and must not be "fixed"
@@ -107,6 +108,7 @@ When a command this framework tells you to run is refused by the permission laye
 1. Never substitute another mechanism and report its result as the check's.
 2. Never re-spell the command until it lands. One identical retry, standalone, is fine.
 3. Never keep the workaround private. A refusal of a shipped command is a framework defect: report it on the run line and to whoever maintains the framework, never into the consuming project's tracker.
+4. The same holds for a write or a wait the framework tells you to make, by any tool, and inside a dispatch: the dispatch returns the `UNAVAILABLE` line, and you carry it onto the step's line. `bash ~/.mayker/mayker-dev/hooks/lib/refusals.sh` lists every refusal of the session and its dispatches; `claude -p`'s `permission_denials` lists the session's only.
 
 On an attended surface, approving the prompt is fine. Treat a surface `hooks/lib/surface-detect.sh` reports as `unknown` as unattended.
 

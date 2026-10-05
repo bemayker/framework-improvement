@@ -216,6 +216,7 @@ jobs:
             if [ "$code" != "200" ]; then
               echo "::error::tracker transition failed (HTTP $code) for ${ID}"; exit 1
             fi
+            echo "Tracker transition for ${ID}: HTTP ${code} (${external_id} -> '${target}')."
             updated="tracker (${external_id} -> '${target}')"
             if [ "$add_label" = "yes" ]; then
               code="$(curl -sS -o /dev/null -w '%{http_code}' \
@@ -224,7 +225,9 @@ jobs:
               if [ "$code" != "200" ]; then
                 echo "::error::${ID} is '${target}' but the '${label}' label could not be added (HTTP $code). Add it on the item by hand, or it reads as verified."; exit 1
               fi
+              echo "Tracker label for ${ID}: HTTP ${code} ('${label}' on ${external_id})."
               updated="${updated} + label '${label}'"
+              echo "::notice::Done with the tracker label '${label}' is not verified: ${ID} is not verified until a human removes the label."
             fi
           fi
 
@@ -303,6 +306,52 @@ jobs:
             fi
             echo "Transitioned ${ID} to '${done_status}'."
           fi
+
+      # The pull request's phase label mirrors the item's status (MDF-281): one
+      # `mayker:` label, replaced at each transition. The merge is the last one,
+      # so the merged pull request gets `mayker:done`, or `mayker:to-verify`
+      # alone on the to-verify arm, and loses every other phase label and the
+      # retired `plan-review`. It runs only where this job marked the item. A
+      # label is a notice that nothing reads, so a refused call warns and never
+      # fails the merge pipeline.
+      - name: Label the merged pull request with its final phase
+        if: steps.fid.outputs.id != '' && steps.last.outputs.last == 'yes'
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR: ${{ github.event.pull_request.number }}
+          ARM: ${{ steps.verify.outputs.arm }}
+          PR_LABELS: ${{ toJSON(github.event.pull_request.labels.*.name) }}
+        run: |
+          set -uo pipefail
+          if [ "${ARM:-}" = "to-verify" ]; then
+            final="mayker:to-verify"
+            color="d93f0b"; desc="Merged, awaiting verification on the deployed environment (mayker-dev)"
+          else
+            final="mayker:done"
+            color="0e8a16"; desc="Merged, work item done (mayker-dev)"
+          fi
+          args=()
+          has() { printf '%s' "${PR_LABELS:-[]}" | jq -e --arg l "$1" 'any(.[]; . == $l)' >/dev/null 2>&1; }
+          has "$final" || args+=(--add-label "$final")
+          for old in mayker:plan-review mayker:ready-for-build mayker:in-progress mayker:in-review mayker:done mayker:to-verify plan-review; do
+            [ "$old" = "$final" ] && continue
+            [ "$old" = "mayker:to-verify" ] && [ "$final" = "mayker:done" ] && continue
+            if has "$old"; then args+=(--remove-label "$old"); fi
+          done
+          if [ "${#args[@]}" -eq 0 ]; then
+            echo "#${PR} already carries ${final} and no other phase label."
+            exit 0
+          fi
+          if ! gh pr edit "$PR" --repo "$GITHUB_REPOSITORY" "${args[@]}"; then
+            # The usual refusal is a label the repository does not have yet.
+            gh label create "$final" --repo "$GITHUB_REPOSITORY" --color "$color" --description "$desc" >/dev/null 2>&1 || true
+            if ! gh pr edit "$PR" --repo "$GITHUB_REPOSITORY" "${args[@]}"; then
+              echo "::warning::could not set the phase label ${final} on #${PR}; the work item was marked, only its pull request label is stale."
+              exit 0
+            fi
+          fi
+          echo "#${PR} now carries ${final} (${args[*]})."
 
   validate-uat:
     # UAT Gherkin well-formedness check (mayker-dev), part of the merge pipeline.

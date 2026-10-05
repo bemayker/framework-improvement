@@ -1,4 +1,4 @@
-<!-- materialized-from: mayker-dev v0.3.250; do not edit, regenerate with /upgrade-project -->
+<!-- materialized-from: mayker-dev v0.3.273; do not edit, regenerate with /upgrade-project -->
 <!--
   CANONICAL TEMPLATE — this file is the single source of truth for the shape of
   `.claude/feature_map.md`. `/sync-project` (Section 4) and `/deliver` (Section 2
@@ -143,8 +143,8 @@ framework computes:
   expressed with `depends_on`, which is what the graph is for.
 - **No status ever enters this file.** A wave is never marked complete here,
   nothing writes a `✅` beside it, and the grouped overview is rendered on demand
-  from this table plus live status (`bash .claude/scripts/feature-map-waves.sh`,
-  or the `/waves` command). That is the first of the two properties that retired
+  from this table plus live status (the `/waves` command, which runs
+  `bash ~/.mayker/mayker-dev/hooks/lib/feature-map-waves.sh .claude/feature_map.md`). That is the first of the two properties that retired
   the old wave model, and it stays retired.
 - **The wave is authored and editable throughout development**, not computed once
   at init. That is the second retired property. `/sync-project` and `/deliver`
