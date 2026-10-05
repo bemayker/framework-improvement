@@ -4,6 +4,7 @@ import time
 from datetime import UTC, datetime, timedelta, timezone
 
 import pytest
+from fastapi import Response
 from pydantic import ValidationError
 
 from app.routers.server_time import get_server_time
@@ -56,7 +57,7 @@ def test_schema_rejects_timezone_other_than_utc():
 
 def test_handler_returns_schema_with_aware_utc_now():
     """Criterion 3: the handler returns the Pydantic schema, aware and in UTC."""
-    result = get_server_time()
+    result = get_server_time(Response())
 
     assert isinstance(result, ServerTimeResponse)
     assert result.now.utcoffset() == timedelta(0)
@@ -65,8 +66,17 @@ def test_handler_returns_schema_with_aware_utc_now():
 
 def test_handler_computes_now_per_call():
     """Criterion 2: two calls give a strictly later second `now`."""
-    first = get_server_time()
+    first = get_server_time(Response())
     time.sleep(0.01)
-    second = get_server_time()
+    second = get_server_time(Response())
 
     assert second.now > first.now
+
+
+def test_handler_sets_cache_control_no_store_on_response():
+    """BUG-01 criterion 1: the handler marks its response uncacheable."""
+    response = Response()
+
+    get_server_time(response)
+
+    assert response.headers["cache-control"] == "no-store"
