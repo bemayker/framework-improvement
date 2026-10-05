@@ -1,4 +1,4 @@
-"""Integration tests for GET /api/version (TEST-05), full HTTP request/response cycle."""
+"""Integration tests for GET /api/version (TEST-05, TEST-09), full HTTP request/response cycle."""
 
 import tomllib
 from pathlib import Path
