@@ -1,0 +1,15 @@
+# Decisions (cross-cutting): deliver-20261005T151552Z
+
+This run's section of the repository-root `DECISIONS.md`, which is cumulative across runs. Per-item decisions live in `.claude/artifacts/{ID}/decisions.md`.
+
+## Run deliver-20261005T151552Z
+
+
+- 2026-10-05 [run] Cancelled tracker items (BUG-02, TEST-11, BUG-03; ClickUp `cancelled`, reverse-mapped to no framework status) are excluded from the graph: not nodes, never dispatched, and never counted as satisfying a dependency edge. No live item depends on one.
+- 2026-10-05 [run] Round-1 dispatch order TEST-09 (wave 2), BUG-01, BUG-04 (wave 3, ID tiebreak; no tracker priority set on any item), all into planning concurrently; TEST-08 (wave 3) held for a free slot by the cap of 3, TEST-10 unready (TEST-08, TEST-09).
+- 2026-10-05 [run] Shared risk inferred over still-empty cells: BUG-04/TEST-08 and BUG-04/TEST-10 on frontend/src/components/LandingPage.tsx, notes written on TEST-08, TEST-10 and BUG-04 rows; TEST-08's build serializes after BUG-04's merge. BUG-01 inferred disjoint from every live node (cell left empty). Cancelled rows not inferred over.
+- 2026-10-05 [run] feature-map-propose.sh: 0 wave proposals, 0 checkpoint proposals (every row already carries both decisions). No rows added in reconcile.
+- 2026-10-05 [BUG-01] Merged PR #93 (4a5f447); to-verify arm (ClickUp complete + mayker:to-verify); checkpoint pass. `git worktree remove .claude/worktrees/BUG-01` unregistered the worktree but the directory delete was refused ("Permission denied", sandbox on .claude/); directory left in place (gitignored), not worked around (workflow_triggers.md 5.9).
+- 2026-10-05 [run] Framework defect observed: planners write plan.md/shared_risks.md/decisions.md into the PRIMARY checkout's .claude/artifacts/{ID}/ (untracked), so the post-merge `git pull --ff-only` of main is refused ("untracked working tree files would be overwritten"). Resolved per item by removing the primary copies after verifying they are identical to / a prefix of the merged files.
+- 2026-10-05 [run] Wave boundary: wave 2 drained (TEST-09 merged, PR #94, aa17015). Follow-ups: filed CHORE-01 "TEST-09 follow-up: known-improvements" (ClickUp 123k99cx6hc, source known-improvements, depends_on TEST-09); BUG-01 had no known improvements and no unaddressed comments (none filed).
+- 2026-10-05 [run] Re-ingest: CHORE-01 assigned framework ID (prefix CHORE, first of its kind), registered in project_state.json features (id_carrier none — no write-back onto the tracker item, per Section 2 step 4); feature_map row added; feature-map-propose accepted: wave 3 (one above TEST-09), test_checkpoint ✅ (sink). Shared risk: CHORE-01 touches only backend/tests/integration/test_version_integration.py, inferred disjoint from every live node (TEST-08, TEST-10, BUG-04 are frontend); cell left empty.
