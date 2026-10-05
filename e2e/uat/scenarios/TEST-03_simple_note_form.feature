@@ -5,7 +5,7 @@ Feature: TEST-03 Simple note form
 
   Background:
     Given the Task Notes project infrastructure (frontend, backend, database) is set up per docker-compose.yml
-    And the application is running at "http://localhost:5173"
+    And the application is running at "http://localhost:5183"
     And the landing page shows the note form identified by "note-form" and the notes list identified by "note-list"
 
   Scenario: A saved note appears in the list straight away
@@ -27,7 +27,7 @@ Feature: TEST-03 Simple note form
 
   Scenario: Saved notes survive closing and reopening the page
     Given I saved the note "Walk the dog" earlier
-    When I reload "http://localhost:5173" in the browser
+    When I reload "http://localhost:5183" in the browser
     Then "Walk the dog" is still shown in the notes list identified by "note-list"
     And it is shown because the app read it back from the database, not from anything the browser kept
 
