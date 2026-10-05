@@ -17,27 +17,26 @@ This project uses a Claude Code-driven, per-feature delivery framework: a human 
    - Backend (FastAPI): http://localhost:8010
    - Database: PostgreSQL, exposed on host port 5442
 
-`docker compose up` starts three services: `db` (PostgreSQL 16), `backend` (FastAPI via uv), and `frontend` (Vite dev server). The backend reports the commit passed as `BUILD_COMMIT` at build time (for example `BUILD_COMMIT=<sha> docker compose build backend`; it defaults to `unknown`, see `.env.example`). See [docs/DEVELOPMENT.md → Running tests locally](docs/DEVELOPMENT.md#running-tests-locally) to run the test suites without Docker.
+`docker compose up` starts three services: `db` (PostgreSQL 16), `backend` (FastAPI via uv), and `frontend` (Vite dev server). See [docs/DEVELOPMENT.md → Running tests locally](docs/DEVELOPMENT.md#running-tests-locally) to run the test suites without Docker.
 
 ---
 
 ## Prerequisites
 
-### Required connections: the tracker and the Git provider
+### Required connections: one MCP, one CLI
 
-This project's framework needs an **issue tracker** connection, an MCP server or on Azure Boards the `az` CLI (reading features, status, dependencies), and a working **Git provider path** (PRs, review comments, branches). They are set up differently, and that is the thing to get right first.
+This project's framework needs an **issue tracker** MCP connection (reading features, status, dependencies) and a working **Git provider path** (PRs, review comments, branches). They are set up differently, and that is the thing to get right first.
 
-- **The issue tracker is an MCP server.** Add it at **project scope** with `claude mcp add --scope project <name> ...` so it is written to `.mcp.json` and shared with the team via git. The template ships a `.mcp.json.example` for reference; `claude mcp add` writes the real file. With Work Item Source `local` you can skip it entirely. **On Azure Boards there is no tracker server to add:** its path is the `az` CLI below.
+- **The issue tracker is an MCP server.** Add it at **project scope** with `claude mcp add --scope project <name> ...` so it is written to `.mcp.json` and shared with the team via git. The template ships a `.mcp.json.example` for reference; `claude mcp add` writes the real file. With Work Item Source `local` you can skip it entirely.
 - **The Git provider on GitHub is the `gh` CLI, not an MCP server.** Install the GitHub CLI and run `gh auth login` once (or set `GH_TOKEN` for an unattended surface). **Do not add a `github` MCP server: nothing reads it.** Every remote git operation — branches, pushes, PRs, checks, review comments, merges, repository creation — runs through `gh`, `gh api` and `git`, and a command that needs the remote stops with a named message rather than degrading. *(mayker-dev 0.3.141 retired the hosted GitHub MCP for this framework; `docs/DEVELOPMENT.md` has the two reasons.)*
 - **On GitLab or Bitbucket the Git provider is that provider's MCP**, added exactly like the tracker. Know one consequence before choosing it: the framework's branch-guard and test-gate hooks match `Bash`, so a push made through a provider MCP's own write tools is **not** gated.
-- **On Azure DevOps the Git provider is the `az` CLI with its `azure-devops` extension, not an MCP server**, and Azure Boards uses the same CLI and login. Run `az extension add --name azure-devops`, then `az login` once per machine (or set `AZURE_DEVOPS_EXT_PAT` for an unattended surface). `CLAUDE.md` → Repository is `organization/project/repo-name` there, and Issue Tracker Project is `organization/project`.
 
 Two things to know before you run it, because they trip people up:
 
 - **ClickUp (and Linear/Jira) use OAuth**, so there is no token to store; you approve in the browser via `/mcp`. A token-authenticated server instead references its secret as `'${SOME_TOKEN}'`, so `.mcp.json` stores only the variable name.
 - **On GitHub Enterprise** (GHES or a `*.ghe.com` tenant), `gh` needs the host: `/init-project` detects a non-github.com remote and writes `GH_HOST=<your-host>` into `.claude/settings.json`, and you run `gh auth login --hostname <host>` once per machine. See **[docs/DEVELOPMENT.md → GitHub Enterprise](docs/DEVELOPMENT.md#github-enterprise-ghes-and-ghecom)**.
 
-Verify the tracker with `claude mcp list` (or `/mcp` inside a session) and the Git path with `gh auth status` (`az devops project list --org <organization URL>` on Azure DevOps). The full `claude mcp add` forms, the worked ClickUp and GitHub examples, secret handling, and the optional Figma MCP are documented once in **[docs/DEVELOPMENT.md → MCP connections](docs/DEVELOPMENT.md#1-mcp-connections-mandatory)**; follow that for setup rather than repeating it here.
+Verify the tracker with `claude mcp list` (or `/mcp` inside a session) and the Git path with `gh auth status`. The full `claude mcp add` forms, the worked ClickUp and GitHub examples, secret handling, and the optional Figma MCP are documented once in **[docs/DEVELOPMENT.md → MCP connections](docs/DEVELOPMENT.md#1-mcp-connections-mandatory)**; follow that for setup rather than repeating it here.
 
 > In Claude Code on the web / Routines, the same project-scoped `.mcp.json` is used and credentials are supplied by the environment rather than your local machine.
 
@@ -52,9 +51,8 @@ The CI pipelines require these secrets to be configured in your repository:
 | Secret | Purpose | Where to get it | Where to add it |
 | --- | --- | --- | --- |
 | `CLICKUP_API_KEY` | Auto-transition features to Done on merge | ClickUp → Settings → Apps → API Token | GitHub → Settings → Secrets and variables → Actions |
-| `MAYKER_FLIP_TOKEN` | Let the auto-Done job push the work-item file flip to a protected default branch (`local` and `hybrid` source only) | A repository admin's fine-grained PAT with `contents: write` | GitHub → Settings → Secrets and variables → Actions |
 
-> The secret name matches your tracker (`CLICKUP_API_KEY` / `LINEAR_API_KEY` / `JIRA_API_TOKEN` + `JIRA_EMAIL`). With `local` work-item source there is no *tracker* secret, but `MAYKER_FLIP_TOKEN` still applies whenever the default branch is protected: the auto-Done job pushes the work-item file flip straight to that branch, and without the token the flip is rejected and the item silently stays in its pre-merge status. `hybrid` needs both. On a Git provider whose CI identity can be exempted from the branch protection (Azure DevOps, GitLab, Bitbucket), the flip needs a permission instead of that token, and the table names it. Optional Slack notifications need a `NOTIFY_SLACK` Variable + `SLACK_WEBHOOK_URL` Secret; optional security scanning needs `AIKIDO_API_KEY`. Full names, locations, and the Slack three-step setup are in [docs/DEVELOPMENT.md → Repository Secrets](docs/DEVELOPMENT.md#3-repository-secrets-for-cicd).
+> The secret name matches your tracker (`CLICKUP_API_KEY` / `LINEAR_API_KEY` / `JIRA_API_TOKEN` + `JIRA_EMAIL`). With `local` work-item source there is no tracker secret. Optional Slack notifications need a `NOTIFY_SLACK` Variable + `SLACK_WEBHOOK_URL` Secret; optional security scanning needs `AIKIDO_API_KEY`. Full names, locations, and the Slack three-step setup are in [docs/DEVELOPMENT.md → Repository Secrets](docs/DEVELOPMENT.md#3-repository-secrets-for-cicd).
 
 ### Development environment
 

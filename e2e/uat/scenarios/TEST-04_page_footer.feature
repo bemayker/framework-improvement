@@ -1,18 +1,18 @@
-Feature: TEST-04 Page footer
+Feature: TEST-04 Page footer with app version
   As a visitor of the Task Notes app
-  I want to see a footer identifying the app
-  So that I know which app I am looking at
-  # The version shown in the footer is verified by TEST-08_footer_app_version.feature.
+  I want to see a footer identifying the app and its deployed version
+  So that I know which build of the app I am looking at
 
   Background:
     Given the Task Notes project infrastructure (frontend, backend, database) is set up per docker-compose.yml
-    And the application is running at "http://localhost:5183"
+    And the application is running at "http://localhost:5173"
 
-  Scenario: Footer shows the app name
+  Scenario: Footer shows the app name and the deployed version
     Given the app is running
-    When I open "http://localhost:5183" in a browser
+    When I open "http://localhost:5173" in a browser
     Then I see a footer identified by "app-footer" at the bottom of the page
-    And the footer shows "Task Notes"
+    And the footer shows "Task Notes" and a version number
+    And that version number matches the "version" field of frontend/package.json
 
   Scenario: Footer is announced as a landmark, not as plain text
     Given the landing page is open
@@ -30,5 +30,5 @@ Feature: TEST-04 Page footer
   Scenario: Footer remains readable on a phone-sized screen (edge case)
     Given I open the app on a phone-sized screen
     When the landing page loads
-    Then the footer with the app name is still visible
+    Then the footer with the app name and version is still visible
     And it is not cut off or overlapping the rest of the page
