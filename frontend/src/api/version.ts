@@ -3,6 +3,10 @@ import { API_BASE_URL } from "./config";
 // The backend's own sentinel for "my package metadata could not be read".
 const UNKNOWN_BACKEND_VERSION = "unknown";
 
+// The backend answers locally in milliseconds; 5 s leaves headroom for a cold
+// container while the footer still settles instead of loading forever.
+export const VERSION_REQUEST_TIMEOUT_MS = 5_000;
+
 type VersionResponse = { version?: unknown };
 
 /**
@@ -10,11 +14,13 @@ type VersionResponse = { version?: unknown };
  *
  * Returns the trimmed version, or null when the backend answered but could not
  * resolve one (missing, non-string, blank or the "unknown" sentinel). Throws
- * when the backend could not be reached or read. Other response fields are
- * ignored.
+ * when the backend could not be reached or read, or did not answer within
+ * VERSION_REQUEST_TIMEOUT_MS. Other response fields are ignored.
  */
 export async function getBackendVersion(): Promise<string | null> {
-  const response = await fetch(`${API_BASE_URL}/api/version`);
+  const response = await fetch(`${API_BASE_URL}/api/version`, {
+    signal: AbortSignal.timeout(VERSION_REQUEST_TIMEOUT_MS),
+  });
 
   if (!response.ok) {
     throw new Error(
