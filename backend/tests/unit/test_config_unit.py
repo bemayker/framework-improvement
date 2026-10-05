@@ -22,7 +22,12 @@ import os
 
 import pytest
 
-from app.core.config import DEFAULT_CORS_ORIGINS, Settings, get_settings
+from app.core.config import (
+    DEFAULT_BUILD_COMMIT,
+    DEFAULT_CORS_ORIGINS,
+    Settings,
+    get_settings,
+)
 
 
 def test_get_settings_returns_the_configured_app_title():
@@ -102,3 +107,34 @@ def test_settings_cors_origins_treats_blank_value_as_unset(monkeypatch, blank):
     monkeypatch.setenv("CORS_ORIGINS", blank)
 
     assert get_settings().cors_origins == DEFAULT_CORS_ORIGINS
+
+
+def test_settings_build_commit_returns_stripped_env_value(monkeypatch):
+    """BUILD_COMMIT is returned with surrounding whitespace stripped."""
+    monkeypatch.setenv("BUILD_COMMIT", "  abc1234  ")
+
+    assert get_settings().build_commit == "abc1234"
+
+
+def test_settings_build_commit_defaults_when_unset(monkeypatch):
+    """With BUILD_COMMIT unset the single declared default applies."""
+    monkeypatch.delenv("BUILD_COMMIT", raising=False)
+
+    assert get_settings().build_commit == DEFAULT_BUILD_COMMIT == "unknown"
+
+
+@pytest.mark.parametrize("blank", ["", "   ", "\t"])
+def test_settings_build_commit_treats_blank_value_as_unset(monkeypatch, blank):
+    """A blank BUILD_COMMIT (an empty Docker build arg) falls back to the default."""
+    monkeypatch.setenv("BUILD_COMMIT", blank)
+
+    assert get_settings().build_commit == DEFAULT_BUILD_COMMIT
+
+
+def test_settings_build_commit_is_read_per_call_not_at_import(monkeypatch):
+    """Changing the variable between calls changes the result."""
+    monkeypatch.setenv("BUILD_COMMIT", "first")
+    first = get_settings().build_commit
+    monkeypatch.setenv("BUILD_COMMIT", "second")
+
+    assert (first, get_settings().build_commit) == ("first", "second")
