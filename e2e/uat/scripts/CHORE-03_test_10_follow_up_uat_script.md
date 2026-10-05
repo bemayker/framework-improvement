@@ -3,7 +3,7 @@
 ## Prerequisites
 
 - A checkout of branch `feature/CHORE-03-test-10-follow-up`.
-- For criterion 2 steps 2-3: Docker running; from the repository root, the stack built with a known commit: `BUILD_COMMIT=0123456789abcdef0123456789abcdef01234567 docker compose up -d --build` (frontend `http://localhost:5183`, backend `http://localhost:8010`).
+- For criterion 2 steps 4-5: Docker running; from the repository root, the stack built with a known commit: `BUILD_COMMIT=0123456789abcdef0123456789abcdef01234567 docker compose up -d --build` (frontend `http://localhost:5183`, backend `http://localhost:8010`).
 - A browser with dev tools.
 
 ## Criterion 1: the decision log records that the commit token inherits the footer's style under Design Reference NONE
