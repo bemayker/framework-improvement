@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { getBackendVersion } from "./version";
+import { getBackendVersion, VERSION_REQUEST_TIMEOUT_MS } from "./version";
 
 const DEFAULT_VERSION_URL = "http://localhost:8010/api/version";
 
@@ -22,6 +22,7 @@ describe("version API client", () => {
 
   afterEach(() => {
     vi.unstubAllGlobals();
+    vi.restoreAllMocks();
   });
 
   it("calls /api/version on the default base URL", async () => {
@@ -30,7 +31,38 @@ describe("version API client", () => {
     await getBackendVersion();
 
     expect(fetchMock).toHaveBeenCalledTimes(1);
-    expect(fetchMock).toHaveBeenCalledWith(DEFAULT_VERSION_URL);
+    expect(fetchMock).toHaveBeenCalledWith(
+      DEFAULT_VERSION_URL,
+      expect.objectContaining({ signal: expect.any(AbortSignal) }),
+    );
+  });
+
+  it("aborts the request after VERSION_REQUEST_TIMEOUT_MS", async () => {
+    const controller = new AbortController();
+    const timeoutSpy = vi
+      .spyOn(AbortSignal, "timeout")
+      .mockReturnValue(controller.signal);
+    // The hung-backend shape: never answers, rejects only when aborted.
+    fetchMock.mockImplementation(
+      (_url, init) =>
+        new Promise<Response>((_resolve, reject) => {
+          init?.signal?.addEventListener("abort", () =>
+            reject(init.signal?.reason),
+          );
+        }),
+    );
+
+    const pending = getBackendVersion();
+    expect(timeoutSpy).toHaveBeenCalledWith(VERSION_REQUEST_TIMEOUT_MS);
+    controller.abort(new DOMException("timed out", "TimeoutError"));
+
+    await expect(pending).rejects.toMatchObject({ name: "TimeoutError" });
+  });
+
+  it("keeps the timeout positive and bounded", () => {
+    expect(Number.isFinite(VERSION_REQUEST_TIMEOUT_MS)).toBe(true);
+    expect(VERSION_REQUEST_TIMEOUT_MS).toBeGreaterThan(0);
+    expect(VERSION_REQUEST_TIMEOUT_MS).toBeLessThanOrEqual(10_000);
   });
 
   it("returns the version and ignores other fields such as commit", async () => {

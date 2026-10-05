@@ -5,11 +5,11 @@ Feature: TEST-01 Static landing page
 
   Background:
     Given the Task Notes project infrastructure (frontend, backend, database) is set up per docker-compose.yml
-    And the application is running at "http://localhost:5173"
+    And the application is running at "http://localhost:5183"
 
   Scenario: Landing page displays the app title
     Given the app is running
-    When I open "http://localhost:5173" in a browser
+    When I open "http://localhost:5183" in a browser
     Then I see the landing page container identified by "landing-page"
     And I see the title identified by "landing-title" with the text "Task Notes"
 
@@ -23,6 +23,6 @@ Feature: TEST-01 Static landing page
 
   Scenario: Landing page renders on direct navigation (edge case)
     Given the app is running
-    When I navigate directly to "http://localhost:5173" via a fresh browser tab (not following an internal link)
+    When I navigate directly to "http://localhost:5183" via a fresh browser tab (not following an internal link)
     Then the landing page loads immediately without requiring a prior navigation step
     And I see the title identified by "landing-title" with the text "Task Notes"
