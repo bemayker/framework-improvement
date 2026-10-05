@@ -1,4 +1,4 @@
-<!-- materialized-from: mayker-dev v0.3.250; do not edit, regenerate with /upgrade-project -->
+<!-- materialized-from: mayker-dev v0.3.273; do not edit, regenerate with /upgrade-project -->
 # Work items
 
 > **Not loaded at launch:** Sections 2 to 4 and 6 in `${CLAUDE_PLUGIN_ROOT}/rules/work_items/local_items_and_status.md`; Sections 7 to 9 in `${CLAUDE_PLUGIN_ROOT}/rules/work_items/readiness_resume_commit.md` (the mayker-dev plugin). Read the named file before you apply or cite one of those sections.

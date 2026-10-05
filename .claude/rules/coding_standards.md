@@ -1,4 +1,4 @@
-<!-- materialized-from: mayker-dev v0.3.250; do not edit, regenerate with /upgrade-project -->
+<!-- materialized-from: mayker-dev v0.3.273; do not edit, regenerate with /upgrade-project -->
 <!--
   Universal standard. Loaded at launch from .claude/rules/ (always on). Do not edit per project.
   Stack-agnostic: code quality, naming, architecture patterns, component design, test attributes.
