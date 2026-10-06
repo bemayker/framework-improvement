@@ -15,7 +15,9 @@ import dataclasses
 import os
 
 import pytest
+from fastapi.testclient import TestClient
 
+from app.main import create_app
 from app.core.config import (
     DEFAULT_BUILD_COMMIT,
     DEFAULT_CORS_ORIGINS,
@@ -99,6 +101,30 @@ def test_settings_cors_origins_defaults_when_unset(monkeypatch):
 def test_settings_cors_origins_treats_blank_value_as_unset(monkeypatch, blank):
     """A blank CORS_ORIGINS falls back to the default rather than allowing nothing."""
     monkeypatch.setenv("CORS_ORIGINS", blank)
+
+    assert get_settings().cors_origins == DEFAULT_CORS_ORIGINS
+
+
+def test_settings_cors_origins_drops_trailing_slash(monkeypatch):
+    """BUG-02: an origin configured with a trailing slash is stored without it."""
+    monkeypatch.setenv("CORS_ORIGINS", "http://localhost:5183/")
+
+    assert get_settings().cors_origins == ("http://localhost:5183",)
+
+
+def test_cors_simple_request_allows_origin_configured_with_trailing_slash(monkeypatch):
+    """BUG-02: the browser's slashless Origin matches a slash-terminated setting."""
+    monkeypatch.setenv("CORS_ORIGINS", "http://localhost:5183/")
+    client = TestClient(create_app())
+
+    response = client.get("/api/health", headers={"Origin": "http://localhost:5183"})
+
+    assert response.headers.get("access-control-allow-origin") == "http://localhost:5183"
+
+
+def test_settings_cors_origins_lone_slash_falls_back_to_default(monkeypatch):
+    """A value that is only a slash is an empty entry and uses the default."""
+    monkeypatch.setenv("CORS_ORIGINS", "/")
 
     assert get_settings().cors_origins == DEFAULT_CORS_ORIGINS
 
