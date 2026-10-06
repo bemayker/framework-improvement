@@ -112,7 +112,7 @@ def test_settings_cors_origins_drops_trailing_slash(monkeypatch):
     assert get_settings().cors_origins == ("http://localhost:5183",)
 
 
-def test_cors_preflight_allows_origin_configured_with_trailing_slash(monkeypatch):
+def test_cors_simple_request_allows_origin_configured_with_trailing_slash(monkeypatch):
     """BUG-02: the browser's slashless Origin matches a slash-terminated setting."""
     monkeypatch.setenv("CORS_ORIGINS", "http://localhost:5183/")
     client = TestClient(create_app())
