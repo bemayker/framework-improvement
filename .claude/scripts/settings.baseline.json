@@ -15,8 +15,7 @@
       "Bash(docker:*)","Bash(docker compose:*)","Bash(docker-compose:*)",
       "Bash(sleep:*)","Bash(jq:*)","Bash(head:*)","Bash(tail:*)","Bash(wc:*)","Bash(date:*)",
       "Bash(touch:*)","Bash(diff:*)",
-      "Bash(bash:*)","Bash(set:*)","Bash(uv:*)","Bash(perl:*)","Bash(curl:*)",
-      "mcp__clickup__*"
+      "Bash(bash:*)","Bash(set:*)","Bash(uv:*)","Bash(perl:*)","Bash(curl:*)"
     ],
     "deny": [
       "Bash(rm -rf:*)","Bash(sudo:*)",

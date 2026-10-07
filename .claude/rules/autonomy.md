@@ -1,4 +1,4 @@
-<!-- materialized-from: mayker-dev v0.3.273; do not edit, regenerate with /upgrade-project -->
+<!-- materialized-from: mayker-dev v0.3.298; do not edit, regenerate with /upgrade-project -->
 <!--
   Universal standard. Loaded at launch from .claude/rules/ (always on). Do not edit per project.
   Autonomous decision authority, decision log, merge policy, escalation bar,
