@@ -1,7 +1,7 @@
 """Data access for notes (TEST-03).
 
-Raw parameterized SQL via psycopg: one table with an insert and a select
-needs neither an ORM nor a query builder. The connection is supplied by the
+Raw parameterized SQL via psycopg: one table with an insert and two selects
+(list and get by id) needs neither an ORM nor a query builder. The connection is supplied by the
 caller (the `get_connection` dependency in app/core/db.py), so the repository
 owns no transaction boundary of its own.
 """
