@@ -46,6 +46,10 @@
 - **Done flips:** auto
 - **Docs:** auto
 
+## Worktrees
+
+- **Worktrees:** per-feature      # per-feature | off
+
 ## Project Description
 
 Minimal task-notes app used exclusively as a validation sandbox for the mayker-dev framework. Features are deliberately trivial; the point is exercising the framework lifecycle, not the product.
