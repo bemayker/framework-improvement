@@ -150,6 +150,27 @@
       "id_carrier": "none",
       "url": "https://app.clickup.com/t/123k99cx6rm",
       "registered_at": "2026-10-05T16:55:34Z"
+    },
+    "TEST-12": {
+      "external_id": "123k99cxe5w",
+      "external_identifier": "",
+      "id_source": "framework",
+      "id_carrier": "title_prefix",
+      "url": "https://app.clickup.com/t/123k99cxe5w"
+    },
+    "TEST-13": {
+      "external_id": "123k99cxe5x",
+      "external_identifier": "",
+      "id_source": "framework",
+      "id_carrier": "title_prefix",
+      "url": "https://app.clickup.com/t/123k99cxe5x"
+    },
+    "TEST-14": {
+      "external_id": "123k99cxe5y",
+      "external_identifier": "",
+      "id_source": "framework",
+      "id_carrier": "title_prefix",
+      "url": "https://app.clickup.com/t/123k99cxe5y"
     }
   },
   "discovery": {

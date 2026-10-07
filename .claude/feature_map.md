@@ -173,5 +173,8 @@ its API marks the story Done early. The merge order above is what prevents it.
 | CHORE-01 | TEST-09 follow-up: known-improvements | [TEST-09] | feature/CHORE-01-test-09-follow-up | | | ✅ | 3 | |
 | CHORE-02 | TEST-08 follow-up: known-improvements | [TEST-08] | feature/CHORE-02-test-08-follow-up | | ⚠️ CHORE-02 and TEST-10 both plausibly edit frontend/src/api/version.ts (fetch timeout vs reading the commit field) and possibly AppFooter.tsx; serialize if run concurrently | ✅ | 4 | |
 | CHORE-03 | TEST-10 follow-up: known-improvements | [TEST-10] | feature/CHORE-03-test-10-follow-up | | | ✅ | 5 | |
+| TEST-12 | Read one note by id | [TEST-03] | feature/TEST-12-read-note-by-id | | | | 3 | |
+| TEST-13 | Ping endpoint | [TEST-01] | feature/TEST-13-ping-endpoint | | | ✅ | 2 | |
+| TEST-14 | Delete a note by id | [TEST-12] | feature/TEST-14-delete-note-by-id | | | ✅ | 4 | |
 
 Scaffold gate: TEST-01 (`scaffold: true` in its frontmatter) is **done**, so the gate passes. TEST-01 through TEST-07 and FEAT-1 are done; TEST-08, TEST-09 and BUG-01 are ready (TEST-09 registers a router in `backend/app/main.py`, BUG-01 edits only `server_time.py`, TEST-08 is frontend only); TEST-10 waits on TEST-08 and TEST-09.
