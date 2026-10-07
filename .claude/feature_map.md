@@ -176,5 +176,6 @@ its API marks the story Done early. The merge order above is what prevents it.
 | TEST-12 | Read one note by id | [TEST-03] | feature/TEST-12-read-note-by-id | | | | 3 | |
 | TEST-13 | Ping endpoint | [TEST-01] | feature/TEST-13-ping-endpoint | | | ✅ | 2 | |
 | TEST-14 | Delete a note by id | [TEST-12] | feature/TEST-14-delete-note-by-id | | | ✅ | 4 | |
+| CHORE-04 | TEST-14 follow-up: known-improvements | [TEST-14] | feature/CHORE-04-test-14-follow-up | | | ✅ | 5 | |
 
 Scaffold gate: TEST-01 (`scaffold: true` in its frontmatter) is **done**, so the gate passes. TEST-01 through TEST-07 and FEAT-1 are done; TEST-08, TEST-09 and BUG-01 are ready (TEST-09 registers a router in `backend/app/main.py`, BUG-01 edits only `server_time.py`, TEST-08 is frontend only); TEST-10 waits on TEST-08 and TEST-09.
