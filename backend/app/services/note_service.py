@@ -23,6 +23,8 @@ class NoteRepositoryProtocol(Protocol):
 
     def get_note(self, note_id: int) -> Note | None: ...
 
+    def delete_note(self, note_id: int) -> bool: ...
+
 
 def create_note(repository: NoteRepositoryProtocol, text: str) -> Note:
     """Store one note, trimmed of surrounding whitespace."""
@@ -49,4 +51,13 @@ def get_note(repository: NoteRepositoryProtocol, note_id: int) -> Note | None:
         return repository.get_note(note_id)
     except Exception:
         logger.exception("Reading a note failed (id %d)", note_id)
+        raise
+
+
+def delete_note(repository: NoteRepositoryProtocol, note_id: int) -> bool:
+    """Delete the note with this id; False when it does not exist."""
+    try:
+        return repository.delete_note(note_id)
+    except Exception:
+        logger.exception("Deleting a note failed (id %d)", note_id)
         raise
