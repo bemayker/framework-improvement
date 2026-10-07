@@ -21,6 +21,8 @@ class NoteRepositoryProtocol(Protocol):
 
     def list_notes(self) -> list[Note]: ...
 
+    def get_note(self, note_id: int) -> Note | None: ...
+
 
 def create_note(repository: NoteRepositoryProtocol, text: str) -> Note:
     """Store one note, trimmed of surrounding whitespace."""
@@ -38,4 +40,13 @@ def list_notes(repository: NoteRepositoryProtocol) -> list[Note]:
         return repository.list_notes()
     except Exception:
         logger.exception("Listing notes failed")
+        raise
+
+
+def get_note(repository: NoteRepositoryProtocol, note_id: int) -> Note | None:
+    """Return the note with this id, or None when it does not exist."""
+    try:
+        return repository.get_note(note_id)
+    except Exception:
+        logger.exception("Reading a note failed (id %d)", note_id)
         raise

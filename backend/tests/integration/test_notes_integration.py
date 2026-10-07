@@ -154,3 +154,64 @@ def test_post_notes_over_the_maximum_length_returns_422_and_stores_nothing(
 
     assert response.status_code == 422
     assert client.get("/api/notes").json() == []
+
+
+def test_get_note_round_trips_an_inserted_note_through_postgres(
+    notes_table: psycopg.Connection,
+):
+    """Repository insert + get-by-id round-trip against the real database."""
+    repository = NoteRepository(notes_table)
+    repository.insert_note("first")
+    created = repository.insert_note("Buy milk")
+
+    assert repository.get_note(created.id) == created
+
+
+def test_get_note_returns_none_when_table_is_empty(notes_table: psycopg.Connection):
+    """Edge case: a miss is None, not an error."""
+    assert NoteRepository(notes_table).get_note(1) is None
+
+
+def test_get_note_by_id_returns_200_with_the_stored_note(
+    client: TestClient, notes_table: psycopg.Connection
+):
+    """AC1: a stored note is returned with exactly its id and text."""
+    client.post("/api/notes", json={"text": "Walk dog"})
+    created = client.post("/api/notes", json={"text": "Buy milk"}).json()
+
+    response = client.get(f"/api/notes/{created['id']}")
+
+    assert response.status_code == 200
+    assert response.json() == {"id": created["id"], "text": "Buy milk"}
+
+
+def test_get_note_by_id_returns_404_with_detail_when_id_does_not_exist(
+    client: TestClient, notes_table: psycopg.Connection
+):
+    """AC2: an id that was never created answers 404 with the exact detail body."""
+    response = client.get("/api/notes/999999")
+
+    assert response.status_code == 404
+    assert response.json() == {"detail": "Note not found"}
+
+
+@pytest.mark.parametrize("bad_id", ["abc", "1.5"])
+def test_get_note_by_id_with_non_integer_id_returns_422(
+    client: TestClient, notes_table: psycopg.Connection, bad_id: str
+):
+    """AC3: a non-integer path segment is a validation error on `note_id`."""
+    response = client.get(f"/api/notes/{bad_id}")
+
+    assert response.status_code == 422
+    assert response.json()["detail"][0]["loc"] == ["path", "note_id"]
+
+
+@pytest.mark.parametrize("odd_id", ["0", "-1", "99999999999999999999"])
+def test_get_note_by_id_with_out_of_range_integer_returns_404_not_500(
+    client: TestClient, notes_table: psycopg.Connection, odd_id: str
+):
+    """Edge case (plan assumption 1): zero, negative and above-BIGINT ids are misses."""
+    response = client.get(f"/api/notes/{odd_id}")
+
+    assert response.status_code == 404
+    assert response.json() == {"detail": "Note not found"}

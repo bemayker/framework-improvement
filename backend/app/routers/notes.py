@@ -1,9 +1,10 @@
-"""Router for the notes endpoints (TEST-03): POST and GET /api/notes."""
+"""Router for the notes endpoints: POST and GET /api/notes (TEST-03) and
+GET /api/notes/{note_id} (TEST-12)."""
 
 from typing import Annotated
 
 import psycopg
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, HTTPException, status
 
 from app.core.db import get_connection
 from app.repositories.note_repository import NoteRepository
@@ -41,3 +42,18 @@ def list_notes(repository: NoteRepositoryDependency) -> list[NoteResponse]:
     """Return every stored note, ascending by id."""
     notes = note_service.list_notes(repository)
     return [NoteResponse(id=note.id, text=note.text) for note in notes]
+
+
+@router.get(
+    "/notes/{note_id}",
+    response_model=NoteResponse,
+    responses={status.HTTP_404_NOT_FOUND: {"description": "Note not found"}},
+)
+def get_note(note_id: int, repository: NoteRepositoryDependency) -> NoteResponse:
+    """Return one stored note by id; 404 when no note has that id."""
+    note = note_service.get_note(repository, note_id)
+    if note is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Note not found"
+        )
+    return NoteResponse(id=note.id, text=note.text)
