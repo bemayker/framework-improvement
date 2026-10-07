@@ -31,6 +31,12 @@ class RecordingRepository:
     def get_note(self, note_id: int) -> Note | None:
         return next((note for note in self.notes if note.id == note_id), None)
 
+    def delete_note(self, note_id: int) -> bool:
+        remaining = [note for note in self.notes if note.id != note_id]
+        found = len(remaining) != len(self.notes)
+        self.notes = remaining
+        return found
+
 
 class FailingRepository:
     """Stand-in for an unreachable database."""
@@ -42,6 +48,9 @@ class FailingRepository:
         raise RuntimeError("database unreachable")
 
     def get_note(self, note_id: int) -> Note | None:
+        raise RuntimeError("database unreachable")
+
+    def delete_note(self, note_id: int) -> bool:
         raise RuntimeError("database unreachable")
 
 
@@ -114,3 +123,30 @@ def test_get_note_propagates_repository_failure_and_logs_it(caplog):
             note_service.get_note(FailingRepository(), 7)
 
     assert "Reading a note failed (id 7)" in caplog.text
+
+
+def test_delete_note_returns_true_and_removes_the_note():
+    """Happy path: an existing note is deleted and the service reports it."""
+    stored = [Note(id=1, text="Buy milk"), Note(id=2, text="Walk dog")]
+    repository = RecordingRepository(stored)
+
+    assert note_service.delete_note(repository, 1) is True
+    assert repository.notes == [stored[1]]
+
+
+def test_delete_note_returns_false_when_note_does_not_exist():
+    """Edge case: an unknown id is a miss (False) and leaves stored notes untouched."""
+    stored = [Note(id=1, text="Buy milk")]
+    repository = RecordingRepository(stored)
+
+    assert note_service.delete_note(repository, 999) is False
+    assert repository.notes == stored
+
+
+def test_delete_note_propagates_repository_failure_and_logs_it(caplog):
+    """Error case: a delete failure is logged with the id and re-raised."""
+    with caplog.at_level(logging.ERROR, logger=note_service.__name__):
+        with pytest.raises(RuntimeError, match="database unreachable"):
+            note_service.delete_note(FailingRepository(), 7)
+
+    assert "Deleting a note failed (id 7)" in caplog.text

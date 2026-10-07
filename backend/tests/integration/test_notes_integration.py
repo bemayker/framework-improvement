@@ -215,3 +215,71 @@ def test_get_note_by_id_with_out_of_range_integer_returns_404_not_500(
 
     assert response.status_code == 404
     assert response.json() == {"detail": "Note not found"}
+
+
+def test_delete_note_removes_the_note_and_returns_true(
+    notes_table: psycopg.Connection,
+):
+    """Repository delete against the real database: the note is gone afterwards."""
+    repository = NoteRepository(notes_table)
+    first = repository.insert_note("Buy milk")
+    second = repository.insert_note("Walk dog")
+
+    assert repository.delete_note(first.id) is True
+    assert repository.list_notes() == [second]
+
+
+def test_delete_note_returns_false_when_table_is_empty(
+    notes_table: psycopg.Connection,
+):
+    """Edge case: a miss is False, not an error."""
+    assert NoteRepository(notes_table).delete_note(1) is False
+
+
+def test_delete_note_by_id_returns_204_and_the_note_leaves_the_list(
+    client: TestClient, notes_table: psycopg.Connection
+):
+    """AC1: a stored note is deleted with an empty 204 and no longer listed."""
+    buy_milk = client.post("/api/notes", json={"text": "Buy milk"}).json()
+    walk_dog = client.post("/api/notes", json={"text": "Walk dog"}).json()
+
+    response = client.delete(f"/api/notes/{buy_milk['id']}")
+
+    assert response.status_code == 204
+    assert response.content == b""
+    assert client.get("/api/notes").json() == [walk_dog]
+    assert client.get(f"/api/notes/{buy_milk['id']}").status_code == 404
+
+
+def test_delete_note_by_id_returns_404_with_detail_when_id_does_not_exist(
+    client: TestClient, notes_table: psycopg.Connection
+):
+    """AC2: an id that was never created answers 404 with the exact detail body."""
+    response = client.delete("/api/notes/999999")
+
+    assert response.status_code == 404
+    assert response.json() == {"detail": "Note not found"}
+
+
+def test_delete_note_by_id_twice_returns_204_then_404(
+    client: TestClient, notes_table: psycopg.Connection
+):
+    """Edge case (plan assumption 2): the second delete of one id is a miss."""
+    created = client.post("/api/notes", json={"text": "Buy milk"}).json()
+
+    first = client.delete(f"/api/notes/{created['id']}")
+    second = client.delete(f"/api/notes/{created['id']}")
+
+    assert first.status_code == 204
+    assert second.status_code == 404
+    assert second.json() == {"detail": "Note not found"}
+
+
+def test_delete_note_by_id_with_out_of_range_integer_returns_404_not_500(
+    client: TestClient, notes_table: psycopg.Connection
+):
+    """Edge case (plan assumption 3): an id above the BIGINT range is a miss."""
+    response = client.delete("/api/notes/99999999999999999999")
+
+    assert response.status_code == 404
+    assert response.json() == {"detail": "Note not found"}
