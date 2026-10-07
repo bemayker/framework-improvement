@@ -1,0 +1,16 @@
+# Decisions (CHORE-04, after its final push): deliver-20261007T214613Z
+
+The entries `.claude/artifacts/CHORE-04/decisions.md` received after the last push of its branch (1c54478), the head its pull request merged. The entries before them reached the default branch in that file.
+
+- 2026-10-08 [CHORE-04] 6.6 push gate: test-gate: verdict recorded for this push (head 1c54478: full after 3s; counts: root: pytest 151 passed, 0 failed, 0 skipped + vitest 50 passed, 0 failed, 0 skipped). Upstream verified origin/feature/CHORE-04-test-14-follow-up.
+- 2026-10-08 [CHORE-04] 6.6 draft PR #121 opened. PR label: #121 mayker:in-progress. Item-to-PR link: ClickUp comment posted.
+- 2026-10-08 [CHORE-04] 6.7 CI: CI: 7/7 checks done, 3m09s, next poll none (green); verdict=green failed=0 poll=3. No fix cycle spent.
+- 2026-10-08 [CHORE-04] 6.7 handover rebuild: status=rebuilt sha=1c54478+dirty (decisions.md only) services=3/3 health=pass project=framework-improvement-chore-04-handover urls=backend=http://localhost:29404,db=localhost:29405,frontend=http://localhost:29406 duration=19s
+- 2026-10-08 [CHORE-04] 6.7 handover: PR #121 converted to ready; PR label: #121 mayker:in-review (removed mayker:in-progress); ClickUp status to test (in_review). The conversion queued a second `notify` run (Slack, subscribed to ready_for_review by design), briefly making mergeStateStatus UNSTABLE; no pr-tests run appeared. Re-poll: 7/7 green, CLEAN.
+- 2026-10-08 [CHORE-04] 6.8 comments: PR inline 0, PR conversation 0, reviews 0; tracker 1 (the framework's own PR-link comment, not actionable). mergeable=MERGEABLE mergeStateStatus=CLEAN.
+- 2026-10-08 [CHORE-04] 6.9 merge verdict: merge (squash). Rationale: autonomy.md Section 5 holds on all five conditions: blocking=0; PR #121 ready, 8/8 checks SUCCESS (two notify runs, six pr-tests jobs), MERGEABLE/CLEAN at head 1c54478; three derived criteria met (lines 78/73/72/75 under 79, docstring-only diff, pytest 151/0 and vitest 50/0); PR 0 comments and no change request, tracker 1 non-actionable framework comment; docstring rewrap is reversible and unambiguous, escalation bar not triggered.
+- 2026-10-08 [CHORE-04] 6.9 merged: PR #121 squash-merged as 8d9936e2b6bdb6a55b229330be81fd2c50f3f9f0.
+- 2026-10-08 [CHORE-04] 6.10 auto-Done: auto-done: no run for 1c54478495ee38ce870434bb0266abbb827e866c after 90s. Contradicted by gh run list: run 37695456705 "Auto-Done on merge" (pull_request, headSha 1c54478, created 22:19:42Z) completed success; ClickUp twin re-read: complete; PR labels mayker:done. Framework defect in auto-done-run.sh (missed an existing run), reported, not filed. No backstop flip performed.
+- 2026-10-08 [CHORE-04] 6.10 standards provenance: 7 dispatch(es); both always-on standards SELF-REPORTED as read by 4 of 7; 0 unbacked provenance claim(s); 4 of 7 not assessed. No MISMATCH.
+- 2026-10-08 [CHORE-04] 6.10 checkpoint: [checkpoint] due=yes items=CHORE-04 command=uv run --directory backend pytest -q && npm --prefix frontend test merged=CHORE-04 verdict=pass (pytest 151, vitest 50, on main 8d9936e).
+- 2026-10-08 [CHORE-04] 6.10 teardown: docker rm -f CHORE-04-db (done). Handover stack framework-improvement-chore-04-handover left running.
