@@ -440,10 +440,13 @@ jobs:
 
   validate-uat:
     # UAT Gherkin well-formedness check (mayker-dev), part of the merge pipeline.
-    # Guarded on the presence of e2e/uat/scenarios/*.feature, so it is a clean
-    # no-op when UAT generation is off (CLAUDE.md Feature Toggles -> UAT
-    # Generation). It validates STRUCTURE only and never runs the scenarios as
-    # browser tests: the executable E2E specs (*.spec.ts) run in pr-tests.yml.
+    # It validates the tracked .feature files in CLAUDE.md -> Scenarios
+    # directory, fails when that folder holds none while scenarios are tracked
+    # elsewhere, warns and validates every tracked .feature file while the field
+    # is still a placeholder, and is a no-op only when CLAUDE.md -> UAT
+    # Generation is DISABLED. It validates STRUCTURE only and never runs the
+    # scenarios as browser tests: the executable E2E specs (*.spec.ts) run in
+    # pr-tests.yml.
     # See the plugin's DEVELOPMENT.md -> "Why UAT is validated, not executed".
     if: github.event.pull_request.merged == true
     runs-on: ubuntu-latest
@@ -455,14 +458,50 @@ jobs:
       - name: Validate UAT Gherkin is well-formed
         run: |
           set -euo pipefail
-          shopt -s nullglob
-          files=(e2e/uat/scenarios/*.feature)
-          if [ ${#files[@]} -eq 0 ]; then
-            echo "No e2e/uat/scenarios/*.feature files found; UAT validation is a no-op."
+          err()  { echo "::error${1:+ file=$1}::$2"; }
+          warn() { echo "::warning::$1"; }
+          # The scenarios live where CLAUDE.md -> Scenarios directory says, so read it
+          # there: the label anchored to the start of its list item (the file explains
+          # its own fields in comments above them), bold, a code span, a trailing
+          # `# comment` and a carriage return tolerated.
+          field() {
+            [ -f CLAUDE.md ] || return 0
+            grep -m1 -E "^[[:space:]]*([-*][[:space:]]*)?[*]*$1" CLAUDE.md \
+              | tr -d '\r' \
+              | sed -e "s/.*$1\**[[:space:]]*//" -e 's/[[:space:]]*#.*$//' -e 's/`//g' \
+                    -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//' || true
+          }
+          case "$(field 'UAT Generation:')" in
+            DISABLED|Disabled|disabled)
+              echo "CLAUDE.md -> UAT Generation is DISABLED: no scenarios are generated, so UAT validation is a no-op."
+              exit 0 ;;
+          esac
+          dir="$(field 'Scenarios directory:')"
+          dir="${dir#./}"; dir="${dir%/}"
+          all="$(git ls-files -- '*.feature')"
+          case "$dir" in
+            ''|'['*)
+              # Still a placeholder (or no line at all): never a silent no-op. Validate
+              # every tracked scenario, wherever a build put it, and say why.
+              warn "CLAUDE.md -> Scenarios directory is not set (${dir:-no such line}); validating every tracked .feature file instead. Set it to the folder your builds write scenarios to."
+              dir=""; files="$all" ;;
+            *)
+              files="$(git ls-files -- "$dir/*.feature")"
+              if [ -z "$files" ] && [ -n "$all" ]; then
+                # Scenarios exist, just not where CLAUDE.md says: the builds and this
+                # check disagree about the folder, which a no-op would hide for good.
+                where="$(printf '%s\n' "$all" | sed -e 's|/[^/]*$||' -e 's|^[^/]*$|.|' | sort | uniq -c \
+                  | awk '{ printf "%s%s/ (%s)", (NR > 1 ? ", " : ""), $2, $1 }')"
+                err "" "CLAUDE.md -> Scenarios directory is $dir/, which holds no tracked .feature file, but tracked .feature files are elsewhere: $where. Move them under $dir/, or set Scenarios directory to the folder your builds write scenarios to."
+                exit 1
+              fi ;;
+          esac
+          if [ -z "$files" ]; then
+            echo "No tracked .feature file${dir:+ under $dir/ or anywhere else}: nothing to validate."
             exit 0
           fi
           fail=0
-          for f in "${files[@]}"; do
+          while IFS= read -r f; do
             errs=""
             grep -qE '^[[:space:]]*Feature:' "$f" || errs="missing 'Feature:'"
             grep -qE '^[[:space:]]*(Scenario:|Scenario Outline:)' "$f" \
@@ -476,10 +515,10 @@ jobs:
               errs="${errs:+$errs; }Scenario Outline without an Examples: table"
             fi
             if [ -n "$errs" ]; then
-              echo "::error file=$f::not well-formed Gherkin: $errs"
+              err "$f" "not well-formed Gherkin: $errs"
               fail=1
             else
               echo "ok: $f"
             fi
-          done
+          done <<< "$files"
           exit "$fail"
