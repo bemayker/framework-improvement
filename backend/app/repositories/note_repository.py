@@ -1,7 +1,7 @@
 """Data access for notes (TEST-03).
 
-Raw parameterized SQL via psycopg: one table with an insert and a select
-needs neither an ORM nor a query builder. The connection is supplied by the
+Raw parameterized SQL via psycopg: one table with an insert and two selects
+(list and get by id) needs neither an ORM nor a query builder. The connection is supplied by the
 caller (the `get_connection` dependency in app/core/db.py), so the repository
 owns no transaction boundary of its own.
 """
@@ -12,6 +12,7 @@ from app.models.note import Note
 
 INSERT_NOTE_SQL = "INSERT INTO notes (text) VALUES (%s) RETURNING id, text"
 LIST_NOTES_SQL = "SELECT id, text FROM notes ORDER BY id"
+GET_NOTE_SQL = "SELECT id, text FROM notes WHERE id = %s"
 
 
 class NoteRepository:
@@ -33,3 +34,10 @@ class NoteRepository:
             cursor.execute(LIST_NOTES_SQL)
             rows = cursor.fetchall()
         return [Note(id=row[0], text=row[1]) for row in rows]
+
+    def get_note(self, note_id: int) -> Note | None:
+        """Return the note with this id, or None when no such note is stored."""
+        with self._connection.cursor() as cursor:
+            cursor.execute(GET_NOTE_SQL, (note_id,))
+            row = cursor.fetchone()
+        return None if row is None else Note(id=row[0], text=row[1])
