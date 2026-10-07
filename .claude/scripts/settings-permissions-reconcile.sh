@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# materialized-from: mayker-dev v0.3.273; do not edit, regenerate with /upgrade-project
+# materialized-from: mayker-dev v0.3.298; do not edit, regenerate with /upgrade-project
 #
 # Additive reconciler for a consuming repo's `.claude/settings.json` permissions
 # block (MDF-178).
@@ -53,7 +53,7 @@
 #   2. {script dir}/settings.baseline.json    the vendored pair
 #   3. {script dir}/../../templates/settings.json   the plugin layout
 #
-# MCP source resolution (optional; absent means the MCP slice is left alone):
+# MCP source resolution (optional; absent hands THE TRACKER SLICE, MDF-335):
 #   1. $MCP_CONFIG                            explicit override (the fixtures use it)
 #   2. {settings dir}/../.mcp.json            the repo root beside `.claude/`
 #
@@ -183,15 +183,26 @@ fi
 
 # --- Resolve the optional MCP source -----------------------------------------
 # `.claude/settings.json` -> the repo root is two levels up. An absent or
-# unparseable `.mcp.json` means the MCP slice is left entirely alone rather than
-# emptied: a repo that has not configured its servers yet must not have its
-# existing grants withdrawn by a file that is not there.
+# unparseable `.mcp.json` is never read as "no servers", so the slice is never
+# emptied on the strength of it: a repo that has not configured its servers yet
+# must not have its existing grants withdrawn by a file that is not there. An
+# ABSENT one hands the known tracker servers' entries to THE TRACKER SLICE
+# (MDF-335), which touches nothing else; an unparseable one leaves the whole
+# slice alone.
+#
+# `MCP_PRESENT` separates "no file" from "a file this script could not parse":
+# only the first hands the slice to the tracker derivation (MDF-335).
 MCP=""
+MCP_PRESENT=""
 if [ -n "${MCP_CONFIG:-}" ]; then
   MCP="$MCP_CONFIG"
+  [ ! -e "$MCP" ] || MCP_PRESENT=1
 else
   _sd="$(cd "$(dirname "$TARGET")" && pwd)"
-  if [ -r "$_sd/../.mcp.json" ]; then MCP="$_sd/../.mcp.json"; fi
+  if [ -e "$_sd/../.mcp.json" ]; then
+    MCP_PRESENT=1
+    if [ -r "$_sd/../.mcp.json" ]; then MCP="$_sd/../.mcp.json"; fi
+  fi
 fi
 
 # --- Resolve the optional declared-command source -----------------------------
@@ -207,7 +218,7 @@ else
 fi
 
 SP_MODE="$MODE" SP_TARGET="$TARGET" SP_BASELINE="$BASELINE" SP_MCP="$MCP" \
-SP_CMD_SRC="$CMD_SRC" python3 - <<'PY'
+SP_MCP_PRESENT="$MCP_PRESENT" SP_CMD_SRC="$CMD_SRC" python3 - <<'PY'
 import json
 import os
 import re
@@ -217,6 +228,7 @@ mode = os.environ["SP_MODE"]
 target = os.environ["SP_TARGET"]
 baseline_path = os.environ["SP_BASELINE"]
 mcp_path = os.environ.get("SP_MCP") or ""
+mcp_present = bool(os.environ.get("SP_MCP_PRESENT"))
 cmd_src_path = os.environ.get("SP_CMD_SRC") or ""
 
 # =============================================================================
@@ -343,11 +355,41 @@ ENTRY_LISTS = ("allow", "deny", "additionalDirectories")
 
 # `mcp__...` allow entries are NOT part of the baseline-derived add set. They are
 # derived from the project's own `.mcp.json` instead (Section 5.1's contract,
-# folded in here so the block has one writer). The baseline's own `mcp__clickup__*`
-# is the FIRST-RUN scaffold that `/init-project` Section C step 2 copies in whole;
-# reconciliation is per project from that point on. It ships no `mcp__github__*`
-# any more: GitHub projects configure no Git provider server (MDF-175).
+# folded in here so the block has one writer), or, where the project has no
+# `.mcp.json`, from its tracker (THE TRACKER SLICE, below). The baseline ships
+# NO `mcp__` entry at all: it carried `mcp__clickup__*` as a first-run scaffold
+# until MDF-335 (0.3.288), which every azure-boards project then kept forever,
+# and `mcp__github__*` until MDF-175 (GitHub projects configure no Git provider
+# server). A baseline `mcp__` entry would still be skipped by the add step.
 MCP_ENTRY = re.compile(r"^mcp__")
+
+# =============================================================================
+# THE TRACKER SLICE (MDF-335) — the MCP slice of a project with no `.mcp.json`.
+#
+# TRACKER_SERVERS maps an `Issue Tracker Provider:` value to the MCP server the
+# framework knows that tracker by. It is the ONE list of framework-known tracker
+# servers, and it lives here because this script is the half of the pair that is
+# vendored (`REPO-57` point 4): a consuming repo's ledger Detect runs it with no
+# plugin to read. `tests/settings-permissions-reconcile.test.sh` derives it from
+# this line (a single literal dict, so extraction is a parse) and checks every
+# key against a `rules/adapters/tracker/<value>.md`. A tracker whose working path
+# is not an MCP server (azure-boards: the `az` CLI) or whose server no shipped
+# project has named (jira, linear: their mapping files say so) has no entry.
+#
+# The pass, only when `.mcp.json` is ABSENT and `CLAUDE.md` names a provider:
+#   * the configured provider's own server entry is KEPT, or ADDED when missing;
+#   * every OTHER key's server entry is RETIRED when present verbatim;
+#   * every other `mcp__` entry is LEFT ALONE: a server the framework does not
+#     know is an operator's, and deriving the whole slice from the tracker would
+#     delete it (the rejected alternative, decided 2026-10-06 on MDF-335).
+# Rejected too: a one-off retire row for `mcp__clickup__*`, which the next
+# tracker repeats, and which `REPO-44` point 1 forbids (an `mcp__` entry is
+# never a `RETIRE` row).
+TRACKER_SERVERS = {"clickup": "clickup"}
+
+# A provider value is configured when it is one lowercase token; the template's
+# `[TO BE COMPLETED: ...]` placeholder, and anything else, skips the slice.
+PROVIDER_VALUE = re.compile(r"^[a-z][a-z0-9-]*$")
 
 # =============================================================================
 # THE INERT-FORM ADVISORY (MDF-185) — the one thing this script reports on
@@ -548,6 +590,30 @@ def declared_programs(path):
 
 declared = declared_programs(cmd_src_path)
 
+
+def configured_tracker(path):
+    """The `Issue Tracker Provider:` value, or None when unknowable."""
+    if not path:
+        return None
+    try:
+        with open(path, encoding="utf-8") as fh:
+            text = fh.read()
+    except (OSError, UnicodeDecodeError):
+        return None
+    m = re.search(
+        r"^\s*[-*]?\s*\**Issue Tracker Provider:?\**\s*:?\s*(.*)$", text, re.MULTILINE
+    )
+    if not m:
+        return None
+    value = re.split(r"\s+#", m.group(1), maxsplit=1)[0].replace("`", "").strip()
+    return value if PROVIDER_VALUE.match(value) else None
+
+
+# `None` means the tracker slice does not run: `.mcp.json` exists (it owns the
+# slice, or leaves it alone when unparseable), or no provider is configured.
+tracker = None if mcp_present else configured_tracker(cmd_src_path)
+tracker_server = TRACKER_SERVERS.get(tracker) if tracker else None
+
 # --- Build the pass -----------------------------------------------------------
 report = []
 new_perms = {}
@@ -651,6 +717,33 @@ for lst in ENTRY_LISTS:
             if item not in surviving:
                 report.append("add    permissions.allow: %s (from .mcp.json)" % item)
                 surviving.append(item)
+                changed = True
+        kept = surviving
+
+    # 3b. The tracker slice, only when there is no `.mcp.json` (MDF-335): the
+    #     known tracker servers alone, every other `mcp__` entry untouched.
+    if lst == "allow" and mcp_wanted is None and tracker is not None:
+        others = set(
+            "mcp__%s__*" % s for k, s in TRACKER_SERVERS.items() if s != tracker_server
+        )
+        surviving = []
+        for item in kept:
+            if isinstance(item, str) and item in others:
+                report.append(
+                    "retire permissions.allow: %s (Issue Tracker Provider is %s in "
+                    "CLAUDE.md, and there is no .mcp.json)" % (item, tracker)
+                )
+                changed = True
+                continue
+            surviving.append(item)
+        if tracker_server is not None:
+            entry = "mcp__%s__*" % tracker_server
+            if entry not in surviving:
+                report.append(
+                    "add    permissions.allow: %s (Issue Tracker Provider is %s in "
+                    "CLAUDE.md, and there is no .mcp.json)" % (entry, tracker)
+                )
+                surviving.append(entry)
                 changed = True
         kept = surviving
 

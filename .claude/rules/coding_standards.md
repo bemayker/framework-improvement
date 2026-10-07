@@ -1,4 +1,4 @@
-<!-- materialized-from: mayker-dev v0.3.273; do not edit, regenerate with /upgrade-project -->
+<!-- materialized-from: mayker-dev v0.3.298; do not edit, regenerate with /upgrade-project -->
 <!--
   Universal standard. Loaded at launch from .claude/rules/ (always on). Do not edit per project.
   Stack-agnostic: code quality, naming, architecture patterns, component design, test attributes.
@@ -39,4 +39,4 @@ An unexplained E2E timeout on a call that works under `curl` is an origin questi
 - **Never widen a default to a list of likely values.** The next value anyone picks is still wrong, and now nothing says so.
 - **One value, one source, across generated files too.** A port a CI workflow and a compose file both name is derived from the file that owns it. A comment telling a human to keep them in step is not a mechanism.
 - **A test that asserts the fallback is not coverage of the wiring.** Assert the resolution, not the literal.
-- **Check it:** `bash ~/.mayker/mayker-dev/hooks/lib/config-consistency.sh settings <file>` and `... ports <repo-root>` exit 1 on a violation, 0 when consistent, and 2 when they cannot check, which is never a pass. A clean run is not proof; the review check is the authority.
+- **Check it:** `bash ~/.mayker/mayker-dev/hooks/lib/config-consistency.sh settings <file>` and `... ports <repo-root> <ci-path>` (the first path the git mapping file's `ci-config-path` row names) exit 1 on a violation, 0 when consistent, and 2 when they cannot check, which is never a pass. A clean run is not proof; the review check is the authority.

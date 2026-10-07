@@ -1,4 +1,4 @@
-<!-- materialized-from: mayker-dev v0.3.273; do not edit, regenerate with /upgrade-project -->
+<!-- materialized-from: mayker-dev v0.3.298; do not edit, regenerate with /upgrade-project -->
 # Work items
 
 > **Not loaded at launch:** Sections 2 to 4 and 6 in `${CLAUDE_PLUGIN_ROOT}/rules/work_items/local_items_and_status.md`; Sections 7 to 9 in `${CLAUDE_PLUGIN_ROOT}/rules/work_items/readiness_resume_commit.md` (the mayker-dev plugin). Read the named file before you apply or cite one of those sections.
@@ -13,7 +13,7 @@ A *work item* is a unit of work: a feature, bug, performance issue, or chore. It
 - `local`: items live as files under `docs/issues/` in the repo. No tracker MCP is required.
 - `hybrid`: resolve from the tracker if the ID exists there, otherwise from `docs/issues/`.
 
-**A tracker item with no human-readable key gets a framework-assigned ID** (`FEAT-{n}`, or `BUG-`/`PERF-`/`CHORE-` by its type), which `/sync-project` Section 2 writes back onto the item. The rules for assigning it are `mcp_integration.md` Section 1.5's alone.
+**A tracker item with no human-readable key gets a framework-assigned ID** (`FEAT-{n}`, or `BUG-`/`PERF-`/`CHORE-` by its type or its `bug`, `perf` or `chore` tag), which `/sync-project` Section 2 writes back onto the item. The rules for assigning it are `mcp_integration.md` Section 1.5's alone.
 
 ## 5. MCP requirement by source
 

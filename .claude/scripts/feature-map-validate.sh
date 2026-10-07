@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# materialized-from: mayker-dev v0.3.273; do not edit, regenerate with /upgrade-project
+# materialized-from: mayker-dev v0.3.298; do not edit, regenerate with /upgrade-project
 #
 # Schema validator for a consuming repo's `.claude/feature_map.md` (MDF-044).
 #
