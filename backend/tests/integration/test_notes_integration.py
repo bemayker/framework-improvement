@@ -217,6 +217,65 @@ def test_get_note_by_id_with_out_of_range_integer_returns_404_not_500(
     assert response.json() == {"detail": "Note not found"}
 
 
+def test_count_notes_returns_zero_when_table_is_empty(
+    notes_table: psycopg.Connection,
+):
+    """Edge case: an empty table counts 0."""
+    assert NoteRepository(notes_table).count_notes() == 0
+
+
+def test_count_notes_follows_inserts_and_deletes_against_postgres(
+    notes_table: psycopg.Connection,
+):
+    """Repository count against the real database: 2 after two inserts, 1 after a delete."""
+    repository = NoteRepository(notes_table)
+    first = repository.insert_note("Buy milk")
+    repository.insert_note("Walk dog")
+
+    assert repository.count_notes() == 2
+
+    repository.delete_note(first.id)
+
+    assert repository.count_notes() == 1
+
+
+def test_get_notes_count_returns_zero_when_no_notes_exist(
+    client: TestClient, notes_table: psycopg.Connection
+):
+    """AC1: an empty table answers 200 with exactly {"count": 0}."""
+    response = client.get("/api/notes/count")
+
+    assert response.status_code == 200
+    assert response.json() == {"count": 0}
+
+
+def test_get_notes_count_follows_creates_and_deletes(
+    client: TestClient, notes_table: psycopg.Connection
+):
+    """AC2: two created notes count 2, and deleting one counts 1."""
+    buy_milk = client.post("/api/notes", json={"text": "Buy milk"}).json()
+    client.post("/api/notes", json={"text": "Walk dog"})
+
+    assert client.get("/api/notes/count").json() == {"count": 2}
+    assert client.delete(f"/api/notes/{buy_milk['id']}").status_code == 204
+    assert client.get("/api/notes/count").json() == {"count": 1}
+
+
+def test_get_notes_count_does_not_shadow_get_note_by_id(
+    client: TestClient, notes_table: psycopg.Connection
+):
+    """AC3: `/count` is not captured by `{note_id}` (no 422), and `{note_id}` still works."""
+    created = client.post("/api/notes", json={"text": "Buy milk"}).json()
+
+    count_response = client.get("/api/notes/count")
+    note_response = client.get(f"/api/notes/{created['id']}")
+
+    assert count_response.status_code == 200
+    assert count_response.json() == {"count": 1}
+    assert note_response.status_code == 200
+    assert note_response.json() == {"id": created["id"], "text": "Buy milk"}
+
+
 def test_delete_note_removes_the_note_and_returns_true(
     notes_table: psycopg.Connection,
 ):
