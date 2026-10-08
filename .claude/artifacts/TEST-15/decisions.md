@@ -15,3 +15,17 @@
 - Exact paths verified present; no invented endpoints; route-order claim verified (get_note declared with an unconstrained note_id segment, so the count handler must precede it).
 - Technology Selection present before the manifest: database aggregate, installed Pydantic model, declaration order over an int path convertor; no new dependency.
 - Noted gap, carried rather than blocking: no Manual verification plan section. Phase G step 3 writes the manual script from the Acceptance Test Outline and the built code and names the from-scratch write in its summary.
+
+## 6.4 Build (deliver-20261008T073635Z)
+
+- [merged-since] base=e4772f7 ref=origin/main@e4772f7 commits=0 overlap=0 verdict=clean
+- Phase B 272d90a: unit 94/0, integration 65/0, backend-full 159/0 on real Postgres (TEST-15-db).
+- Phase D skipped: plan carries no [D] entries (no criterion needs the UI).
+- Phase G 6b28fdc: manual UAT script written from scratch from the Acceptance Test Outline and the built code (no Manual verification plan section in the plan).
+- Section 15 documentation check: no change (README.md and docs/DEVELOPMENT.md list no endpoints).
+
+## 6.5 Self-review and refactor gate (deliver-20261008T073635Z)
+
+- Reviewer: VERDICT PASS blocking=0 recommended=1 optional=0. RECOMMENDED: test_note_service_unit.py:38 lost the space after = on the TEST-14 delete_note stub.
+- Refactor gate 76e68ea: 1 improvements applied (6 files examined); suite 159/0.
+- Step 2a: skipped, the refactor gate added no source or test file.
