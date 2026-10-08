@@ -35,7 +35,7 @@ class RecordingRepository:
         return len(self.notes)
 
     def delete_note(self, note_id: int) -> bool:
-        remaining =[note for note in self.notes if note.id != note_id]
+        remaining = [note for note in self.notes if note.id != note_id]
         found = len(remaining) != len(self.notes)
         self.notes = remaining
         return found
