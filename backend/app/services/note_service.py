@@ -23,6 +23,8 @@ class NoteRepositoryProtocol(Protocol):
 
     def get_note(self, note_id: int) -> Note | None: ...
 
+    def count_notes(self) -> int: ...
+
     def delete_note(self, note_id: int) -> bool: ...
 
 
@@ -51,6 +53,15 @@ def get_note(repository: NoteRepositoryProtocol, note_id: int) -> Note | None:
         return repository.get_note(note_id)
     except Exception:
         logger.exception("Reading a note failed (id %d)", note_id)
+        raise
+
+
+def count_notes(repository: NoteRepositoryProtocol) -> int:
+    """Return how many notes are stored."""
+    try:
+        return repository.count_notes()
+    except Exception:
+        logger.exception("Counting notes failed")
         raise
 
 

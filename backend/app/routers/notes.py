@@ -1,5 +1,6 @@
 """Router for the notes endpoints: POST and GET /api/notes (TEST-03) and
-GET /api/notes/{note_id} (TEST-12) and DELETE /api/notes/{note_id} (TEST-14)."""
+GET /api/notes/{note_id} (TEST-12), DELETE /api/notes/{note_id} (TEST-14) and
+GET /api/notes/count (TEST-15)."""
 
 from typing import Annotated
 
@@ -8,7 +9,7 @@ from fastapi import APIRouter, Depends, HTTPException, Response, status
 
 from app.core.db import get_connection
 from app.repositories.note_repository import NoteRepository
-from app.schemas.note import NoteCreate, NoteResponse
+from app.schemas.note import NoteCountResponse, NoteCreate, NoteResponse
 from app.services import note_service
 
 router = APIRouter(prefix="/api", tags=["notes"])
@@ -44,6 +45,14 @@ def list_notes(repository: NoteRepositoryDependency) -> list[NoteResponse]:
     """Return every stored note, ascending by id."""
     notes = note_service.list_notes(repository)
     return [NoteResponse(id=note.id, text=note.text) for note in notes]
+
+
+# Must stay declared before `/notes/{note_id}`: routes match in declaration
+# order and `{note_id}` would capture "count", answering 422 (not an int).
+@router.get("/notes/count", response_model=NoteCountResponse)
+def count_notes(repository: NoteRepositoryDependency) -> NoteCountResponse:
+    """Return how many notes are stored."""
+    return NoteCountResponse(count=note_service.count_notes(repository))
 
 
 @router.get(

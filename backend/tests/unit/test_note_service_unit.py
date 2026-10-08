@@ -31,8 +31,11 @@ class RecordingRepository:
     def get_note(self, note_id: int) -> Note | None:
         return next((note for note in self.notes if note.id == note_id), None)
 
+    def count_notes(self) -> int:
+        return len(self.notes)
+
     def delete_note(self, note_id: int) -> bool:
-        remaining = [note for note in self.notes if note.id != note_id]
+        remaining =[note for note in self.notes if note.id != note_id]
         found = len(remaining) != len(self.notes)
         self.notes = remaining
         return found
@@ -48,6 +51,9 @@ class FailingRepository:
         raise RuntimeError("database unreachable")
 
     def get_note(self, note_id: int) -> Note | None:
+        raise RuntimeError("database unreachable")
+
+    def count_notes(self) -> int:
         raise RuntimeError("database unreachable")
 
     def delete_note(self, note_id: int) -> bool:
@@ -123,6 +129,27 @@ def test_get_note_propagates_repository_failure_and_logs_it(caplog):
             note_service.get_note(FailingRepository(), 7)
 
     assert "Reading a note failed (id 7)" in caplog.text
+
+
+def test_count_notes_returns_the_number_of_stored_notes():
+    """Happy path: the repository's count is passed through untouched."""
+    stored = [Note(id=1, text="Buy milk"), Note(id=2, text="Walk dog")]
+
+    assert note_service.count_notes(RecordingRepository(stored)) == 2
+
+
+def test_count_notes_returns_zero_when_none_exist():
+    """Edge case: an empty table counts 0, never None."""
+    assert note_service.count_notes(RecordingRepository()) == 0
+
+
+def test_count_notes_propagates_repository_failure_and_logs_it(caplog):
+    """Error case: a count failure is logged with context and re-raised."""
+    with caplog.at_level(logging.ERROR, logger=note_service.__name__):
+        with pytest.raises(RuntimeError, match="database unreachable"):
+            note_service.count_notes(FailingRepository())
+
+    assert "Counting notes failed" in caplog.text
 
 
 def test_delete_note_returns_true_and_removes_the_note():

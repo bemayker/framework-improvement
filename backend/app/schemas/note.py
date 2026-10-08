@@ -31,3 +31,9 @@ class NoteResponse(BaseModel):
 
     id: int
     text: str
+
+
+class NoteCountResponse(BaseModel):
+    """Response body for GET /api/notes/count."""
+
+    count: int
