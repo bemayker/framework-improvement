@@ -179,6 +179,14 @@
       "id_carrier": "none",
       "url": "https://app.clickup.com/t/123k99cxe9a",
       "registered_at": "2026-10-07T22:04:35Z"
+    },
+    "TEST-15": {
+      "external_id": "123k99cxenj",
+      "external_identifier": "",
+      "id_source": "framework",
+      "id_carrier": "title_prefix",
+      "url": "https://app.clickup.com/t/123k99cxenj",
+      "registered_at": "2026-10-08T07:40:11Z"
     }
   },
   "discovery": {
