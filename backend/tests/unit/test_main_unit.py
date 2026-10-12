@@ -67,6 +67,15 @@ def test_create_app_registers_echo_route():
     assert "/api/echo" in custom_paths
 
 
+def test_create_app_registers_uptime_route():
+    """Edge case: the app registers the TEST-07 uptime route."""
+    app = create_app()
+
+    custom_paths = _collect_route_paths(app.routes) - BUILT_IN_ROUTE_PATHS
+
+    assert "/api/uptime" in custom_paths
+
+
 def test_create_app_returns_independent_instances():
     """Error/robustness case: repeated calls do not share mutable state.
 
