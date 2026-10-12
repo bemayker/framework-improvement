@@ -1,0 +1,6 @@
+# Decisions (TEST-11, after its final push): deliver-20261012T095729Z
+
+The entries `.claude/artifacts/TEST-11/decisions.md` received after the last push of its branch (2b092ea), the head its pull request merged. The entries before them reached the default branch in that file.
+
+- 2026-10-12 [TEST-11] Post-merge: PR #111 merged as 3ad498f. Auto-Done: run 38234363663 succeeded; tracker twin 123k99cx1mn reads complete, no backstop flip. Standards provenance: reviewer 6.5 read 3, orchestrator 6.9 read 3; both always-on standards self-reported as read by 1 of 2 dispatches (self-reported, information only).
+- 2026-10-12 [TEST-11] Checkpoint (due, test_checkpoint): could not run. Backend half of the suite passed on merged main (133 passed, 34 skipped); the frontend half exited 127 (`vitest: command not found`, the primary checkout has no frontend node_modules). Verdict unknown, treated as fail for admission per 6.10 step 3: no newly ready item is admitted for the rest of the run; in-flight FEAT-2 runs to completion. Remedy for a human: install frontend dependencies in the primary checkout (`npm ci --prefix frontend`) and re-run `bash ~/.mayker/mayker-dev/hooks/lib/checkpoint-suite.sh --merged TEST-11`.
