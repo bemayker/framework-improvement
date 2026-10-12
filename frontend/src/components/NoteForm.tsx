@@ -53,12 +53,6 @@ const buttonStyle: CSSProperties = {
   cursor: "pointer",
 };
 
-const buttonSavingStyle: CSSProperties = {
-  ...buttonStyle,
-  cursor: "not-allowed",
-  opacity: 0.6,
-};
-
 const errorStyle: CSSProperties = {
   fontSize: "0.875rem",
   color: "#b3261e",
@@ -73,17 +67,9 @@ type NoteFormProps = {
 function NoteForm({ onCreated }: NoteFormProps) {
   const [text, setText] = useState("");
   const [error, setError] = useState<string | null>(null);
-  const [isSaving, setIsSaving] = useState(false);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-
-    // A repeat submit while the first request is still pending must not send a
-    // second request; the disabled button covers clicks and Enter, this covers
-    // any submit event that still reaches the handler.
-    if (isSaving) {
-      return;
-    }
 
     // A whitespace-only note counts as empty, and is rejected here so no
     // request is sent at all.
@@ -93,7 +79,6 @@ function NoteForm({ onCreated }: NoteFormProps) {
       return;
     }
 
-    setIsSaving(true);
     try {
       const savedNote = await createNote(trimmedText);
       setError(null);
@@ -101,8 +86,6 @@ function NoteForm({ onCreated }: NoteFormProps) {
       onCreated(savedNote);
     } catch {
       setError(SAVE_FAILED_MESSAGE);
-    } finally {
-      setIsSaving(false);
     }
   }
 
@@ -122,12 +105,7 @@ function NoteForm({ onCreated }: NoteFormProps) {
           style={inputStyle}
           onChange={(event) => setText(event.target.value)}
         />
-        <button
-          data-testid="note-submit"
-          type="submit"
-          disabled={isSaving}
-          style={isSaving ? buttonSavingStyle : buttonStyle}
-        >
+        <button data-testid="note-submit" type="submit" style={buttonStyle}>
           {SUBMIT_LABEL}
         </button>
       </div>
