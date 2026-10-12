@@ -37,9 +37,3 @@ class NoteCountResponse(BaseModel):
     """Response body for GET /api/notes/count."""
 
     count: int
-
-
-class NoteTotalLengthResponse(BaseModel):
-    """Response body for GET /api/notes/total-length."""
-
-    total_length: int
