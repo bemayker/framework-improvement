@@ -25,8 +25,6 @@ class NoteRepositoryProtocol(Protocol):
 
     def count_notes(self) -> int: ...
 
-    def longest_note_length(self) -> int: ...
-
     def delete_note(self, note_id: int) -> bool: ...
 
 
@@ -64,15 +62,6 @@ def count_notes(repository: NoteRepositoryProtocol) -> int:
         return repository.count_notes()
     except Exception:
         logger.exception("Counting notes failed")
-        raise
-
-
-def longest_note_length(repository: NoteRepositoryProtocol) -> int:
-    """Return the character length of the longest stored note (0 when none exist)."""
-    try:
-        return repository.longest_note_length()
-    except Exception:
-        logger.exception("Reading the longest note length failed")
         raise
 
 

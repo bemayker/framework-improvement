@@ -37,9 +37,3 @@ class NoteCountResponse(BaseModel):
     """Response body for GET /api/notes/count."""
 
     count: int
-
-
-class NoteLongestLengthResponse(BaseModel):
-    """Response body for GET /api/notes/longest-length."""
-
-    max_length: int
