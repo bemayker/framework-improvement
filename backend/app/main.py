@@ -4,9 +4,7 @@ TEST-01 (the scaffold feature) instantiates the app with no feature routes.
 Later features register their routers here without restructuring this factory:
 TEST-05 registers the version router, TEST-03 the notes router plus the
 startup schema initialisation and the CORS middleware the browser needs, and
-TEST-02 the health router, TEST-06 the echo router, TEST-07 the uptime
-router plus the startup capture of the process start moment, FEAT-1 the server
-time router, TEST-13 the ping router.
+TEST-02 the health router.
 """
 
 import logging
@@ -18,14 +16,9 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.core.config import get_settings
 from app.core.db import ensure_schema
-from app.routers.echo import router as echo_router
 from app.routers.health import router as health_router
 from app.routers.notes import router as notes_router
-from app.routers.ping import router as ping_router
-from app.routers.server_time import router as server_time_router
-from app.routers.uptime import router as uptime_router
 from app.routers.version import router as version_router
-from app.services import uptime_service
 
 logger = logging.getLogger(__name__)
 
@@ -37,11 +30,7 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     Skipped with a warning when DATABASE_URL is unset: the version endpoint
     needs no database and must still answer, so startup never hard-requires
     one (the notes endpoints then fail loudly per request instead).
-
-    First, it records the process start moment once for the uptime endpoint
-    (TEST-07), independent of the database.
     """
-    app.state.process_start = uptime_service.capture_process_start()
     settings = get_settings()
     if settings.database_url is None:
         logger.warning(
@@ -65,10 +54,6 @@ def create_app() -> FastAPI:
     app.include_router(version_router)
     app.include_router(notes_router)
     app.include_router(health_router)
-    app.include_router(echo_router)
-    app.include_router(uptime_router)
-    app.include_router(server_time_router)
-    app.include_router(ping_router)
     return app
 
 
