@@ -175,7 +175,9 @@ its API marks the story Done early. The merge order above is what prevents it.
 | CHORE-03 | TEST-10 follow-up: known-improvements | [TEST-10] | feature/CHORE-03-test-10-follow-up | | | ✅ | 5 | |
 | TEST-12 | Read one note by id | [TEST-03] | feature/TEST-12-read-note-by-id | | | | 3 | |
 | TEST-13 | Ping endpoint | [TEST-01] | feature/TEST-13-ping-endpoint | | | ✅ | 2 | |
-| TEST-14 | Delete a note by id | [TEST-12] | feature/TEST-14-delete-note-by-id | | | ✅ | 4 | |
-| CHORE-04 | TEST-14 follow-up: known-improvements | [TEST-14] | feature/CHORE-04-test-14-follow-up | | | ✅ | 5 | |
+| TEST-14 | Delete a note by id | [TEST-12] | feature/TEST-14-delete-note-by-id | | ⚠️ TEST-14 and FEAT-2 both edit backend/app/routers/notes.py, note_service.py, note_repository.py and test_notes_integration.py; serialize if run concurrently | ✅ | 4 | |
+| CHORE-04 | TEST-14 follow-up: known-improvements | [TEST-14] | feature/CHORE-04-test-14-follow-up | | ⚠️ CHORE-04, TEST-15 and FEAT-2 all edit backend/app/repositories/note_repository.py; serialize if run concurrently | ✅ | 5 | |
+| TEST-15 | Count notes | [TEST-14] | feature/TEST-15-count-notes | | ⚠️ TEST-15 and CHORE-04 both edit backend/app/repositories/note_repository.py; TEST-15 and FEAT-2 both add a static GET in backend/app/routers/notes.py before /notes/{note_id}; serialize if run concurrently | ➖ | 5 | |
+| FEAT-2 | Notes total length endpoint | [TEST-12] | feature/FEAT-2-notes-total-length-endpoint | | ⚠️ FEAT-2, TEST-14, CHORE-04 and TEST-15 all edit backend/app/routers/notes.py, services/note_service.py and repositories/note_repository.py (all three complete); FEAT-2 adds a static GET under /api/notes that must be declared before /notes/{note_id}, like TEST-15's /notes/count. Disjoint from TEST-11 (echo only) | ✅ | 4 | |
 
 Scaffold gate: TEST-01 (`scaffold: true` in its frontmatter) is **done**, so the gate passes. TEST-01 through TEST-07 and FEAT-1 are done; TEST-08, TEST-09 and BUG-01 are ready (TEST-09 registers a router in `backend/app/main.py`, BUG-01 edits only `server_time.py`, TEST-08 is frontend only); TEST-10 waits on TEST-08 and TEST-09.
