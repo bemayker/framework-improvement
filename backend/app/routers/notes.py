@@ -1,6 +1,6 @@
-"""Router for the notes endpoints: POST and GET /api/notes (TEST-03) and
-GET /api/notes/{note_id} (TEST-12), DELETE /api/notes/{note_id} (TEST-14) and
-GET /api/notes/count (TEST-15)."""
+"""Router for the notes endpoints: POST and GET /api/notes (TEST-03),
+GET /api/notes/{note_id} (TEST-12), DELETE /api/notes/{note_id} (TEST-14),
+GET /api/notes/count (TEST-15) and GET /api/notes/longest-length (FEAT-3)."""
 
 from typing import Annotated
 
@@ -9,7 +9,12 @@ from fastapi import APIRouter, Depends, HTTPException, Response, status
 
 from app.core.db import get_connection
 from app.repositories.note_repository import NoteRepository
-from app.schemas.note import NoteCountResponse, NoteCreate, NoteResponse
+from app.schemas.note import (
+    NoteCountResponse,
+    NoteCreate,
+    NoteLongestLengthResponse,
+    NoteResponse,
+)
 from app.services import note_service
 
 router = APIRouter(prefix="/api", tags=["notes"])
@@ -53,6 +58,18 @@ def list_notes(repository: NoteRepositoryDependency) -> list[NoteResponse]:
 def count_notes(repository: NoteRepositoryDependency) -> NoteCountResponse:
     """Return how many notes are stored."""
     return NoteCountResponse(count=note_service.count_notes(repository))
+
+
+# Must stay declared before `/notes/{note_id}`: routes match in declaration
+# order and `{note_id}` would capture "longest-length", answering 422 (not an int).
+@router.get("/notes/longest-length", response_model=NoteLongestLengthResponse)
+def longest_note_length(
+    repository: NoteRepositoryDependency,
+) -> NoteLongestLengthResponse:
+    """Return the character length of the longest stored note, 0 when none exist."""
+    return NoteLongestLengthResponse(
+        max_length=note_service.longest_note_length(repository)
+    )
 
 
 @router.get(

@@ -1,9 +1,10 @@
 """Data access for notes (TEST-03).
 
 Raw parameterized SQL via psycopg: one table with an insert, two selects (list
-and get by id), a count and a delete needs neither an ORM nor a query builder. The
-connection is supplied by the caller (the `get_connection` dependency in
-app/core/db.py), so the repository owns no transaction boundary of its own.
+and get by id), a count, a longest-text-length aggregate and a delete needs
+neither an ORM nor a query builder. The connection is supplied by the caller
+(the `get_connection` dependency in app/core/db.py), so the repository owns no
+transaction boundary of its own.
 """
 
 import psycopg
@@ -14,6 +15,8 @@ INSERT_NOTE_SQL = "INSERT INTO notes (text) VALUES (%s) RETURNING id, text"
 LIST_NOTES_SQL = "SELECT id, text FROM notes ORDER BY id"
 GET_NOTE_SQL = "SELECT id, text FROM notes WHERE id = %s"
 COUNT_NOTES_SQL = "SELECT COUNT(*) FROM notes"
+# MAX over an empty table is NULL, so the COALESCE is what makes an empty table 0.
+LONGEST_NOTE_LENGTH_SQL = "SELECT COALESCE(MAX(char_length(text)), 0) FROM notes"
 DELETE_NOTE_SQL = "DELETE FROM notes WHERE id = %s"
 
 
@@ -48,6 +51,13 @@ class NoteRepository:
         """Return how many notes are stored (0 on an empty table)."""
         with self._connection.cursor() as cursor:
             cursor.execute(COUNT_NOTES_SQL)
+            row = cursor.fetchone()
+        return row[0]
+
+    def longest_note_length(self) -> int:
+        """Return the character length of the longest stored note (0 on an empty table)."""
+        with self._connection.cursor() as cursor:
+            cursor.execute(LONGEST_NOTE_LENGTH_SQL)
             row = cursor.fetchone()
         return row[0]
 
