@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# materialized-from: mayker-dev v0.3.298; do not edit, regenerate with /upgrade-project
+# materialized-from: mayker-dev v0.3.309; do not edit, regenerate with /upgrade-project
 #
 # Additive reconciler for a consuming repo's `.claude/settings.json` permissions
 # block (MDF-178).
@@ -73,6 +73,8 @@
 # grant nobody audits. It is strictly ADD-ONLY and never retires: a program
 # merely absent from `CLAUDE.md` is indistinguishable from a grant an operator
 # added, which is the same asymmetry that forces the retire list above.
+#
+# THE PROVIDER SLICE (MDF-372): `Git Provider:` keys add-only `PROVIDER_GRANTS`.
 #
 # Exit codes:
 #   0  nothing to do — the block already carries every shipped entry and none of
@@ -392,6 +394,32 @@ TRACKER_SERVERS = {"clickup": "clickup"}
 PROVIDER_VALUE = re.compile(r"^[a-z][a-z0-9-]*$")
 
 # =============================================================================
+# THE PROVIDER SLICE (MDF-372) — the CLI grants a Git provider's rows need.
+#
+# PROVIDER_GRANTS maps a `Git Provider:` value to the `Bash(...)` grants the
+# session-run rows of `rules/adapters/git/<value>.md` need beyond the baseline.
+# `github` has no key: its rows run `gh`, which the baseline ships. `azure-devops`
+# runs `az` as a raw Bash call in every row (`probe-path` first), and the
+# baseline grants no `az`, so an unattended `/deliver` stopped at `probe-path`
+# with the permission layer refusing `az repos show` (MDF-372, devops-testing,
+# 2026-10-12: two denials, nothing delivered).
+#
+# WHY HERE AND NOT IN `templates/settings.json`: the baseline reaches every
+# project, and a GitHub project would carry an `az` grant it never uses (CHARTER
+# H7, `REPO-43`). WHY SUBCOMMANDS AND NOT `Bash(az:*)`: `az` is the whole Azure
+# CLI, so a bare program grant would also allow `az group delete` or `az vm
+# delete` on whatever subscription the session's login reaches; the four
+# prefixes are exactly the commands the mapping rows run. `azure-boards` has no
+# key either: every session-run tracker row goes through `azure-boards.sh`,
+# which `Bash(bash:*)` already grants, and an `az` call inside a script is not a
+# Bash tool call. `tests/settings-permissions-reconcile.test.sh` derives this
+# line (a single literal dict) and checks it both ways against the mapping file:
+# every `az` command a row names is matched by a grant, and every grant matches
+# one. ADD-ONLY: a project that leaves the provider keeps the grants, because a
+# grant merely not derived is indistinguishable from an operator's.
+PROVIDER_GRANTS = {"azure-devops": ("Bash(az extension show:*)", "Bash(az repos:*)", "Bash(az devops invoke:*)", "Bash(az pipelines:*)")}
+
+# =============================================================================
 # THE INERT-FORM ADVISORY (MDF-185) — the one thing this script reports on
 # entries it does not WRITE.
 #
@@ -591,8 +619,8 @@ def declared_programs(path):
 declared = declared_programs(cmd_src_path)
 
 
-def configured_tracker(path):
-    """The `Issue Tracker Provider:` value, or None when unknowable."""
+def configured_provider(path, label):
+    """The `<label>:` value in CLAUDE.md, or None when unknowable."""
     if not path:
         return None
     try:
@@ -601,7 +629,7 @@ def configured_tracker(path):
     except (OSError, UnicodeDecodeError):
         return None
     m = re.search(
-        r"^\s*[-*]?\s*\**Issue Tracker Provider:?\**\s*:?\s*(.*)$", text, re.MULTILINE
+        r"^\s*[-*]?\s*\**%s:?\**\s*:?\s*(.*)$" % re.escape(label), text, re.MULTILINE
     )
     if not m:
         return None
@@ -611,8 +639,11 @@ def configured_tracker(path):
 
 # `None` means the tracker slice does not run: `.mcp.json` exists (it owns the
 # slice, or leaves it alone when unparseable), or no provider is configured.
-tracker = None if mcp_present else configured_tracker(cmd_src_path)
+tracker = None if mcp_present else configured_provider(cmd_src_path, "Issue Tracker Provider")
 tracker_server = TRACKER_SERVERS.get(tracker) if tracker else None
+
+# The provider slice runs whatever `.mcp.json` says: it grants a CLI, not a server.
+git_provider = configured_provider(cmd_src_path, "Git Provider")
 
 # --- Build the pass -----------------------------------------------------------
 report = []
@@ -758,6 +789,21 @@ for lst in ENTRY_LISTS:
             report.append(
                 "add    permissions.allow: %s (declared in CLAUDE.md -> %s:)"
                 % (entry, declared[prog])
+            )
+            kept.append(entry)
+            changed = True
+
+    # 5. The provider grants (MDF-372), allow only and ADD-ONLY. A block that
+    #    already grants the whole program (`Bash(az:*)`, an operator's own) needs
+    #    none of its narrower prefixes.
+    if lst == "allow" and git_provider is not None:
+        for entry in PROVIDER_GRANTS.get(git_provider, ()):
+            whole = "Bash(%s:*)" % entry[len("Bash("):].split()[0]
+            if entry in kept or whole in kept:
+                continue
+            report.append(
+                "add    permissions.allow: %s (Git Provider is %s in CLAUDE.md)"
+                % (entry, git_provider)
             )
             kept.append(entry)
             changed = True
