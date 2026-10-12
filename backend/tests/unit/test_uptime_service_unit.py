@@ -33,7 +33,7 @@ def test_capture_process_start_returns_utc_aware_timestamp_and_monotonic_reading
     assert before <= start.started_at <= after
 
 
-def test_capture_process_start_reads_each_clock_once(monkeypatch):
+def test_capture_process_start_reads_the_monotonic_clock_once(monkeypatch):
     """Edge case: one monotonic reading per capture, so the value is taken once."""
     readings = iter([1.0])
     calls = []
