@@ -34,7 +34,7 @@ Feature: FEAT-3 Notes longest body length endpoint
     And the error detail names the path parameter "note_id"
 
   Scenario: AC3 The backend test suite passes with the new tests included
-    When I run "uv run --directory backend pytest tests/unit/test_note_service_unit.py tests/integration/test_notes_integration.py -q" with a reachable PostgreSQL
+    When I run "uv run --directory backend pytest -q" with a reachable PostgreSQL
     Then pytest reports 0 failed
 
   Scenario: Edge case, length counts characters and not bytes

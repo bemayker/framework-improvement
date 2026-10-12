@@ -1,5 +1,5 @@
-"""Router for the notes endpoints: POST and GET /api/notes (TEST-03) and
-GET /api/notes/{note_id} (TEST-12), DELETE /api/notes/{note_id} (TEST-14) and
+"""Router for the notes endpoints: POST and GET /api/notes (TEST-03),
+GET /api/notes/{note_id} (TEST-12), DELETE /api/notes/{note_id} (TEST-14),
 GET /api/notes/count (TEST-15) and GET /api/notes/longest-length (FEAT-3)."""
 
 from typing import Annotated
