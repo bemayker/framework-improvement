@@ -276,6 +276,76 @@ def test_get_notes_count_does_not_shadow_get_note_by_id(
     assert note_response.json() == {"id": created["id"], "text": "Buy milk"}
 
 
+def test_longest_note_length_returns_zero_when_table_is_empty(
+    notes_table: psycopg.Connection,
+):
+    """Edge case: MAX over no rows is NULL in SQL, the repository still answers 0."""
+    assert NoteRepository(notes_table).longest_note_length() == 0
+
+
+def test_longest_note_length_returns_the_longest_text_length(
+    notes_table: psycopg.Connection,
+):
+    """Repository aggregate against the real database: "ab" and "cde" give 3."""
+    repository = NoteRepository(notes_table)
+    repository.insert_note("ab")
+    repository.insert_note("cde")
+
+    assert repository.longest_note_length() == 3
+
+
+def test_longest_note_length_counts_characters_not_bytes(
+    notes_table: psycopg.Connection,
+):
+    """Edge case (plan assumption 2): "éé" is 2 characters (4 bytes), "abc" is 3."""
+    repository = NoteRepository(notes_table)
+    repository.insert_note("éé")
+    repository.insert_note("abc")
+
+    assert repository.longest_note_length() == 3
+
+
+def test_get_notes_longest_length_returns_zero_when_no_notes_exist(
+    client: TestClient, notes_table: psycopg.Connection
+):
+    """AC1: an empty table answers 200 with exactly {"max_length": 0}."""
+    response = client.get("/api/notes/longest-length")
+
+    assert response.status_code == 200
+    assert response.json() == {"max_length": 0}
+
+
+def test_get_notes_longest_length_returns_the_longest_body_length(
+    client: TestClient, notes_table: psycopg.Connection
+):
+    """AC2: after creating "ab" and "cde" the longest body is 3 characters."""
+    client.post("/api/notes", json={"text": "ab"})
+    client.post("/api/notes", json={"text": "cde"})
+
+    response = client.get("/api/notes/longest-length")
+
+    assert response.status_code == 200
+    assert response.json() == {"max_length": 3}
+
+
+def test_get_notes_longest_length_does_not_shadow_get_note_by_id(
+    client: TestClient, notes_table: psycopg.Connection
+):
+    """AC3: `/longest-length` is not captured by `{note_id}` (no 422), and `{note_id}` still works."""
+    created = client.post("/api/notes", json={"text": "Buy milk"}).json()
+
+    longest_response = client.get("/api/notes/longest-length")
+    note_response = client.get(f"/api/notes/{created['id']}")
+    bad_id_response = client.get("/api/notes/abc")
+
+    assert longest_response.status_code == 200
+    assert longest_response.json() == {"max_length": 8}
+    assert note_response.status_code == 200
+    assert note_response.json() == {"id": created["id"], "text": "Buy milk"}
+    assert bad_id_response.status_code == 422
+    assert bad_id_response.json()["detail"][0]["loc"] == ["path", "note_id"]
+
+
 def test_delete_note_removes_the_note_and_returns_true(
     notes_table: psycopg.Connection,
 ):

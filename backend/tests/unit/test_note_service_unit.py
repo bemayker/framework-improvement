@@ -34,6 +34,9 @@ class RecordingRepository:
     def count_notes(self) -> int:
         return len(self.notes)
 
+    def longest_note_length(self) -> int:
+        return max((len(note.text) for note in self.notes), default=0)
+
     def delete_note(self, note_id: int) -> bool:
         remaining = [note for note in self.notes if note.id != note_id]
         found = len(remaining) != len(self.notes)
@@ -54,6 +57,9 @@ class FailingRepository:
         raise RuntimeError("database unreachable")
 
     def count_notes(self) -> int:
+        raise RuntimeError("database unreachable")
+
+    def longest_note_length(self) -> int:
         raise RuntimeError("database unreachable")
 
     def delete_note(self, note_id: int) -> bool:
@@ -150,6 +156,27 @@ def test_count_notes_propagates_repository_failure_and_logs_it(caplog):
             note_service.count_notes(FailingRepository())
 
     assert "Counting notes failed" in caplog.text
+
+
+def test_longest_note_length_returns_the_longest_stored_text_length():
+    """Happy path: the longest of "ab" and "cde" is 3."""
+    stored = [Note(id=1, text="ab"), Note(id=2, text="cde")]
+
+    assert note_service.longest_note_length(RecordingRepository(stored)) == 3
+
+
+def test_longest_note_length_returns_zero_when_none_exist():
+    """Edge case: an empty table yields 0, never None."""
+    assert note_service.longest_note_length(RecordingRepository()) == 0
+
+
+def test_longest_note_length_propagates_repository_failure_and_logs_it(caplog):
+    """Error case: a read failure is logged with context and re-raised."""
+    with caplog.at_level(logging.ERROR, logger=note_service.__name__):
+        with pytest.raises(RuntimeError, match="database unreachable"):
+            note_service.longest_note_length(FailingRepository())
+
+    assert "Reading the longest note length failed" in caplog.text
 
 
 def test_delete_note_returns_true_and_removes_the_note():
