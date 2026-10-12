@@ -187,6 +187,14 @@
       "id_carrier": "title_prefix",
       "url": "https://app.clickup.com/t/123k99cxenj",
       "registered_at": "2026-10-08T07:40:11Z"
+    },
+    "FEAT-2": {
+      "external_id": "123k99cxqhp",
+      "external_identifier": "",
+      "id_source": "framework",
+      "id_carrier": "none",
+      "url": "https://app.clickup.com/t/123k99cxqhp",
+      "registered_at": "2026-10-12T10:03:10Z"
     }
   },
   "discovery": {
