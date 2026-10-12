@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# materialized-from: mayker-dev v0.3.298; do not edit, regenerate with /upgrade-project
+# materialized-from: mayker-dev v0.3.309; do not edit, regenerate with /upgrade-project
 #
 # Schema validator for a consuming repo's `.claude/feature_map.md` (MDF-044).
 #
@@ -46,8 +46,9 @@
 # worse than no check at all — the vendored copy's whole point is that a stale or
 # half-vendored pair must go red, not quiet (MDF-047).
 #
-# Callers, WRITE side: `/sync-project` Section 4 and `/deliver` Section 2 step 6 +
-# Section 3 step 3 run it on the file they just wrote and refuse to proceed on
+# Callers, WRITE side: `hooks/lib/feature-map-write.sh` runs it on every result
+# before that result replaces the map; `/sync-project` Section 4 and `/deliver`
+# Section 2 step 6 + Section 3 step 3 run it on the file they just wrote and refuse to proceed on
 # non-zero; `hooks/feature-map-guard.sh` runs it advisorily after any write to the
 # file; the vendored copy runs in the consuming repo's `pr-tests.yml` `feature-map`
 # job.
