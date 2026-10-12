@@ -203,6 +203,14 @@
       "id_carrier": "none",
       "url": "https://app.clickup.com/t/123k99cxqtv",
       "registered_at": "2026-10-12T10:21:35Z"
+    },
+    "FEAT-3": {
+      "external_id": "123k99cxrch",
+      "external_identifier": "",
+      "id_source": "framework",
+      "id_carrier": "none",
+      "url": "https://app.clickup.com/t/123k99cxrch",
+      "registered_at": "2026-10-12T13:16:52Z"
     }
   },
   "discovery": {
