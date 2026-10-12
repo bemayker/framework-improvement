@@ -1,0 +1,10 @@
+# Decisions (FEAT-3, after its final push): deliver-20261012T131322Z
+
+The entries `.claude/artifacts/FEAT-3/decisions.md` received after the last push of its branch (eba1b2a), the head its pull request merged. The entries before them reached the default branch in that file.
+
+- [run deliver-20261012T131322Z] 6.7: CI green 7/7 on eba1b2a at poll 3 (3m16s). Handover rebuild status=rebuilt sha=eba1b2a health=pass project=framework-improvement-feat-3-handover. PR converted out of draft, item in_review.
+- [run deliver-20261012T131322Z] 6.8: 0 PR comments, 0 reviews, tracker comments 1 (the framework own PR link), none actionable.
+- [run deliver-20261012T131322Z] 6.9 merge verdict (orchestrator): merge PR 136 at eba1b2a, squash. autonomy.md Section 5 conditions 1 to 5 all hold. The first merge call failed with a transient GitHub GraphQL error; one identical retry merged it as d4a5638.
+- [run deliver-20261012T131322Z] 6.10 auto-done: run 38256306608 succeeded (verdict=succeeded, sha eba1b2a). ClickUp item read back as complete.
+- [run deliver-20261012T131322Z] 6.10 standards provenance: 7 dispatches; both always-on standards SELF-REPORTED as read by 4 of 7 (information only, no pass bar); 0 unbacked provenance claims; 4 of 7 not assessed (no artifact or claim).
+- [run deliver-20261012T131322Z] 6.10 test checkpoint (FEAT-3 flagged, due): COULD NOT RUN. Cause 1: the primary checkout could not fast-forward to the merge (d4a5638) because two untracked, byte-identical copies of FEAT-3 plan.md and shared_risks.md (written there by the planner) block the pull; removing them with rm was refused: UNAVAILABLE (refused: "Claude requested permissions to edit .claude/artifacts/FEAT-3/plan.md which is a sensitive file."), so no workaround was used (workflow_triggers.md 5.9). Cause 2: checkpoint-suite.sh then ran against the stale primary checkout (b1deb5c, pytest 133 passed 34 skipped) and exited 2 because vitest is not installed there (npm --prefix frontend test: vitest not found, exit 127). Treated as fail for admission per 6.10 step 3: nothing further is admitted. FEAT-3 was the only graph node, so no item was held back.
