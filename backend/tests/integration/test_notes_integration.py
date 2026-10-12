@@ -276,6 +276,74 @@ def test_get_notes_count_does_not_shadow_get_note_by_id(
     assert note_response.json() == {"id": created["id"], "text": "Buy milk"}
 
 
+def test_total_length_returns_zero_when_table_is_empty(
+    notes_table: psycopg.Connection,
+):
+    """Edge case: an empty table sums to 0, not NULL."""
+    assert NoteRepository(notes_table).total_length() == 0
+
+
+def test_total_length_follows_inserts_and_deletes_against_postgres(
+    notes_table: psycopg.Connection,
+):
+    """Repository sum against the real database: 5 after "ab" + "cde", 2 after deleting "cde"."""
+    repository = NoteRepository(notes_table)
+    repository.insert_note("ab")
+    second = repository.insert_note("cde")
+
+    assert repository.total_length() == 5
+
+    repository.delete_note(second.id)
+
+    assert repository.total_length() == 2
+
+
+def test_total_length_counts_characters_not_bytes(notes_table: psycopg.Connection):
+    """Edge case: an accented character is one character (octet_length would give 5)."""
+    repository = NoteRepository(notes_table)
+    repository.insert_note("café")
+
+    assert repository.total_length() == 4
+
+
+def test_get_notes_total_length_returns_zero_when_no_notes_exist(
+    client: TestClient, notes_table: psycopg.Connection
+):
+    """AC1: an empty table answers 200 with exactly {"total_length": 0}."""
+    response = client.get("/api/notes/total-length")
+
+    assert response.status_code == 200
+    assert response.json() == {"total_length": 0}
+
+
+def test_get_notes_total_length_sums_the_created_notes(
+    client: TestClient, notes_table: psycopg.Connection
+):
+    """AC2: notes "ab" and "cde" answer 200 with exactly {"total_length": 5}."""
+    client.post("/api/notes", json={"text": "ab"})
+    client.post("/api/notes", json={"text": "cde"})
+
+    response = client.get("/api/notes/total-length")
+
+    assert response.status_code == 200
+    assert response.json() == {"total_length": 5}
+
+
+def test_get_notes_total_length_does_not_shadow_get_note_by_id(
+    client: TestClient, notes_table: psycopg.Connection
+):
+    """AC3: `/total-length` is not captured by `{note_id}` (no 422), and `{note_id}` still works."""
+    created = client.post("/api/notes", json={"text": "Buy milk"}).json()
+
+    total_response = client.get("/api/notes/total-length")
+    note_response = client.get(f"/api/notes/{created['id']}")
+
+    assert total_response.status_code == 200
+    assert total_response.json() == {"total_length": 8}
+    assert note_response.status_code == 200
+    assert note_response.json() == {"id": created["id"], "text": "Buy milk"}
+
+
 def test_delete_note_removes_the_note_and_returns_true(
     notes_table: psycopg.Connection,
 ):
