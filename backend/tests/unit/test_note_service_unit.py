@@ -34,6 +34,9 @@ class RecordingRepository:
     def count_notes(self) -> int:
         return len(self.notes)
 
+    def total_length(self) -> int:
+        return sum(len(note.text) for note in self.notes)
+
     def delete_note(self, note_id: int) -> bool:
         remaining = [note for note in self.notes if note.id != note_id]
         found = len(remaining) != len(self.notes)
@@ -54,6 +57,9 @@ class FailingRepository:
         raise RuntimeError("database unreachable")
 
     def count_notes(self) -> int:
+        raise RuntimeError("database unreachable")
+
+    def total_length(self) -> int:
         raise RuntimeError("database unreachable")
 
     def delete_note(self, note_id: int) -> bool:
@@ -150,6 +156,30 @@ def test_count_notes_propagates_repository_failure_and_logs_it(caplog):
             note_service.count_notes(FailingRepository())
 
     assert "Counting notes failed" in caplog.text
+
+
+def test_total_length_returns_the_summed_length_of_stored_notes():
+    """Happy path: "ab" and "cde" sum to 5."""
+    stored = [Note(id=1, text="ab"), Note(id=2, text="cde")]
+
+    assert note_service.total_length(RecordingRepository(stored)) == 5
+
+
+def test_total_length_returns_zero_when_none_exist():
+    """Edge case: an empty store sums to 0, an int and never None."""
+    result = note_service.total_length(RecordingRepository())
+
+    assert result == 0
+    assert isinstance(result, int)
+
+
+def test_total_length_propagates_repository_failure_and_logs_it(caplog):
+    """Error case: a sum failure is logged with context and re-raised."""
+    with caplog.at_level(logging.ERROR, logger=note_service.__name__):
+        with pytest.raises(RuntimeError, match="database unreachable"):
+            note_service.total_length(FailingRepository())
+
+    assert "Summing note lengths failed" in caplog.text
 
 
 def test_delete_note_returns_true_and_removes_the_note():

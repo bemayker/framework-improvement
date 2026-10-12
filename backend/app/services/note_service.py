@@ -25,6 +25,8 @@ class NoteRepositoryProtocol(Protocol):
 
     def count_notes(self) -> int: ...
 
+    def total_length(self) -> int: ...
+
     def delete_note(self, note_id: int) -> bool: ...
 
 
@@ -62,6 +64,15 @@ def count_notes(repository: NoteRepositoryProtocol) -> int:
         return repository.count_notes()
     except Exception:
         logger.exception("Counting notes failed")
+        raise
+
+
+def total_length(repository: NoteRepositoryProtocol) -> int:
+    """Return the summed character length of every stored note's text."""
+    try:
+        return repository.total_length()
+    except Exception:
+        logger.exception("Summing note lengths failed")
         raise
 
 
