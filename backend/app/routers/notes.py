@@ -1,6 +1,6 @@
 """Router for the notes endpoints: POST and GET /api/notes (TEST-03) and
 GET /api/notes/{note_id} (TEST-12), DELETE /api/notes/{note_id} (TEST-14) and
-GET /api/notes/count (TEST-15) and GET /api/notes/total-length (FEAT-2)."""
+GET /api/notes/count (TEST-15)."""
 
 from typing import Annotated
 
@@ -9,12 +9,7 @@ from fastapi import APIRouter, Depends, HTTPException, Response, status
 
 from app.core.db import get_connection
 from app.repositories.note_repository import NoteRepository
-from app.schemas.note import (
-    NoteCountResponse,
-    NoteCreate,
-    NoteResponse,
-    NoteTotalLengthResponse,
-)
+from app.schemas.note import NoteCountResponse, NoteCreate, NoteResponse
 from app.services import note_service
 
 router = APIRouter(prefix="/api", tags=["notes"])
@@ -52,21 +47,12 @@ def list_notes(repository: NoteRepositoryDependency) -> list[NoteResponse]:
     return [NoteResponse(id=note.id, text=note.text) for note in notes]
 
 
-# The static routes `/notes/count` and `/notes/total-length` must stay declared
-# before `/notes/{note_id}`: routes match in declaration order and `{note_id}`
-# would capture "count" or "total-length", answering 422 (not an int).
+# Must stay declared before `/notes/{note_id}`: routes match in declaration
+# order and `{note_id}` would capture "count", answering 422 (not an int).
 @router.get("/notes/count", response_model=NoteCountResponse)
 def count_notes(repository: NoteRepositoryDependency) -> NoteCountResponse:
     """Return how many notes are stored."""
     return NoteCountResponse(count=note_service.count_notes(repository))
-
-
-@router.get("/notes/total-length", response_model=NoteTotalLengthResponse)
-def total_length(repository: NoteRepositoryDependency) -> NoteTotalLengthResponse:
-    """Return the summed character length of every stored note's text."""
-    return NoteTotalLengthResponse(
-        total_length=note_service.total_length(repository)
-    )
 
 
 @router.get(

@@ -1,8 +1,7 @@
 """Data access for notes (TEST-03).
 
 Raw parameterized SQL via psycopg: one table with an insert, two selects (list
-and get by id), a count, a total text length and a delete needs neither an ORM nor a
-query builder. The
+and get by id), a count and a delete needs neither an ORM nor a query builder. The
 connection is supplied by the caller (the `get_connection` dependency in
 app/core/db.py), so the repository owns no transaction boundary of its own.
 """
@@ -15,9 +14,6 @@ INSERT_NOTE_SQL = "INSERT INTO notes (text) VALUES (%s) RETURNING id, text"
 LIST_NOTES_SQL = "SELECT id, text FROM notes ORDER BY id"
 GET_NOTE_SQL = "SELECT id, text FROM notes WHERE id = %s"
 COUNT_NOTES_SQL = "SELECT COUNT(*) FROM notes"
-# char_length counts characters (like Python len), not bytes; COALESCE turns the
-# NULL that SUM yields over zero rows into 0.
-TOTAL_LENGTH_SQL = "SELECT COALESCE(SUM(char_length(text)), 0) FROM notes"
 DELETE_NOTE_SQL = "DELETE FROM notes WHERE id = %s"
 
 
@@ -52,13 +48,6 @@ class NoteRepository:
         """Return how many notes are stored (0 on an empty table)."""
         with self._connection.cursor() as cursor:
             cursor.execute(COUNT_NOTES_SQL)
-            row = cursor.fetchone()
-        return row[0]
-
-    def total_length(self) -> int:
-        """Return the summed character length of every stored note's text (0 when none)."""
-        with self._connection.cursor() as cursor:
-            cursor.execute(TOTAL_LENGTH_SQL)
             row = cursor.fetchone()
         return row[0]
 
