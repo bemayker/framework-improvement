@@ -38,6 +38,13 @@ def test_get_time_differs_between_calls_a_second_apart(client: TestClient):
     assert (second - first).total_seconds() >= 0.9
 
 
+def test_get_time_sets_cache_control_no_store(client: TestClient):
+    response = client.get("/api/time")
+
+    assert response.status_code == 200
+    assert response.headers["cache-control"] == "no-store"
+
+
 def test_openapi_documents_the_server_time_response_schema(client: TestClient):
     spec = client.get("/openapi.json").json()
 

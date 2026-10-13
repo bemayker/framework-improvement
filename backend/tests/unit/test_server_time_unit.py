@@ -3,6 +3,7 @@
 from datetime import datetime, timedelta, timezone
 
 import pytest
+from fastapi import Response
 from pydantic import ValidationError
 
 from app.routers import server_time
@@ -70,8 +71,8 @@ def test_get_server_time_reads_the_clock_on_every_call(monkeypatch):
 
     monkeypatch.setattr(server_time, "datetime", FakeDatetime)
 
-    first = server_time.get_server_time()
-    second = server_time.get_server_time()
+    first = server_time.get_server_time(Response())
+    second = server_time.get_server_time(Response())
 
     assert first.now == datetime(2026, 10, 13, 8, 0, 0, tzinfo=timezone.utc)
     assert second.now == datetime(2026, 10, 13, 8, 0, 1, tzinfo=timezone.utc)
