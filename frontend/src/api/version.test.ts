@@ -44,12 +44,28 @@ describe("version API client", () => {
     expect(fetchMock).toHaveBeenCalledWith(DEFAULT_VERSION_URL);
   });
 
-  it("ignores extra fields such as commit", async () => {
+  it("returns the commit when the backend sends one", async () => {
     fetchMock.mockResolvedValue(
-      okResponse({ version: "0.1.0", commit: "abc1234" }),
+      okResponse({ version: "0.1.0", commit: "0123456789ab" }),
     );
 
-    await expect(fetchVersion()).resolves.toEqual({ version: "0.1.0" });
+    await expect(fetchVersion()).resolves.toEqual({
+      version: "0.1.0",
+      commit: "0123456789ab",
+    });
+  });
+
+  it.each([
+    ["missing", { version: "0.1.0" }],
+    ["a non-string", { version: "0.1.0", commit: 42 }],
+    ["empty", { version: "0.1.0", commit: "" }],
+  ])("omits the commit when it is %s", async (_label, body) => {
+    fetchMock.mockResolvedValue(okResponse(body));
+
+    const info = await fetchVersion();
+
+    expect(info).toEqual({ version: "0.1.0" });
+    expect(info).not.toHaveProperty("commit");
   });
 
   it("throws with the status and reason when the response is not OK", async () => {
