@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, waitFor } from "@testing-library/react";
+import { act, render, screen, waitFor } from "@testing-library/react";
 import AppFooter from "./AppFooter";
 import { fetchVersion } from "../api/version";
 
@@ -52,9 +52,10 @@ describe("AppFooter", () => {
 
     render(<AppFooter />);
 
-    await waitFor(() => expect(fetchVersionMock).toHaveBeenCalledTimes(1));
-    // Let the resolved promise's state update settle before asserting absence.
-    await Promise.resolve();
+    // Flush the effect and the resolved promise's state update inside act, so
+    // the assertion runs after the sentinel guard has had its chance to fail.
+    await act(async () => {});
+    expect(fetchVersionMock).toHaveBeenCalledTimes(1);
     expect(screen.getByTestId("app-footer").textContent).toBe("Task Notes");
   });
 
