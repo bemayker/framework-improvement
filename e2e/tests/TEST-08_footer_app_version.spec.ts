@@ -26,10 +26,21 @@ test.describe("TEST-08 footer shows the app version", () => {
   test("shows the version the backend reports in the footer", async ({ page }) => {
     const response = await openLandingPageAndGetVersionResponse(page);
     expect(response.ok()).toBe(true);
-    const { version } = (await response.json()) as { version: string };
+    const { version, commit } = (await response.json()) as {
+      version: string;
+      commit?: string;
+    };
     expect(version).not.toBe("");
 
-    await expect(page.getByTestId("app-footer")).toHaveText(`Task Notes v${version}`);
+    // TEST-10 appends the short commit when the backend reports a real one; the
+    // default stack reports `unknown`, which shows the version alone.
+    const hasUsableCommit =
+      typeof commit === "string" && commit.trim() !== "" && commit !== "unknown";
+    const expectedText = hasUsableCommit
+      ? `Task Notes v${version} (${commit.slice(0, 7)})`
+      : `Task Notes v${version}`;
+
+    await expect(page.getByTestId("app-footer")).toHaveText(expectedText);
   });
 
   test("shows the backend's version, ignoring extra fields and the frontend package version", async ({
@@ -49,10 +60,9 @@ test.describe("TEST-08 footer shows the app version", () => {
     await page.goto("/");
 
     const footer = page.getByTestId("app-footer");
-    await expect(footer).toHaveText("Task Notes v9.9.9-backend");
+    await expect(footer).toHaveText("Task Notes v9.9.9-backend (abc1234)");
     // frontend/package.json declares 0.0.0, which must not be what the footer shows.
     await expect(footer).not.toContainText("0.0.0");
-    await expect(footer).not.toContainText("abc1234");
   });
 
   test("renders only the app name when the version endpoint is unreachable", async ({

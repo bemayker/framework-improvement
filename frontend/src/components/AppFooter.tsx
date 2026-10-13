@@ -1,5 +1,5 @@
 import { useEffect, useState, type CSSProperties } from "react";
-import { fetchVersion } from "../api/version";
+import { fetchVersion, type VersionInfo } from "../api/version";
 
 const APP_NAME = "Task Notes";
 
@@ -7,22 +7,46 @@ const APP_NAME = "Task Notes";
 // (version_service.UNKNOWN_VERSION); it is treated like a failed request.
 const UNRESOLVED_VERSION = "unknown";
 
+// The backend's "could not resolve a commit" sentinel; a footer with no real
+// commit shows the version alone.
+const UNRESOLVED_COMMIT = "unknown";
+const SHORT_COMMIT_LENGTH = 7;
+
 const footerStyle: CSSProperties = {
   fontSize: "0.875rem",
   color: "#5f5f5f",
   marginTop: "1.5rem",
 };
 
+function footerText(info: VersionInfo | null): string {
+  if (info === null) {
+    return APP_NAME;
+  }
+
+  const base = `${APP_NAME} v${info.version}`;
+  const { commit } = info;
+
+  if (
+    typeof commit !== "string" ||
+    commit.trim() === "" ||
+    commit === UNRESOLVED_COMMIT
+  ) {
+    return base;
+  }
+
+  return `${base} (${commit.slice(0, SHORT_COMMIT_LENGTH)})`;
+}
+
 function AppFooter() {
-  const [version, setVersion] = useState<string | null>(null);
+  const [info, setInfo] = useState<VersionInfo | null>(null);
 
   useEffect(() => {
     let isMounted = true;
 
     fetchVersion()
-      .then((info) => {
-        if (isMounted && info.version !== UNRESOLVED_VERSION) {
-          setVersion(info.version);
+      .then((resolved) => {
+        if (isMounted && resolved.version !== UNRESOLVED_VERSION) {
+          setInfo(resolved);
         }
       })
       .catch(() => {
@@ -37,7 +61,7 @@ function AppFooter() {
 
   return (
     <footer data-testid="app-footer" style={footerStyle}>
-      {version === null ? APP_NAME : `${APP_NAME} v${version}`}
+      {footerText(info)}
     </footer>
   );
 }
