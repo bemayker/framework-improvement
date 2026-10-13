@@ -55,6 +55,7 @@ def test_get_version_reports_short_build_commit_unchanged(client: TestClient, mo
 
     response = client.get("/api/version")
 
+    assert response.status_code == 200
     assert response.json()["commit"] == "abc1234"
 
 
