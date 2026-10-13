@@ -1,0 +1,13 @@
+# Decisions (cross-cutting): deliver-20261013T010031Z
+
+This run's section of the repository-root `DECISIONS.md`, which is cumulative across runs. Per-item decisions live in `.claude/artifacts/{ID}/decisions.md`.
+
+## Run deliver-20261013T010031Z
+
+- 2026-10-13 [run] Graph built with five nodes (TEST-09, BUG-01, BUG-04, TEST-08 ready; TEST-10 blocked by TEST-08 and TEST-09); every cancelled tracker item dropped. Rationale: reverse status mapping sends `cancelled` to null, so CHORE-01..05, TEST-11..15, BUG-02, BUG-03, FEAT-2 and FEAT-3 are not work; scaffold TEST-01 is done, so the gate passes for all.
+- 2026-10-13 [run] No feature_map reconcile: no rows added, no wave or test_checkpoint proposed, no note written. Rationale: all five open items carry authored waves meeting the invariant and decided checkpoint cells; only BUG-01's shared_risk_notes cell was empty, inferred this run as disjoint (server_time.py only) and left empty because the schema has no "no overlap" marker.
+- 2026-10-13 [run] Round 1 dispatched TEST-09, BUG-01 and BUG-04 to plan concurrently; TEST-08 held on the concurrency cap, not a conflict. Rationale: wave ascending (TEST-09 wave 2) then ID among wave 3 with no tracker priority supplied; the three file sets are disjoint (version.py, server_time.py, note form), so no serialization hold applies.
+- 2026-10-13 [run] Serialize the builds of BUG-04, TEST-08 and TEST-10 pairwise on frontend/src/components/LandingPage.tsx, in that dispatch order; plans may overlap. Rationale: shared_risk_notes flags each pair, and the chain is the same length whichever order is taken, so ID order costs nothing.
+- 2026-10-13 [run] No serialization for TEST-09 against backend/app/main.py. Rationale: its flagged partners TEST-06, TEST-07 and FEAT-1 are all merged; BUG-01 is the only other backend item and touches server_time.py only.
+- 2026-10-13 [run] Wave 2 boundary (TEST-09 merged; BUG-01 and BUG-04 merged since run start). Follow-ups: filed CHORE-06 "BUG-01 follow-up: known-improvements" (ClickUp 123k99cxtzq, tag chore, status to do) from BUG-01's one OPTIONAL known improvement on PR #149. Rationale: Section W step 1's known-improvements source; TEST-09's OPTIONAL findings were both applied by its gate and its .venv note is a builder observation, not a review finding; BUG-04 listed none; no item merged with unaddressed comments.
+- 2026-10-13 [run] Registered CHORE-06 (id_source framework, id_carrier none: no write-back onto the tracker item) in project_state.json; map row added with depends_on [BUG-01]; accepted the proposal wave 4 (one above BUG-01, wave 3) and test_checkpoint ✅ (sink). Shared risk inferred over the open rows: disjoint (the finding asks for no code change), cell left empty.
