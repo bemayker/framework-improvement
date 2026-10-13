@@ -19,6 +19,8 @@ This project uses a Claude Code-driven, per-feature delivery framework: a human 
 
 `docker compose up` starts three services: `db` (PostgreSQL 16), `backend` (FastAPI via uv), and `frontend` (Vite dev server). See [docs/DEVELOPMENT.md → Running tests locally](docs/DEVELOPMENT.md#running-tests-locally) to run the test suites without Docker.
 
+`BUILD_COMMIT` is an optional build-time variable (default `unknown`) that `GET /api/version` reports as `commit`, truncated to its first 12 characters.
+
 ---
 
 ## Prerequisites
