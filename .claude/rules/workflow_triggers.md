@@ -1,4 +1,4 @@
-<!-- materialized-from: mayker-dev v0.3.309; do not edit, regenerate with /upgrade-project -->
+<!-- materialized-from: mayker-dev v0.3.348; do not edit, regenerate with /upgrade-project -->
 <!--
   Universal standard. Loaded at launch from .claude/rules/ (always on). Do not edit per project.
   Slash-command mapping, operational behaviour, git conventions.
@@ -83,19 +83,18 @@ Batch independent work into one Bash call per exec turn, in a shape the permissi
 
 ### 5.1 Never emit these shapes
 
-No prefix rule grants these shapes, and the framework does not ship the bare `Bash` grant that would (5.5). `tests/bash-command-shape.test.sh` Part 8 checks every command block the plugin ships against them (5.4).
-
 - **No `$(…)` command substitution, and no backticks.** Take a value from a prior call's printed output as a literal, or from a helper script that computes it. Use the script whenever the value is a fact about the moment the call runs, such as a timestamp.
 - **No `.`, `source` or `eval`.** Run a shared library instead: `bash ~/.mayker/mayker-dev/hooks/lib/<script>.sh …`.
 - **No `cd` segment.** Use `git -C <dir>`, an explicit path argument, or a tool's root flag (`uv run --directory <dir>`, `npm --prefix <dir>`, `make -C <dir>`). This binds a configured command such as `CLAUDE.md` → `Test gate command:` too, because a session runs it as well as the hook.
 - **No path outside the working directories.** The plugin cache is the exception, through the two shipped `permissions.additionalDirectories` entries (5.8), and the read fence setting disables that route (5.6). Running a program through the pointer is allowed; a read through it is judged on the resolved target. Read the installed version with `bash ~/.mayker/mayker-dev/hooks/lib/plugin-version.sh`.
+- **No `sed` or `awk` reading a file.** Read it with the `Read` tool, `cat`, `head` or `grep`. On a pipe, both are fine.
 - **No quoted string containing `git push`.** Spell a search pattern so it cannot contain the phrase.
 - **No `${…}` brace expansion, and no `$CLAUDE_PLUGIN_ROOT` in a Bash command.** Name a plugin script through the pointer, unquoted: `bash ~/.mayker/mayker-dev/hooks/lib/<script>.sh …` (5.7).
 - **No variable expansion other than `$HOME` and `$PWD`:** not an assigned variable, `"$@"`, `$1` or `$?`. Put the value in as a literal, or compute it inside a script. A `$` inside single quotes is not an expansion.
-- **No compact JSON, or brace group holding a quote and a comma, outside single quotes, and a heredoc body counts as outside.** Pass a JSON record as a single-quoted argument or on a `printf` pipe into the script. Space a JSON example inside a document (`{"now": "…", "timezone": "UTC"}`).
+- **No line holding a `{` and a quote outside single quotes, and a heredoc body counts as outside.** Pass such a line (a JSON record, a JSON or curl example) as a single-quoted argument or on a `printf` pipe into the script, or reword it. **No zsh `<N-M>` shape:** write a pair as `A and B`.
 - **No environment-assignment prefix** (`NAME=value command`), and no leading `env`. A recorded backing service reaches a test command through `bash ~/.mayker/mayker-dev/hooks/lib/run-env.sh --id {ID} --run-id {RUN_ID} -- <test command>`.
 - **No tool-call write under `.claude/`**, by `Write`, `Edit`, a redirect, or a `cp` or `mv` naming a `.claude/` path as either end, and **no `sleep`, loop or background watch of your own for CI**. Write through `bash ~/.mayker/mayker-dev/hooks/lib/run-dir.sh write-item|write-run|append-item|append-run <dir> <name>` on a quoted heredoc, publish a run's files with `run-dir.sh publish-run`, and wait with `ci-poll.sh --wait` (2.1).
-- **No trailing `&&` or `||`, and no command over 10,000 characters.** Write a long document as one `write-*` call, then `append-*` calls, each under 10,000 characters and split at a heading (5.3).
+- **No trailing `&&` or `||`, and no command over 10,000 characters.** Write a document as the `write-*` then `append-*` calls its writer names, else split at headings under 10,000 characters; a script appends its own output (5.3).
 
 ### 5.2 What composes fine, and must not be "fixed"
 
