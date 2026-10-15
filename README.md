@@ -19,8 +19,6 @@ This project uses a Claude Code-driven, per-feature delivery framework: a human 
 
 `docker compose up` starts three services: `db` (PostgreSQL 16), `backend` (FastAPI via uv), and `frontend` (Vite dev server). See [docs/DEVELOPMENT.md → Running tests locally](docs/DEVELOPMENT.md#running-tests-locally) to run the test suites without Docker.
 
-`BUILD_COMMIT` is an optional build-time variable (default `unknown`) that `GET /api/version` reports as `commit`, truncated to its first 12 characters.
-
 ---
 
 ## Prerequisites
@@ -128,8 +126,6 @@ This repo runs on the `mayker-dev` Claude Code plugin from the private `mayker` 
 claude plugin marketplace add bemayker/mayker-marketplace
 claude plugin install mayker-dev@mayker --scope project
 ```
-
-Run both with the command or alias that starts your sessions, once per profile: the marketplace and the plugin cache live in the active Claude config directory, so a profile you start as `CLAUDE_CONFIG_DIR=~/.claude-work claude` needs its own run through that same command, and an install under a bare `claude` leaves that profile with the plugin enabled but not installed.
 
 Team members are prompted to add the marketplace and install the plugin when they open the repo, since it is declared in the committed `.claude/settings.json` (this is what makes the install automatic; the prompt is a one-time approval per person).
 

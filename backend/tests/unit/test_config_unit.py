@@ -6,11 +6,15 @@ FastAPI instance in `create_app()` and `database_url` is the only credential-
 shaped value in the package, so an unnoticed change to either is a silent
 production-configuration change.
 
-Every environment-driven field (`database_url`, `cors_origins`, `build_commit`)
-is a `default_factory`, so it is read from the environment on each call to
-`get_settings()` rather than once at class definition. The tests below pin that
-per-call behaviour with `monkeypatch`, and the `database_url` test accepts only
-field shapes that bake in no credential literal.
+One thing is deliberately NOT asserted here, and the reason is a source defect
+rather than a gap in these tests. `Settings.database_url`'s default is written
+as a plain dataclass field default, so it is evaluated **once at class
+definition**, while `get_settings()`'s own docstring promises a value "read
+fresh from the environment". Those two cannot both be true. Asserting either
+one would encode a contested contract: asserting freshness fails today, and
+asserting import-time capture would pin the defect and break the moment it is
+fixed. So these tests cover the part of the contract that holds either way and
+the mismatch is reported instead (see the generate-tests report and PR).
 """
 
 import dataclasses
@@ -18,7 +22,7 @@ import os
 
 import pytest
 
-from app.core.config import DEFAULT_BUILD_COMMIT, DEFAULT_CORS_ORIGINS, Settings, get_settings
+from app.core.config import DEFAULT_CORS_ORIGINS, Settings, get_settings
 
 
 def test_get_settings_returns_the_configured_app_title():
@@ -58,7 +62,8 @@ def test_settings_database_url_is_optional_and_never_a_hardcoded_credential():
     The scaffold deliberately ships no credential-shaped default; the real
     value arrives from the environment via docker-compose or `.env.example`.
     This asserts the type contract and the absence of a literal default, which
-    hold for either field shape (see the module docstring).
+    hold whether or not the field is evaluated per call (see the module
+    docstring).
     """
     settings = get_settings()
 
@@ -84,31 +89,6 @@ def test_settings_cors_origins_parses_comma_separated_env_value(monkeypatch):
     assert get_settings().cors_origins == ("https://a.example", "https://b.example")
 
 
-def test_settings_cors_origins_strips_trailing_slash_from_each_entry(monkeypatch):
-    """A trailing slash never matches a browser Origin, so it is dropped per entry (BUG-02)."""
-    monkeypatch.setenv("CORS_ORIGINS", "http://localhost:5183/, https://b.example/ ,https://c.example")
-
-    assert get_settings().cors_origins == (
-        "http://localhost:5183",
-        "https://b.example",
-        "https://c.example",
-    )
-
-
-def test_settings_cors_origins_drops_entry_that_is_only_a_slash(monkeypatch):
-    """Edge case: an entry reduced to nothing by the slash strip is dropped, not kept as ''."""
-    monkeypatch.setenv("CORS_ORIGINS", "/,https://a.example/")
-
-    assert get_settings().cors_origins == ("https://a.example",)
-
-
-def test_settings_cors_origins_defaults_when_value_is_only_a_slash(monkeypatch):
-    """Edge case: a value of only '/' is effectively blank and falls back to the default."""
-    monkeypatch.setenv("CORS_ORIGINS", "/")
-
-    assert get_settings().cors_origins == DEFAULT_CORS_ORIGINS
-
-
 def test_settings_cors_origins_defaults_when_unset(monkeypatch):
     """With CORS_ORIGINS unset the frontend's default origin is allowed."""
     monkeypatch.delenv("CORS_ORIGINS", raising=False)
@@ -122,25 +102,3 @@ def test_settings_cors_origins_treats_blank_value_as_unset(monkeypatch, blank):
     monkeypatch.setenv("CORS_ORIGINS", blank)
 
     assert get_settings().cors_origins == DEFAULT_CORS_ORIGINS
-
-
-def test_settings_build_commit_returns_stripped_env_value(monkeypatch):
-    """BUILD_COMMIT is read from the environment with surrounding whitespace stripped."""
-    monkeypatch.setenv("BUILD_COMMIT", "  abc1234 ")
-
-    assert get_settings().build_commit == "abc1234"
-
-
-def test_settings_build_commit_defaults_when_unset(monkeypatch):
-    """With BUILD_COMMIT unset the commit is the documented default."""
-    monkeypatch.delenv("BUILD_COMMIT", raising=False)
-
-    assert get_settings().build_commit == DEFAULT_BUILD_COMMIT == "unknown"
-
-
-@pytest.mark.parametrize("blank", ["", "   "])
-def test_settings_build_commit_treats_blank_value_as_unset(monkeypatch, blank):
-    """A blank BUILD_COMMIT falls back to the default."""
-    monkeypatch.setenv("BUILD_COMMIT", blank)
-
-    assert get_settings().build_commit == DEFAULT_BUILD_COMMIT

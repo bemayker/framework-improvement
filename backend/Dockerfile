@@ -9,9 +9,6 @@ COPY pyproject.toml uv.lock ./
 RUN --mount=type=cache,target=/root/.cache/uv \
     uv sync --no-install-project --frozen
 
-ARG BUILD_COMMIT
-ENV BUILD_COMMIT=${BUILD_COMMIT}
-
 COPY . .
 RUN --mount=type=cache,target=/root/.cache/uv \
     uv sync
