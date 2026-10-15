@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# materialized-from: mayker-dev v0.3.348; do not edit, regenerate with /upgrade-project
+# materialized-from: mayker-dev v0.3.365; do not edit, regenerate with /upgrade-project
 #
 # Additive reconciler for a consuming repo's `.claude/settings.json` permissions
 # block (MDF-178).
@@ -558,12 +558,16 @@ SEPARATORS = re.compile(r"\|\||&&|\|&|;|\||&|\n")
 # A leading `FOO=bar` assignment is not the program.
 ASSIGNMENT = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*=")
 
-# Shell builtins and keywords a `Bash(<x>:*)` rule cannot usefully grant. `cd`,
-# `source`, `.` and `eval` were each MEASURED ungrantable (MDF-173, CLI 2.1.263),
-# and a grant that cannot match anything is the defect `MEASURE-12` names, so
-# they are dropped rather than emitted.
+# Shell builtins and keywords a `Bash(<x>:*)` rule cannot usefully grant, so
+# they are dropped rather than emitted: a grant that cannot match anything is a
+# defect of its own. Only `cd`, `source`, `.` and `eval` were MEASURED
+# ungrantable (CLI 2.1.263); every other member is excluded by construction as a
+# keyword or builtin, unmeasured. `set` is NOT a member: `Bash(set:*)` was
+# measured on the same CLI to turn `set -e` and `set -e; git status` from
+# refused to allowed, and `templates/settings.json` ships it. A shipped grant
+# whose program is listed here is a contradiction the reconcile test fails on.
 NOT_A_PROGRAM = frozenset((
-    "cd", "set", "source", ".", "eval", "exec", "export", "unset", "shift",
+    "cd", "source", ".", "eval", "exec", "export", "unset", "shift",
     "if", "then", "else", "elif", "fi", "for", "while", "until", "do", "done",
     "case", "esac", "function", "return", "exit", "trap", "wait", "time",
     "[", "[[", "{", "(", "!", "test",
