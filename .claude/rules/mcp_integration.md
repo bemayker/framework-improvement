@@ -1,4 +1,4 @@
-<!-- materialized-from: mayker-dev v0.3.348; do not edit, regenerate with /upgrade-project -->
+<!-- materialized-from: mayker-dev v0.3.365; do not edit, regenerate with /upgrade-project -->
 <!--
   Universal standard. Loaded at launch from .claude/rules/ (always on). Do not edit per project.
   MCP usage is gated by Work Item Source: issue tracker + Git provider patterns,
@@ -45,5 +45,6 @@ Every tracker MCP call that accepts a workspace, project, or team identifier **p
 
 - `workspace_id` is resolved once by `/sync-project` and written for every provider. Downstream commands only read it.
 - A workspace disambiguation error means `project_state.json` is stale. Re-run `/sync-project`; never guess an identifier per call.
+- An item with `features.{ID}.tracker` reads `issue_trackers.{tracker}` instead (full text: shared.md).
 
 **Batch independent tracker reads.** Issue a command's independent reads (the feature, each dependency's status, the scaffold item's status) as one parallel batch. Keep status updates sequential where order matters.
