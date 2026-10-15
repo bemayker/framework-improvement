@@ -81,6 +81,10 @@ jobs:
       # LAST half merges: `repos` in `.claude/feature_map.md` lists them in merge
       # order, and only the last one listed marks it. An empty cell, no row, or no
       # map at all is a single-repository story, marked here as before.
+      # A multi-repo project (`CLAUDE.md` -> Repositories, MDF-402) reads no
+      # `repos` cell: its wrapper's pull request merges last, so the wrapper marks
+      # the item, and a sub-repository, whose state or map is a projection of the
+      # wrapper's, never does.
       - name: Decide whether this repository closes the story
         id: last
         if: steps.fid.outputs.id != ''
@@ -90,6 +94,18 @@ jobs:
         run: |
           set -euo pipefail
           map=".claude/feature_map.md"
+          state=".claude/project_state.json"
+          if { [ -f "$state" ] && jq -e 'has("_projection")' "$state" >/dev/null 2>&1; } \
+             || { [ -f "$map" ] && awk 'NR == 1 { p = /^<!-- mayker-dev projection:/; exit } END { exit !p }' "$map"; }; then
+            echo "::notice::This repository is a sub-repository of a multi-repo project: the wrapper's pull request merges last and the wrapper's auto-Done marks $ID Done, so this one does not."
+            echo "last=no" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          if [ -f CLAUDE.md ] && grep -qE '^[[:space:]]*[-*][[:space:]]*[*]*Layout:[*]*[[:space:]]*multi-repo([[:space:]]|$)' CLAUDE.md; then
+            echo "This repository is the wrapper of a multi-repo project: its pull request merges last, after every repository in CLAUDE.md -> Repositories, so it marks $ID Done. The repos column is not read here."
+            echo "last=yes" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
           repos=""
           if [ -f "$map" ]; then
             # Columns by NAME, as every other reader does; `\|` inside a cell is a
@@ -139,6 +155,7 @@ jobs:
           ID: ${{ steps.fid.outputs.id }}
           PR_LABELS: ${{ toJSON(github.event.pull_request.labels.*.name) }}
           TRACKER_API_KEY: ${{ secrets.CLICKUP_API_KEY }}
+          # MDF-404: /sync-project 6.2 adds one HOME_TRACKER_KEY_{ROW} line here per repository tracker.
           FLIP_TOKEN_SET: ${{ secrets.MAYKER_FLIP_TOKEN != '' }}
         run: |
           set -euo pipefail
@@ -192,11 +209,38 @@ jobs:
             external_id=""
             target=""
             done_status="done"
+            home=""
             if [ -f "$state" ]; then
               external_id="$(jq -r --arg id "$ID" '(.features[$id].external_id) // empty' "$state")"
               target="$(jq -r '(.status_mapping.to_verify) // ""' "$state")"
               done_status="$(jq -r '(.status_mapping.done) // "done"' "$state")"
+              home="$(jq -r --arg id "$ID" '(.features[$id].tracker) // empty' "$state")"
             fi
+            # MDF-404: a multi-repo item whose home is a repository's own tracker
+            # (CLAUDE.md -> Repositories) is written there, through the same call,
+            # with that tracker's statuses, scope and secret in place of the
+            # project tracker's. /sync-project 6.2 maps each repository tracker's
+            # secret into this step's env as HOME_TRACKER_KEY_{ROW}.
+            home_blocked=""
+            home_secret=""
+            if [ -n "$home" ]; then
+              home_key="HOME_TRACKER_KEY_$(printf '%s' "$home" | tr 'a-z.-' 'A-Z__')"
+              home_secret="${!home_key:-}"
+              case "$home_secret" in '$('*) home_secret="" ;; esac
+              home_provider="$(jq -r --arg h "$home" '(.issue_trackers[$h].provider) // ""' "$state")"
+              target="$(jq -r --arg h "$home" '(.issue_trackers[$h].status_mapping.to_verify) // ""' "$state")"
+              done_status="$(jq -r --arg h "$home" '(.issue_trackers[$h].status_mapping.done) // "done"' "$state")"
+              org_url="$(jq -r --arg h "$home" '(.issue_trackers[$h].workspace_id) // "" | tostring | sub("/+$"; "")' "$state")"
+              project="$(jq -r --arg h "$home" '(.issue_trackers[$h].project // {}) | if ((.id // "") | tostring) != "" then .id else (.name // "") end | tostring' "$state")"
+              if [ -z "$home_provider" ]; then
+                home_blocked="no issue_trackers.${home} in project_state.json for the home tracker of ${ID}"
+              elif [ "$home_provider" != "$(jq -r '(.issue_tracker.provider) // ""' "$state")" ]; then
+                home_blocked="the home tracker of ${ID} (repository '${home}') is ${home_provider}, and this step carries the project tracker's call only; /sync-project 6.2 generates one per provider"
+              elif [ -z "$home_secret" ]; then
+                home_blocked="${home_key} is not set: add the secret docs/DEVELOPMENT.md names for the tracker of repository '${home}'"
+              fi
+            fi
+            [ -z "$home" ] || TRACKER_API_KEY="$home_secret"
             add_label="no"
             if [ -z "$target" ]; then
               # No spare tracker status: Done, plus the label a human removes once verified.
@@ -204,7 +248,9 @@ jobs:
               add_label="yes"
             fi
             blocked=""
-            if [ -z "${TRACKER_API_KEY:-}" ]; then
+            if [ -n "$home_blocked" ]; then
+              blocked="$home_blocked"
+            elif [ -z "${TRACKER_API_KEY:-}" ]; then
               blocked="TRACKER_API_KEY not set"
             elif [ -z "$external_id" ]; then
               blocked="no external_id for ${ID} in project_state.json"
@@ -280,6 +326,7 @@ jobs:
           # tracker/hybrid sources only. /sync-project sets the secret name for your tracker
           # (CLICKUP_API_KEY / LINEAR_API_KEY / JIRA_API_TOKEN[, JIRA_EMAIL]).
           TRACKER_API_KEY: ${{ secrets.CLICKUP_API_KEY }}
+          # MDF-404: /sync-project 6.2 adds one HOME_TRACKER_KEY_{ROW} line here per repository tracker.
           # local/hybrid sources only: whether the checkout above got the admin
           # PAT that can push to a protected default branch.
           FLIP_TOKEN_SET: ${{ secrets.MAYKER_FLIP_TOKEN != '' }}
@@ -326,12 +373,41 @@ jobs:
           if [ "$do_tracker" = "yes" ]; then
             external_id=""
             done_status="done"
+            home=""
             if [ -f "$state" ]; then
               external_id="$(jq -r --arg id "$ID" '(.features[$id].external_id) // empty' "$state")"
               done_status="$(jq -r '(.status_mapping.done) // "done"' "$state")"
+              home="$(jq -r --arg id "$ID" '(.features[$id].tracker) // empty' "$state")"
             fi
+            # MDF-404: a multi-repo item whose home is a repository's own tracker
+            # (CLAUDE.md -> Repositories) is written there, through the same call,
+            # with that tracker's statuses, scope and secret in place of the
+            # project tracker's. /sync-project 6.2 maps each repository tracker's
+            # secret into this step's env as HOME_TRACKER_KEY_{ROW}.
+            home_blocked=""
+            home_secret=""
+            if [ -n "$home" ]; then
+              home_key="HOME_TRACKER_KEY_$(printf '%s' "$home" | tr 'a-z.-' 'A-Z__')"
+              home_secret="${!home_key:-}"
+              case "$home_secret" in '$('*) home_secret="" ;; esac
+              home_provider="$(jq -r --arg h "$home" '(.issue_trackers[$h].provider) // ""' "$state")"
+              target="$(jq -r --arg h "$home" '(.issue_trackers[$h].status_mapping.to_verify) // ""' "$state")"
+              done_status="$(jq -r --arg h "$home" '(.issue_trackers[$h].status_mapping.done) // "done"' "$state")"
+              org_url="$(jq -r --arg h "$home" '(.issue_trackers[$h].workspace_id) // "" | tostring | sub("/+$"; "")' "$state")"
+              project="$(jq -r --arg h "$home" '(.issue_trackers[$h].project // {}) | if ((.id // "") | tostring) != "" then .id else (.name // "") end | tostring' "$state")"
+              if [ -z "$home_provider" ]; then
+                home_blocked="no issue_trackers.${home} in project_state.json for the home tracker of ${ID}"
+              elif [ "$home_provider" != "$(jq -r '(.issue_tracker.provider) // ""' "$state")" ]; then
+                home_blocked="the home tracker of ${ID} (repository '${home}') is ${home_provider}, and this step carries the project tracker's call only; /sync-project 6.2 generates one per provider"
+              elif [ -z "$home_secret" ]; then
+                home_blocked="${home_key} is not set: add the secret docs/DEVELOPMENT.md names for the tracker of repository '${home}'"
+              fi
+            fi
+            [ -z "$home" ] || TRACKER_API_KEY="$home_secret"
             blocked=""
-            if [ -z "${TRACKER_API_KEY:-}" ]; then
+            if [ -n "$home_blocked" ]; then
+              blocked="$home_blocked"
+            elif [ -z "${TRACKER_API_KEY:-}" ]; then
               blocked="TRACKER_API_KEY not set"
             elif [ -z "$external_id" ]; then
               blocked="no external_id for ${ID} in project_state.json"

@@ -51,8 +51,9 @@ The CI pipelines require these secrets to be configured in your repository:
 | Secret | Purpose | Where to get it | Where to add it |
 | --- | --- | --- | --- |
 | `CLICKUP_API_KEY` | Auto-transition features to Done on merge | ClickUp → Settings → Apps → API Token | GitHub → Settings → Secrets and variables → Actions |
+| `MAYKER_FLIP_TOKEN` | Let the auto-Done job push the work-item file flip to a protected default branch (`local` and `hybrid` source only) | A repository admin's fine-grained PAT with `contents: write` | GitHub → Settings → Secrets and variables → Actions |
 
-> The secret name matches your tracker (`CLICKUP_API_KEY` / `LINEAR_API_KEY` / `JIRA_API_TOKEN` + `JIRA_EMAIL`). With `local` work-item source there is no tracker secret. Optional Slack notifications need a `NOTIFY_SLACK` Variable + `SLACK_WEBHOOK_URL` Secret; optional security scanning needs `AIKIDO_API_KEY`. Full names, locations, and the Slack three-step setup are in [docs/DEVELOPMENT.md → Repository Secrets](docs/DEVELOPMENT.md#3-repository-secrets-for-cicd).
+> The secret name matches your tracker (`CLICKUP_API_KEY` / `LINEAR_API_KEY` / `JIRA_API_TOKEN` + `JIRA_EMAIL`). With `local` work-item source there is no *tracker* secret, but `MAYKER_FLIP_TOKEN` still applies whenever the default branch is protected: the auto-Done job pushes the work-item file flip straight to that branch, and without the token the flip is rejected and the item silently stays in its pre-merge status. `hybrid` needs both. On a Git provider whose CI identity can be exempted from the branch protection (Azure DevOps, GitLab, Bitbucket), the flip needs a permission instead of that token, and the table names it. Optional Slack notifications need a `NOTIFY_SLACK` Variable + `SLACK_WEBHOOK_URL` Secret; optional security scanning needs `AIKIDO_API_KEY`. Full names, locations, and the Slack three-step setup are in [docs/DEVELOPMENT.md → Repository Secrets](docs/DEVELOPMENT.md#3-repository-secrets-for-cicd).
 
 ### Development environment
 
