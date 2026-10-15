@@ -20,9 +20,6 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
-      # Unset on the host means an empty value, which the app treats as unset.
-      args:
-        BUILD_COMMIT: ${BUILD_COMMIT:-}
       # Migration 0.3.181-01 (MDF-208) arm 1, workflow-side half. The cache
       # mount in backend/Dockerfile lives in the builder's own store, and a
       # GitHub runner starts with an empty builder, so the mount is only warm
