@@ -331,6 +331,8 @@ Adjust the `model:` field in the plugin's `commands/*.md` (these files live in t
 | `Skill(mayker-dev:build-feature)` — the `Skill` tool, including the description-based auto-load | **No** | the session model, for the whole procedure |
 | A subagent dispatch (`planner`, `builder`, `reviewer`, `orchestrator`) | **Yes**, from `agents/*.md` — **unless the dispatch call passes a `model` argument, which outranks it** | that agent's pinned model, on either route above; the argument's model when one is passed |
 
+**The `/` menu lists each command once, and that entry is the pinned route.** Every plugin skill is hidden from the menu (`user-invocable: false`), so picking `/mayker-dev:build-feature` there always starts the command, never a same-name skill entry that would run the same procedure on your session model. The skill itself is still there for the `Skill` tool and the description-based auto-load, which is the second row above.
+
 Three consequences worth planning around:
 
 - **A pin does not span a turn.** It holds for the turn the command starts, and a new turn starts not only with your next message but also when a background subagent reports back or a scheduled wakeup fires, with nobody typing anything. So when `/plan-feature`'s `planner` runs in the background, as it did in every measured run (Claude Code 2.1.296), the steps after the plan (commit, draft PR, status, summary) run on the session model, and in an assisted `/build-feature` everything after the first approval or answer does too. The per-step Model column described below shows where a run switched.

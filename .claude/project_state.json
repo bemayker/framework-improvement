@@ -19,8 +19,8 @@
     "effective_path": {
       "path": "gh",
       "host": "github.com",
-      "verified_at": "2026-10-12T21:58:08Z",
-      "plugin_version": "0.3.309",
+      "verified_at": "2026-10-15T22:53:23Z",
+      "plugin_version": "0.3.365",
       "mcp_server_url": ""
     }
   },
@@ -131,7 +131,7 @@
       "external_id": "123k99cx6hc",
       "external_identifier": "",
       "id_source": "framework",
-      "id_carrier": "none",
+      "id_carrier": "title_prefix",
       "url": "https://app.clickup.com/t/123k99cx6hc",
       "registered_at": "2026-10-05T15:42:19Z"
     },
@@ -139,7 +139,7 @@
       "external_id": "123k99cx6mf",
       "external_identifier": "",
       "id_source": "framework",
-      "id_carrier": "none",
+      "id_carrier": "title_prefix",
       "url": "https://app.clickup.com/t/123k99cx6mf",
       "registered_at": "2026-10-05T16:17:18Z"
     },
@@ -147,7 +147,7 @@
       "external_id": "123k99cx6rm",
       "external_identifier": "",
       "id_source": "framework",
-      "id_carrier": "none",
+      "id_carrier": "title_prefix",
       "url": "https://app.clickup.com/t/123k99cx6rm",
       "registered_at": "2026-10-05T16:55:34Z"
     },
@@ -176,7 +176,7 @@
       "external_id": "123k99cxe9a",
       "external_identifier": "",
       "id_source": "framework",
-      "id_carrier": "none",
+      "id_carrier": "title_prefix",
       "url": "https://app.clickup.com/t/123k99cxe9a",
       "registered_at": "2026-10-07T22:04:35Z"
     },
@@ -192,7 +192,7 @@
       "external_id": "123k99cxqhp",
       "external_identifier": "",
       "id_source": "framework",
-      "id_carrier": "none",
+      "id_carrier": "title_prefix",
       "url": "https://app.clickup.com/t/123k99cxqhp",
       "registered_at": "2026-10-12T10:03:10Z"
     },
@@ -200,7 +200,7 @@
       "external_id": "123k99cxqtv",
       "external_identifier": "",
       "id_source": "framework",
-      "id_carrier": "none",
+      "id_carrier": "title_prefix",
       "url": "https://app.clickup.com/t/123k99cxqtv",
       "registered_at": "2026-10-12T10:21:35Z"
     },
@@ -208,7 +208,7 @@
       "external_id": "123k99cxrch",
       "external_identifier": "",
       "id_source": "framework",
-      "id_carrier": "none",
+      "id_carrier": "title_prefix",
       "url": "https://app.clickup.com/t/123k99cxrch",
       "registered_at": "2026-10-12T13:16:52Z"
     },
@@ -216,14 +216,14 @@
       "external_id": "123k99cxtzq",
       "external_identifier": "",
       "id_source": "framework",
-      "id_carrier": "none",
+      "id_carrier": "title_prefix",
       "url": "https://app.clickup.com/t/123k99cxtzq",
       "registered_at": "2026-10-13T01:28:53Z"
     }
   },
   "discovery": {
-    "last_scan_commit": "fc19931e30086a362045865adbe7e34f211eb839",
-    "scanned_at": "2026-10-12T21:58:08Z",
+    "last_scan_commit": "be69c77ce0ab62ce2432e76cccb896b4b81f37c3",
+    "scanned_at": "2026-10-15T22:53:23Z",
     "scanned_by": "/sync-project"
   },
   "framework": {
@@ -231,8 +231,8 @@
     "migrated_to": "0.3.365",
     "migrated_at": "2026-10-15T09:16:15Z",
     "synced": {
-      "plugin_version": "0.3.309",
-      "synced_at": "2026-10-12T21:58:08Z"
+      "plugin_version": "0.3.365",
+      "synced_at": "2026-10-15T22:53:23Z"
     }
   }
 }
