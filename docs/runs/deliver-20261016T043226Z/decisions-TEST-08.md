@@ -1,0 +1,11 @@
+# Decisions (TEST-08, after its final push): deliver-20261016T043226Z
+
+The entries `.claude/artifacts/TEST-08/decisions.md` received after the last push of its branch (f29411f), the head its pull request merged. The entries before them reached the default branch in that file.
+
+- 2026-10-16 [TEST-08] PR #173 opened as draft; PR label: #173 mayker:in-progress; gate: verdict recorded for this push (head f29411f: full after 3s). Item-to-PR link comment posted on the tracker, answering the correction comment with the recorded loading and failure states.
+- 2026-10-16 [TEST-08] CI green 7/7 (ci-poll poll 1). Handover rebuild: status=rebuilt sha=f29411f+dirty health=pass project=framework-improvement-test-08-handover. PR converted to ready; PR label: #173 mayker:in-review (removed mayker:in-progress); status to test (in_review).
+- 2026-10-16 [TEST-08] 6.8 comment loop round 1: PR inline 0, general 0, reviews 0; tracker 9 comments: 1 human correction (answered on the item by this run link comment), 1 operator reset note, 7 bot notices; 0 new actionable.
+- 2026-10-16 [TEST-08] Merge verdict: merge PR #173 (squash, head f29411f). Rationale: autonomy.md Section 5 all five conditions hold: blocking=0, 7 checks SUCCESS and PR ready (MERGEABLE/CLEAN), four criteria confirmed with criterion 2 per the tracker correction, PR 0 comments and no change request, tracker correction answered on the item; base moved to cf83f86 with no overlap and provider reports CLEAN, so no base sync; nothing irreversible.
+- 2026-10-16 [TEST-08] auto-done: run 38853504544 succeeded. Tracker re-read: status complete (done); no backstop flip needed.
+- 2026-10-16 [TEST-08] Standards provenance: exit 1, 1 unbacked claim. MISMATCH: decisions.md cites mcp_integration.md as provenance; the dispatch did not report reading it (the main session tracker-comment entry, charged to the plan verdict by file). Both always-on standards self-reported as read by 3 of 4 dispatches (self-reported, not measured).
+- 2026-10-16 [TEST-08] Checkpoint: due=yes items=TEST-08 command=uv run --directory backend pytest -q && npm --prefix frontend test verdict=pass (93 passed 14 skipped; 38 passed). No env lines of this run, nothing to tear down.
