@@ -12,7 +12,67 @@ const fetchVersionMock = vi.mocked(fetchVersion);
 describe("AppFooter", () => {
   beforeEach(() => {
     fetchVersionMock.mockReset();
-    fetchVersionMock.mockResolvedValue("9.9.9-test");
+    fetchVersionMock.mockResolvedValue({ version: "9.9.9-test", commit: null });
+  });
+
+  describe("build commit", () => {
+    const FORBIDDEN_TEXT = /undefined|null|unknown|\(\)/;
+
+    it("renders the short commit after the version on success", async () => {
+      fetchVersionMock.mockResolvedValue({ version: "9.9.9-test", commit: "0123456" });
+
+      render(<AppFooter />);
+
+      const commit = await screen.findByTestId("app-footer-commit");
+      expect(commit.textContent).toBe(" (0123456)");
+      const footer = screen.getByTestId("app-footer");
+      expect(footer.textContent).toBe("Task Notes v9.9.9-test (0123456)");
+      expect(footer).not.toHaveTextContent(FORBIDDEN_TEXT);
+    });
+
+    it("renders the version alone on success when the commit is null", async () => {
+      render(<AppFooter />);
+
+      await screen.findByTestId("app-footer-version");
+      const footer = screen.getByTestId("app-footer");
+      expect(footer.textContent).toBe("Task Notes v9.9.9-test");
+      expect(screen.queryByTestId("app-footer-commit")).not.toBeInTheDocument();
+      expect(footer).not.toHaveTextContent(FORBIDDEN_TEXT);
+    });
+
+    it("renders no commit when a partial result lacks the commit field", async () => {
+      fetchVersionMock.mockResolvedValue({ version: "9.9.9-test" } as never);
+
+      render(<AppFooter />);
+
+      await screen.findByTestId("app-footer-version");
+      expect(screen.queryByTestId("app-footer-commit")).not.toBeInTheDocument();
+      expect(screen.getByTestId("app-footer")).not.toHaveTextContent(FORBIDDEN_TEXT);
+    });
+
+    it("renders exactly the app name while the request is pending", () => {
+      fetchVersionMock.mockReturnValue(new Promise(() => undefined));
+
+      render(<AppFooter />);
+
+      const footer = screen.getByTestId("app-footer");
+      expect(footer.textContent).toBe("Task Notes");
+      expect(screen.queryByTestId("app-footer-commit")).not.toBeInTheDocument();
+      expect(footer).not.toHaveTextContent(FORBIDDEN_TEXT);
+    });
+
+    it("renders exactly the app name when the request fails", async () => {
+      fetchVersionMock.mockRejectedValue(new Error("unreachable"));
+
+      render(<AppFooter />);
+      await waitFor(() => expect(fetchVersionMock).toHaveBeenCalledTimes(1));
+      await new Promise((resolve) => setTimeout(resolve, 0));
+
+      const footer = screen.getByTestId("app-footer");
+      expect(footer.textContent).toBe("Task Notes");
+      expect(screen.queryByTestId("app-footer-commit")).not.toBeInTheDocument();
+      expect(footer).not.toHaveTextContent(FORBIDDEN_TEXT);
+    });
   });
 
   it("renders the application name", async () => {
