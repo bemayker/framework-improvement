@@ -1,6 +1,9 @@
 """Unit tests for the FastAPI app factory (backend/app/main.py)."""
 
+from fastapi.testclient import TestClient
+
 from app.main import create_app
+from app.services.uptime_service import StartMark
 
 # FastAPI's own routes, present on every app regardless of what this project
 # registers; subtracted so a test asserts only the app's custom routes.
@@ -65,6 +68,26 @@ def test_create_app_registers_echo_route():
     custom_paths = _collect_route_paths(app.routes) - BUILT_IN_ROUTE_PATHS
 
     assert "/api/echo" in custom_paths
+
+
+def test_create_app_registers_uptime_route():
+    """Edge case: the app registers the TEST-07 uptime route."""
+    app = create_app()
+
+    custom_paths = _collect_route_paths(app.routes) - BUILT_IN_ROUTE_PATHS
+
+    assert "/api/uptime" in custom_paths
+
+
+def test_lifespan_records_uptime_start_mark_on_startup(monkeypatch):
+    """Happy path: startup stores a StartMark on the app state (no database touched)."""
+    monkeypatch.delenv("DATABASE_URL", raising=False)
+
+    app = create_app()
+    with TestClient(app):
+        start = app.state.uptime_start
+
+    assert isinstance(start, StartMark)
 
 
 def test_create_app_returns_independent_instances():
