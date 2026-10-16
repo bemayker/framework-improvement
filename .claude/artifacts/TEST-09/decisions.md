@@ -1,0 +1,6 @@
+- Plan base: 183fb151f9c3e29eb32c556546c4727e1cbb67c7
+- 2026-10-16 [TEST-09] Tracker comments read at 6.1: 5 total, 1 actionable (BUILD_COMMIT 12-char clarification); 4 are earlier bot notices. Rationale: mcp_integration.md Section 2 step 3.
+- 2026-10-16 [TEST-09] plan self-approved (orchestrator verdict=approve, first pass, no re-plan). Rationale: all four criteria mapped with a covering tier and reason; tracker 12-character truncation folded in; extends the existing TEST-05 /api/version with config, service, router and schema layering and a per-call env read. Status passed plan review to on hold (ready_for_build).
+- 2026-10-16 [TEST-09] Build-arg plumbing (backend/Dockerfile, docker-compose.yml build.args, .env.example, README.md tree line) judged scope-contained. Rationale: criterion 2 names a variable set at build time, and the Docker build arg is the only mechanism that satisfies it here; no CI or runtime-env wiring added.
+- 2026-10-16 [TEST-09] Self-review: blocking=0 recommended=0 optional=2 (config.py blank line; test_version_integration.py stale docstrings); OPTIONAL findings go to the PR known improvements.
+- 2026-10-16 [TEST-09] Refactor gate: no findings (7 files examined), commit c60d7c5 holds refactor_report.md only; the 2 OPTIONAL review findings go to known improvements.

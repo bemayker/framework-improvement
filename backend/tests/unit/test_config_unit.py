@@ -22,7 +22,12 @@ import os
 
 import pytest
 
-from app.core.config import DEFAULT_CORS_ORIGINS, Settings, get_settings
+from app.core.config import (
+    DEFAULT_BUILD_COMMIT,
+    DEFAULT_CORS_ORIGINS,
+    Settings,
+    get_settings,
+)
 
 
 def test_get_settings_returns_the_configured_app_title():
@@ -102,3 +107,33 @@ def test_settings_cors_origins_treats_blank_value_as_unset(monkeypatch, blank):
     monkeypatch.setenv("CORS_ORIGINS", blank)
 
     assert get_settings().cors_origins == DEFAULT_CORS_ORIGINS
+
+
+def test_settings_build_commit_reads_env_value_stripped(monkeypatch):
+    """Set path: BUILD_COMMIT is the source, surrounding whitespace removed."""
+    monkeypatch.setenv("BUILD_COMMIT", "  abc1234  ")
+
+    assert get_settings().build_commit == "abc1234"
+
+
+def test_settings_build_commit_defaults_to_unknown_when_unset(monkeypatch):
+    """Unset path: the documented default is used."""
+    monkeypatch.delenv("BUILD_COMMIT", raising=False)
+
+    assert get_settings().build_commit == DEFAULT_BUILD_COMMIT == "unknown"
+
+
+@pytest.mark.parametrize("blank", ["", "   "])
+def test_settings_build_commit_treats_blank_value_as_unset(monkeypatch, blank):
+    """A blank BUILD_COMMIT yields the default, not an empty commit."""
+    monkeypatch.setenv("BUILD_COMMIT", blank)
+
+    assert get_settings().build_commit == DEFAULT_BUILD_COMMIT
+
+
+def test_settings_build_commit_is_read_per_call_not_baked_into_the_class():
+    """The field is a default_factory, so no commit literal lives in the class."""
+    field = next(f for f in dataclasses.fields(Settings) if f.name == "build_commit")
+
+    assert field.default is dataclasses.MISSING
+    assert field.default_factory is not dataclasses.MISSING
