@@ -15,7 +15,7 @@ const VERSION_URL = `${API_BASE_URL}/api/version`;
 // The backend reports this literal when its package metadata is not installed
 // (version) or BUILD_COMMIT is unset (commit); it means "could not be resolved".
 // A version of this value is a failure; a commit of this value is simply absent.
-const UNKNOWN_VERSION = "unknown";
+const UNKNOWN_SENTINEL = "unknown";
 
 export const COMMIT_DISPLAY_LENGTH = 7;
 
@@ -24,7 +24,7 @@ function toShortCommit(commit: unknown): string | null {
     return null;
   }
   const trimmed = commit.trim();
-  if (trimmed === "" || trimmed === UNKNOWN_VERSION) {
+  if (trimmed === "" || trimmed === UNKNOWN_SENTINEL) {
     return null;
   }
   return trimmed.slice(0, COMMIT_DISPLAY_LENGTH);
@@ -47,7 +47,7 @@ export async function fetchVersion(): Promise<VersionInfo> {
   const body = (await response.json()) as Partial<VersionResponse> | null;
   const version = typeof body?.version === "string" ? body.version.trim() : "";
 
-  if (version === "" || version === UNKNOWN_VERSION) {
+  if (version === "" || version === UNKNOWN_SENTINEL) {
     throw new Error("The backend did not report a usable version");
   }
 
