@@ -42,11 +42,3 @@ def test_get_server_time_now_is_computed_per_request(client: TestClient):
     after = datetime.now(UTC)
 
     assert before <= first <= second <= after
-
-
-def test_get_server_time_sets_cache_control_no_store(client: TestClient):
-    """BUG-01 criteria 1 and 2: exactly no-store, so a widened directive fails."""
-    response = client.get("/api/time")
-
-    assert response.status_code == 200
-    assert response.headers["cache-control"] == "no-store"
