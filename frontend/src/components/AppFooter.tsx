@@ -1,5 +1,6 @@
+import { useEffect, useState } from "react";
 import type { CSSProperties } from "react";
-import { version } from "../../package.json";
+import { fetchVersion } from "../api/version";
 
 const APP_NAME = "Task Notes";
 
@@ -10,9 +11,31 @@ const footerStyle: CSSProperties = {
 };
 
 function AppFooter() {
+  const [version, setVersion] = useState<string | null>(null);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    // On failure the version stays null: the footer then shows the app name alone.
+    fetchVersion()
+      .then((resolvedVersion) => {
+        if (isMounted) {
+          setVersion(resolvedVersion);
+        }
+      })
+      .catch(() => undefined);
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
   return (
     <footer data-testid="app-footer" style={footerStyle}>
-      {APP_NAME} v{version}
+      {APP_NAME}
+      {version !== null && (
+        <span data-testid="app-footer-version"> v{version}</span>
+      )}
     </footer>
   );
 }
