@@ -182,6 +182,5 @@ its API marks the story Done early. The merge order above is what prevents it.
 | CHORE-05 | TEST-11 follow-up: known-improvements | [TEST-11] | feature/CHORE-05-test-11-follow-up | | | ✅ | 4 | |
 | FEAT-3 | Notes longest body length endpoint | [TEST-12] | feature/FEAT-3-notes-longest-body-length-endpoint | | ⚠️ FEAT-3 edits backend/app/routers/notes.py, services/note_service.py, repositories/note_repository.py, schemas/note.py and tests/integration/test_notes_integration.py, the same set FEAT-2, TEST-14, CHORE-04 and TEST-15 edited (all complete or cancelled); like the TEST-15 /notes/count route, its static GET /notes/longest-length must be declared before the /notes/note_id route. Disjoint from every non-notes row | ✅ | 4 | |
 | CHORE-06 | BUG-01 follow-up: known-improvements | [BUG-01] | feature/CHORE-06-bug-01-follow-up | | | ✅ | 4 | |
-| FEAT-4 | RELEASE 0.3.365: deletion probe | [] | feature/FEAT-4-release-0-3-365-deletion-probe | | | ➖ | 1 | |
 
 Scaffold gate: TEST-01 (`scaffold: true` in its frontmatter) is **done**, so the gate passes. TEST-01 through TEST-07 and FEAT-1 are done; TEST-08, TEST-09 and BUG-01 are ready (TEST-09 registers a router in `backend/app/main.py`, BUG-01 edits only `server_time.py`, TEST-08 is frontend only); TEST-10 waits on TEST-08 and TEST-09.
