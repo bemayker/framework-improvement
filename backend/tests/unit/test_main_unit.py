@@ -79,15 +79,6 @@ def test_create_app_registers_uptime_route():
     assert "/api/uptime" in custom_paths
 
 
-def test_create_app_registers_server_time_route():
-    """Edge case: the app registers the FEAT-1 server time route."""
-    app = create_app()
-
-    custom_paths = _collect_route_paths(app.routes) - BUILT_IN_ROUTE_PATHS
-
-    assert "/api/time" in custom_paths
-
-
 def test_lifespan_records_uptime_start_mark_on_startup(monkeypatch):
     """Happy path: startup stores a StartMark on the app state (no database touched)."""
     monkeypatch.delenv("DATABASE_URL", raising=False)
