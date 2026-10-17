@@ -3,7 +3,7 @@
 ## Prerequisites
 
 - App stack running (frontend at `http://localhost:5183`, backend and database reachable from it), on branch `feature/BUG-04-double-submit-note` or later `main`.
-- A Chromium-based browser with DevTools. Steps 2 to 7 need the **Network** tab, to throttle requests and to count the `POST /api/notes` requests.
+- A Chromium-based browser with DevTools. Steps 2 to 12 need the **Network** tab, to throttle requests and to count the `POST /api/notes` requests.
 - Notes from earlier runs may already be in the list. That is expected: every step below is about the note you add.
 
 ## Steps
@@ -31,7 +31,7 @@
 
 | # | Step | Expected Result | Pass/Fail |
 |---|------|-----------------|-----------|
-| 10 | Set throttling to **No throttling**. In DevTools Network, right-click any request, choose **Block request URL** and enter `localhost:8000/api/notes` (or the notes API URL the Network tab shows) | That URL is blocked | [ ] Pass [ ] Fail |
+| 10 | Set throttling to **No throttling**. In DevTools Network, right-click any request, choose **Block request URL** and enter `localhost:8010/api/notes` (or the notes API URL the Network tab shows) | That URL is blocked | [ ] Pass [ ] Fail |
 | 11 | Type `Retry check` and click **Save note** | The red message `The note could not be saved. Please try again.` appears, the text stays in the field and the button is enabled | [ ] Pass [ ] Fail |
 | 12 | Remove the block in the Network request blocking panel, then click **Save note** once | Exactly one `POST` to `/api/notes` succeeds, `Retry check` appears once in the list and the error message is gone | [ ] Pass [ ] Fail |
 

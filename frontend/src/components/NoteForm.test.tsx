@@ -106,6 +106,20 @@ describe("NoteForm", () => {
     expect(createNoteMock).toHaveBeenCalledTimes(1);
   });
 
+  it("ignores a second submit event while the first save is pending, even with the button not yet disabled", () => {
+    // Submit events bypass the button's disabled attribute, so only the in-flight
+    // guard inside the handler can stop the second one.
+    createNoteMock.mockReturnValue(new Promise(() => {}));
+    render(<NoteForm onCreated={vi.fn()} />);
+
+    typeNote("Buy milk");
+    const form = screen.getByTestId("note-form");
+    fireEvent.submit(form);
+    fireEvent.submit(form);
+
+    expect(createNoteMock).toHaveBeenCalledTimes(1);
+  });
+
   it("disables the submit button while saving and enables it again once the save succeeds", async () => {
     let resolveSave: (note: { id: number; text: string }) => void = () => {};
     createNoteMock.mockReturnValue(
