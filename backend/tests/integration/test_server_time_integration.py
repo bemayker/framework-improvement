@@ -41,6 +41,14 @@ def test_get_time_now_differs_across_calls_a_second_apart(client: TestClient):
     )
 
 
+def test_get_time_response_carries_cache_control_no_store(client: TestClient):
+    """BUG-01 criteria 1 and 2: the edge cache is told not to store the response."""
+    response = client.get("/api/time")
+
+    assert response.status_code == 200
+    assert response.headers["Cache-Control"] == "no-store"
+
+
 def test_openapi_declares_server_time_response_schema(client: TestClient):
     """Criterion 3: the published schema names ServerTimeResponse and its fields."""
     document = client.get("/openapi.json").json()
