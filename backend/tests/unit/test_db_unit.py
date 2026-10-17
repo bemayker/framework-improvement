@@ -86,9 +86,7 @@ def test_ensure_schema_applies_the_ddl_to_a_provided_connection(
 
     db.ensure_schema(caller_connection)
 
-    # The advisory lock must precede the DDL so concurrent creators serialize.
-    assert caller_connection.executed == [db.SCHEMA_LOCK_SQL, db.SCHEMA_DDL]
-    assert "pg_advisory_xact_lock" in db.SCHEMA_LOCK_SQL
+    assert caller_connection.executed == [db.SCHEMA_DDL]
     assert caller_connection.commits == 1
     # The dispatch must not open a second connection of its own.
     assert calls == []
@@ -103,7 +101,7 @@ def test_ensure_schema_opens_a_connection_when_given_a_connection_string(
     db.ensure_schema(URL)
 
     assert calls == [URL]
-    assert connection.executed == [db.SCHEMA_LOCK_SQL, db.SCHEMA_DDL]
+    assert connection.executed == [db.SCHEMA_DDL]
     assert connection.commits == 1
 
 

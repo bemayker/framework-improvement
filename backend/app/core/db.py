@@ -25,13 +25,6 @@ CREATE TABLE IF NOT EXISTS notes (
 );
 """
 
-# CREATE TABLE IF NOT EXISTS is not concurrency-safe: two simultaneous creators
-# (the app container and the test session in CI) race on the pg_type row and one
-# fails with a UniqueViolation. A transaction-scoped advisory lock serializes
-# them and is released by the commit that ends `_apply_schema`.
-SCHEMA_LOCK_KEY = 7_265_001
-SCHEMA_LOCK_SQL = f"SELECT pg_advisory_xact_lock({SCHEMA_LOCK_KEY})"
-
 # A health probe that can hang is not a probe: without an explicit bound,
 # libpq waits for the OS TCP timeout, so an unreachable database would stall
 # the request instead of answering 503 (TEST-02).
@@ -79,7 +72,6 @@ def ensure_schema(target: psycopg.Connection | str) -> None:
 
 def _apply_schema(connection: psycopg.Connection) -> None:
     with connection.cursor() as cursor:
-        cursor.execute(SCHEMA_LOCK_SQL)
         cursor.execute(SCHEMA_DDL)
     connection.commit()
 
