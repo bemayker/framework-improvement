@@ -5,8 +5,7 @@ Later features register their routers here without restructuring this factory:
 TEST-05 registers the version router, TEST-03 the notes router plus the
 startup schema initialisation and the CORS middleware the browser needs, and
 TEST-02 the health router, TEST-06 the echo router, and TEST-07 the uptime
-router plus the process-start capture in the lifespan hook, and FEAT-1 the
-server time router.
+router plus the process-start capture in the lifespan hook.
 """
 
 import logging
@@ -21,7 +20,6 @@ from app.core.db import ensure_schema
 from app.routers.echo import router as echo_router
 from app.routers.health import router as health_router
 from app.routers.notes import router as notes_router
-from app.routers.server_time import router as server_time_router
 from app.routers.uptime import router as uptime_router
 from app.routers.version import router as version_router
 from app.services import uptime_service
@@ -66,7 +64,6 @@ def create_app() -> FastAPI:
     app.include_router(health_router)
     app.include_router(echo_router)
     app.include_router(uptime_router)
-    app.include_router(server_time_router)
     return app
 
 
