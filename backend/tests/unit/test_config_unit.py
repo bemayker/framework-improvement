@@ -6,15 +6,11 @@ FastAPI instance in `create_app()` and `database_url` is the only credential-
 shaped value in the package, so an unnoticed change to either is a silent
 production-configuration change.
 
-One thing is deliberately NOT asserted here, and the reason is a source defect
-rather than a gap in these tests. `Settings.database_url`'s default is written
-as a plain dataclass field default, so it is evaluated **once at class
-definition**, while `get_settings()`'s own docstring promises a value "read
-fresh from the environment". Those two cannot both be true. Asserting either
-one would encode a contested contract: asserting freshness fails today, and
-asserting import-time capture would pin the defect and break the moment it is
-fixed. So these tests cover the part of the contract that holds either way and
-the mismatch is reported instead (see the generate-tests report and PR).
+`Settings.database_url` is read per call through a `default_factory`, like
+`cors_origins` and `build_commit`, so `get_settings()`'s "read fresh from the
+environment" promise holds for every field. The database_url test asserts only
+the type contract and the absence of a hardcoded credential; the per-call
+behaviour is pinned for `cors_origins` and `build_commit` below.
 """
 
 import dataclasses
@@ -22,7 +18,12 @@ import os
 
 import pytest
 
-from app.core.config import DEFAULT_CORS_ORIGINS, Settings, get_settings
+from app.core.config import (
+    DEFAULT_BUILD_COMMIT,
+    DEFAULT_CORS_ORIGINS,
+    Settings,
+    get_settings,
+)
 
 
 def test_get_settings_returns_the_configured_app_title():
@@ -62,8 +63,7 @@ def test_settings_database_url_is_optional_and_never_a_hardcoded_credential():
     The scaffold deliberately ships no credential-shaped default; the real
     value arrives from the environment via docker-compose or `.env.example`.
     This asserts the type contract and the absence of a literal default, which
-    hold whether or not the field is evaluated per call (see the module
-    docstring).
+    hold whether or not the field is evaluated per call.
     """
     settings = get_settings()
 
@@ -102,3 +102,42 @@ def test_settings_cors_origins_treats_blank_value_as_unset(monkeypatch, blank):
     monkeypatch.setenv("CORS_ORIGINS", blank)
 
     assert get_settings().cors_origins == DEFAULT_CORS_ORIGINS
+
+
+def test_settings_build_commit_reads_the_build_commit_env_value(monkeypatch):
+    """BUILD_COMMIT is the declared source: the resolved value is what the env holds."""
+    full_sha = "0123456789abcdef0123456789abcdef01234567"
+    monkeypatch.setenv("BUILD_COMMIT", full_sha)
+
+    assert get_settings().build_commit == full_sha
+
+
+def test_settings_build_commit_defaults_to_unknown_when_unset(monkeypatch):
+    """With BUILD_COMMIT unset the build is reported as unknown."""
+    monkeypatch.delenv("BUILD_COMMIT", raising=False)
+
+    assert get_settings().build_commit == DEFAULT_BUILD_COMMIT == "unknown"
+
+
+@pytest.mark.parametrize("blank", ["", "   "])
+def test_settings_build_commit_treats_blank_value_as_unset(monkeypatch, blank):
+    """A blank BUILD_COMMIT (docker-compose passes one when unset) means unknown."""
+    monkeypatch.setenv("BUILD_COMMIT", blank)
+
+    assert get_settings().build_commit == DEFAULT_BUILD_COMMIT
+
+
+def test_settings_build_commit_strips_surrounding_whitespace(monkeypatch):
+    """Edge case: whitespace around a real value is dropped, the value is kept."""
+    monkeypatch.setenv("BUILD_COMMIT", "  abc1234 \n")
+
+    assert get_settings().build_commit == "abc1234"
+
+
+def test_settings_build_commit_is_read_per_call_not_at_import(monkeypatch):
+    """The value follows the environment between calls, like the other settings."""
+    monkeypatch.setenv("BUILD_COMMIT", "first")
+    first = get_settings().build_commit
+    monkeypatch.setenv("BUILD_COMMIT", "second")
+
+    assert (first, get_settings().build_commit) == ("first", "second")
