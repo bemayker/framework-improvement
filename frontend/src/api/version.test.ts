@@ -34,16 +34,40 @@ describe("fetchAppVersion", () => {
     vi.unstubAllGlobals();
   });
 
-  it("resolves the version from an OK body", async () => {
+  it("resolves the version with a null commit when the body has no commit", async () => {
     fetchMock.mockResolvedValue(okResponse({ version: "0.1.0" }));
 
-    await expect(fetchAppVersion()).resolves.toBe("0.1.0");
+    await expect(fetchAppVersion()).resolves.toEqual({ version: "0.1.0", commit: null });
   });
 
-  it("ignores extra fields such as commit", async () => {
-    fetchMock.mockResolvedValue(okResponse({ version: "0.1.0", commit: "abc123" }));
+  it("cuts the commit to its first 7 characters", async () => {
+    fetchMock.mockResolvedValue(
+      okResponse({ version: "0.1.0", commit: "3dd809b0a1c2" }),
+    );
 
-    await expect(fetchAppVersion()).resolves.toBe("0.1.0");
+    await expect(fetchAppVersion()).resolves.toEqual({
+      version: "0.1.0",
+      commit: "3dd809b",
+    });
+  });
+
+  it("keeps a commit shorter than 7 characters as is", async () => {
+    fetchMock.mockResolvedValue(okResponse({ version: "0.1.0", commit: "abc12" }));
+
+    await expect(fetchAppVersion()).resolves.toEqual({
+      version: "0.1.0",
+      commit: "abc12",
+    });
+  });
+
+  it.each([
+    ["an empty commit", { version: "0.1.0", commit: "" }],
+    ["a non-string commit", { version: "0.1.0", commit: 42 }],
+    ["the unknown sentinel commit", { version: "0.1.0", commit: "unknown" }],
+  ])("resolves the version with a null commit for %s", async (_label, body) => {
+    fetchMock.mockResolvedValue(okResponse(body));
+
+    await expect(fetchAppVersion()).resolves.toEqual({ version: "0.1.0", commit: null });
   });
 
   it.each([
