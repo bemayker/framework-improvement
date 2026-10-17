@@ -1,0 +1,15 @@
+# Decisions (cross-cutting): deliver-20261017T193219Z
+
+This run's section of the repository-root `DECISIONS.md`, which is cumulative across runs. Per-item decisions live in `.claude/artifacts/{ID}/decisions.md`.
+
+## Run deliver-20261017T193219Z
+
+- 2026-10-17 [run] Graph nodes TEST-09, BUG-01, BUG-04, TEST-08 (ready) and TEST-10 (blocked by TEST-08 and TEST-09); edges TEST-08 to TEST-10 and TEST-09 to TEST-10; scaffold TEST-01 done. Rationale: readiness invariant over live ClickUp statuses (all five to do) and local frontmatter (TEST-01 to TEST-05 done); wave is an ordering key and entered no readiness.
+- 2026-10-17 [run] Dropped 14 cancelled tracker rows (TEST-11 to TEST-15, BUG-02, BUG-03, CHORE-01 to CHORE-06, FEAT-2, FEAT-3) from the graph; none of the five open items depends on a cancelled item. Rationale: cancelled reverse-maps to no framework status, so it is not a node.
+- 2026-10-17 [run] No map reconcile: every open tracker item has a row and a registry entry, feature-map-propose.sh returned 0 wave and 0 checkpoint proposals, so no write and no Section L register publish. Rationale: Section 3 step 3 writes only for a missing row or an accepted proposal.
+- 2026-10-17 [run] Inferred shared_risk_notes for BUG-01: disjoint from every open node (server_time.py and its tests only). Cell left empty because the column carries only a warning note. Rationale: sync-project Section 3 step 5 scope rule.
+- 2026-10-17 [run] Dispatch order TEST-09, BUG-01, BUG-04, TEST-08, then TEST-10; round 1 plans TEST-09, BUG-01 and BUG-04. Rationale: wave ascending then ID with no tracker priority; cap 3 leaves TEST-08 queued; the three dispatched items share no files.
+- 2026-10-17 [run] TEST-08 build serialized after the BUG-04 merge, and TEST-10 build after BUG-04 if still unmerged; a hold is released only if both approved File Manifests are disjoint on their whole-feature union. Rationale: shared_risk_notes flags them on frontend/src/components/LandingPage.tsx.
+- 2026-10-17 [run] Resume map: all five open items have no remote branch, no open PR and no artifact, so each runs the full lifecycle from 6.1. Rationale: Section 4 ground-truth read.
+- 2026-10-17 [run] Wave 2 boundary (TEST-09 merged as 3dd809b; BUG-01 to_verify 3fefb2d and BUG-04 done d6bd166 also merged from wave 3). Follow-ups: none filed; every known-improvements entry of PRs 201, 202 and 203 is OPTIONAL and no comment was unaddressed at merge. Re-ingest: open tracker items TEST-08 and TEST-10 only, no new item, no registration, no map write. Rationale: Section W steps 1 and 2.
+- 2026-10-17 [run] Serialization hold on TEST-08 behind BUG-04 released: the approved BUG-04 manifest touched NoteForm files only, disjoint from the TEST-08 plan; BUG-04 has also merged. Rationale: Section 5 step 2 conflict rule on whole-feature manifest unions.
