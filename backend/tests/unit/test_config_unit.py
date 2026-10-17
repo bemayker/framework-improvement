@@ -109,6 +109,30 @@ def test_settings_cors_origins_treats_blank_value_as_unset(monkeypatch, blank):
     assert get_settings().cors_origins == DEFAULT_CORS_ORIGINS
 
 
+def test_settings_cors_origins_strips_trailing_slash(monkeypatch):
+    """BUG-02: the browser's Origin header has no trailing slash, so neither may the setting."""
+    monkeypatch.setenv("CORS_ORIGINS", "http://localhost:5183/")
+
+    assert get_settings().cors_origins == ("http://localhost:5183",)
+
+
+def test_settings_cors_origins_strips_trailing_slash_per_entry(monkeypatch):
+    """Edge case: only slashed entries change; slash-less ones pass through."""
+    monkeypatch.setenv("CORS_ORIGINS", "https://a.example/, https://b.example")
+
+    assert get_settings().cors_origins == ("https://a.example", "https://b.example")
+
+
+@pytest.mark.parametrize("slashes_only", ["/", " / , "])
+def test_settings_cors_origins_trailing_slash_only_entries_fall_back_to_default(
+    monkeypatch, slashes_only
+):
+    """Edge case: an entry that is only a slash is empty once stripped, so the default applies."""
+    monkeypatch.setenv("CORS_ORIGINS", slashes_only)
+
+    assert get_settings().cors_origins == DEFAULT_CORS_ORIGINS
+
+
 def test_settings_build_commit_reads_the_build_commit_env_value(monkeypatch):
     """BUILD_COMMIT is the single declared source and is read per call."""
     monkeypatch.setenv("BUILD_COMMIT", "1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b")
