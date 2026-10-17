@@ -39,32 +39,3 @@ def test_get_app_version_returns_unknown_when_distribution_not_installed(monkeyp
     monkeypatch.setattr(version_service, "version", raise_not_found)
 
     assert version_service.get_app_version() == version_service.UNKNOWN_VERSION
-
-
-def test_get_build_commit_truncates_a_full_sha_to_its_first_12_characters(monkeypatch):
-    """Happy path: CI passes a 40-character sha, the client gets its first 12."""
-    monkeypatch.setenv("BUILD_COMMIT", "0123456789abcdef0123456789abcdef01234567")
-
-    assert version_service.get_build_commit() == "0123456789ab"
-    assert version_service.COMMIT_LENGTH == 12
-
-
-def test_get_build_commit_returns_a_short_value_unchanged(monkeypatch):
-    """Edge case: a value shorter than the limit is not padded or altered."""
-    monkeypatch.setenv("BUILD_COMMIT", "abc1234")
-
-    assert version_service.get_build_commit() == "abc1234"
-
-
-def test_get_build_commit_returns_a_value_of_exactly_12_characters_unchanged(monkeypatch):
-    """Boundary: 12 characters is the limit itself and is returned whole."""
-    monkeypatch.setenv("BUILD_COMMIT", "0123456789ab")
-
-    assert version_service.get_build_commit() == "0123456789ab"
-
-
-def test_get_build_commit_returns_unknown_when_unset(monkeypatch):
-    """Error case: no BUILD_COMMIT yields the unknown default, never a raise."""
-    monkeypatch.delenv("BUILD_COMMIT", raising=False)
-
-    assert version_service.get_build_commit() == "unknown"

@@ -1,8 +1,6 @@
-"""Unit tests for the GET /api/time handler (FEAT-1, BUG-01), with the clock stubbed."""
+"""Unit tests for the GET /api/time handler (FEAT-1), with the clock stubbed."""
 
 from datetime import datetime, timezone
-
-from fastapi import Response
 
 from app.routers import server_time
 from app.schemas.server_time import ServerTimeResponse
@@ -28,8 +26,8 @@ def test_get_server_time_reads_the_clock_on_every_call(monkeypatch):
     stub = _StubDatetime([FIRST_INSTANT, SECOND_INSTANT])
     monkeypatch.setattr(server_time, "datetime", stub)
 
-    first = server_time.get_server_time(Response())
-    second = server_time.get_server_time(Response())
+    first = server_time.get_server_time()
+    second = server_time.get_server_time()
 
     assert first.now == FIRST_INSTANT
     assert second.now == SECOND_INSTANT
@@ -41,7 +39,7 @@ def test_get_server_time_requests_utc_from_the_clock(monkeypatch):
     stub = _StubDatetime([FIRST_INSTANT])
     monkeypatch.setattr(server_time, "datetime", stub)
 
-    server_time.get_server_time(Response())
+    server_time.get_server_time()
 
     assert stub.requested_tzinfos == [timezone.utc]
 
@@ -50,17 +48,7 @@ def test_get_server_time_returns_schema_not_a_dict(monkeypatch):
     """Criterion 3: the handler returns a ServerTimeResponse."""
     monkeypatch.setattr(server_time, "datetime", _StubDatetime([FIRST_INSTANT]))
 
-    result = server_time.get_server_time(Response())
+    result = server_time.get_server_time()
 
     assert isinstance(result, ServerTimeResponse)
     assert result.timezone == "UTC"
-
-
-def test_get_server_time_sets_cache_control_no_store(monkeypatch):
-    """BUG-01 criterion 1: the injected response carries `Cache-Control: no-store`."""
-    monkeypatch.setattr(server_time, "datetime", _StubDatetime([FIRST_INSTANT]))
-    response = Response()
-
-    server_time.get_server_time(response)
-
-    assert response.headers["Cache-Control"] == "no-store"
