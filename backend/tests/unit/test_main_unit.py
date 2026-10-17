@@ -1,6 +1,7 @@
 """Unit tests for the FastAPI app factory (backend/app/main.py)."""
 
 from app.main import create_app
+from app.schemas.echo import EchoResponse
 
 # FastAPI's own routes, present on every app regardless of what this project
 # registers; subtracted so a test asserts only the app's custom routes.
@@ -56,6 +57,31 @@ def test_create_app_registers_health_route():
     custom_paths = _collect_route_paths(app.routes) - BUILT_IN_ROUTE_PATHS
 
     assert "/api/health" in custom_paths
+
+
+def _find_route(routes, path: str):
+    """Return the route with this path, walking `original_router` wrappers."""
+    for route in routes:
+        if getattr(route, "path", None) == path:
+            return route
+        original_router = getattr(route, "original_router", None)
+        if original_router is not None:
+            found = _find_route(original_router.routes, path)
+            if found is not None:
+                return found
+    return None
+
+
+def test_create_app_registers_echo_route_with_echo_response_model():
+    """Edge case: the TEST-06 echo route is wired in and declares its schema."""
+    app = create_app()
+
+    custom_paths = _collect_route_paths(app.routes) - BUILT_IN_ROUTE_PATHS
+    echo_route = _find_route(app.routes, "/api/echo")
+
+    assert "/api/echo" in custom_paths
+    assert echo_route is not None
+    assert echo_route.response_model is EchoResponse
 
 
 def test_create_app_returns_independent_instances():
