@@ -93,4 +93,64 @@ describe("NoteForm", () => {
       expect(screen.queryByTestId("note-form-error")).not.toBeInTheDocument(),
     );
   });
+
+  it("sends only one create request on a double submit while the first save is pending", () => {
+    // A promise that never settles keeps the first save in flight for the whole test.
+    createNoteMock.mockReturnValue(new Promise(() => {}));
+    render(<NoteForm onCreated={vi.fn()} />);
+
+    typeNote("Buy milk");
+    submitForm();
+    submitForm();
+
+    expect(createNoteMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("disables the submit button while saving and enables it again once the save succeeds", async () => {
+    let resolveSave: (note: { id: number; text: string }) => void = () => {};
+    createNoteMock.mockReturnValue(
+      new Promise((resolve) => {
+        resolveSave = resolve;
+      }),
+    );
+    render(<NoteForm onCreated={vi.fn()} />);
+
+    typeNote("Buy milk");
+    submitForm();
+
+    expect(screen.getByTestId("note-submit")).toBeDisabled();
+
+    resolveSave({ id: 10, text: "Buy milk" });
+
+    await waitFor(() => expect(screen.getByTestId("note-submit")).toBeEnabled());
+    expect(screen.getByTestId("note-input")).toHaveValue("");
+  });
+
+  it("releases the guard after a failed save so a retry sends exactly one more request", async () => {
+    createNoteMock.mockRejectedValueOnce(new Error("Saving the note failed: 500"));
+    createNoteMock.mockResolvedValue({ id: 11, text: "Buy milk" });
+    render(<NoteForm onCreated={vi.fn()} />);
+
+    typeNote("Buy milk");
+    submitForm();
+
+    expect(await screen.findByTestId("note-form-error")).toBeInTheDocument();
+    await waitFor(() => expect(screen.getByTestId("note-submit")).toBeEnabled());
+
+    submitForm();
+
+    await waitFor(() => expect(createNoteMock).toHaveBeenCalledTimes(2));
+    await waitFor(() =>
+      expect(screen.queryByTestId("note-form-error")).not.toBeInTheDocument(),
+    );
+  });
+
+  it("keeps the submit button enabled after an empty submit while idle", async () => {
+    render(<NoteForm onCreated={vi.fn()} />);
+
+    submitForm();
+
+    expect(await screen.findByTestId("note-form-error")).toBeInTheDocument();
+    expect(screen.getByTestId("note-submit")).toBeEnabled();
+  });
 });
