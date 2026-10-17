@@ -2,6 +2,7 @@
 
 from app.main import create_app
 from app.schemas.echo import EchoResponse
+from app.schemas.server_time import ServerTimeResponse
 from app.schemas.uptime import UptimeResponse
 
 # FastAPI's own routes, present on every app regardless of what this project
@@ -95,6 +96,18 @@ def test_create_app_registers_uptime_route_with_uptime_response_model():
     assert "/api/uptime" in custom_paths
     assert uptime_route is not None
     assert uptime_route.response_model is UptimeResponse
+
+
+def test_create_app_registers_time_route_with_server_time_response_model():
+    """Criterion 3: the FEAT-1 time route is wired in and declares its schema."""
+    app = create_app()
+
+    custom_paths = _collect_route_paths(app.routes) - BUILT_IN_ROUTE_PATHS
+    time_route = _find_route(app.routes, "/api/time")
+
+    assert "/api/time" in custom_paths
+    assert time_route is not None
+    assert time_route.response_model is ServerTimeResponse
 
 
 def test_create_app_returns_independent_instances():
