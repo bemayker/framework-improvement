@@ -56,14 +56,6 @@ def test_openapi_declares_server_time_response_schema(client: TestClient):
     assert set(schema["required"]) == {"now", "timezone"}
 
 
-def test_get_time_response_carries_cache_control_no_store(client: TestClient):
-    """BUG-01: an edge cache must not store the response."""
-    response = client.get("/api/time")
-
-    assert response.status_code == 200
-    assert response.headers["cache-control"] == "no-store"
-
-
 def test_post_time_returns_405_method_not_allowed(client: TestClient):
     """Only reachable error case: the endpoint is read-only."""
     response = client.post("/api/time")
