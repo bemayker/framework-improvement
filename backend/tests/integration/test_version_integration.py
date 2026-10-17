@@ -27,7 +27,10 @@ def test_get_version_returns_200_with_version_from_pyproject(client: TestClient,
 
 
 def test_get_version_answers_when_database_url_is_unset(monkeypatch):
-    """Criterion 3: no database connection is needed; DATABASE_URL may be absent."""
+    """TEST-05 criterion 3: no database connection is needed; DATABASE_URL may be absent.
+
+    BUILD_COMMIT is unset too, so the commit reads "unknown".
+    """
     monkeypatch.delenv("DATABASE_URL", raising=False)
     monkeypatch.delenv("BUILD_COMMIT", raising=False)
 

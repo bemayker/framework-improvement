@@ -1,8 +1,9 @@
-"""Business logic for resolving the running application's version (TEST-05).
+"""Business logic for resolving the running application's version (TEST-05) and build commit (TEST-09).
 
 The version is read from installed package metadata rather than hardcoded,
 so it always reflects `[project].version` in backend/pyproject.toml without
-any code change when that value is bumped.
+any code change when that value is bumped. The commit comes from the
+BUILD_COMMIT setting, shortened for clients.
 """
 
 import logging
