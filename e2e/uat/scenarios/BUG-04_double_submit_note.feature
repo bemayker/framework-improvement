@@ -9,11 +9,11 @@ Feature: BUG-04 Saving a note twice quickly stores it once
 
   Scenario: A second submit while the first save is in flight stores the note once
     Given the landing page is open
-    And the save request to "POST /api/notes" is still in flight
+    And save requests to "POST /api/notes" are held until released
     When I type "Enter check 1" into the note field identified by "note-input"
     And I press the save button identified by "note-submit"
     And I press Enter in the note field identified by "note-input" before the save has finished
-    And the save request finishes
+    And the held save request is released
     Then exactly one "POST /api/notes" request was sent
     And "Enter check 1" is shown exactly once in the notes list identified by "note-list"
     And the note field is empty again
@@ -24,7 +24,7 @@ Feature: BUG-04 Saving a note twice quickly stores it once
     When I type "Disabled check 2" into the note field identified by "note-input"
     And I press the save button identified by "note-submit" once
     Then the save button identified by "note-submit" is disabled and clicking it again does nothing
-    And when "Disabled check 2" appears in the notes list identified by "note-list"
+    When "Disabled check 2" appears in the notes list identified by "note-list"
     Then the save button identified by "note-submit" is enabled again
 
   Scenario: The form accepts the next submit after a save, including a retry after a failed save
@@ -44,10 +44,10 @@ Feature: BUG-04 Saving a note twice quickly stores it once
 
   Scenario: A double-click on Save note stores the note once (edge case)
     Given the landing page is open
-    And the save request to "POST /api/notes" is still in flight
+    And save requests to "POST /api/notes" are held until released
     When I type "Double click check 1" into the note field identified by "note-input"
     And I double-click the save button identified by "note-submit"
-    And the save request finishes
+    And the held save request is released
     Then exactly one "POST /api/notes" request was sent
     And "Double click check 1" is shown exactly once in the notes list identified by "note-list"
 
