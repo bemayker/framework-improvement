@@ -2,13 +2,15 @@ import { readFileSync } from "node:fs";
 import path from "node:path";
 import { test, expect } from "@playwright/test";
 
-const frontendPackageJsonPath = path.resolve(__dirname, "../../frontend/package.json");
-const { version } = JSON.parse(readFileSync(frontendPackageJsonPath, "utf-8")) as {
-  version: string;
-};
+// TEST-08 supersedes the version source: the footer shows the backend version,
+// fetched at runtime from GET /api/version, not the frontend package.json one.
+const backendPyprojectPath = path.resolve(__dirname, "../../backend/pyproject.toml");
+const version = /^version\s*=\s*"([^"]+)"/m.exec(
+  readFileSync(backendPyprojectPath, "utf-8"),
+)?.[1] as string;
 
 test.describe("TEST-04 page footer", () => {
-  test("shows a footer with the app name and the version from frontend/package.json", async ({
+  test("shows a footer with the app name and the version from backend/pyproject.toml", async ({
     page,
   }) => {
     await page.goto("/");
