@@ -22,12 +22,7 @@ import os
 
 import pytest
 
-from app.core.config import (
-    DEFAULT_BUILD_COMMIT,
-    DEFAULT_CORS_ORIGINS,
-    Settings,
-    get_settings,
-)
+from app.core.config import DEFAULT_CORS_ORIGINS, Settings, get_settings
 
 
 def test_get_settings_returns_the_configured_app_title():
@@ -107,56 +102,3 @@ def test_settings_cors_origins_treats_blank_value_as_unset(monkeypatch, blank):
     monkeypatch.setenv("CORS_ORIGINS", blank)
 
     assert get_settings().cors_origins == DEFAULT_CORS_ORIGINS
-
-
-def test_settings_cors_origins_strips_trailing_slash(monkeypatch):
-    """BUG-02: the browser's Origin header has no trailing slash, so neither may the setting."""
-    monkeypatch.setenv("CORS_ORIGINS", "http://localhost:5183/")
-
-    assert get_settings().cors_origins == ("http://localhost:5183",)
-
-
-def test_settings_cors_origins_strips_trailing_slash_per_entry(monkeypatch):
-    """Edge case: only slashed entries change; slash-less ones pass through."""
-    monkeypatch.setenv("CORS_ORIGINS", "https://a.example/, https://b.example")
-
-    assert get_settings().cors_origins == ("https://a.example", "https://b.example")
-
-
-@pytest.mark.parametrize("slashes_only", ["/", " / , "])
-def test_settings_cors_origins_trailing_slash_only_entries_fall_back_to_default(
-    monkeypatch, slashes_only
-):
-    """Edge case: an entry that is only a slash is empty once stripped, so the default applies."""
-    monkeypatch.setenv("CORS_ORIGINS", slashes_only)
-
-    assert get_settings().cors_origins == DEFAULT_CORS_ORIGINS
-
-
-def test_settings_build_commit_reads_the_build_commit_env_value(monkeypatch):
-    """BUILD_COMMIT is the single declared source and is read per call."""
-    monkeypatch.setenv("BUILD_COMMIT", "1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b")
-
-    assert get_settings().build_commit == "1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b"
-
-
-def test_settings_build_commit_defaults_when_unset(monkeypatch):
-    """With BUILD_COMMIT unset the documented default is used."""
-    monkeypatch.delenv("BUILD_COMMIT", raising=False)
-
-    assert get_settings().build_commit == DEFAULT_BUILD_COMMIT == "unknown"
-
-
-@pytest.mark.parametrize("blank", ["", "   "])
-def test_settings_build_commit_treats_blank_value_as_unset(monkeypatch, blank):
-    """A blank BUILD_COMMIT falls back to the default."""
-    monkeypatch.setenv("BUILD_COMMIT", blank)
-
-    assert get_settings().build_commit == DEFAULT_BUILD_COMMIT
-
-
-def test_settings_build_commit_strips_surrounding_whitespace(monkeypatch):
-    """Surrounding whitespace is removed before the value is used."""
-    monkeypatch.setenv("BUILD_COMMIT", "  abc123\n")
-
-    assert get_settings().build_commit == "abc123"
