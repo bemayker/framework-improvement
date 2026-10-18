@@ -48,5 +48,12 @@ def test_get_time_is_computed_per_request(client: TestClient):
     assert second > first
 
 
+def test_get_time_sets_cache_control_no_store(client: TestClient):
+    response = client.get("/api/time")
+
+    assert response.status_code == 200
+    assert response.headers.get("cache-control") == "no-store"
+
+
 def test_post_time_returns_405(client: TestClient):
     assert client.post("/api/time").status_code == 405
