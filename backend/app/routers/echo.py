@@ -9,5 +9,8 @@ router = APIRouter(prefix="/api", tags=["echo"])
 
 @router.get("/echo", response_model=EchoResponse)
 def get_echo(msg: str = Query(..., max_length=ECHO_MESSAGE_MAX_LENGTH)) -> EchoResponse:
-    """Return the given message."""
-    return EchoResponse(echo=msg)
+    """Return the given message with leading and trailing whitespace removed.
+
+    The max-length rule applies to the raw input, before stripping.
+    """
+    return EchoResponse(echo=msg.strip())
