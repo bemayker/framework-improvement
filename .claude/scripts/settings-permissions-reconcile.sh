@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# materialized-from: mayker-dev v0.3.410; do not edit, regenerate with /upgrade-project
+# materialized-from: mayker-dev v0.3.394; do not edit, regenerate with /upgrade-project
 #
 # Additive reconciler for a consuming repo's `.claude/settings.json` permissions
 # block (MDF-178).
@@ -378,12 +378,8 @@ MCP_ENTRY = re.compile(r"^mcp__")
 # is not an MCP server (azure-boards: the `az` CLI) or whose server no shipped
 # project has named (jira, linear: their mapping files say so) has no entry.
 #
-# The pass, only when `.mcp.json` is ABSENT and `CLAUDE.md` names a provider
-# (the project's, or a multi-repo row's own tracker, MDF-406):
-#   * the configured provider's own server entry is KEPT, or ADDED when missing,
-#     and so is the server of each `## Repositories` row whose `tracker` cell
-#     names a provider (`{provider}; {project}[; {team}]`, MDF-389): a row's
-#     tracker is a tracker the project uses, so its grant is never retired;
+# The pass, only when `.mcp.json` is ABSENT and `CLAUDE.md` names a provider:
+#   * the configured provider's own server entry is KEPT, or ADDED when missing;
 #   * every OTHER key's server entry is RETIRED when present verbatim;
 #   * every other `mcp__` entry is LEFT ALONE: a server the framework does not
 #     know is an operator's, and deriving the whole slice from the tracker would
@@ -650,55 +646,6 @@ def configured_provider(path, label):
 tracker = None if mcp_present else configured_provider(cmd_src_path, "Issue Tracker Provider")
 tracker_server = TRACKER_SERVERS.get(tracker) if tracker else None
 
-
-def repository_trackers(path):
-    """[(row name, provider)] of the `## Repositories` rows whose `tracker` cell
-    names a provider, in a `Layout: multi-repo` CLAUDE.md; [] otherwise (MDF-406).
-    Parsed the way `hooks/lib/repos.sh` parses it: HTML comments dropped, columns
-    found by name, a backslash-escaped pipe is a literal pipe, and the provider is
-    the cell's first `;` part."""
-    if not path:
-        return []
-    try:
-        with open(path, encoding="utf-8") as fh:
-            text = re.sub(r"<!--.*?-->", "", fh.read(), flags=re.S)
-    except (OSError, UnicodeDecodeError):
-        return []
-    section, inside = [], False
-    for line in text.split("\n"):
-        if re.match(r"^##\s+Repositories\s*$", line):
-            inside = True
-            continue
-        if inside and re.match(r"^#{1,2}\s", line):
-            break
-        if inside:
-            section.append(line)
-    layout, header, found = "single", None, []
-    for line in section:
-        m = re.match(r"^\s*-\s+\*\*Layout:\*\*\s*([^\s#]*)", line)
-        if m:
-            layout = m.group(1)
-            continue
-        body = line.strip()
-        if not body.startswith("|"):
-            continue
-        body = body[1:]
-        body = body[:-1] if body.endswith("|") and not body.endswith("\\|") else body
-        cells = [c.replace("\\|", "|").strip() for c in re.split(r"(?<!\\)\|", body)]
-        if header is None:
-            header = [c.lower() for c in cells]
-            continue
-        if all(re.fullmatch(r":?-{3,}:?", c or "") for c in cells):
-            continue
-        row = dict(zip(header, cells))
-        provider = row.get("tracker", "").split(";")[0].strip()
-        if provider and PROVIDER_VALUE.match(provider):
-            found.append((row.get("name", ""), provider))
-    return found if layout == "multi-repo" else []
-
-
-repo_trackers = [] if mcp_present else repository_trackers(cmd_src_path)
-
 # The provider slice runs whatever `.mcp.json` says: it grants a CLI, not a server.
 git_provider = configured_provider(cmd_src_path, "Git Provider")
 
@@ -809,39 +756,28 @@ for lst in ENTRY_LISTS:
         kept = surviving
 
     # 3b. The tracker slice, only when there is no `.mcp.json` (MDF-335): the
-    #     known tracker servers alone, every other `mcp__` entry untouched. The
-    #     wanted servers are the project tracker's, then each repository row's
-    #     own (MDF-406), each with the reason the report names.
-    if lst == "allow" and mcp_wanted is None and (tracker is not None or repo_trackers):
-        tracker_wanted = {}
-        if tracker_server is not None:
-            tracker_wanted["mcp__%s__*" % tracker_server] = (
-                "Issue Tracker Provider is %s in CLAUDE.md, and there is no .mcp.json" % tracker
-            )
-        for row, provider in repo_trackers:
-            server = TRACKER_SERVERS.get(provider)
-            if server is not None:
-                tracker_wanted.setdefault(
-                    "mcp__%s__*" % server,
-                    "repository '%s' tracks on %s in CLAUDE.md -> Repositories, and "
-                    "there is no .mcp.json" % (row, provider),
-                )
-        others = set("mcp__%s__*" % s for s in TRACKER_SERVERS.values()) - set(tracker_wanted)
+    #     known tracker servers alone, every other `mcp__` entry untouched.
+    if lst == "allow" and mcp_wanted is None and tracker is not None:
+        others = set(
+            "mcp__%s__*" % s for k, s in TRACKER_SERVERS.items() if s != tracker_server
+        )
         surviving = []
         for item in kept:
             if isinstance(item, str) and item in others:
-                why = (
-                    "Issue Tracker Provider is %s in CLAUDE.md, and there is no .mcp.json" % tracker
-                    if tracker is not None
-                    else "no tracker in CLAUDE.md uses it, and there is no .mcp.json"
+                report.append(
+                    "retire permissions.allow: %s (Issue Tracker Provider is %s in "
+                    "CLAUDE.md, and there is no .mcp.json)" % (item, tracker)
                 )
-                report.append("retire permissions.allow: %s (%s)" % (item, why))
                 changed = True
                 continue
             surviving.append(item)
-        for entry, why in tracker_wanted.items():
+        if tracker_server is not None:
+            entry = "mcp__%s__*" % tracker_server
             if entry not in surviving:
-                report.append("add    permissions.allow: %s (%s)" % (entry, why))
+                report.append(
+                    "add    permissions.allow: %s (Issue Tracker Provider is %s in "
+                    "CLAUDE.md, and there is no .mcp.json)" % (entry, tracker)
+                )
                 surviving.append(entry)
                 changed = True
         kept = surviving

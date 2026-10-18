@@ -5,8 +5,7 @@ open a database connection, so `database_url` is now read per call rather
 than bound once at import time: a dataclass field default is evaluated when
 the class is defined, which would make `get_settings()`'s "read fresh from
 the environment" promise false for anything that changes the variable after
-import (the version integration test does exactly that). BUILD_COMMIT
-(TEST-09) is read the same way.
+import (the version integration test does exactly that).
 """
 
 import os
@@ -17,22 +16,9 @@ from dataclasses import dataclass, field
 DEFAULT_CORS_ORIGINS = ("http://localhost:5183",)
 
 
-# Reported by GET /api/version when BUILD_COMMIT is unset or blank.
-DEFAULT_BUILD_COMMIT = "unknown"
-
-
-def _read_build_commit() -> str:
-    """Return BUILD_COMMIT stripped, or the default when it is unset or blank."""
-    return (os.environ.get("BUILD_COMMIT") or "").strip() or DEFAULT_BUILD_COMMIT
-
-
 def _read_cors_origins() -> tuple[str, ...]:
-    """Return CORS_ORIGINS split on commas, or the default when none are given.
-
-    A trailing slash is dropped from each entry: browsers send an Origin header
-    without one, and CORSMiddleware compares origins exactly.
-    """
-    entries = (entry.strip().rstrip("/") for entry in (os.environ.get("CORS_ORIGINS") or "").split(","))
+    """Return CORS_ORIGINS split on commas, or the default when none are given."""
+    entries = (entry.strip() for entry in (os.environ.get("CORS_ORIGINS") or "").split(","))
     return tuple(entry for entry in entries if entry) or DEFAULT_CORS_ORIGINS
 
 
@@ -46,8 +32,6 @@ class Settings:
     )
     # CORS_ORIGINS (comma-separated), read per call; unset or blank uses the default.
     cors_origins: tuple[str, ...] = field(default_factory=_read_cors_origins)
-    # BUILD_COMMIT (set at build time, TEST-09), read per call; unset or blank uses the default.
-    build_commit: str = field(default_factory=_read_build_commit)
 
 
 def get_settings() -> Settings:
