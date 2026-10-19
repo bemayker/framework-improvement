@@ -1,0 +1,14 @@
+# Decisions (TEST-08, after its final push): deliver-20261018T232421Z
+
+The entries `.claude/artifacts/TEST-08/decisions.md` received after the last push of its branch (7454981), the head its pull request merged. The entries before them reached the default branch in that file.
+
+- 6.6: 7454981 chore(TEST-08): record review scope manifests; push gate: test-gate: verdict recorded for this push (head 7454981: full after 5s; counts: root: pytest 104 passed, 0 failed, 14 skipped + vitest 42 passed, 0 failed, 0 skipped); upstream-ok. Draft PR https://github.com/bemayker/framework-improvement/pull/230; body fit unchanged 10041 chars. PR label: #230 mayker:in-progress. Item-to-PR link comment posted on ClickUp, answering the human correction comment on the item.
+- PR body first write refused once by bash-shape-guard brace-quote (a prose line held a brace beside an apostrophe); the line was reworded and the same write-run call landed.
+- 6.7: CI 7 of 7 checks green at 2m46s (2 polls). Handover rebuild: status=rebuilt sha=7454981+dirty (only decisions.md uncommitted) services=3/3 health=pass project=framework-improvement-test-08-handover duration=13s. PR 230 converted ready; PR label: #230 mayker:in-review (removed mayker:in-progress); ClickUp status to test (in_review). mergeStateStatus read UNSTABLE right after conversion while the notify job (ready_for_review subscriber) ran; gh pr checks then showed all 7 pass, notify included.
+- 6.8 round 1: PR 230 has 0 inline comments, 0 conversation comments, 0 reviews; tracker comments 12: the human correction comment is answered by this build and by the PR-link comment posted this run; the operator reset note is answered by the plan (revert verified on main); the rest are mayker-dev notices. 0 unanswered.
+- 2026-10-19 [TEST-08] Merge verdict: MERGE (squash) for PR 230. Rationale: autonomy.md Section 5 holds on all five conditions: reviewer blocking=0; 7 of 7 checks pass and mergeStateStatus CLEAN after the notify job settled; all 4 acceptance criteria met per the human correction comment; 0 PR reviews or change requests and 0 unanswered tracker comments; escalation bar not triggered (additive frontend change, revertible, intent unambiguous).
+- 6.9: PR 230 squash-merged, merge commit 76b992db70a6bdbb33b5540e151e36c46f2df018.
+- 6.10 auto-Done: auto-done: run 39179332908 succeeded. Re-read: ClickUp status complete (done), no tags. No backstop flip.
+- 6.10 standards provenance: 9 dispatches; both always-on standards SELF-REPORTED as read by 5 of 9 (self-reported); 0 unbacked provenance claims; 0 MISMATCH lines.
+- 6.10 checkpoint: [checkpoint] due=yes items=TEST-08 command=uv run --directory backend pytest -q && npm --prefix frontend test merged=TEST-08 head=76b992d tip=origin/main@76b992d verdict=pass.
+- 6.10 teardown: no env line of this run for TEST-08. Handover stack framework-improvement-test-08-handover left running for the tester.
