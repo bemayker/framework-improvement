@@ -14,15 +14,26 @@ describe("AppFooter", () => {
     fetchAppVersionMock.mockReset();
   });
 
-  it("renders the app name and the version the backend reported", async () => {
-    fetchAppVersionMock.mockResolvedValue("0.1.0");
+  it("renders the app name, the version and the short commit the backend reported", async () => {
+    fetchAppVersionMock.mockResolvedValue({ version: "0.1.0", commit: "abc1234" });
 
     render(<AppFooter />);
 
-    expect(await screen.findByTestId("app-footer-version")).toHaveTextContent(
-      "v0.1.0",
-    );
-    expect(screen.getByTestId("app-footer")).toHaveTextContent("Task Notes v0.1.0");
+    expect(await screen.findByTestId("app-footer-commit")).toHaveTextContent("(abc1234)");
+    expect(screen.getByTestId("app-footer-version")).toHaveTextContent("v0.1.0");
+    expect(screen.getByTestId("app-footer").textContent).toBe("Task Notes v0.1.0 (abc1234)");
+  });
+
+  it("renders the version alone when the commit is null", async () => {
+    fetchAppVersionMock.mockResolvedValue({ version: "0.1.0", commit: null });
+
+    render(<AppFooter />);
+
+    expect(await screen.findByTestId("app-footer-version")).toHaveTextContent("v0.1.0");
+    const footer = screen.getByTestId("app-footer");
+    expect(footer.textContent).toBe("Task Notes v0.1.0");
+    expect(screen.queryByTestId("app-footer-commit")).not.toBeInTheDocument();
+    expect(footer.textContent).not.toMatch(/undefined|null|unknown/);
   });
 
   it("renders the app name alone when the version cannot be resolved", async () => {
@@ -34,6 +45,7 @@ describe("AppFooter", () => {
     const footer = screen.getByTestId("app-footer");
     expect(footer.textContent).toBe("Task Notes");
     expect(screen.queryByTestId("app-footer-version")).not.toBeInTheDocument();
+    expect(screen.queryByTestId("app-footer-commit")).not.toBeInTheDocument();
     expect(footer.textContent).not.toMatch(/undefined|null|unknown/);
   });
 
@@ -43,8 +55,11 @@ describe("AppFooter", () => {
     render(<AppFooter />);
     await waitFor(() => expect(fetchAppVersionMock).toHaveBeenCalledTimes(1));
 
-    expect(screen.getByTestId("app-footer").textContent).toBe("Task Notes");
+    const footer = screen.getByTestId("app-footer");
+    expect(footer.textContent).toBe("Task Notes");
     expect(screen.queryByTestId("app-footer-version")).not.toBeInTheDocument();
+    expect(screen.queryByTestId("app-footer-commit")).not.toBeInTheDocument();
+    expect(footer.textContent).not.toMatch(/undefined|null|unknown|error/i);
   });
 
   it("renders the app name alone before the version request resolves", () => {
@@ -52,12 +67,14 @@ describe("AppFooter", () => {
 
     render(<AppFooter />);
 
-    expect(screen.getByTestId("app-footer").textContent).toBe("Task Notes");
+    const footer = screen.getByTestId("app-footer");
+    expect(footer.textContent).toBe("Task Notes");
     expect(screen.queryByTestId("app-footer-version")).not.toBeInTheDocument();
+    expect(screen.queryByTestId("app-footer-commit")).not.toBeInTheDocument();
   });
 
   it("is exposed as the contentinfo landmark and carries the app-footer test id", async () => {
-    fetchAppVersionMock.mockResolvedValue("0.1.0");
+    fetchAppVersionMock.mockResolvedValue({ version: "0.1.0", commit: "abc1234" });
 
     render(<AppFooter />);
     await screen.findByTestId("app-footer-version");
