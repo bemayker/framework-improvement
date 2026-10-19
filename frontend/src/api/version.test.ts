@@ -28,7 +28,7 @@ describe("version API client", () => {
   it("returns the backend version from the default base URL", async () => {
     fetchMock.mockResolvedValue(response(true, 200, { version: "0.1.0" }));
 
-    await expect(fetchAppVersion()).resolves.toBe("0.1.0");
+    await expect(fetchAppVersion()).resolves.toEqual({ version: "0.1.0", commit: null });
 
     expect(fetchMock).toHaveBeenCalledTimes(1);
     expect(fetchMock).toHaveBeenCalledWith(DEFAULT_VERSION_URL);
@@ -82,6 +82,43 @@ describe("version API client", () => {
 
   it("returns null for the backend unknown sentinel", async () => {
     fetchMock.mockResolvedValue(response(true, 200, { version: "unknown" }));
+
+    await expect(fetchAppVersion()).resolves.toBeNull();
+  });
+
+  it("cuts the commit to its first 7 characters from the same single request", async () => {
+    fetchMock.mockResolvedValue(
+      response(true, 200, { version: "0.1.0", commit: "abc1234def56" }),
+    );
+
+    await expect(fetchAppVersion()).resolves.toEqual({
+      version: "0.1.0",
+      commit: "abc1234",
+    });
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("keeps a commit shorter than 7 characters as is", async () => {
+    fetchMock.mockResolvedValue(response(true, 200, { version: "0.1.0", commit: " abc " }));
+
+    await expect(fetchAppVersion()).resolves.toEqual({ version: "0.1.0", commit: "abc" });
+  });
+
+  it.each([
+    ["missing", {}],
+    ["not a string", { commit: 42 }],
+    ["blank", { commit: "   " }],
+    ["the unknown sentinel", { commit: "unknown" }],
+  ])("returns the version with a null commit when the commit is %s", async (_label, extra) => {
+    fetchMock.mockResolvedValue(response(true, 200, { version: "0.1.0", ...extra }));
+
+    await expect(fetchAppVersion()).resolves.toEqual({ version: "0.1.0", commit: null });
+  });
+
+  it("returns null when the version is unusable even if a commit is present", async () => {
+    fetchMock.mockResolvedValue(
+      response(true, 200, { version: "unknown", commit: "abc1234def56" }),
+    );
 
     await expect(fetchAppVersion()).resolves.toBeNull();
   });
