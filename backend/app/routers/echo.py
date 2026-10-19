@@ -11,5 +11,5 @@ router = APIRouter(prefix="/api", tags=["echo"])
 
 @router.get("/echo", response_model=EchoResponse)
 def get_echo(query: Annotated[EchoQuery, Query()]) -> EchoResponse:
-    """Return the validated `msg` query parameter unchanged."""
-    return EchoResponse(echo=query.msg)
+    """Return the validated `msg` query parameter without surrounding whitespace."""
+    return EchoResponse(echo=query.msg.strip())
