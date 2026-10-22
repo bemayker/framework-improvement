@@ -34,25 +34,62 @@ describe("version API client", () => {
     vi.unstubAllEnvs();
   });
 
-  it("returns the version and requests the default base URL", async () => {
-    fetchMock.mockResolvedValue(okResponse({ version: "0.1.0" }));
+  it("returns the version and commit from one request to the default base URL", async () => {
+    fetchMock.mockResolvedValue(
+      okResponse({ version: "0.1.0", commit: "0123456789ab" }),
+    );
 
-    await expect(fetchBackendVersion()).resolves.toBe("0.1.0");
+    await expect(fetchBackendVersion()).resolves.toEqual({
+      version: "0.1.0",
+      commit: "0123456789ab",
+    });
 
     expect(fetchMock).toHaveBeenCalledTimes(1);
     expect(fetchMock).toHaveBeenCalledWith(DEFAULT_VERSION_URL);
   });
 
-  it("ignores fields other than version", async () => {
-    fetchMock.mockResolvedValue(okResponse({ version: "0.1.0", commit: "abc123" }));
+  it("ignores fields other than version and commit", async () => {
+    fetchMock.mockResolvedValue(
+      okResponse({ version: "0.1.0", commit: "abc123", extra: "x" }),
+    );
 
-    await expect(fetchBackendVersion()).resolves.toBe("0.1.0");
+    await expect(fetchBackendVersion()).resolves.toEqual({
+      version: "0.1.0",
+      commit: "abc123",
+    });
   });
 
-  it("resolves null when the backend reports the unknown sentinel", async () => {
-    fetchMock.mockResolvedValue(okResponse({ version: "unknown" }));
+  it("resolves a null version when the backend reports the unknown sentinel", async () => {
+    fetchMock.mockResolvedValue(okResponse({ version: "unknown", commit: "abc123" }));
 
-    await expect(fetchBackendVersion()).resolves.toBeNull();
+    await expect(fetchBackendVersion()).resolves.toEqual({
+      version: null,
+      commit: "abc123",
+    });
+  });
+
+  it("trims whitespace around the commit", async () => {
+    fetchMock.mockResolvedValue(okResponse({ version: "0.1.0", commit: "  abc123  " }));
+
+    await expect(fetchBackendVersion()).resolves.toEqual({
+      version: "0.1.0",
+      commit: "abc123",
+    });
+  });
+
+  it.each([
+    ["the unknown sentinel", { version: "0.1.0", commit: "unknown" }],
+    ["a missing commit", { version: "0.1.0" }],
+    ["a non-string commit", { version: "0.1.0", commit: 42 }],
+    ["a null commit", { version: "0.1.0", commit: null }],
+    ["a blank commit", { version: "0.1.0", commit: "   " }],
+  ])("resolves a null commit without throwing for %s", async (_label, body) => {
+    fetchMock.mockResolvedValue(okResponse(body));
+
+    await expect(fetchBackendVersion()).resolves.toEqual({
+      version: "0.1.0",
+      commit: null,
+    });
   });
 
   it("throws with the status and reason when the response is not OK", async () => {

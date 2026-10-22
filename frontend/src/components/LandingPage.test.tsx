@@ -15,6 +15,7 @@ vi.mock("../api/version", () => ({
 
 // Differs from frontend/package.json's version, so the footer test proves the source.
 const BACKEND_VERSION = "9.9.9";
+const BACKEND_COMMIT = "0123456789ab";
 const fetchBackendVersionMock = vi.mocked(fetchBackendVersion);
 
 const listNotesMock = vi.mocked(listNotes);
@@ -32,7 +33,10 @@ describe("LandingPage", () => {
     createNoteMock.mockReset();
     listNotesMock.mockResolvedValue([]);
     fetchBackendVersionMock.mockReset();
-    fetchBackendVersionMock.mockResolvedValue(BACKEND_VERSION);
+    fetchBackendVersionMock.mockResolvedValue({
+      version: BACKEND_VERSION,
+      commit: BACKEND_COMMIT,
+    });
   });
 
   it("renders the app title 'Task Notes'", async () => {
@@ -53,12 +57,12 @@ describe("LandingPage", () => {
     expect(screen.getByRole("heading", { name: "Task Notes" })).toBeInTheDocument();
   });
 
-  it("renders the footer with the app name and the backend version", async () => {
+  it("renders the footer with the app name, the backend version and the short commit", async () => {
     await renderLandingPage();
 
     await waitFor(() =>
       expect(screen.getByTestId("app-footer")).toHaveTextContent(
-        `Task Notes v${BACKEND_VERSION}`,
+        `Task Notes v${BACKEND_VERSION} (${BACKEND_COMMIT.slice(0, 7)})`,
       ),
     );
   });
