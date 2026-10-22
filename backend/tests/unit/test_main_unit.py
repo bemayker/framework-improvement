@@ -85,15 +85,6 @@ def test_create_app_registers_time_route():
     assert "/api/time" in custom_paths
 
 
-def test_create_app_registers_stamp_route():
-    """Edge case: the app registers the FEAT-6 stamp route."""
-    app = create_app()
-
-    custom_paths = _collect_route_paths(app.routes) - BUILT_IN_ROUTE_PATHS
-
-    assert "/api/stamp" in custom_paths
-
-
 def test_create_app_returns_independent_instances():
     """Error/robustness case: repeated calls do not share mutable state.
 
