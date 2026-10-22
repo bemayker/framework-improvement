@@ -1,22 +1,67 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen } from "@testing-library/react";
 import AppFooter from "./AppFooter";
-import { version } from "../../package.json";
+import { fetchBackendVersion } from "../api/version";
+
+vi.mock("../api/version", () => ({
+  fetchBackendVersion: vi.fn(),
+}));
+
+const fetchBackendVersionMock = vi.mocked(fetchBackendVersion);
+
+function expectNoPlaceholderText(text: string | null) {
+  expect(text).not.toMatch(/undefined|null|unknown/);
+}
 
 describe("AppFooter", () => {
-  it("renders the application name", () => {
-    render(<AppFooter />);
-
-    expect(screen.getByTestId("app-footer")).toHaveTextContent("Task Notes");
+  beforeEach(() => {
+    fetchBackendVersionMock.mockReset();
   });
 
-  it("renders the version imported from package.json", () => {
+  it("renders the name and the backend version once it resolves", async () => {
+    fetchBackendVersionMock.mockResolvedValue("9.9.9");
+
     render(<AppFooter />);
 
-    expect(screen.getByTestId("app-footer")).toHaveTextContent(version);
+    expect(await screen.findByText("Task Notes v9.9.9")).toBeInTheDocument();
+    expect(fetchBackendVersionMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("renders the name alone while the version is still loading", () => {
+    fetchBackendVersionMock.mockReturnValue(new Promise(() => {}));
+
+    render(<AppFooter />);
+
+    const footer = screen.getByTestId("app-footer");
+    expect(footer.textContent).toBe("Task Notes");
+    expectNoPlaceholderText(footer.textContent);
+  });
+
+  it("renders the name alone when the version fetch is rejected", async () => {
+    fetchBackendVersionMock.mockRejectedValue(new Error("Failed to fetch"));
+
+    render(<AppFooter />);
+
+    await vi.waitFor(() => expect(fetchBackendVersionMock).toHaveBeenCalled());
+    const footer = screen.getByTestId("app-footer");
+    expect(footer.textContent).toBe("Task Notes");
+    expectNoPlaceholderText(footer.textContent);
+  });
+
+  it("renders the name alone when the backend version is unresolved (null)", async () => {
+    fetchBackendVersionMock.mockResolvedValue(null);
+
+    render(<AppFooter />);
+
+    await vi.waitFor(() => expect(fetchBackendVersionMock).toHaveBeenCalled());
+    const footer = screen.getByTestId("app-footer");
+    expect(footer.textContent).toBe("Task Notes");
+    expectNoPlaceholderText(footer.textContent);
   });
 
   it("is exposed as the contentinfo landmark and carries the app-footer test id", () => {
+    fetchBackendVersionMock.mockReturnValue(new Promise(() => {}));
+
     render(<AppFooter />);
 
     const footer = screen.getByRole("contentinfo");
