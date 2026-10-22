@@ -45,6 +45,28 @@ def test_get_time_reads_the_clock_at_request_time(client):
     assert before <= now <= after
 
 
+def test_get_time_sets_cache_control_no_store(client):
+    """Defect BUG-01: the exact directive, so an added max-age would fail."""
+    response = client.get("/api/time")
+
+    assert response.status_code == 200
+    assert response.headers["cache-control"] == "no-store"
+    assert set(response.json()) == {"now", "timezone"}
+
+
+def test_get_time_sets_cache_control_no_store_on_every_call(client, monkeypatch):
+    """Local stand-in for the deployed reproduction: both calls uncached and fresh."""
+    first_instant = datetime(2026, 10, 22, 17, 29, 35, tzinfo=UTC)
+    _patch_clock(monkeypatch, first_instant)
+    first = client.get("/api/time")
+    _patch_clock(monkeypatch, first_instant + timedelta(seconds=1))
+    second = client.get("/api/time")
+
+    assert first.headers["cache-control"] == "no-store"
+    assert second.headers["cache-control"] == "no-store"
+    assert first.json()["now"] != second.json()["now"]
+
+
 def test_post_time_returns_405(client):
     """Error case: the route is GET only."""
     response = client.post("/api/time")
