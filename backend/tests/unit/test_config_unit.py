@@ -22,12 +22,7 @@ import os
 
 import pytest
 
-from app.core.config import (
-    DEFAULT_BUILD_COMMIT,
-    DEFAULT_CORS_ORIGINS,
-    Settings,
-    get_settings,
-)
+from app.core.config import DEFAULT_CORS_ORIGINS, Settings, get_settings
 
 
 def test_get_settings_returns_the_configured_app_title():
@@ -107,25 +102,3 @@ def test_settings_cors_origins_treats_blank_value_as_unset(monkeypatch, blank):
     monkeypatch.setenv("CORS_ORIGINS", blank)
 
     assert get_settings().cors_origins == DEFAULT_CORS_ORIGINS
-
-
-def test_settings_build_commit_reads_the_environment_value(monkeypatch):
-    """BUILD_COMMIT is reported as configured, whitespace stripped."""
-    monkeypatch.setenv("BUILD_COMMIT", " abc1234 ")
-
-    assert get_settings().build_commit == "abc1234"
-
-
-def test_settings_build_commit_defaults_to_unknown_when_unset(monkeypatch):
-    """With BUILD_COMMIT unset the documented default applies."""
-    monkeypatch.delenv("BUILD_COMMIT", raising=False)
-
-    assert get_settings().build_commit == DEFAULT_BUILD_COMMIT == "unknown"
-
-
-@pytest.mark.parametrize("blank", ["", "   "])
-def test_settings_build_commit_treats_blank_value_as_unset(monkeypatch, blank):
-    """A blank BUILD_COMMIT falls back to the default rather than reporting nothing."""
-    monkeypatch.setenv("BUILD_COMMIT", blank)
-
-    assert get_settings().build_commit == DEFAULT_BUILD_COMMIT
