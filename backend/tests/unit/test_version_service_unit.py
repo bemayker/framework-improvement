@@ -39,3 +39,32 @@ def test_get_app_version_returns_unknown_when_distribution_not_installed(monkeyp
     monkeypatch.setattr(version_service, "version", raise_not_found)
 
     assert version_service.get_app_version() == version_service.UNKNOWN_VERSION
+
+
+def test_get_build_commit_truncates_full_sha_to_twelve_characters(monkeypatch):
+    """Criterion 5: a 40-character sha is cut to its first 12."""
+    monkeypatch.setenv("BUILD_COMMIT", "0123456789abcdef0123456789abcdef01234567")
+
+    assert version_service.BUILD_COMMIT_LENGTH == 12
+    assert version_service.get_build_commit() == "0123456789ab"
+
+
+def test_get_build_commit_returns_twelve_character_value_unchanged(monkeypatch):
+    """Edge case: exactly 12 characters is the boundary and is not cut."""
+    monkeypatch.setenv("BUILD_COMMIT", "0123456789ab")
+
+    assert version_service.get_build_commit() == "0123456789ab"
+
+
+def test_get_build_commit_returns_shorter_value_unchanged(monkeypatch):
+    """Edge case: a short value is returned whole."""
+    monkeypatch.setenv("BUILD_COMMIT", "abc1234")
+
+    assert version_service.get_build_commit() == "abc1234"
+
+
+def test_get_build_commit_returns_unknown_when_unset(monkeypatch):
+    """Criterion 2: with no BUILD_COMMIT the default is reported."""
+    monkeypatch.delenv("BUILD_COMMIT", raising=False)
+
+    assert version_service.get_build_commit() == "unknown"
