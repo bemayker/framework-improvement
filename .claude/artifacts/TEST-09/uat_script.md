@@ -25,7 +25,7 @@ Backend-only feature: no screen shows the commit yet (the footer display is TEST
 | 2.2 | Run `BUILD_COMMIT=0123456789abcdef0123456789abcdef01234567 docker compose up -d backend` from the repository root, wait until `backend` runs, then `curl -s http://localhost:8010/api/version` | `commit` is `0123456789ab` (the first 12 of the 40 characters) | [ ] | [ ] |
 | 2.3 | Run `BUILD_COMMIT=abc123 docker compose up -d backend`, wait, then `curl -s http://localhost:8010/api/version` | `commit` is `abc123` (shorter than 12, returned as is) | [ ] | [ ] |
 | 2.4 | Run `BUILD_COMMIT=" " docker compose up -d backend`, wait, then `curl -s http://localhost:8010/api/version` | `commit` is `unknown` (blank counts as unset) | [ ] | [ ] |
-| 2.5 | Open `backend/app/routers/version.py`, then run `grep -rn BUILD_COMMIT backend/app` | The router calls `get_build_commit()` and contains no commit string literal; `BUILD_COMMIT` appears only in `backend/app/core/config.py` | [ ] | [ ] |
+| 2.5 | Open `backend/app/routers/version.py`, then run `grep -rn --include='*.py' 'environ.get("BUILD_COMMIT")' backend/app` | The router calls `get_build_commit()` and contains no commit string literal; the grep prints exactly one match, in `backend/app/core/config.py` (the only place the variable is read) | [ ] | [ ] |
 | 2.6 | Run `docker compose up -d backend` with no `BUILD_COMMIT` to restore the default | Backend restarts and `curl -s http://localhost:8010/api/version` reports `unknown` again | [ ] | [ ] |
 
 ## Criterion 3: the response body is defined by a Pydantic schema in backend/app/schemas/
