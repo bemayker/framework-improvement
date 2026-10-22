@@ -75,7 +75,6 @@ def test_openapi_declares_server_time_response_fields():
     assert properties["now"]["type"] == "string"
     assert properties["now"]["format"] == "date-time"
     assert "timezone" in properties
-    assert properties["timezone"].get("const", None) == "UTC" or properties["timezone"][
-        "enum"
-    ] == ["UTC"]
+    timezone_schema = properties["timezone"]
+    assert timezone_schema.get("const") == "UTC" or timezone_schema.get("enum") == ["UTC"]
     assert "now" in component["required"]
