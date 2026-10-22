@@ -1,23 +1,35 @@
-// Client for the backend's GET /api/version. Only `version` is read, so extra
-// response fields (for example `commit`) are ignored.
+// Client for the backend's GET /api/version. Both `version` and `commit` are
+// read from the one response.
 
 import { API_BASE_URL } from "./config";
 
 export type VersionResponse = {
   version: string;
+  commit: string;
+};
+
+export type BackendVersion = {
+  version: string;
+  commit: string | null;
 };
 
 const VERSION_URL = `${API_BASE_URL}/api/version`;
 
-// The backend answers with this sentinel when its package metadata is missing.
-const UNKNOWN_VERSION = "unknown";
+// The backend answers with this sentinel when its package metadata or
+// BUILD_COMMIT is missing.
+const UNKNOWN = "unknown";
+
+function isUsable(value: unknown): value is string {
+  return typeof value === "string" && value !== "" && value !== UNKNOWN;
+}
 
 /**
- * Fetches the backend's version. Resolves to null when the response carries no
- * usable version (missing, empty, non-string, or the backend's "unknown").
- * Rejects on network failure or a non-OK status.
+ * Fetches the backend's version and build commit. Resolves to null when the
+ * response carries no usable version (missing, empty, non-string, or the
+ * backend's "unknown"). The commit is null when it is unusable in the same
+ * way. Rejects on network failure or a non-OK status.
  */
-export async function fetchBackendVersion(): Promise<string | null> {
+export async function fetchBackendVersion(): Promise<BackendVersion | null> {
   const response = await fetch(VERSION_URL);
 
   if (!response.ok) {
@@ -27,11 +39,13 @@ export async function fetchBackendVersion(): Promise<string | null> {
   }
 
   const body = (await response.json()) as Partial<VersionResponse> | null;
-  const version = body?.version;
 
-  if (typeof version !== "string" || version === "" || version === UNKNOWN_VERSION) {
+  if (!isUsable(body?.version)) {
     return null;
   }
 
-  return version;
+  return {
+    version: body.version,
+    commit: isUsable(body.commit) ? body.commit : null,
+  };
 }

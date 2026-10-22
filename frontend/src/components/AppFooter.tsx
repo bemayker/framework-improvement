@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
 import type { CSSProperties } from "react";
 import { fetchBackendVersion } from "../api/version";
+import type { BackendVersion } from "../api/version";
 
 const APP_NAME = "Task Notes";
+const SHORT_COMMIT_LENGTH = 7;
 
 const footerStyle: CSSProperties = {
   fontSize: "0.875rem",
@@ -11,16 +13,17 @@ const footerStyle: CSSProperties = {
 };
 
 function AppFooter() {
-  const [version, setVersion] = useState<string | null>(null);
+  const [build, setBuild] = useState<BackendVersion | null>(null);
 
   useEffect(() => {
     let isMounted = true;
 
-    // Loading and failure both leave the version null: the footer shows the
-    // app name alone rather than a placeholder or "unknown".
+    // One request supplies version and commit. Loading and failure both leave
+    // the build null: the footer shows the app name alone rather than a
+    // placeholder or "unknown". An unusable commit is null and is omitted.
     fetchBackendVersion()
       .then((resolved) => {
-        if (isMounted) setVersion(resolved);
+        if (isMounted) setBuild(resolved);
       })
       .catch(() => {});
 
@@ -32,10 +35,18 @@ function AppFooter() {
   return (
     <footer data-testid="app-footer" style={footerStyle}>
       {APP_NAME}
-      {version ? (
+      {build ? (
         <>
           {" "}
-          <span data-testid="app-version">v{version}</span>
+          <span data-testid="app-version">v{build.version}</span>
+          {build.commit ? (
+            <>
+              {" "}
+              <span data-testid="app-commit">
+                ({build.commit.slice(0, SHORT_COMMIT_LENGTH)})
+              </span>
+            </>
+          ) : null}
         </>
       ) : null}
     </footer>

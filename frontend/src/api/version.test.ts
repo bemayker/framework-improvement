@@ -26,11 +26,16 @@ describe("fetchBackendVersion", () => {
     vi.unstubAllEnvs();
   });
 
-  it("resolves to the version the backend returned", async () => {
-    fetchMock.mockResolvedValue(jsonResponse({ version: "0.1.0" }));
+  it("resolves to the version and commit the backend returned", async () => {
+    fetchMock.mockResolvedValue(
+      jsonResponse({ version: "0.1.0", commit: "0123456789ab" }),
+    );
     const { fetchBackendVersion } = await loadClient();
 
-    await expect(fetchBackendVersion()).resolves.toBe("0.1.0");
+    await expect(fetchBackendVersion()).resolves.toEqual({
+      version: "0.1.0",
+      commit: "0123456789ab",
+    });
   });
 
   it("calls the default backend URL", async () => {
@@ -65,13 +70,26 @@ describe("fetchBackendVersion", () => {
     await expect(fetchBackendVersion()).resolves.toBeNull();
   });
 
-  it("ignores extra fields such as commit", async () => {
-    fetchMock.mockResolvedValue(
-      jsonResponse({ version: "0.1.0", commit: "abc1234" }),
-    );
+  it.each([
+    ["missing", {}],
+    ["empty", { commit: "" }],
+    ["unknown sentinel", { commit: "unknown" }],
+    ["non-string", { commit: 12 }],
+  ])("resolves the version with a null commit when the commit is %s", async (_label, extra) => {
+    fetchMock.mockResolvedValue(jsonResponse({ version: "0.1.0", ...extra }));
     const { fetchBackendVersion } = await loadClient();
 
-    await expect(fetchBackendVersion()).resolves.toBe("0.1.0");
+    await expect(fetchBackendVersion()).resolves.toEqual({
+      version: "0.1.0",
+      commit: null,
+    });
+  });
+
+  it("resolves to null when the version is unusable even with a usable commit", async () => {
+    fetchMock.mockResolvedValue(jsonResponse({ commit: "0123456789ab" }));
+    const { fetchBackendVersion } = await loadClient();
+
+    await expect(fetchBackendVersion()).resolves.toBeNull();
   });
 
   it("throws when the backend answers non-OK", async () => {

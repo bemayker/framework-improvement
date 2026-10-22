@@ -13,6 +13,7 @@ function expectNameOnly() {
   const footer = screen.getByTestId("app-footer");
   expect(footer.textContent).toBe("Task Notes");
   expect(screen.queryByTestId("app-version")).not.toBeInTheDocument();
+  expect(screen.queryByTestId("app-commit")).not.toBeInTheDocument();
   expect(footer).not.toHaveTextContent(/undefined|null|unknown/);
 }
 
@@ -21,13 +22,39 @@ describe("AppFooter", () => {
     fetchBackendVersionMock.mockReset();
   });
 
-  it("shows the backend version once it resolves", async () => {
-    fetchBackendVersionMock.mockResolvedValue("1.2.3");
+  it("shows the backend version and the first 7 characters of the commit", async () => {
+    fetchBackendVersionMock.mockResolvedValue({
+      version: "1.2.3",
+      commit: "0123456789ab",
+    });
 
     render(<AppFooter />);
 
     expect(await screen.findByTestId("app-version")).toHaveTextContent("v1.2.3");
-    expect(screen.getByTestId("app-footer")).toHaveTextContent("Task Notes v1.2.3");
+    expect(screen.getByTestId("app-commit")).toHaveTextContent("(0123456)");
+    expect(screen.getByTestId("app-footer").textContent).toBe(
+      "Task Notes v1.2.3 (0123456)",
+    );
+  });
+
+  it("shows a commit shorter than 7 characters as is", async () => {
+    fetchBackendVersionMock.mockResolvedValue({ version: "1.2.3", commit: "abc" });
+
+    render(<AppFooter />);
+
+    expect(await screen.findByTestId("app-commit")).toHaveTextContent("(abc)");
+  });
+
+  it("shows the version alone when the commit is unusable", async () => {
+    fetchBackendVersionMock.mockResolvedValue({ version: "1.2.3", commit: null });
+
+    render(<AppFooter />);
+
+    expect(await screen.findByTestId("app-version")).toHaveTextContent("v1.2.3");
+    const footer = screen.getByTestId("app-footer");
+    expect(footer.textContent).toBe("Task Notes v1.2.3");
+    expect(screen.queryByTestId("app-commit")).not.toBeInTheDocument();
+    expect(footer).not.toHaveTextContent(/undefined|null|unknown/);
   });
 
   it("shows the name only while the version is loading", () => {
