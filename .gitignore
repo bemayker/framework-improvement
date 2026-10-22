@@ -52,3 +52,4 @@ CLAUDE.local.md
 # Claude Code / mayker-dev — personal overrides and machine-local run state (never commit)
 .claude/artifacts/refactor-*/
 .claude/artifacts/generate-tests-*/
+.mayker/staging/
