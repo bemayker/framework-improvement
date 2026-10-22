@@ -19,3 +19,7 @@ This run's section of the repository-root `DECISIONS.md`, which is cumulative ac
 - 2026-10-22 [run] Wave-3 boundary (W step 1): no follow-ups filed. Rationale: BUG-04's one RECOMMENDED finding was applied by its refactor gate; no unaddressed comments.
 - 2026-10-22 [run] W step 2 re-ingestion (wave 3): 25 tracker and 5 local items, none new; one open node, TEST-10, in flight; registered=none; 0 wave and 0 checkpoint proposals. Rationale: no row or registry entry missing.
 - 2026-10-22 [run] The TEST-10 and BUG-04 serialization condition closed without a hold. Rationale: BUG-04 merged first and TEST-10's committed working set shares no file with it.
+- 2026-10-22 [run] Wave-3 publish: arm=opened merge=merged, PR https://github.com/bemayker/framework-improvement/pull/247, branch chore/mayker-deliver-20261022T030105Z-wave-3. Rationale: Section L, class framework. Whether pr-tests was required at merge time could not be read (branch protection API returns HTTP 403 to the token).
+- 2026-10-22 [run] Merged TEST-10 (PR #248, 3b5d666) on green CI and an orchestrator merge verdict; checkpoint suite passed on the merged main. Rationale: autonomy.md Section 5 held on all five conditions.
+- 2026-10-22 [run] Final boundary (W step 1): no follow-ups filed. Rationale: TEST-10's known improvements are OPTIONAL only; no unaddressed comments.
+- 2026-10-22 [run] Final boundary re-ingestion: 25 tracker and 5 local items; open nodes none; registered=none; 0 wave and 0 checkpoint proposals. Rationale: the backlog is drained, so the run goes to the report.
