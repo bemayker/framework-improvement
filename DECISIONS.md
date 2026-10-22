@@ -14,3 +14,16 @@ Autonomous-run decisions that affect more than one item (`autonomy.md` Section 3
 - 2026-09-14 [run] Dispatch order wave-ascending among ready items: FEAT-1 and TEST-07 (wave 2) then TEST-08 (wave 3); TEST-08 dispatched in the same round because no lower-wave item was ready for a build slot (TEST-07 held by the serialization above). Wave is an ordering key, never a gate.
 - 2026-09-14 [TEST-07] Precondition in the 2026-09-07 tracker comment ("do not run /deliver until the revert has merged") verified satisfied: revert 0ac6818 (#29) is on main. Comment is a process note, not a feature change.
 - 2026-09-14 [TEST-08] Tracker correction comment overrides acceptance criterion 2: the version is fetched from the backend at runtime via the existing GET /api/version (shipped by TEST-05), never from package.json. Carried into the planner dispatch verbatim.
+
+## Run deliver-20261022T134920Z
+
+- [deliver-20261022T134920Z] Ingest: scope FEAT-6; depends_on TEST-03/TEST-04 resolved as local docs/issues/ items (absent from ClickUp list 901524718831), both done; graph has one node, FEAT-6 ready, scaffold TEST-01 done.
+- [deliver-20261022T134920Z] Reconcile: FEAT-6 already has a map row and a features registry entry, so no row added, no registration, no register publish; propose helper returned 0/0 over 32 rows; map not written, no re-validation.
+- [deliver-20261022T134920Z] Shared risk: 0 notes appended; the five empty-cell rows are all done or cancelled and FEAT-6 is the only open item, so no concurrent overlap can arise.
+- [deliver-20261022T134920Z] Resume: FEAT-6 fresh from 6.1 (no branch, PR, artifacts or worktree); TEST-03/TEST-04 dropped as done. Dispatch order: 1. FEAT-6 (runs alone).
+- [deliver-20261022T134920Z] FEAT-6 merged: PR #263 squash a6e334e on the orchestrator's merge verdict (autonomy.md Section 5 conditions all met); auto-done run 39801761122 succeeded; test checkpoint pass at a6e334e.
+- [deliver-20261022T134920Z] W.1 follow-ups: none filed (FEAT-6's only known improvement is OPTIONAL; 0 unaddressed comments).
+- [deliver-20261022T134920Z] W.2 re-ingestion (final boundary): FEAT-6 read live as complete (PR #263, a6e334e) and dropped from the graph; TEST-03/TEST-04 done in frontmatter. Graph empty, 0 dispatchable nodes.
+- [deliver-20261022T134920Z] W.2 reconcile: 0 rows added, registered=none, write-back 0, propose 0/0, shared-risk 0 appended; map valid, not rewritten.
+- [deliver-20261022T134920Z] Report: composed per 08-report-template.md with terminal state complete; the orchestrator's staged Write was refused by the harness (UNAVAILABLE (refused: Subagents should return findings as text, not write report files. Include this content in your final response instead.)), so it returned the text and the session wrote report.md through the same staged run-dir.sh route. Framework defect, reported to the maintainer, not filed in the project tracker.
+- [deliver-20261022T134920Z] Statistics writer defect: the W.2 re-ingest marker was written as a top-level 3.orchestrator pair while step 5's window was still open, so the collector reports step 5 and 3.orchestrator #2 overlapping by 109s; per-step rows for those two are not trustworthy, run totals stand.
