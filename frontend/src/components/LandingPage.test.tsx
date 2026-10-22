@@ -9,11 +9,6 @@ vi.mock("../api/notes", () => ({
   createNote: vi.fn(),
 }));
 
-// The footer fetches the stamp on mount; keep these page tests off the network.
-vi.mock("../api/stamp", () => ({
-  getStamp: vi.fn().mockResolvedValue({ stamp: "ok", db: true }),
-}));
-
 const listNotesMock = vi.mocked(listNotes);
 const createNoteMock = vi.mocked(createNote);
 
