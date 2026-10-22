@@ -22,7 +22,12 @@ import os
 
 import pytest
 
-from app.core.config import DEFAULT_CORS_ORIGINS, Settings, get_settings
+from app.core.config import (
+    DEFAULT_BUILD_COMMIT,
+    DEFAULT_CORS_ORIGINS,
+    Settings,
+    get_settings,
+)
 
 
 def test_get_settings_returns_the_configured_app_title():
@@ -102,3 +107,34 @@ def test_settings_cors_origins_treats_blank_value_as_unset(monkeypatch, blank):
     monkeypatch.setenv("CORS_ORIGINS", blank)
 
     assert get_settings().cors_origins == DEFAULT_CORS_ORIGINS
+
+
+def test_settings_build_commit_reads_the_environment_per_call(monkeypatch):
+    """Set path: BUILD_COMMIT is returned as given, and changes are seen on the next call."""
+    monkeypatch.setenv("BUILD_COMMIT", "abc1234")
+    assert get_settings().build_commit == "abc1234"
+
+    monkeypatch.setenv("BUILD_COMMIT", "def5678")
+    assert get_settings().build_commit == "def5678"
+
+
+def test_settings_build_commit_defaults_to_unknown_when_unset(monkeypatch):
+    """Unset path: the default is the documented sentinel."""
+    monkeypatch.delenv("BUILD_COMMIT", raising=False)
+
+    assert get_settings().build_commit == DEFAULT_BUILD_COMMIT == "unknown"
+
+
+@pytest.mark.parametrize("blank", ["", "   "])
+def test_settings_build_commit_treats_blank_value_as_unset(monkeypatch, blank):
+    """A blank BUILD_COMMIT (an empty compose build arg) falls back to the default."""
+    monkeypatch.setenv("BUILD_COMMIT", blank)
+
+    assert get_settings().build_commit == DEFAULT_BUILD_COMMIT
+
+
+def test_settings_build_commit_strips_surrounding_whitespace(monkeypatch):
+    """Edge case: whitespace around the value is not part of the commit."""
+    monkeypatch.setenv("BUILD_COMMIT", "  abc1234\n")
+
+    assert get_settings().build_commit == "abc1234"
