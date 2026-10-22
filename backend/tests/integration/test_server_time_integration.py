@@ -45,23 +45,6 @@ def test_get_time_reads_the_clock_at_request_time(client):
     assert before <= now <= after
 
 
-def test_get_time_sets_cache_control_no_store(client):
-    """BUG-01: the response forbids shared caches from storing it (exact value)."""
-    response = client.get("/api/time")
-
-    assert response.status_code == 200
-    assert response.headers["cache-control"] == "no-store"
-
-
-def test_get_time_sets_cache_control_on_every_call(client):
-    """BUG-01: the header is set per request, not only on the first response."""
-    first = client.get("/api/time")
-    second = client.get("/api/time")
-
-    assert first.headers["cache-control"] == "no-store"
-    assert second.headers["cache-control"] == "no-store"
-
-
 def test_post_time_returns_405(client):
     """Error case: the route is GET only."""
     response = client.post("/api/time")

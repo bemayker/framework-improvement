@@ -6,8 +6,6 @@ than bound once at import time: a dataclass field default is evaluated when
 the class is defined, which would make `get_settings()`'s "read fresh from
 the environment" promise false for anything that changes the variable after
 import (the version integration test does exactly that).
-
-TEST-09 adds `build_commit`, read from BUILD_COMMIT the same way.
 """
 
 import os
@@ -24,16 +22,6 @@ def _read_cors_origins() -> tuple[str, ...]:
     return tuple(entry for entry in entries if entry) or DEFAULT_CORS_ORIGINS
 
 
-# TEST-09: the commit the running build was made from, set by whoever builds
-# the image.
-DEFAULT_BUILD_COMMIT = "unknown"
-
-
-def _read_build_commit() -> str:
-    """Return BUILD_COMMIT stripped, or the default when it is unset or blank."""
-    return (os.environ.get("BUILD_COMMIT") or "").strip() or DEFAULT_BUILD_COMMIT
-
-
 @dataclass(frozen=True)
 class Settings:
     app_title: str = "Task Notes API"
@@ -44,9 +32,6 @@ class Settings:
     )
     # CORS_ORIGINS (comma-separated), read per call; unset or blank uses the default.
     cors_origins: tuple[str, ...] = field(default_factory=_read_cors_origins)
-    # BUILD_COMMIT, read per call; unset or blank uses "unknown". Reported as
-    # configured: the endpoint's 12-character truncation lives in version_service.
-    build_commit: str = field(default_factory=_read_build_commit)
 
 
 def get_settings() -> Settings:

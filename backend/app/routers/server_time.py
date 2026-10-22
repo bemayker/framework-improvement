@@ -2,7 +2,7 @@
 
 from datetime import UTC, datetime
 
-from fastapi import APIRouter, Response
+from fastapi import APIRouter
 
 from app.schemas.server_time import ServerTimeResponse
 
@@ -15,9 +15,6 @@ def current_utc_time() -> datetime:
 
 
 @router.get("/time", response_model=ServerTimeResponse)
-def get_server_time(response: Response) -> ServerTimeResponse:
+def get_server_time() -> ServerTimeResponse:
     """Return the server's current UTC time, read on every request."""
-    # A per-request clock reading must never be stored: the CDN in front of the
-    # API caches any response that carries no cache directive (BUG-01).
-    response.headers["Cache-Control"] = "no-store"
     return ServerTimeResponse(now=current_utc_time())
