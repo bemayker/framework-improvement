@@ -13,5 +13,8 @@ router = APIRouter(prefix="/api", tags=["echo"])
 def get_echo(
     msg: Annotated[str, Query(max_length=ECHO_MSG_MAX_LENGTH)],
 ) -> EchoResponse:
-    """Return the given message unchanged; FastAPI validates presence and length."""
-    return EchoResponse(echo=msg)
+    """Return the message without surrounding whitespace.
+
+    FastAPI validates presence and length (on the raw message) before this runs.
+    """
+    return EchoResponse(echo=msg.strip())
