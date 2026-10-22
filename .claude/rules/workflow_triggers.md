@@ -1,4 +1,4 @@
-<!-- materialized-from: mayker-dev v0.3.410; do not edit, regenerate with /upgrade-project -->
+<!-- materialized-from: mayker-dev v0.3.430; do not edit, regenerate with /upgrade-project -->
 <!--
   Universal standard. Loaded at launch from .claude/rules/ (always on). Do not edit per project.
   Slash-command mapping, operational behaviour, git conventions.
@@ -91,10 +91,10 @@ Batch independent work into one Bash call per exec turn, in a shape the permissi
 - **No quoted string containing `git push`.** Spell a search pattern so it cannot contain the phrase.
 - **No `${…}` brace expansion, and no `$CLAUDE_PLUGIN_ROOT` in a Bash command.** Name a plugin script through the pointer, unquoted: `bash ~/.mayker/mayker-dev/hooks/lib/<script>.sh …` (5.7).
 - **No variable expansion other than `$HOME` and `$PWD`:** not an assigned variable, `"$@"`, `$1` or `$?`. Put the value in as a literal, or compute it inside a script. A `$` inside single quotes is not an expansion.
-- **No line holding a `{` and a quote outside single quotes, and a heredoc body counts as outside.** Pass such a line (a JSON record, a JSON or curl example) as a single-quoted operand of the script, never via `printf`, or reword it. **No zsh `<N-M>` shape:** write a pair as `A and B`.
+- **No line holding a `{` and a quote outside single quotes, and a heredoc body counts as outside.** Pass a JSON record as a single-quoted operand of the script, never via `printf`; stage a document holding such lines (below). **No zsh `<N-M>` shape:** write a pair as `A and B`.
 - **No environment-assignment prefix** (`NAME=value command`), and no leading `env`. A recorded backing service reaches a test command through `bash ~/.mayker/mayker-dev/hooks/lib/run-env.sh --id {ID} --run-id {RUN_ID} -- <test command>`.
-- **No tool-call write under `.claude/`**, by `Write`, `Edit`, a redirect, or a `cp` or `mv` naming a `.claude/` path as either end, and **no `sleep`, loop or background watch of your own for CI**. Write through `bash ~/.mayker/mayker-dev/hooks/lib/run-dir.sh write-item|write-run|append-item|append-run <dir> <name>` on a quoted heredoc, publish a run's files with `run-dir.sh publish-run`, and wait with `ci-poll.sh --wait` (2.1).
-- **No trailing `&&` or `||`, and no command over 10,000 characters.** Write a document as the `write-*` then `append-*` calls its writer names, else split at headings under 10,000 characters; a script appends its own output (5.3).
+- **No tool-call write under `.claude/`**, by `Write`, `Edit`, a redirect, or a `cp` or `mv` naming a `.claude/` path as either end, and **no `sleep`, loop or background watch of your own for CI**. Stage a document: `Write` it to `.mayker/staging/{name}`, then `bash ~/.mayker/mayker-dev/hooks/lib/run-dir.sh stage-in write-*|append-* <dir> <name> .mayker/staging/{name}` (MDF-456); publish a run's files with `run-dir.sh publish-run`, and wait with `ci-poll.sh --wait` (2.1).
+- **No trailing `&&` or `||`, and no command over 10,000 characters.** A staged document is not in the command; a script appends its own output (5.3).
 
 ### 5.2 What composes fine, and must not be "fixed"
 
