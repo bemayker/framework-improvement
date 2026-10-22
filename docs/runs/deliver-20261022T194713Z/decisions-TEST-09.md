@@ -1,0 +1,15 @@
+# Decisions (TEST-09, after its final push): deliver-20261022T194713Z
+
+The entries `.claude/artifacts/TEST-09/decisions.md` received after the last push of its branch (f12f6af), the head its pull request merged. The entries before them reached the default branch in that file.
+
+- 6.6 push: test-gate verdict recorded for this push (head f12f6af: full; pytest 91 passed 0 failed 14 skipped + vitest 26 passed 0 failed); upstream-ok
+- 6.6 PR: opened https://github.com/bemayker/framework-improvement/pull/286 (draft)
+- 6.7 CI: 7/7 checks done, 15m41s, green (poll 2)
+- 6.7 handover rebuild: status=rebuilt sha=f12f6af+dirty services=3/3 health=pass project=framework-improvement-test-09-handover urls=backend=http://localhost:30819,db=localhost:30820,frontend=http://localhost:30821 duration=11s
+- 6.7 handover: #286 ready for review; status to test (in_review); PR label: #286 mayker:in-review (removed mayker:in-progress)
+- 6.8 comments round 1: PR inline 0, general 0, reviews 0; tracker 12, one human clarification (12-character BUILD_COMMIT) answered in code and in earlier replies; none outstanding
+- 2026-10-22 [TEST-09] 6.9 merge verdict (orchestrator, run=deliver-20261022T194713Z): merge, squash, PR #286 head f12f6af5def6aa182824fb4369a7441a2763ae01. Rationale: `autonomy.md` Section 5, all five conditions hold, read from the working path (`pr-mergeable`, `pr-checks`) rather than the dispatch prompt. (1) self-review VERDICT: PASS blocking=0 (6.5 line). (2) 7/7 checks SUCCESS (changes, feature-map, unit, integration, e2e, pr-tests, notify), isDraft=false, mergeable=MERGEABLE, mergeStateStatus=CLEAN; push gate recorded pytest 91/0/14 skipped and vitest 26/0 on the same head. (3) the four criteria map to the changed files: router composes `VersionResponse` from the service with no literal, `Settings.build_commit` reads `BUILD_COMMIT` with default `unknown`, schema in `backend/app/schemas/version.py`, set and unset paths in `test_version_service_unit.py`, `test_config_unit.py` and `test_version_integration.py`; the 12-character cut from the one actionable tracker comment is implemented and tested. (4) PR surface 0 inline, 0 general, 0 reviews, reviewDecision empty so no change request; tracker surface 12 comments, the one actionable answered in code and in reply, the bar being `answered` (MDF-141). (5) escalation bar not triggered: an additive env-read field, a Dockerfile ARG/ENV and a compose build arg, all reversible by a revert PR. Main moved by BUG-01 (#285, `backend/app/routers/server_time.py` and its integration test) with no overlap against this PR's file set, and the provider reports CLEAN against current main, so no update-branch before the merge.
+- 6.9 merged #286 (squash) at 137046147631787afc63bff90dfcdbff7bf62d59
+- 6.10 auto-done: run 39848016912 succeeded; re-read: ClickUp status complete (done arm, fired by the pipeline)
+- 6.10 standards provenance: 8 dispatches; both always-on standards self-reported read by 3 of 8 (self-reported); 0 unbacked claims; no MISMATCH
+- 6.10 checkpoint: due=no reason=none-merged verdict=not-due (row carries ➖)
