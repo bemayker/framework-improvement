@@ -14,12 +14,26 @@ function isVersionApiUrl(url: URL): boolean {
   return url.pathname === VERSION_PATH;
 }
 
+/** Escapes regex metacharacters so a dotted version matches literally. */
+function escapeRegExp(text: string): string {
+  return text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
 test.describe("TEST-08 footer app version", () => {
   test("shows the backend version in the footer", async ({ page }) => {
     await page.goto("/");
 
+    // Holds with or without a build commit: TEST-10 appends a commit span
+    // when the backend has BUILD_COMMIT, which this test does not control.
+    const version = backendVersion();
+    // The leading space is asserted on the raw text, which toHaveText's
+    // whitespace normalization would hide.
+    await expect(page.getByTestId("app-version")).toHaveJSProperty(
+      "textContent",
+      ` v${version}`,
+    );
     await expect(page.getByTestId("app-footer")).toHaveText(
-      `Task Notes v${backendVersion()}`,
+      new RegExp(`^Task Notes v${escapeRegExp(version)}( \\([0-9a-f]{7}\\))?$`),
     );
   });
 
