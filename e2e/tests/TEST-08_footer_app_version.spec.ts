@@ -1,15 +1,7 @@
-import { readFileSync } from "node:fs";
-import path from "node:path";
 import { test, expect } from "@playwright/test";
+import { readBackendVersion } from "../helpers/backendVersion";
 
-// The backend's declared version: [project].version in backend/pyproject.toml.
-// It differs from frontend/package.json's, so this spec proves the footer's source.
-const pyprojectPath = path.resolve(__dirname, "../../backend/pyproject.toml");
-const projectSection = readFileSync(pyprojectPath, "utf-8").split(/^\[project\]\s*$/m)[1] ?? "";
-const backendVersion = /^version\s*=\s*"([^"]+)"/m.exec(projectSection)?.[1];
-if (!backendVersion) {
-  throw new Error("Could not read [project].version from backend/pyproject.toml");
-}
+const backendVersion = readBackendVersion();
 
 test.describe("TEST-08 footer app version", () => {
   test("shows the backend's version in the footer on the landing page", async ({ page }) => {

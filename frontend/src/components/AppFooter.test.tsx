@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { act, render, screen } from "@testing-library/react";
 import AppFooter from "./AppFooter";
 import { fetchBackendVersion } from "../api/version";
 
@@ -8,6 +8,12 @@ vi.mock("../api/version", () => ({
 }));
 
 const fetchBackendVersionMock = vi.mocked(fetchBackendVersion);
+
+// Lets the mocked promise's then/catch handlers run inside act, so the
+// assertions that follow see the settled state rather than the loading one.
+async function settlePendingPromises() {
+  await act(async () => {});
+}
 
 function expectNoPlaceholderText(text: string | null) {
   expect(text).not.toMatch(/undefined|null|unknown/);
@@ -42,7 +48,7 @@ describe("AppFooter", () => {
 
     render(<AppFooter />);
 
-    await vi.waitFor(() => expect(fetchBackendVersionMock).toHaveBeenCalled());
+    await settlePendingPromises();
     const footer = screen.getByTestId("app-footer");
     expect(footer.textContent).toBe("Task Notes");
     expectNoPlaceholderText(footer.textContent);
@@ -53,7 +59,7 @@ describe("AppFooter", () => {
 
     render(<AppFooter />);
 
-    await vi.waitFor(() => expect(fetchBackendVersionMock).toHaveBeenCalled());
+    await settlePendingPromises();
     const footer = screen.getByTestId("app-footer");
     expect(footer.textContent).toBe("Task Notes");
     expectNoPlaceholderText(footer.textContent);
