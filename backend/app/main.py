@@ -6,7 +6,7 @@ TEST-05 registers the version router, TEST-03 the notes router plus the
 startup schema initialisation and the CORS middleware the browser needs,
 TEST-02 the health router, TEST-06 the echo router, and TEST-07 the uptime
 router plus the start mark it reads (captured once per app in create_app()),
-and FEAT-1 the server time router.
+FEAT-1 the server time router, and FEAT-6 the stamp router.
 """
 
 import logging
@@ -22,6 +22,7 @@ from app.routers.echo import router as echo_router
 from app.routers.health import router as health_router
 from app.routers.notes import router as notes_router
 from app.routers.server_time import router as server_time_router
+from app.routers.stamp import router as stamp_router
 from app.routers.uptime import router as uptime_router
 from app.routers.version import router as version_router
 from app.services import uptime_service
@@ -64,6 +65,7 @@ def create_app() -> FastAPI:
     app.include_router(echo_router)
     app.include_router(uptime_router)
     app.include_router(server_time_router)
+    app.include_router(stamp_router)
     return app
 
 
