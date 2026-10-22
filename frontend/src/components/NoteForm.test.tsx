@@ -17,6 +17,19 @@ function typeNote(text: string) {
   fireEvent.change(screen.getByTestId("note-input"), { target: { value: text } });
 }
 
+type SavedNote = { id: number; text: string };
+
+/** Makes the next createNote call stay pending until the returned resolver runs. */
+function holdNextSave(): (note: SavedNote) => void {
+  let resolveSave: (note: SavedNote) => void = () => {};
+  createNoteMock.mockReturnValue(
+    new Promise((resolve) => {
+      resolveSave = resolve;
+    }),
+  );
+  return (note) => resolveSave(note);
+}
+
 describe("NoteForm", () => {
   beforeEach(() => {
     createNoteMock.mockReset();
@@ -95,12 +108,7 @@ describe("NoteForm", () => {
   });
 
   it("sends only one request when the form is submitted twice while the save is pending", async () => {
-    let resolveSave: (note: { id: number; text: string }) => void = () => {};
-    createNoteMock.mockReturnValue(
-      new Promise((resolve) => {
-        resolveSave = resolve;
-      }),
-    );
+    const resolveSave = holdNextSave();
     const onCreated = vi.fn();
     render(<NoteForm onCreated={onCreated} />);
 
@@ -115,12 +123,7 @@ describe("NoteForm", () => {
   });
 
   it("disables the save button while the save is pending and enables it after success", async () => {
-    let resolveSave: (note: { id: number; text: string }) => void = () => {};
-    createNoteMock.mockReturnValue(
-      new Promise((resolve) => {
-        resolveSave = resolve;
-      }),
-    );
+    const resolveSave = holdNextSave();
     render(<NoteForm onCreated={vi.fn()} />);
 
     expect(screen.getByTestId("note-submit")).toBeEnabled();
