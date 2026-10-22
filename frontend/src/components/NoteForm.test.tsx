@@ -17,6 +17,17 @@ function typeNote(text: string) {
   fireEvent.change(screen.getByTestId("note-input"), { target: { value: text } });
 }
 
+type StoredNote = { id: number; text: string };
+
+/** A save the test settles by hand, so it stays pending while the form is poked. */
+function pendingSave() {
+  let resolveSave: (note: StoredNote) => void = () => {};
+  const promise = new Promise<StoredNote>((resolve) => {
+    resolveSave = resolve;
+  });
+  return { promise, resolveSave };
+}
+
 describe("NoteForm", () => {
   beforeEach(() => {
     createNoteMock.mockReset();
@@ -80,12 +91,8 @@ describe("NoteForm", () => {
   });
 
   it("sends one request when the form is submitted twice while the first save is pending", async () => {
-    let resolveSave: (note: { id: number; text: string }) => void = () => {};
-    createNoteMock.mockReturnValue(
-      new Promise((resolve) => {
-        resolveSave = resolve;
-      }),
-    );
+    const { promise, resolveSave } = pendingSave();
+    createNoteMock.mockReturnValue(promise);
     const onCreated = vi.fn();
     render(<NoteForm onCreated={onCreated} />);
 
@@ -102,12 +109,8 @@ describe("NoteForm", () => {
   });
 
   it("disables the submit button while saving and re-enables it after success", async () => {
-    let resolveSave: (note: { id: number; text: string }) => void = () => {};
-    createNoteMock.mockReturnValueOnce(
-      new Promise((resolve) => {
-        resolveSave = resolve;
-      }),
-    );
+    const { promise, resolveSave } = pendingSave();
+    createNoteMock.mockReturnValueOnce(promise);
     createNoteMock.mockResolvedValueOnce({ id: 2, text: "Walk dog" });
     render(<NoteForm onCreated={vi.fn()} />);
 

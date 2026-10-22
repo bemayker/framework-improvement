@@ -19,11 +19,24 @@ function uniqueNoteText(label: string): string {
   return `BUG-04 ${label} ${randomUUID().slice(0, 8)}`;
 }
 
-/** Waits for the mount `GET /api/notes` to settle before the test interacts. */
-async function openLandingPage(page: Page): Promise<void> {
-  const mountLoad = page.waitForResponse(
+/** Resolves once a successful `GET /api/notes` response arrives. */
+function waitForNotesLoad(page: Page) {
+  return page.waitForResponse(
     (response) => isNotesApiRequest(response.request(), "GET") && response.ok(),
   );
+}
+
+/** Resolves once the backend answers a create with 201. */
+function waitForNoteCreated(page: Page) {
+  return page.waitForResponse(
+    (response) =>
+      isNotesApiRequest(response.request(), "POST") && response.status() === 201,
+  );
+}
+
+/** Waits for the mount `GET /api/notes` to settle before the test interacts. */
+async function openLandingPage(page: Page): Promise<void> {
+  const mountLoad = waitForNotesLoad(page);
 
   await page.goto("/");
 
@@ -75,9 +88,7 @@ async function expectNoteListedOnce(page: Page, noteText: string): Promise<void>
 
   await expect(matchingItems).toHaveCount(1);
 
-  const reloadedNotes = page.waitForResponse(
-    (response) => isNotesApiRequest(response.request(), "GET") && response.ok(),
-  );
+  const reloadedNotes = waitForNotesLoad(page);
   await page.reload();
   await reloadedNotes;
 
@@ -98,10 +109,7 @@ test.describe("BUG-04 double submit stores one note", () => {
     // The first save is still held, so the form must already refuse a submit.
     await expect(page.getByTestId("note-submit")).toBeDisabled();
 
-    const createResponse = page.waitForResponse(
-      (response) =>
-        isNotesApiRequest(response.request(), "POST") && response.status() === 201,
-    );
+    const createResponse = waitForNoteCreated(page);
     release();
     await createResponse;
 
@@ -124,10 +132,7 @@ test.describe("BUG-04 double submit stores one note", () => {
     await expect(page.getByTestId("note-submit")).toBeDisabled();
     await noteInput.press("Enter");
 
-    const createResponse = page.waitForResponse(
-      (response) =>
-        isNotesApiRequest(response.request(), "POST") && response.status() === 201,
-    );
+    const createResponse = waitForNoteCreated(page);
     release();
     await createResponse;
 
