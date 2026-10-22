@@ -113,8 +113,8 @@ Minimal task-notes app used exclusively as a validation sandbox for the mayker-d
 -->
 
 - **Start command:** docker run -d --name {ID}-db -e POSTGRES_USER=tasknotes -e POSTGRES_PASSWORD=tasknotes -e POSTGRES_DB=tasknotes -p 0:5432 postgres:16
-- **Readiness check:** docker exec {ID}-db pg_isready -q -U tasknotes
-- **Port lookup:** docker port {ID}-db 5432
+- **Readiness check:** until docker exec {ID}-db pg_isready -q -U tasknotes; do sleep 1; done
+- **Port lookup:** docker port {ID}-db 5432 | head -n 1 | cut -d: -f2
 - **Connection string:** postgresql://tasknotes:tasknotes@localhost:{PORT}/tasknotes
 - **Teardown command:** docker rm -f {ID}-db  # run once per run, never per dispatch
 
