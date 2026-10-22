@@ -2,9 +2,8 @@
 // fetch directly (coding_standards.md Section 4, applied to this project's own
 // backend).
 
-const DEFAULT_API_BASE_URL = "http://localhost:8010";
+import { API_BASE_URL } from "./baseUrl";
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? DEFAULT_API_BASE_URL;
 const VERSION_URL = `${API_BASE_URL}/api/version`;
 
 // backend/app/services/version_service.py answers this sentinel (UNKNOWN_VERSION)
