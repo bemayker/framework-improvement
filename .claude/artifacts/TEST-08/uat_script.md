@@ -32,7 +32,7 @@
 | 9 | 3 | Run `docker compose start backend`, wait until `http://localhost:8010/api/version` answers `{"version":"0.1.0"}`, then reload `http://localhost:5183/` | The footer reads `Task Notes v0.1.0` again | [ ] Pass [ ] Fail |
 | 10 | 5 | In Chrome or Edge DevTools, Network tab, right-click the `version` request and choose "Block request URL", then reload. Afterwards remove the block, set throttling to "Slow 3G" and reload while watching the footer | With the block: footer reads exactly `Task Notes`, never `Task Notes unknown` or blank. While loading on Slow 3G: `Task Notes`; once complete: `Task Notes v0.1.0` | [ ] Pass [ ] Fail |
 | 11 | 4, 5 | From the repository root run `npm --prefix frontend test -- src/components/AppFooter.test.tsx` | The run reports `0 failed`; the list includes a version-present test, a version-absent test (rejected and `null`) and a loading test expecting exactly `Task Notes` | [ ] Pass [ ] Fail |
-| 12 | 1, 3 | From the repository root run the E2E specs for this feature (`npx playwright test e2e/tests/TEST-08_footer_app_version.spec.ts`) | Both specs pass | [ ] Pass [ ] Fail |
+| 12 | 1, 3 | From the repository root run the E2E specs for this feature (`npx playwright test e2e/tests/TEST-08_footer_app_version.spec.ts`) | The run reports `0 failed`, and lists `shows the backend version in the footer` and `shows exactly the app name when the version request fails` | [ ] Pass [ ] Fail |
 
 ## Summary
 
