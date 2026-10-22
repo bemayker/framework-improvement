@@ -1,22 +1,17 @@
+import { readFileSync } from "node:fs";
+import path from "node:path";
 import { test, expect } from "@playwright/test";
-import type { Page } from "@playwright/test";
 
-// Since TEST-08 the footer shows the backend's version, so the expectation is
-// the version the browser itself received from /api/version.
-async function gotoLandingPage(page: Page): Promise<string> {
-  const versionResponse = page.waitForResponse(
-    (response) => response.url().endsWith("/api/version") && response.ok(),
-  );
-  await page.goto("/");
-  const { version } = (await (await versionResponse).json()) as { version: string };
-  return version;
-}
+const frontendPackageJsonPath = path.resolve(__dirname, "../../frontend/package.json");
+const { version } = JSON.parse(readFileSync(frontendPackageJsonPath, "utf-8")) as {
+  version: string;
+};
 
 test.describe("TEST-04 page footer", () => {
-  test("shows a footer with the app name and the version from /api/version", async ({
+  test("shows a footer with the app name and the version from frontend/package.json", async ({
     page,
   }) => {
-    const version = await gotoLandingPage(page);
+    await page.goto("/");
 
     const footer = page.getByTestId("app-footer");
     await expect(footer).toBeVisible();
@@ -25,7 +20,7 @@ test.describe("TEST-04 page footer", () => {
   });
 
   test("exposes the footer as a contentinfo landmark", async ({ page }) => {
-    const version = await gotoLandingPage(page);
+    await page.goto("/");
 
     await expect(page.getByRole("contentinfo")).toContainText(version);
   });
@@ -43,7 +38,7 @@ test.describe("TEST-04 page footer", () => {
 
   test("keeps the footer visible on a mobile viewport", async ({ page }) => {
     await page.setViewportSize({ width: 375, height: 667 });
-    const version = await gotoLandingPage(page);
+    await page.goto("/");
 
     const footer = page.getByTestId("app-footer");
     await expect(footer).toBeVisible();

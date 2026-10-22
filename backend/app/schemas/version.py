@@ -7,5 +7,3 @@ class VersionResponse(BaseModel):
     """Response body for GET /api/version."""
 
     version: str
-    # Sourced from the BUILD_COMMIT environment variable (see app.core.config).
-    commit: str

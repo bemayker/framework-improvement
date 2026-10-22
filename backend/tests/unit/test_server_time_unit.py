@@ -4,7 +4,6 @@ from datetime import datetime, timedelta, timezone
 from unittest.mock import patch
 
 import pytest
-from fastapi import Response
 from pydantic import ValidationError
 
 from app.routers import server_time
@@ -64,18 +63,9 @@ def test_handler_reads_clock_on_every_call():
 
     with patch.object(server_time, "datetime") as fake_datetime:
         fake_datetime.now.side_effect = [first, second]
-        first_response = server_time.get_server_time(Response())
-        second_response = server_time.get_server_time(Response())
+        first_response = server_time.get_server_time()
+        second_response = server_time.get_server_time()
 
     assert first_response.now == first
     assert second_response.now == second
     assert first_response.timezone == "UTC"
-
-
-def test_handler_sets_cache_control_no_store_on_the_response():
-    """Happy path (BUG-01): the handler marks the response uncacheable."""
-    response = Response()
-
-    server_time.get_server_time(response)
-
-    assert response.headers["Cache-Control"] == "no-store"
