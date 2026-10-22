@@ -17,7 +17,11 @@ class DatabaseTarget(BaseModel):
 
 
 class HealthResponse(BaseModel):
-    """Response body for GET /api/health, on both the 200 and 503 paths."""
+    """Response body for GET /api/health, on both the 200 and 503 paths.
+
+    FEAT-5 adds `health`, "green" when status is "ok" and "red" when degraded.
+    """
 
     status: Literal["ok", "degraded"]
+    health: Literal["green", "red"]
     database: DatabaseTarget

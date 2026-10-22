@@ -25,6 +25,7 @@ def test_get_health_returns_200_ok_against_the_real_database(
     assert response.status_code == 200
     payload = response.json()
     assert payload["status"] == "ok"
+    assert payload["health"] == "green"
 
     conninfo = conninfo_to_dict(database_url)
     configured_port = conninfo.get("port")
@@ -49,6 +50,7 @@ def test_get_health_returns_503_degraded_when_the_database_is_unreachable(monkey
     assert response.status_code == 503
     assert response.json() == {
         "status": "degraded",
+        "health": "red",
         "database": {"host": "127.0.0.1", "port": 9},
     }
 
@@ -58,3 +60,14 @@ def test_post_health_returns_405_method_not_allowed(client: TestClient):
     response = client.post("/api/health")
 
     assert response.status_code == 405
+    assert response.json() == {"detail": "Method Not Allowed"}
+    assert response.headers["allow"] == "GET"
+
+
+def test_post_health_with_json_body_returns_the_same_405(client: TestClient):
+    """Edge case: a request body does not change the method-not-allowed answer."""
+    response = client.post("/api/health", json={"x": 1})
+
+    assert response.status_code == 405
+    assert response.json() == {"detail": "Method Not Allowed"}
+    assert response.headers["allow"] == "GET"
