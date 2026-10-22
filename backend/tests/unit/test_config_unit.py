@@ -6,15 +6,9 @@ FastAPI instance in `create_app()` and `database_url` is the only credential-
 shaped value in the package, so an unnoticed change to either is a silent
 production-configuration change.
 
-One thing is deliberately NOT asserted here, and the reason is a source defect
-rather than a gap in these tests. `Settings.database_url`'s default is written
-as a plain dataclass field default, so it is evaluated **once at class
-definition**, while `get_settings()`'s own docstring promises a value "read
-fresh from the environment". Those two cannot both be true. Asserting either
-one would encode a contested contract: asserting freshness fails today, and
-asserting import-time capture would pin the defect and break the moment it is
-fixed. So these tests cover the part of the contract that holds either way and
-the mismatch is reported instead (see the generate-tests report and PR).
+Every environment-backed field (`database_url`, `cors_origins`, `build_commit`)
+is read per call through `default_factory`, so `get_settings()` honours its
+"read fresh from the environment" promise; the BUILD_COMMIT tests below assert it.
 """
 
 import dataclasses
@@ -66,9 +60,7 @@ def test_settings_database_url_is_optional_and_never_a_hardcoded_credential():
 
     The scaffold deliberately ships no credential-shaped default; the real
     value arrives from the environment via docker-compose or `.env.example`.
-    This asserts the type contract and the absence of a literal default, which
-    hold whether or not the field is evaluated per call (see the module
-    docstring).
+    This asserts the type contract and the absence of a literal default.
     """
     settings = get_settings()
 
