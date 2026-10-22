@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import NoteForm from "./NoteForm";
-import { createNote } from "../api/notes";
+import { createNote, type Note } from "../api/notes";
 
 vi.mock("../api/notes", () => ({
   createNote: vi.fn(),
@@ -97,9 +97,9 @@ describe("NoteForm", () => {
   describe("while a save is in flight", () => {
     // Holds the mocked createNote open so the in-flight window is deterministic.
     function holdNextSave() {
-      let resolve!: (note: { id: number; text: string }) => void;
+      let resolve!: (note: Note) => void;
       let reject!: (reason: Error) => void;
-      const pending = new Promise<{ id: number; text: string }>((res, rej) => {
+      const pending = new Promise<Note>((res, rej) => {
         resolve = res;
         reject = rej;
       });

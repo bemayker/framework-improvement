@@ -4,9 +4,9 @@
 
 - The stack is running: backend on port `8010`, frontend at `http://localhost:5183`, and the database it needs.
 - Repository checked out locally, on branch `feature/BUG-04-double-submit-note` (or later, once merged, on `main`).
-- A browser with developer tools open on the **Network** tab, filtered to `notes`. Steps 5, 8, 12 and 14 count requests, which is only observable there.
+- A browser with developer tools open on the **Network** tab, filtered to `notes`. Steps 5, 7 and 12 count requests, which is only observable there.
 - Network throttling available in the browser (Slow 3G) so a save stays in flight long enough to double-click.
-- For step 16, a way to stop and start the backend, or the Network tab's "Offline" option.
+- For steps 14 and 15, a way to stop and start the backend, or the Network tab's "Offline" option.
 
 ## Test Environment Setup
 
