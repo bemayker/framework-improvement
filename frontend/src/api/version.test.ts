@@ -38,17 +38,62 @@ describe("version API client", () => {
   it("returns the backend version from the default base URL", async () => {
     fetchMock.mockResolvedValue(okResponse({ version: "0.1.0" }));
 
-    await expect(fetchBackendVersion()).resolves.toBe("0.1.0");
+    await expect(fetchBackendVersion()).resolves.toEqual({
+      version: "0.1.0",
+      commit: null,
+    });
 
     expect(fetchMock).toHaveBeenCalledTimes(1);
     expect(fetchMock).toHaveBeenCalledWith(DEFAULT_VERSION_URL);
   });
 
-  it("returns null when the backend reports its unknown sentinel", async () => {
+  it("returns a null version when the backend reports its unknown sentinel", async () => {
     fetchMock.mockResolvedValue(okResponse({ version: "unknown" }));
 
-    await expect(fetchBackendVersion()).resolves.toBeNull();
+    await expect(fetchBackendVersion()).resolves.toEqual({
+      version: null,
+      commit: null,
+    });
   });
+
+  it("returns the commit the backend reports next to the version", async () => {
+    fetchMock.mockResolvedValue(
+      okResponse({ version: "0.1.0", commit: "0123456789ab" }),
+    );
+
+    await expect(fetchBackendVersion()).resolves.toEqual({
+      version: "0.1.0",
+      commit: "0123456789ab",
+    });
+  });
+
+  it("returns a null commit when the backend reports its unknown commit sentinel", async () => {
+    fetchMock.mockResolvedValue(
+      okResponse({ version: "0.1.0", commit: "unknown" }),
+    );
+
+    await expect(fetchBackendVersion()).resolves.toEqual({
+      version: "0.1.0",
+      commit: null,
+    });
+  });
+
+  it.each([
+    ["missing", {}],
+    ["empty", { commit: "" }],
+    ["a number", { commit: 123 }],
+    ["null", { commit: null }],
+  ])(
+    "returns a null commit without rejecting when the commit is %s",
+    async (_label, extra) => {
+      fetchMock.mockResolvedValue(okResponse({ version: "0.1.0", ...extra }));
+
+      await expect(fetchBackendVersion()).resolves.toEqual({
+        version: "0.1.0",
+        commit: null,
+      });
+    },
+  );
 
   it("throws with the status and reason when the response is not OK", async () => {
     fetchMock.mockResolvedValue(failedResponse(503, "Service Unavailable"));
