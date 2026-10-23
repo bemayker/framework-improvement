@@ -12,3 +12,6 @@ This run's section of the repository-root `DECISIONS.md`, which is cumulative ac
 - [run] Section W final boundary (wave 2): follow-ups filed none. known-improvements read for FEAT-7: 0 RECOMMENDED (1 OPTIONAL, not a source); unaddressed-comments: 0.
 - [run] Section W step 2 re-ingest not dispatched: the run is scoped to FEAT-7, its scope rule admits only FEAT-7 and follow-ups this run filed, FEAT-7 is done and no follow-up was filed, so the re-ingested graph is empty by construction. Deviation from the letter of Section W, recorded here.
 - [run] Section W step 3 publish: pr-tests required status not read separately; the publish diff is docs/runs/** only.
+- [run] Report dispatch: the report applies the template and the session's handed facts only; no standard read.
+- [run] Run statistics: only the run-level table is embedded; the step-3-and-8-only run-level marker coverage (no step 5 window around the scheduler loop) is reported as a marker-writer gap in this session's instrumentation.
+- [run] Shared risk written on the none-flagged arm with inferred and appended counts (0, 0).
