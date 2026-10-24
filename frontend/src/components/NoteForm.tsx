@@ -1,4 +1,4 @@
-import { useRef, useState, type CSSProperties, type FormEvent } from "react";
+import { useState, type CSSProperties, type FormEvent } from "react";
 import { createNote, type Note } from "../api/notes";
 
 const FIELD_LABEL = "New note";
@@ -53,11 +53,6 @@ const buttonStyle: CSSProperties = {
   cursor: "pointer",
 };
 
-const buttonSavingStyle: CSSProperties = {
-  cursor: "not-allowed",
-  opacity: 0.6,
-};
-
 const errorStyle: CSSProperties = {
   fontSize: "0.875rem",
   color: "#b3261e",
@@ -72,8 +67,6 @@ type NoteFormProps = {
 function NoteForm({ onCreated }: NoteFormProps) {
   const [text, setText] = useState("");
   const [error, setError] = useState<string | null>(null);
-  const [isSaving, setIsSaving] = useState(false);
-  const isSavingRef = useRef(false);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -86,14 +79,6 @@ function NoteForm({ onCreated }: NoteFormProps) {
       return;
     }
 
-    // The ref is checked synchronously: two submit events in the same tick would
-    // both pass a state check, because state updates are applied asynchronously.
-    if (isSavingRef.current) {
-      return;
-    }
-    isSavingRef.current = true;
-    setIsSaving(true);
-
     try {
       const savedNote = await createNote(trimmedText);
       setError(null);
@@ -101,19 +86,11 @@ function NoteForm({ onCreated }: NoteFormProps) {
       onCreated(savedNote);
     } catch {
       setError(SAVE_FAILED_MESSAGE);
-    } finally {
-      isSavingRef.current = false;
-      setIsSaving(false);
     }
   }
 
   return (
-    <form
-      data-testid="note-form"
-      style={formStyle}
-      aria-busy={isSaving}
-      onSubmit={handleSubmit}
-    >
+    <form data-testid="note-form" style={formStyle} onSubmit={handleSubmit}>
       <label htmlFor="note-text" style={labelStyle}>
         {FIELD_LABEL}
       </label>
@@ -128,12 +105,7 @@ function NoteForm({ onCreated }: NoteFormProps) {
           style={inputStyle}
           onChange={(event) => setText(event.target.value)}
         />
-        <button
-          data-testid="note-submit"
-          type="submit"
-          disabled={isSaving}
-          style={isSaving ? { ...buttonStyle, ...buttonSavingStyle } : buttonStyle}
-        >
+        <button data-testid="note-submit" type="submit" style={buttonStyle}>
           {SUBMIT_LABEL}
         </button>
       </div>

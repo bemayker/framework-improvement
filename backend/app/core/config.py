@@ -22,11 +22,6 @@ def _read_cors_origins() -> tuple[str, ...]:
     return tuple(entry for entry in entries if entry) or DEFAULT_CORS_ORIGINS
 
 
-def _read_build_commit() -> str | None:
-    """Return BUILD_COMMIT stripped, or None when it is unset or blank."""
-    return (os.environ.get("BUILD_COMMIT") or "").strip() or None
-
-
 @dataclass(frozen=True)
 class Settings:
     app_title: str = "Task Notes API"
@@ -37,8 +32,6 @@ class Settings:
     )
     # CORS_ORIGINS (comma-separated), read per call; unset or blank uses the default.
     cors_origins: tuple[str, ...] = field(default_factory=_read_cors_origins)
-    # BUILD_COMMIT, set at build time, read per call; unset or blank is None.
-    build_commit: str | None = field(default_factory=_read_build_commit)
 
 
 def get_settings() -> Settings:
