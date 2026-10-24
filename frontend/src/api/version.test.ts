@@ -34,13 +34,40 @@ describe("getBackendVersion", () => {
     vi.unstubAllEnvs();
   });
 
-  it("returns the version the backend sent, from the default base URL", async () => {
-    fetchMock.mockResolvedValue(okResponse({ version: "0.1.0" }));
+  it("returns the version and commit the backend sent, from the default base URL", async () => {
+    fetchMock.mockResolvedValue(
+      okResponse({ version: "0.1.0", commit: "0123456789ab" }),
+    );
 
-    await expect(getBackendVersion()).resolves.toBe("0.1.0");
+    await expect(getBackendVersion()).resolves.toEqual({
+      version: "0.1.0",
+      commit: "0123456789ab",
+    });
 
     expect(fetchMock).toHaveBeenCalledTimes(1);
     expect(fetchMock).toHaveBeenCalledWith(DEFAULT_VERSION_URL);
+  });
+
+  it.each([
+    ["missing", {}],
+    ["not a string", { commit: 42 }],
+    ["blank", { commit: "  " }],
+    ["the unknown sentinel", { commit: "unknown" }],
+  ])("returns a null commit when the commit is %s", async (_label, extra) => {
+    fetchMock.mockResolvedValue(okResponse({ version: "0.1.0", ...extra }));
+
+    await expect(getBackendVersion()).resolves.toEqual({
+      version: "0.1.0",
+      commit: null,
+    });
+  });
+
+  it("returns null, ignoring the commit, when the version is unknown", async () => {
+    fetchMock.mockResolvedValue(
+      okResponse({ version: "unknown", commit: "0123456789ab" }),
+    );
+
+    await expect(getBackendVersion()).resolves.toBeNull();
   });
 
   it("uses VITE_API_BASE_URL instead of the default when it is configured", async () => {
@@ -54,12 +81,6 @@ describe("getBackendVersion", () => {
     await getVersionWithConfiguredBase();
 
     expect(fetchMock).toHaveBeenCalledWith("https://notes.example.test/api/version");
-  });
-
-  it("returns null when the backend reports its unknown sentinel", async () => {
-    fetchMock.mockResolvedValue(okResponse({ version: "unknown" }));
-
-    await expect(getBackendVersion()).resolves.toBeNull();
   });
 
   it("returns null when the version is blank", async () => {
