@@ -11,6 +11,10 @@ if (!versionMatch) {
 }
 const backendVersion = versionMatch[1];
 
+function escapeRegExp(text: string): string {
+  return text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
 test.describe("TEST-08 footer shows the backend app version", () => {
   test("shows the backend's version, read from backend/pyproject.toml, in the footer", async ({
     page,
@@ -19,7 +23,10 @@ test.describe("TEST-08 footer shows the backend app version", () => {
 
     const footer = page.getByTestId("app-footer");
     await expect(footer).toBeVisible();
-    await expect(footer).toHaveText(`Task Notes v${backendVersion}`);
+    // The footer carries " (7 hex chars)" whenever the stack runs with BUILD_COMMIT set (TEST-10).
+    await expect(footer).toHaveText(
+      new RegExp(`^Task Notes v${escapeRegExp(backendVersion)}( \\([0-9a-f]{7}\\))?$`),
+    );
   });
 
   test("shows only the app name when /api/version is unreachable", async ({ page }) => {
