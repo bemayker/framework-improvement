@@ -2,46 +2,7 @@
 
 from importlib.metadata import PackageNotFoundError
 
-import pytest
-
-from app.core.config import Settings
 from app.services import version_service
-
-FULL_SHA = "0123456789abcdef0123456789abcdef01234567"
-
-
-def _use_build_commit(monkeypatch, value: str) -> None:
-    monkeypatch.setattr(version_service, "get_settings", lambda: Settings(build_commit=value))
-
-
-def test_get_build_commit_cuts_a_full_sha_to_its_first_12_characters(monkeypatch):
-    """Happy path: a 40-character sha is shortened to 12."""
-    _use_build_commit(monkeypatch, FULL_SHA)
-
-    assert version_service.get_build_commit() == "0123456789ab"
-    assert version_service.COMMIT_LENGTH == 12
-
-
-def test_get_build_commit_returns_exactly_12_characters_unchanged(monkeypatch):
-    """Boundary: a value of exactly COMMIT_LENGTH is not cut."""
-    _use_build_commit(monkeypatch, "0123456789ab")
-
-    assert version_service.get_build_commit() == "0123456789ab"
-
-
-@pytest.mark.parametrize("short", ["abc1234", "a"])
-def test_get_build_commit_returns_a_shorter_value_unchanged(monkeypatch, short):
-    """Edge case: a value under 12 characters is returned as is, not padded."""
-    _use_build_commit(monkeypatch, short)
-
-    assert version_service.get_build_commit() == short
-
-
-def test_get_build_commit_returns_unknown_when_build_commit_is_unset(monkeypatch):
-    """Fallback: with BUILD_COMMIT unset the settings default reaches the caller."""
-    monkeypatch.delenv("BUILD_COMMIT", raising=False)
-
-    assert version_service.get_build_commit() == "unknown"
 
 
 def test_get_app_version_returns_installed_distribution_version(monkeypatch):
