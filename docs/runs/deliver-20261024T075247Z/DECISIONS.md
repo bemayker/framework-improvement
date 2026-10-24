@@ -14,3 +14,7 @@ This run's section of the repository-root `DECISIONS.md`, which is cumulative ac
 - [run] Wave boundary (waves 2 and 3 drained): follow-ups filed none (no RECOMMENDED finding left unapplied, no comment unanswered at merge; OPTIONAL findings stay on their PRs).
 - [run] Re-ingestion: graph reduced to TEST-10 (ready since TEST-08 and TEST-09 merged) and BUG-01 (blocked, depends_on FEAT-1 cancelled). registered=none, map not written, 0 proposals, 0 new shared-risk pairs.
 - [run] Round 3: TEST-10 dispatched alone from 6.1, no hold (its shared-risk partners BUG-04 merged and CHORE-02 cancelled).
+- [run] Wave-3 publish: [publish] arm=opened branch=chore/mayker-deliver-20261024T075247Z-wave-3 pr=https://github.com/bemayker/framework-improvement/pull/331 merge=merged (9a49388); pr-tests was a required check on main at merge time.
+- [run] Merged: TEST-10 PR #332 (23fc827) on the orchestrator's merge verdict; checkpoint after TEST-10 passed on the integrated main.
+- [run] Final boundary (wave 4 drained): follow-ups filed none (TEST-10's two RECOMMENDED findings were applied by its refactor gate; no comment unanswered at merge).
+- [run] Re-ingestion (recomputation 3): BUG-01 is the only remaining node and stays blocked (depends_on FEAT-1, cancelled). Nothing dispatchable; the run proceeds to its report. Human action: revive FEAT-1, or re-point or cancel BUG-01.
