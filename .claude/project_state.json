@@ -254,11 +254,18 @@
       "id_source": "framework",
       "id_carrier": "title_prefix",
       "url": "https://app.clickup.com/t/123k99cyy8y"
+    },
+    "FEAT-8": {
+      "external_id": "123k99cyyp0",
+      "external_identifier": "",
+      "id_source": "framework",
+      "id_carrier": "title_prefix",
+      "url": "https://app.clickup.com/t/123k99cyyp0"
     }
   },
   "discovery": {
-    "last_scan_commit": "7935a0bb6885e1a312a839d9ac87b416bcfcd461",
-    "scanned_at": "2026-10-23T20:05:00Z",
+    "last_scan_commit": "c4a794ced8562c17a4ebdfcb5c4368c3b5599603",
+    "scanned_at": "2026-10-24T02:31:32Z",
     "scanned_by": "/sync-project"
   },
   "framework": {
@@ -266,8 +273,8 @@
     "migrated_to": "0.3.443",
     "migrated_at": "2026-10-24T02:17:33Z",
     "synced": {
-      "plugin_version": "0.3.438",
-      "synced_at": "2026-10-23T20:06:37Z"
+      "plugin_version": "0.3.443",
+      "synced_at": "2026-10-24T02:31:34Z"
     }
   }
 }
