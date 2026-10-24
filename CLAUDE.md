@@ -135,6 +135,7 @@ Minimal task-notes app used exclusively as a validation sandbox for the mayker-d
 - **File naming:** {feature_id}_{slug}.spec.ts
 - **Base URL:** http://localhost:5183
 - **Parallel workers:** auto  # integer, or auto for the runner's own default — substituted into this project's configured E2E command (build Phase D's smoke run and the CI E2E step), never into a framework-chosen flag
+- **E2E CI scope:** plan  # plan | always
 
 ### UAT Tests
 
