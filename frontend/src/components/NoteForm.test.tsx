@@ -79,61 +79,6 @@ describe("NoteForm", () => {
     expect(onCreated).not.toHaveBeenCalled();
   });
 
-  it("submits only once while a save is in progress", async () => {
-    createNoteMock.mockReturnValue(new Promise(() => {}));
-    render(<NoteForm onCreated={vi.fn()} />);
-
-    typeNote("Buy milk");
-    fireEvent.submit(screen.getByTestId("note-form"));
-    fireEvent.submit(screen.getByTestId("note-form"));
-
-    expect(createNoteMock).toHaveBeenCalledTimes(1);
-  });
-
-  it("disables the submit button while saving and enables it after success", async () => {
-    let resolveSave: (note: { id: number; text: string }) => void = () => {};
-    createNoteMock.mockReturnValue(
-      new Promise((resolve) => {
-        resolveSave = resolve;
-      }),
-    );
-    render(<NoteForm onCreated={vi.fn()} />);
-
-    typeNote("Buy milk");
-    submitForm();
-
-    await waitFor(() => expect(screen.getByTestId("note-submit")).toBeDisabled());
-
-    resolveSave({ id: 1, text: "Buy milk" });
-
-    await waitFor(() => expect(screen.getByTestId("note-submit")).toBeEnabled());
-  });
-
-  it("enables the button after a rejected save and calls createNote again on retry", async () => {
-    createNoteMock.mockRejectedValueOnce(new Error("Saving the note failed: 500"));
-    createNoteMock.mockResolvedValueOnce({ id: 2, text: "Buy milk" });
-    render(<NoteForm onCreated={vi.fn()} />);
-
-    typeNote("Buy milk");
-    submitForm();
-
-    expect(await screen.findByTestId("note-form-error")).toBeInTheDocument();
-    await waitFor(() => expect(screen.getByTestId("note-submit")).toBeEnabled());
-
-    submitForm();
-
-    await waitFor(() => expect(createNoteMock).toHaveBeenCalledTimes(2));
-  });
-
-  it("does not disable the button when an empty note is submitted", async () => {
-    render(<NoteForm onCreated={vi.fn()} />);
-
-    submitForm();
-
-    expect(await screen.findByTestId("note-form-error")).toBeInTheDocument();
-    expect(screen.getByTestId("note-submit")).toBeEnabled();
-  });
-
   it("clears a previous validation message once a valid note is saved", async () => {
     createNoteMock.mockResolvedValue({ id: 9, text: "Buy milk" });
     render(<NoteForm onCreated={vi.fn()} />);

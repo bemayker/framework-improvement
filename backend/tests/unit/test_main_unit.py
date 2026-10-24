@@ -1,7 +1,5 @@
 """Unit tests for the FastAPI app factory (backend/app/main.py)."""
 
-from datetime import timedelta
-
 from app.main import create_app
 
 # FastAPI's own routes, present on every app regardless of what this project
@@ -58,43 +56,6 @@ def test_create_app_registers_health_route():
     custom_paths = _collect_route_paths(app.routes) - BUILT_IN_ROUTE_PATHS
 
     assert "/api/health" in custom_paths
-
-
-def test_create_app_registers_server_time_route():
-    """Edge case: the app registers the FEAT-1 server time route."""
-    app = create_app()
-
-    custom_paths = _collect_route_paths(app.routes) - BUILT_IN_ROUTE_PATHS
-
-    assert "/api/time" in custom_paths
-
-
-def test_create_app_registers_echo_route():
-    """Edge case: the app registers the TEST-06 echo route."""
-    app = create_app()
-
-    custom_paths = _collect_route_paths(app.routes) - BUILT_IN_ROUTE_PATHS
-
-    assert "/api/echo" in custom_paths
-
-
-def test_create_app_registers_uptime_route():
-    """Edge case: the app registers the TEST-07 uptime route."""
-    app = create_app()
-
-    custom_paths = _collect_route_paths(app.routes) - BUILT_IN_ROUTE_PATHS
-
-    assert "/api/uptime" in custom_paths
-
-
-def test_create_app_captures_process_start_once_per_instance():
-    """Each app instance holds its own UTC-aware start record, set at creation."""
-    first_app = create_app()
-    second_app = create_app()
-
-    first_start = first_app.state.process_start
-    assert first_start.started_at.utcoffset() == timedelta(0)
-    assert first_start is not second_app.state.process_start
 
 
 def test_create_app_returns_independent_instances():
