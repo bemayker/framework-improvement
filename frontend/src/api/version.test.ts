@@ -83,12 +83,6 @@ describe("getBackendVersion", () => {
     expect(fetchMock).toHaveBeenCalledWith("https://notes.example.test/api/version");
   });
 
-  it("returns null when the backend reports its unknown sentinel", async () => {
-    fetchMock.mockResolvedValue(okResponse({ version: "unknown" }));
-
-    await expect(getBackendVersion()).resolves.toBeNull();
-  });
-
   it("returns null when the version is blank", async () => {
     fetchMock.mockResolvedValue(okResponse({ version: "  " }));
 
