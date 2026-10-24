@@ -3,21 +3,37 @@ import { API_BASE_URL } from "./baseUrl";
 // Mirrors backend/app/schemas/version.py.
 export type VersionResponse = {
   version: string;
+  commit: string;
 };
 
-// Mirrors version_service.UNKNOWN_VERSION: the backend answers with this
-// sentinel when its distribution metadata is missing, which is the absence of
-// a version rather than an answer worth showing.
-const BACKEND_UNKNOWN_VERSION = "unknown";
+export type BackendVersion = {
+  version: string;
+  commit: string | null;
+};
+
+// Mirrors version_service.UNKNOWN_VERSION and config.DEFAULT_BUILD_COMMIT: the
+// backend answers with this sentinel when its distribution metadata or build
+// commit is missing, which is the absence of a value rather than an answer
+// worth showing.
+const BACKEND_UNKNOWN = "unknown";
 
 const VERSION_URL = `${API_BASE_URL}/api/version`;
 
+function usableText(value: unknown): string | null {
+  if (typeof value !== "string") {
+    return null;
+  }
+  const trimmed = value.trim();
+  return trimmed === "" || trimmed === BACKEND_UNKNOWN ? null : trimmed;
+}
+
 /**
- * Reads the backend's version. Returns null when the backend answered but
- * could not resolve it (blank or the "unknown" sentinel); throws on an HTTP,
- * network or response-shape failure.
+ * Reads the backend's version and build commit. Returns null when the backend
+ * answered but could not resolve its version (blank or the "unknown"
+ * sentinel); the commit is null when it is missing, not a string, blank or the
+ * sentinel. Throws on an HTTP, network or response-shape failure.
  */
-export async function getBackendVersion(): Promise<string | null> {
+export async function getBackendVersion(): Promise<BackendVersion | null> {
   const response = await fetch(VERSION_URL);
 
   if (!response.ok) {
@@ -32,10 +48,10 @@ export async function getBackendVersion(): Promise<string | null> {
     throw new Error("Loading the version failed: unexpected response");
   }
 
-  const version = body.version.trim();
-  if (version === "" || version === BACKEND_UNKNOWN_VERSION) {
+  const version = usableText(body.version);
+  if (version === null) {
     return null;
   }
 
-  return version;
+  return { version, commit: usableText(body.commit) };
 }
