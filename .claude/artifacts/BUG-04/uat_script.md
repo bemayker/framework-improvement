@@ -46,7 +46,7 @@ Extra prerequisite: in the DevTools Network panel set throttling to `Slow 3G` so
 | # | Step | Expected Result | Pass/Fail |
 |---|------|------------------|-----------|
 | 16 | With throttling on `Slow 3G`, type `Enter twice check` in the field and press Enter twice in quick succession | Exactly one `POST /api/notes` appears and, once it finishes, `Enter twice check` appears exactly once in the list. Set throttling back to `No throttling` afterwards | [ ] Pass [ ] Fail |
-| 17 | From the repository root, run the E2E spec for this item, `e2e/tests/BUG-04_double_submit_note.spec.ts`, with the project's Playwright command | Both specs pass | [ ] Pass [ ] Fail |
+| 17 | From the repository root, run `npm exec --no -- playwright test e2e/tests/BUG-04_double_submit_note.spec.ts` | `0 failed` for `e2e/tests/BUG-04_double_submit_note.spec.ts` | [ ] Pass [ ] Fail |
 
 ## Acceptance criteria coverage
 
