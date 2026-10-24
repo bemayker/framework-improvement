@@ -28,16 +28,57 @@ describe("fetchAppVersion", () => {
   it("returns the version the backend reported, from the default base URL", async () => {
     fetchMock.mockResolvedValue(okResponse({ version: "0.1.0" }));
 
-    await expect(fetchAppVersion()).resolves.toBe("0.1.0");
+    await expect(fetchAppVersion()).resolves.toEqual({
+      version: "0.1.0",
+      commit: null,
+    });
 
     expect(fetchMock).toHaveBeenCalledTimes(1);
     expect(fetchMock).toHaveBeenCalledWith(DEFAULT_VERSION_URL);
   });
 
-  it("ignores extra fields a later backend version adds", async () => {
-    fetchMock.mockResolvedValue(okResponse({ version: "0.2.0", commit: "abc" }));
+  it("returns the commit as the backend reported it, without shortening", async () => {
+    fetchMock.mockResolvedValue(
+      okResponse({ version: "0.2.0", commit: "9a6bfd7c3e1f" }),
+    );
 
-    await expect(fetchAppVersion()).resolves.toBe("0.2.0");
+    await expect(fetchAppVersion()).resolves.toEqual({
+      version: "0.2.0",
+      commit: "9a6bfd7c3e1f",
+    });
+  });
+
+  it("ignores extra fields a later backend version adds", async () => {
+    fetchMock.mockResolvedValue(
+      okResponse({ version: "0.2.0", commit: "abc", extra: true }),
+    );
+
+    await expect(fetchAppVersion()).resolves.toEqual({
+      version: "0.2.0",
+      commit: "abc",
+    });
+  });
+
+  it.each([
+    ["missing", {}],
+    ["a non-string", { commit: 7 }],
+    ["blank", { commit: "   " }],
+    ["the 'unknown' sentinel", { commit: "unknown" }],
+  ])("keeps the version and yields a null commit when the commit is %s", async (_label, extra) => {
+    fetchMock.mockResolvedValue(okResponse({ version: "0.1.0", ...extra }));
+
+    await expect(fetchAppVersion()).resolves.toEqual({
+      version: "0.1.0",
+      commit: null,
+    });
+  });
+
+  it("returns null when the version is unusable even if the commit is fine", async () => {
+    fetchMock.mockResolvedValue(
+      okResponse({ version: "unknown", commit: "9a6bfd7c3e1f" }),
+    );
+
+    await expect(fetchAppVersion()).resolves.toBeNull();
   });
 
   it("returns null when the response is not OK", async () => {

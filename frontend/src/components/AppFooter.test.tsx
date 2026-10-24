@@ -19,18 +19,36 @@ describe("AppFooter", () => {
     fetchAppVersionMock.mockReset();
   });
 
-  it("renders the app name and the resolved backend version", async () => {
-    fetchAppVersionMock.mockResolvedValue(BACKEND_VERSION);
+  it("renders the version and the first 7 characters of the commit in parentheses", async () => {
+    fetchAppVersionMock.mockResolvedValue({
+      version: BACKEND_VERSION,
+      commit: "9a6bfd7c3e1f",
+    });
 
     render(<AppFooter />);
 
     await waitFor(() =>
-      expect(screen.getByTestId("app-footer")).toHaveTextContent(
-        `Task Notes v${BACKEND_VERSION}`,
+      expect(screen.getByTestId("app-footer").textContent).toBe(
+        `Task Notes v${BACKEND_VERSION} (9a6bfd7)`,
       ),
     );
     expect(screen.getByTestId("app-footer")).not.toHaveTextContent(packageVersion);
     expect(fetchAppVersionMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("renders the version alone when the commit is unavailable", async () => {
+    fetchAppVersionMock.mockResolvedValue({
+      version: BACKEND_VERSION,
+      commit: null,
+    });
+
+    render(<AppFooter />);
+
+    await waitFor(() =>
+      expect(screen.getByTestId("app-footer").textContent).toBe(
+        `Task Notes v${BACKEND_VERSION}`,
+      ),
+    );
   });
 
   it("renders the app name alone when the version cannot be resolved", async () => {
@@ -53,7 +71,10 @@ describe("AppFooter", () => {
   });
 
   it("is exposed as the contentinfo landmark and carries the app-footer test id", async () => {
-    fetchAppVersionMock.mockResolvedValue(BACKEND_VERSION);
+    fetchAppVersionMock.mockResolvedValue({
+      version: BACKEND_VERSION,
+      commit: null,
+    });
 
     render(<AppFooter />);
     await screen.findByText(`Task Notes v${BACKEND_VERSION}`);
