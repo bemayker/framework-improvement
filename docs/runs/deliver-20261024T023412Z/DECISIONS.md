@@ -13,3 +13,5 @@ This run's section of the repository-root `DECISIONS.md`, which is cumulative ac
 - [run] Section W step 2 re-ingestion over scope FEAT-8: FEAT-8 and TEST-01 done; graph has zero nodes; registered=none; proposals 0 wave, 0 checkpoint; map valid (34 rows, 35 edges).
 - [run] Re-ingestion snapshot appended to .claude/artifacts/run/graph.md rather than written over it, so the run-start graph and resume map stay in the run record.
 - [run] The item branch feature/FEAT-8-api-version-json-version remains on origin at d98a84a after the squash merge; no step of this run deletes it.
+- [run] Section W step 3 publish wave-2: arm=opened merge=merged, PR https://github.com/bemayker/framework-improvement/pull/309, branch chore/mayker-deliver-20261024T023412Z-wave-2; pr-tests was a required check on main at merge time (repository ruleset: required_status_checks [pr-tests]).
+- [run] Section W step 4: no node dispatchable or in flight after re-ingestion; the run goes to Section 8.
