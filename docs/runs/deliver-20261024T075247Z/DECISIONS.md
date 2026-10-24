@@ -18,3 +18,5 @@ This run's section of the repository-root `DECISIONS.md`, which is cumulative ac
 - [run] Merged: TEST-10 PR #332 (23fc827) on the orchestrator's merge verdict; checkpoint after TEST-10 passed on the integrated main.
 - [run] Final boundary (wave 4 drained): follow-ups filed none (TEST-10's two RECOMMENDED findings were applied by its refactor gate; no comment unanswered at merge).
 - [run] Re-ingestion (recomputation 3): BUG-01 is the only remaining node and stays blocked (depends_on FEAT-1, cancelled). Nothing dispatchable; the run proceeds to its report. Human action: revive FEAT-1, or re-point or cancel BUG-01.
+- [run] Report: terminal state blocked; 4 delivered (TEST-09 #328, BUG-04 #329, TEST-08 #330, TEST-10 #332), 1 blocked (BUG-01 on cancelled FEAT-1). Stats carry a Degraded line: this session opened the 3.orchestrator re-ingestion windows inside the open step-W window, which the collector reads as an overlap (a marker-writer defect of this run, reported to the framework maintainers, not filed to the project tracker).
+- [run] Standards provenance figures (15 of 37 dispatches) are self-reported, not measured.
