@@ -6,7 +6,7 @@
 - Repository checked out locally, on branch `feature/TEST-10-footer-build-commit` (or `main` once merged).
 - `.env` copied from `.env.example` in the repository root; `BUILD_COMMIT` not set in it.
 - Ports `5183` (frontend) and `8010` (backend) free.
-- Node installed and `npm --prefix frontend install` run once (for steps 10 and 11).
+- Node installed and `npm --prefix frontend install` run once (for steps 7 and 8).
 
 ## Test Environment Setup
 

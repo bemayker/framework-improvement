@@ -27,13 +27,13 @@ function footerText(appVersion: AppVersion | null): string {
 function AppFooter() {
   // null covers loading and failure alike: the footer shows the name alone
   // rather than a placeholder a reader could mistake for a version.
-  const [version, setVersion] = useState<AppVersion | null>(null);
+  const [appVersion, setAppVersion] = useState<AppVersion | null>(null);
 
   useEffect(() => {
     let isMounted = true;
     fetchAppVersion().then((resolved) => {
       if (isMounted) {
-        setVersion(resolved);
+        setAppVersion(resolved);
       }
     });
     return () => {
@@ -43,7 +43,7 @@ function AppFooter() {
 
   return (
     <footer data-testid="app-footer" style={footerStyle}>
-      {footerText(version)}
+      {footerText(appVersion)}
     </footer>
   );
 }
