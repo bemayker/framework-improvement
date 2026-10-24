@@ -19,8 +19,8 @@
     "effective_path": {
       "path": "gh",
       "host": "github.com",
-      "verified_at": "2026-10-18T21:43:20Z",
-      "plugin_version": "0.3.410",
+      "verified_at": "2026-10-24T03:39:20Z",
+      "plugin_version": "0.3.443",
       "mcp_server_url": ""
     }
   },
@@ -247,11 +247,25 @@
       "id_source": "framework",
       "id_carrier": "title_prefix",
       "url": "https://app.clickup.com/t/123k99cyum2"
+    },
+    "FEAT-7": {
+      "external_id": "123k99cyy8y",
+      "external_identifier": "",
+      "id_source": "framework",
+      "id_carrier": "title_prefix",
+      "url": "https://app.clickup.com/t/123k99cyy8y"
+    },
+    "FEAT-8": {
+      "external_id": "123k99cyyp0",
+      "external_identifier": "",
+      "id_source": "framework",
+      "id_carrier": "title_prefix",
+      "url": "https://app.clickup.com/t/123k99cyyp0"
     }
   },
   "discovery": {
-    "last_scan_commit": "480f9bfe023229ae518cc4df802a5ee37d2b4acc",
-    "scanned_at": "2026-10-22T16:03:31Z",
+    "last_scan_commit": "154d799aedef48dbca1cf4de6d3be8532d914692",
+    "scanned_at": "2026-10-24T03:39:20Z",
     "scanned_by": "/sync-project"
   },
   "framework": {
@@ -259,8 +273,8 @@
     "migrated_to": "0.3.443",
     "migrated_at": "2026-10-24T03:29:18Z",
     "synced": {
-      "plugin_version": "0.3.430",
-      "synced_at": "2026-10-22T16:03:31Z"
+      "plugin_version": "0.3.443",
+      "synced_at": "2026-10-24T03:39:26Z"
     }
   }
 }
