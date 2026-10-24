@@ -93,4 +93,88 @@ describe("NoteForm", () => {
       expect(screen.queryByTestId("note-form-error")).not.toBeInTheDocument(),
     );
   });
+
+  describe("while a save is in flight", () => {
+    // A save the test settles by hand, so the pending window is deterministic.
+    function holdSave() {
+      let resolve!: (note: { id: number; text: string }) => void;
+      let reject!: (reason: Error) => void;
+      const pending = new Promise<{ id: number; text: string }>((res, rej) => {
+        resolve = res;
+        reject = rej;
+      });
+      createNoteMock.mockReturnValue(pending);
+      return { resolve, reject };
+    }
+
+    it("sends one request for a quick double click and disables the button", async () => {
+      const save = holdSave();
+      render(<NoteForm onCreated={vi.fn()} />);
+
+      typeNote("Buy milk");
+      submitForm();
+      submitForm();
+
+      expect(createNoteMock).toHaveBeenCalledTimes(1);
+      expect(screen.getByTestId("note-submit")).toBeDisabled();
+      expect(screen.getByTestId("note-form")).toHaveAttribute("aria-busy", "true");
+
+      save.resolve({ id: 1, text: "Buy milk" });
+      await waitFor(() => expect(screen.getByTestId("note-submit")).toBeEnabled());
+    });
+
+    it("ignores an Enter submit while the save is pending", async () => {
+      const save = holdSave();
+      render(<NoteForm onCreated={vi.fn()} />);
+
+      typeNote("Buy milk");
+      submitForm();
+      fireEvent.submit(screen.getByTestId("note-form"));
+      fireEvent.submit(screen.getByTestId("note-form"));
+
+      expect(createNoteMock).toHaveBeenCalledTimes(1);
+
+      save.resolve({ id: 2, text: "Buy milk" });
+      await waitFor(() => expect(screen.getByTestId("note-submit")).toBeEnabled());
+    });
+
+    it("re-enables the button and clears the input after a successful save", async () => {
+      const save = holdSave();
+      render(<NoteForm onCreated={vi.fn()} />);
+
+      typeNote("Buy milk");
+      submitForm();
+      save.resolve({ id: 3, text: "Buy milk" });
+
+      await waitFor(() => expect(screen.getByTestId("note-submit")).toBeEnabled());
+      expect(screen.getByTestId("note-input")).toHaveValue("");
+      expect(screen.getByTestId("note-form")).toHaveAttribute("aria-busy", "false");
+
+      createNoteMock.mockResolvedValue({ id: 4, text: "Second" });
+      typeNote("Second");
+      submitForm();
+      await waitFor(() => expect(createNoteMock).toHaveBeenCalledTimes(2));
+    });
+
+    it("re-enables the button, keeps the text and shows the error after a failed save", async () => {
+      const save = holdSave();
+      render(<NoteForm onCreated={vi.fn()} />);
+
+      typeNote("Buy milk");
+      submitForm();
+      save.reject(new Error("Saving the note failed: 500"));
+
+      expect(await screen.findByTestId("note-form-error")).toBeInTheDocument();
+      expect(screen.getByTestId("note-submit")).toBeEnabled();
+      expect(screen.getByTestId("note-input")).toHaveValue("Buy milk");
+    });
+
+    it("never disables the button for an empty note", () => {
+      render(<NoteForm onCreated={vi.fn()} />);
+
+      submitForm();
+
+      expect(screen.getByTestId("note-submit")).toBeEnabled();
+    });
+  });
 });
