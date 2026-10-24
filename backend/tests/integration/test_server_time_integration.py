@@ -53,6 +53,21 @@ def test_get_time_returns_fresh_value_per_request(client: TestClient, monkeypatc
     assert first != second
 
 
+def test_get_time_response_carries_cache_control_no_store(client: TestClient):
+    response = client.get("/api/time")
+
+    assert response.status_code == 200
+    assert response.headers["cache-control"] == "no-store"
+
+
+def test_get_time_cache_control_is_set_on_every_request(client: TestClient):
+    first = client.get("/api/time")
+    second = client.get("/api/time")
+
+    assert first.headers["cache-control"] == "no-store"
+    assert second.headers["cache-control"] == "no-store"
+
+
 def test_post_time_returns_405_method_not_allowed(client: TestClient):
     response = client.post("/api/time")
 
