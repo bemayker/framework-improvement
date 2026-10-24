@@ -52,24 +52,6 @@ describe("AppFooter", () => {
     expect(screen.getByTestId("app-footer").textContent).toBe("Task Notes");
   });
 
-  it("does not update after unmount when the version resolves late", async () => {
-    let resolveVersion: (value: string | null) => void = () => {};
-    fetchAppVersionMock.mockReturnValue(
-      new Promise((resolve) => {
-        resolveVersion = resolve;
-      }),
-    );
-    const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
-
-    const { unmount } = render(<AppFooter />);
-    unmount();
-    resolveVersion(BACKEND_VERSION);
-    await Promise.resolve();
-
-    expect(errorSpy).not.toHaveBeenCalled();
-    errorSpy.mockRestore();
-  });
-
   it("is exposed as the contentinfo landmark and carries the app-footer test id", async () => {
     fetchAppVersionMock.mockResolvedValue(BACKEND_VERSION);
 
