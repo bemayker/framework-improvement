@@ -8,10 +8,25 @@ any code change when that value is bumped.
 import logging
 from importlib.metadata import PackageNotFoundError, version
 
+from app.core.config import get_settings
+
 logger = logging.getLogger(__name__)
 
 DISTRIBUTION_NAME = "task-notes-backend"
 UNKNOWN_VERSION = "unknown"
+UNKNOWN_COMMIT = "unknown"
+COMMIT_LENGTH = 12
+
+
+def get_build_commit() -> str:
+    """Return the build commit from BUILD_COMMIT, cut to its first 12 characters.
+
+    Unset or blank yields the sentinel, so the endpoint never answers 500.
+    """
+    commit = get_settings().build_commit
+    if commit is None:
+        return UNKNOWN_COMMIT
+    return commit[:COMMIT_LENGTH]
 
 
 def get_app_version() -> str:
