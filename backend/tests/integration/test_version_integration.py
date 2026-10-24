@@ -27,6 +27,14 @@ def test_get_version_returns_200_with_version_from_pyproject(client: TestClient,
     assert response.json() == {"version": _expected_version(), "commit": "unknown"}
 
 
+def test_get_version_returns_200_with_version_1_0(client: TestClient):
+    """FEAT-8: the literal "1.0" is the item's own criterion; the pyproject test covers the wiring."""
+    response = client.get("/api/version")
+
+    assert response.status_code == 200
+    assert response.json()["version"] == "1.0"
+
+
 def test_get_version_answers_when_database_url_is_unset(monkeypatch):
     """Criterion 3: no database connection is needed; DATABASE_URL may be absent."""
     monkeypatch.delenv("DATABASE_URL", raising=False)
