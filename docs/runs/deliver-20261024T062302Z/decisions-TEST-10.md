@@ -1,0 +1,13 @@
+# Decisions (TEST-10, after its final push): deliver-20261024T062302Z
+
+The entries `.claude/artifacts/TEST-10/decisions.md` received after the last push of its branch (523054b), the head its pull request merged. The entries before them reached the default branch in that file.
+
+- 2026-10-24 [TEST-10] Merge verdict: merge PR #324 (head 523054b) by squash. Rationale: autonomy.md Section 5 holds on all five conditions — self-review `VERDICT: PASS blocking=0 recommended=0 optional=1` (the one optional is a kept, accurate docs/DEVELOPMENT.md sentence named in the PR body); 8 check runs on 523054b all COMPLETED/SUCCESS (PR Tests: changes, feature-map, unit, integration, e2e, pr-tests; Notify Slack twice), PR out of draft, MERGEABLE/CLEAN; push gate `full` (pytest 75 passed, vitest 47 passed); all three acceptance criteria covered at Unit per the plan's Criterion coverage table with the criterion 2 interpretation recorded in plan and PR body; 0 PR comments, 0 inline, 0 reviews, no change request, and the only new tracker comment is the run's own PR-link, so condition 4's `answered` bar is met with nothing left to answer; escalation bar not triggered (frontend-only, revertable change). Main moved b9f9792 to 18b2d1a (TEST-07 backend files) with no overlap with TEST-10's frontend manifest.
+- 6.6: pushed head 523054b; gate: `test-gate: verdict recorded for this push (head 523054b: full after 6s; counts: root: pytest 75 passed, 0 failed, 14 skipped + vitest 47 passed, 0 failed, 0 skipped)`; upstream verdict=upstream-ok. Draft PR #324 opened; PR label #324 mayker:in-progress; item-to-PR comment posted.
+- 6.7: CI `CI: 7/7 checks done, 3m33s, next poll none (green)` on 523054b. Handover rebuild: `status=rebuilt sha=523054b services=3/3 health=pass project=framework-improvement-test-10-handover urls=backend=http://localhost:20873,db=localhost:20874,frontend=http://localhost:20875 duration=11s`. PR #324 converted; tracker -> to test. PR label: #324 mayker:in-review (removed mayker:in-progress).
+- 6.8 round 1: PR comments 0, inline 0, reviews 0, CLEAN; tracker: only the run's own PR-link comment is new.
+- 6.9: merged PR #324 (squash) as f7839021c82f21fb5780a7a629cf80ed4dcaf2d0.
+- 6.10 Auto-Done: `auto-done: run 40074561344 succeeded`; tracker re-read: complete. No backstop flip.
+- 6.10 Standards provenance: 8 dispatch(es); both always-on standards SELF-REPORTED as read by 3 of 8 (information only, no pass bar); 0 unbacked provenance claim(s); 0 MISMATCH lines.
+- 6.10 checkpoint: `[pull] result=pulled head=f783902 removed=none set-aside=none blocked-by=none`; `[checkpoint] due=yes items=TEST-10 ... head=f783902 tip=origin/main@f783902 verdict=pass`.
+- 6.10 teardown: no `- env:` line of this run; handover stack left running.
