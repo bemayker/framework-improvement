@@ -97,6 +97,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       code_changed: ${{ steps.gate.outputs.code_changed }}
+      e2e_needed: ${{ steps.e2e-gate.outputs.e2e_needed }}
     steps:
       # Full history: the merge base with the base branch has to be present
       # locally for the three-dot diff below to resolve.
@@ -173,6 +174,82 @@ jobs:
           fi
           echo "code_changed=${code_changed}" >> "$GITHUB_OUTPUT"
           echo "::notice title=pr-tests change gate::code_changed=${code_changed} — ${reason}"
+
+      # DOES THIS PR NEED THE E2E TIER? (MDF-495, migration 0.3.438-01). Asked
+      # here and answered as an OUTPUT the e2e job's `if:` reads, never as a
+      # path filter. CLAUDE.md -> Test Configuration -> E2E -> `E2E CI scope`:
+      # `plan` asks; `always`, or no such line, runs e2e whenever the PR has code.
+      - name: Decide whether the e2e tier runs
+        id: e2e-gate
+        env:
+          RESOLVED: ${{ steps.collect.outputs.resolved }}
+          HEAD_REF: ${{ github.head_ref }}
+        run: |
+          set -u
+          scope=""
+          e2e_dir=""
+          if [ -f CLAUDE.md ]; then
+            scope="$(sed -n 's/^- \*\*E2E CI scope:\*\*[[:space:]]*\([A-Za-z]*\).*/\1/p' CLAUDE.md | head -n 1 | tr 'A-Z' 'a-z')"
+            e2e_dir="$(sed -n 's/^- \*\*Test directory:\*\*[[:space:]]*\([^[:space:]#]*\).*/\1/p' CLAUDE.md | head -n 1)"
+          fi
+          case "$e2e_dir" in "["*|none|auto) e2e_dir="" ;; esac
+          e2e_dir="${e2e_dir%/}"
+          needed=true
+          reason="E2E CI scope is not 'plan' in CLAUDE.md; e2e runs whenever the PR contains code"
+          if [ "$scope" = "plan" ]; then
+            needed=false
+            reason="the PR touches no E2E or UI path and no plan of this PR assigns a criterion to E2E"
+            if [ "${RESOLVED:-false}" != "true" ] || [ ! -f changed-files.txt ]; then
+              needed=true
+              reason="the changed file set could not be resolved; running e2e"
+            fi
+            if [ "$needed" = "false" ]; then
+              while IFS= read -r f; do
+                [ -n "$f" ] || continue
+                if [ -n "$e2e_dir" ]; then
+                  case "$f" in "$e2e_dir"/*) needed=true; reason="this PR changes the E2E path ${f}"; break ;; esac
+                fi
+                case "$f" in
+                  e2e/*|*/e2e/*|playwright.config.*|*/playwright.config.*|cypress.config.*|*/cypress.config.*)
+                    needed=true; reason="this PR changes the E2E path ${f}"; break ;;
+                  *.tsx|*.jsx|*.vue|*.svelte|*.astro|*.html|*.css|*.scss|*.sass|*.less|frontend/*|*/frontend/*|public/*|*/public/*|static/*|*/static/*)
+                    needed=true; reason="this PR changes the UI path ${f}"; break ;;
+                esac
+              done < changed-files.txt
+            fi
+            if [ "$needed" = "false" ]; then
+              plans="$(grep -E '^\.claude/artifacts/[^/]+/plan\.md$' changed-files.txt || true)"
+              slug="$(printf '%s' "${HEAD_REF#feature/}" | tr 'A-Z' 'a-z')"
+              for d in .claude/artifacts/*/; do
+                [ -d "$d" ] || continue
+                id="$(basename "$d" | tr 'A-Z' 'a-z')"
+                case "$slug" in
+                  "$id"|"$id"-*) plans="$plans ${d}plan.md" ;;
+                esac
+              done
+              # Unquoted on purpose: split on whitespace, one plan path each.
+              # shellcheck disable=SC2086
+              for p in $(printf '%s\n' $plans | sort -u); do
+                [ -f "$p" ] || continue
+                cells="$(awk -F'|' '
+                  /^### Criterion coverage[ \t]*$/ { s = 1; next }
+                  s && /^#/ { s = 0 }
+                  s && /^\|/ {
+                    c = $4; gsub(/^[ \t]+|[ \t]+$/, "", c)
+                    if (c == "" || c ~ /^[-: ]+$/ || tolower(c) ~ /tier/) next
+                    print c
+                  }' "$p")"
+                if [ -z "$cells" ]; then
+                  needed=true; reason="${p} has no readable Criterion coverage rows; running e2e"; break
+                fi
+                if printf '%s\n' "$cells" | grep -Eiv 'not[[:space:]]+e2e|no[[:space:]]+e2e' | grep -Eiq '(^|[^[:alnum:]])e2e([^[:alnum:]]|$)'; then
+                  needed=true; reason="${p} assigns a criterion to E2E"; break
+                fi
+              done
+            fi
+          fi
+          echo "e2e_needed=${needed}" >> "$GITHUB_OUTPUT"
+          echo "::notice title=pr-tests e2e gate::e2e_needed=${needed} (scope=${scope:-unset}): ${reason}"
 
   # ---------------------------------------------------------------------------
   # UNIT TESTS (always on)
@@ -339,7 +416,7 @@ jobs:
   # ---------------------------------------------------------------------------
   e2e:
     needs: changes
-    if: needs.changes.outputs.code_changed == 'true'
+    if: needs.changes.outputs.code_changed == 'true' && needs.changes.outputs.e2e_needed == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
