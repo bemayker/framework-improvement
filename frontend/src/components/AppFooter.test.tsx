@@ -1,23 +1,67 @@
-import { describe, it, expect } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { describe, it, expect, vi, beforeEach } from "vitest";
+import { render, screen, waitFor } from "@testing-library/react";
 import AppFooter from "./AppFooter";
-import { version } from "../../package.json";
+import { fetchBackendVersion } from "../api/version";
+
+vi.mock("../api/version", () => ({
+  fetchBackendVersion: vi.fn(),
+}));
+
+const fetchBackendVersionMock = vi.mocked(fetchBackendVersion);
+
+/** Text that must never leak into the footer when no version is resolved. */
+function expectNameOnlyFooter() {
+  const footer = screen.getByTestId("app-footer");
+  expect(footer.textContent).toBe("Task Notes");
+  expect(screen.queryByTestId("app-footer-version")).not.toBeInTheDocument();
+  expect(footer).not.toHaveTextContent(/undefined|null|unknown/);
+}
 
 describe("AppFooter", () => {
-  it("renders the application name", () => {
-    render(<AppFooter />);
-
-    expect(screen.getByTestId("app-footer")).toHaveTextContent("Task Notes");
+  beforeEach(() => {
+    fetchBackendVersionMock.mockReset();
+    fetchBackendVersionMock.mockResolvedValue(null);
   });
 
-  it("renders the version imported from package.json", () => {
+  it("renders the backend version once it resolves", async () => {
+    fetchBackendVersionMock.mockResolvedValue("9.9.9");
+
     render(<AppFooter />);
 
-    expect(screen.getByTestId("app-footer")).toHaveTextContent(version);
+    const version = await screen.findByTestId("app-footer-version");
+    expect(version).toHaveTextContent("v9.9.9");
+    expect(screen.getByTestId("app-footer").textContent).toBe("Task Notes v9.9.9");
   });
 
-  it("is exposed as the contentinfo landmark and carries the app-footer test id", () => {
+  it("renders the name alone when the version request fails", async () => {
+    fetchBackendVersionMock.mockRejectedValue(new Error("network down"));
+
     render(<AppFooter />);
+    await waitFor(() => expect(fetchBackendVersionMock).toHaveBeenCalledTimes(1));
+
+    expectNameOnlyFooter();
+  });
+
+  it("renders the name alone when the backend reports no usable version", async () => {
+    fetchBackendVersionMock.mockResolvedValue(null);
+
+    render(<AppFooter />);
+    await waitFor(() => expect(fetchBackendVersionMock).toHaveBeenCalledTimes(1));
+
+    expectNameOnlyFooter();
+  });
+
+  it("renders the name alone while the version request is pending", () => {
+    fetchBackendVersionMock.mockReturnValue(new Promise(() => {}));
+
+    render(<AppFooter />);
+
+    expectNameOnlyFooter();
+  });
+
+  it("is exposed as the contentinfo landmark and carries the app-footer test id", async () => {
+    render(<AppFooter />);
+    await waitFor(() => expect(fetchBackendVersionMock).toHaveBeenCalledTimes(1));
 
     const footer = screen.getByRole("contentinfo");
     expect(footer).toHaveAttribute("data-testid", "app-footer");
