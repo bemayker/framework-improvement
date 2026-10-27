@@ -39,8 +39,6 @@ services:
       # The browser's origin. A handover rebuild on free ports (MDF-284) rewrites
       # this localhost URL to the moved frontend port, so it must live here.
       CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:5183}
-      # Blank when the host has none; the backend treats blank as unset.
-      BUILD_COMMIT: ${BUILD_COMMIT:-}
     ports:
       - "8010:8010"
     volumes:
