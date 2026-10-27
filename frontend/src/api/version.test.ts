@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { fetchBackendVersion } from "./version";
+import { fetchBackendBuildInfo } from "./version";
 
 const DEFAULT_VERSION_URL = "http://localhost:8010/api/version";
 
@@ -34,39 +34,93 @@ describe("version API client", () => {
     vi.unstubAllEnvs();
   });
 
-  it("returns the backend version from the default base URL", async () => {
-    fetchMock.mockResolvedValue(okResponse({ version: "0.1.0" }));
+  it("returns the backend version and commit from the default base URL", async () => {
+    fetchMock.mockResolvedValue(
+      okResponse({ version: "0.1.0", commit: "a1b2c3d4e5f6" }),
+    );
 
-    await expect(fetchBackendVersion()).resolves.toBe("0.1.0");
+    await expect(fetchBackendBuildInfo()).resolves.toEqual({
+      version: "0.1.0",
+      commit: "a1b2c3d4e5f6",
+    });
 
     expect(fetchMock).toHaveBeenCalledTimes(1);
     expect(fetchMock).toHaveBeenCalledWith(DEFAULT_VERSION_URL);
   });
 
-  it("ignores fields other than version", async () => {
+  it("trims the commit", async () => {
     fetchMock.mockResolvedValue(
-      okResponse({ version: "0.1.0", commit: "abc1234" }),
+      okResponse({ version: "0.1.0", commit: " a1b2c3d4e5f6 " }),
     );
 
-    await expect(fetchBackendVersion()).resolves.toBe("0.1.0");
+    await expect(fetchBackendBuildInfo()).resolves.toEqual({
+      version: "0.1.0",
+      commit: "a1b2c3d4e5f6",
+    });
   });
 
-  it("returns null when the backend reports the unknown sentinel", async () => {
-    fetchMock.mockResolvedValue(okResponse({ version: "unknown" }));
+  it("returns a null commit when the body has no commit", async () => {
+    fetchMock.mockResolvedValue(okResponse({ version: "0.1.0" }));
 
-    await expect(fetchBackendVersion()).resolves.toBeNull();
+    await expect(fetchBackendBuildInfo()).resolves.toEqual({
+      version: "0.1.0",
+      commit: null,
+    });
   });
 
-  it("returns null when the version is empty or blank", async () => {
+  it("returns a null commit when the commit is not a string", async () => {
+    fetchMock.mockResolvedValue(okResponse({ version: "0.1.0", commit: 1 }));
+
+    await expect(fetchBackendBuildInfo()).resolves.toEqual({
+      version: "0.1.0",
+      commit: null,
+    });
+  });
+
+  it("returns a null commit when the commit is blank", async () => {
+    fetchMock.mockResolvedValue(okResponse({ version: "0.1.0", commit: "   " }));
+
+    await expect(fetchBackendBuildInfo()).resolves.toEqual({
+      version: "0.1.0",
+      commit: null,
+    });
+  });
+
+  it("returns a null commit when the backend reports the unknown sentinel", async () => {
+    fetchMock.mockResolvedValue(
+      okResponse({ version: "0.1.0", commit: "unknown" }),
+    );
+
+    await expect(fetchBackendBuildInfo()).resolves.toEqual({
+      version: "0.1.0",
+      commit: null,
+    });
+  });
+
+  it("returns a null version when the backend reports the unknown sentinel", async () => {
+    fetchMock.mockResolvedValue(
+      okResponse({ version: "unknown", commit: "a1b2c3d4e5f6" }),
+    );
+
+    await expect(fetchBackendBuildInfo()).resolves.toEqual({
+      version: null,
+      commit: "a1b2c3d4e5f6",
+    });
+  });
+
+  it("returns a null version when the version is empty or blank", async () => {
     fetchMock.mockResolvedValue(okResponse({ version: "   " }));
 
-    await expect(fetchBackendVersion()).resolves.toBeNull();
+    await expect(fetchBackendBuildInfo()).resolves.toEqual({
+      version: null,
+      commit: null,
+    });
   });
 
   it("throws with the status and reason when the response is not OK", async () => {
     fetchMock.mockResolvedValue(failedResponse(503, "Service Unavailable"));
 
-    await expect(fetchBackendVersion()).rejects.toThrow(
+    await expect(fetchBackendBuildInfo()).rejects.toThrow(
       "Loading the version failed: 503 Service Unavailable",
     );
   });
@@ -74,7 +128,7 @@ describe("version API client", () => {
   it("throws when the body has no string version", async () => {
     fetchMock.mockResolvedValue(okResponse({ version: 1 }));
 
-    await expect(fetchBackendVersion()).rejects.toThrow(
+    await expect(fetchBackendBuildInfo()).rejects.toThrow(
       "Loading the version failed",
     );
   });
@@ -82,13 +136,13 @@ describe("version API client", () => {
   it("propagates a network failure", async () => {
     fetchMock.mockRejectedValue(new TypeError("Failed to fetch"));
 
-    await expect(fetchBackendVersion()).rejects.toThrow("Failed to fetch");
+    await expect(fetchBackendBuildInfo()).rejects.toThrow("Failed to fetch");
   });
 
   it("uses VITE_API_BASE_URL instead of the default when it is configured", async () => {
     vi.stubEnv("VITE_API_BASE_URL", "https://notes.example.test");
     vi.resetModules();
-    const { fetchBackendVersion: fetchWithConfiguredBase } = await import(
+    const { fetchBackendBuildInfo: fetchWithConfiguredBase } = await import(
       "./version"
     );
     fetchMock.mockResolvedValue(okResponse({ version: "0.1.0" }));
