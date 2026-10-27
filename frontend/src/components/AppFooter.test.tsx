@@ -9,7 +9,15 @@ vi.mock("../api/version", () => ({
 
 const fetchBackendVersionMock = vi.mocked(fetchBackendVersion);
 
-/** Text that must never leak into the footer when no version is resolved. */
+/**
+ * Text that must never leak into the footer when no version is resolved.
+ *
+ * Callers wait with `waitFor`, whose act-wrapped polling lets the component's
+ * then/catch settle before this runs. That is load-bearing: the failure and
+ * null cases look identical to the initial state, so an assertion made before
+ * the request settles would prove nothing. Verified by mutating AppFooter so a
+ * failure or a null version rendered "broken": both tests fail.
+ */
 function expectNameOnlyFooter() {
   const footer = screen.getByTestId("app-footer");
   expect(footer.textContent).toBe("Task Notes");
