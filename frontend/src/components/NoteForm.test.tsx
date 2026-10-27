@@ -17,6 +17,17 @@ function typeNote(text: string) {
   fireEvent.change(screen.getByTestId("note-input"), { target: { value: text } });
 }
 
+/** Makes the next createNote call stay pending until the returned resolver runs. */
+function holdSave(): (note: { id: number; text: string }) => void {
+  let resolveSave: (note: { id: number; text: string }) => void = () => {};
+  createNoteMock.mockReturnValue(
+    new Promise((resolve) => {
+      resolveSave = resolve;
+    }),
+  );
+  return (note) => resolveSave(note);
+}
+
 describe("NoteForm", () => {
   beforeEach(() => {
     createNoteMock.mockReset();
@@ -96,12 +107,7 @@ describe("NoteForm", () => {
 
   describe("while a save is in flight", () => {
     it("sends one request and reports one note when the button is clicked twice", async () => {
-      let resolveSave: (note: { id: number; text: string }) => void = () => {};
-      createNoteMock.mockReturnValue(
-        new Promise((resolve) => {
-          resolveSave = resolve;
-        }),
-      );
+      const resolveSave = holdSave();
       const onCreated = vi.fn();
       render(<NoteForm onCreated={onCreated} />);
 
@@ -116,12 +122,7 @@ describe("NoteForm", () => {
     });
 
     it("sends one request when the form is submitted twice (Enter)", async () => {
-      let resolveSave: (note: { id: number; text: string }) => void = () => {};
-      createNoteMock.mockReturnValue(
-        new Promise((resolve) => {
-          resolveSave = resolve;
-        }),
-      );
+      const resolveSave = holdSave();
       const onCreated = vi.fn();
       render(<NoteForm onCreated={onCreated} />);
 
@@ -135,12 +136,7 @@ describe("NoteForm", () => {
     });
 
     it("disables the button while saving and enables it after success", async () => {
-      let resolveSave: (note: { id: number; text: string }) => void = () => {};
-      createNoteMock.mockReturnValue(
-        new Promise((resolve) => {
-          resolveSave = resolve;
-        }),
-      );
+      const resolveSave = holdSave();
       render(<NoteForm onCreated={vi.fn()} />);
 
       typeNote("Buy milk");
