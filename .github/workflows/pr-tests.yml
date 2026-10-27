@@ -188,12 +188,26 @@ jobs:
           set -u
           scope=""
           e2e_dir=""
+          uat_shots=""
+          uat_reports=""
           if [ -f CLAUDE.md ]; then
             scope="$(sed -n 's/^- \*\*E2E CI scope:\*\*[[:space:]]*\([A-Za-z]*\).*/\1/p' CLAUDE.md | head -n 1 | tr 'A-Z' 'a-z')"
             e2e_dir="$(sed -n 's/^- \*\*Test directory:\*\*[[:space:]]*\([^[:space:]#]*\).*/\1/p' CLAUDE.md | head -n 1)"
+            uat_shots="$(sed -n 's/^- \*\*Screenshots directory:\*\*[[:space:]]*\([^[:space:]#]*\).*/\1/p' CLAUDE.md | head -n 1)"
+            uat_reports="$(sed -n 's/^- \*\*Reports directory:\*\*[[:space:]]*\([^[:space:]#]*\).*/\1/p' CLAUDE.md | head -n 1)"
           fi
           case "$e2e_dir" in "["*|none|auto) e2e_dir="" ;; esac
+          case "$uat_shots" in "["*|none|auto) uat_shots="" ;; esac
+          case "$uat_reports" in "["*|none|auto) uat_reports="" ;; esac
           e2e_dir="${e2e_dir%/}"
+          uat_shots="${uat_shots%/}"
+          uat_reports="${uat_reports%/}"
+          # A BDD runner is what makes a `*.feature` file an E2E input.
+          bdd=false
+          if grep -Eqs 'playwright-bdd|cucumber' package.json \
+            || grep -Eiqs 'pytest-bdd|behave' pyproject.toml requirements.txt; then
+            bdd=true
+          fi
           needed=true
           reason="E2E CI scope is not 'plan' in CLAUDE.md; e2e runs whenever the PR contains code"
           if [ "$scope" = "plan" ]; then
@@ -206,12 +220,32 @@ jobs:
             if [ "$needed" = "false" ]; then
               while IFS= read -r f; do
                 [ -n "$f" ] || continue
+                # Runner output (UAT screenshots and reports) is never an input.
+                if [ -n "$uat_shots" ]; then
+                  case "$f" in "$uat_shots"/*) continue ;; esac
+                fi
+                if [ -n "$uat_reports" ]; then
+                  case "$f" in "$uat_reports"/*) continue ;; esac
+                fi
+                is_e2e=false
                 if [ -n "$e2e_dir" ]; then
-                  case "$f" in "$e2e_dir"/*) needed=true; reason="this PR changes the E2E path ${f}"; break ;; esac
+                  case "$f" in "$e2e_dir"/*) is_e2e=true ;; esac
                 fi
                 case "$f" in
-                  e2e/*|*/e2e/*|playwright.config.*|*/playwright.config.*|cypress.config.*|*/cypress.config.*)
-                    needed=true; reason="this PR changes the E2E path ${f}"; break ;;
+                  e2e/*|*/e2e/*|playwright.config.*|*/playwright.config.*|cypress.config.*|*/cypress.config.*) is_e2e=true ;;
+                esac
+                if [ "$is_e2e" = "true" ]; then
+                  # not_e2e_input: a Markdown file (the manual UAT script), and a
+                  # Gherkin scenario no declared BDD runner executes.
+                  case "$f" in
+                    *.md) is_e2e=false ;;
+                    *.feature) [ "$bdd" = "true" ] || is_e2e=false ;;
+                  esac
+                fi
+                if [ "$is_e2e" = "true" ]; then
+                  needed=true; reason="this PR changes the E2E path ${f}"; break
+                fi
+                case "$f" in
                   *.tsx|*.jsx|*.vue|*.svelte|*.astro|*.html|*.css|*.scss|*.sass|*.less|frontend/*|*/frontend/*|public/*|*/public/*|static/*|*/static/*)
                     needed=true; reason="this PR changes the UI path ${f}"; break ;;
                 esac
