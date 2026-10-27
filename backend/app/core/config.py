@@ -15,11 +15,23 @@ from dataclasses import dataclass, field
 # VITE_API_BASE_URL wiring in docker-compose.yml), which is cross-origin.
 DEFAULT_CORS_ORIGINS = ("http://localhost:5183",)
 
+# Reported by GET /api/version when BUILD_COMMIT is unset or blank.
+DEFAULT_BUILD_COMMIT = "unknown"
+
 
 def _read_cors_origins() -> tuple[str, ...]:
     """Return CORS_ORIGINS split on commas, or the default when none are given."""
     entries = (entry.strip() for entry in (os.environ.get("CORS_ORIGINS") or "").split(","))
     return tuple(entry for entry in entries if entry) or DEFAULT_CORS_ORIGINS
+
+
+def _read_build_commit() -> str:
+    """Return BUILD_COMMIT stripped, or the default when it is unset or blank.
+
+    docker-compose.yml passes `${BUILD_COMMIT:-}`, which is an empty string when
+    the host has none, so blank has to mean unset.
+    """
+    return (os.environ.get("BUILD_COMMIT") or "").strip() or DEFAULT_BUILD_COMMIT
 
 
 @dataclass(frozen=True)
@@ -32,6 +44,9 @@ class Settings:
     )
     # CORS_ORIGINS (comma-separated), read per call; unset or blank uses the default.
     cors_origins: tuple[str, ...] = field(default_factory=_read_cors_origins)
+    # BUILD_COMMIT (set at build time, CI passes the full sha), read per call;
+    # unset or blank uses the default. Untruncated: the service layer shortens it.
+    build_commit: str = field(default_factory=_read_build_commit)
 
 
 def get_settings() -> Settings:
