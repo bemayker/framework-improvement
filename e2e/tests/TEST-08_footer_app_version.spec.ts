@@ -11,6 +11,10 @@ if (versionMatch === null) {
 }
 const backendVersion = versionMatch[1];
 
+function escapeRegExp(literal: string): string {
+  return literal.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
 test.describe("TEST-08 footer shows the backend version", () => {
   test("shows the app name followed by the backend version on the landing page", async ({
     page,
@@ -18,7 +22,11 @@ test.describe("TEST-08 footer shows the backend version", () => {
     await page.goto("/");
 
     const footer = page.getByTestId("app-footer");
-    await expect(footer).toHaveText(`Task Notes v${backendVersion}`);
+    // TEST-10 appends the short build commit in parentheses when BUILD_COMMIT is set, so
+    // the pattern admits it while still pinning the name and version exactly.
+    await expect(footer).toHaveText(
+      new RegExp(`^Task Notes v${escapeRegExp(backendVersion)}( \\([0-9a-f]{1,7}\\))?$`),
+    );
     await expect(page.getByTestId("app-footer-version")).toHaveText(`v${backendVersion}`);
   });
 

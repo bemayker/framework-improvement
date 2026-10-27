@@ -38,7 +38,10 @@ describe("fetchBackendVersion", () => {
   it("returns the version the backend reports, requested from /api/version", async () => {
     fetchMock.mockResolvedValue(okResponse({ version: "0.1.0" }));
 
-    await expect(fetchBackendVersion()).resolves.toBe("0.1.0");
+    await expect(fetchBackendVersion()).resolves.toEqual({
+      version: "0.1.0",
+      commit: null,
+    });
 
     expect(fetchMock).toHaveBeenCalledTimes(1);
     expect(fetchMock).toHaveBeenCalledWith(DEFAULT_VERSION_URL);
@@ -47,13 +50,17 @@ describe("fetchBackendVersion", () => {
   it("trims surrounding whitespace from the version", async () => {
     fetchMock.mockResolvedValue(okResponse({ version: "  1.2.3 " }));
 
-    await expect(fetchBackendVersion()).resolves.toBe("1.2.3");
+    await expect(fetchBackendVersion()).resolves.toMatchObject({
+      version: "1.2.3",
+    });
   });
 
-  it("returns null for the backend's unknown sentinel", async () => {
+  it("returns a null version for the backend's unknown sentinel", async () => {
     fetchMock.mockResolvedValue(okResponse({ version: "unknown" }));
 
-    await expect(fetchBackendVersion()).resolves.toBeNull();
+    await expect(fetchBackendVersion()).resolves.toMatchObject({
+      version: null,
+    });
   });
 
   it.each([
@@ -62,10 +69,75 @@ describe("fetchBackendVersion", () => {
     ["a missing field", {}],
     ["a non-string value", { version: 3 }],
     ["a null body", null],
-  ])("returns null when the body has %s", async (_label, body) => {
+  ])("returns a null version when the body has %s", async (_label, body) => {
     fetchMock.mockResolvedValue(okResponse(body));
 
-    await expect(fetchBackendVersion()).resolves.toBeNull();
+    await expect(fetchBackendVersion()).resolves.toMatchObject({
+      version: null,
+    });
+  });
+
+  it("shortens a 12-character commit to its first 7 characters", async () => {
+    fetchMock.mockResolvedValue(
+      okResponse({ version: "0.1.0", commit: "0f0e7a668920" }),
+    );
+
+    await expect(fetchBackendVersion()).resolves.toEqual({
+      version: "0.1.0",
+      commit: "0f0e7a6",
+    });
+  });
+
+  it("keeps a commit already shorter than 7 characters as is", async () => {
+    fetchMock.mockResolvedValue(okResponse({ version: "0.1.0", commit: "abc" }));
+
+    await expect(fetchBackendVersion()).resolves.toMatchObject({
+      commit: "abc",
+    });
+  });
+
+  it("trims whitespace around the commit before shortening it", async () => {
+    fetchMock.mockResolvedValue(
+      okResponse({ version: "0.1.0", commit: "  0f0e7a668920 " }),
+    );
+
+    await expect(fetchBackendVersion()).resolves.toMatchObject({
+      commit: "0f0e7a6",
+    });
+  });
+
+  it("returns a null commit for the backend's unknown sentinel", async () => {
+    fetchMock.mockResolvedValue(
+      okResponse({ version: "0.1.0", commit: "unknown" }),
+    );
+
+    await expect(fetchBackendVersion()).resolves.toEqual({
+      version: "0.1.0",
+      commit: null,
+    });
+  });
+
+  it.each([
+    ["a missing field", { version: "0.1.0" }],
+    ["a non-string value", { version: "0.1.0", commit: 1234567 }],
+    ["an empty string", { version: "0.1.0", commit: "" }],
+    ["whitespace only", { version: "0.1.0", commit: "   " }],
+  ])("returns a null commit when the body has %s", async (_label, body) => {
+    fetchMock.mockResolvedValue(okResponse(body));
+
+    await expect(fetchBackendVersion()).resolves.toEqual({
+      version: "0.1.0",
+      commit: null,
+    });
+  });
+
+  it("returns both fields null for a null body", async () => {
+    fetchMock.mockResolvedValue(okResponse(null));
+
+    await expect(fetchBackendVersion()).resolves.toEqual({
+      version: null,
+      commit: null,
+    });
   });
 
   it("throws with the status and reason when the response is not OK", async () => {

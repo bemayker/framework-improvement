@@ -22,23 +22,54 @@ function expectNameOnlyFooter() {
   const footer = screen.getByTestId("app-footer");
   expect(footer.textContent).toBe("Task Notes");
   expect(screen.queryByTestId("app-footer-version")).not.toBeInTheDocument();
+  expect(screen.queryByTestId("app-footer-commit")).not.toBeInTheDocument();
   expect(footer).not.toHaveTextContent(/undefined|null|unknown/);
 }
 
 describe("AppFooter", () => {
   beforeEach(() => {
     fetchBackendVersionMock.mockReset();
-    fetchBackendVersionMock.mockResolvedValue(null);
+    fetchBackendVersionMock.mockResolvedValue({ version: null, commit: null });
   });
 
-  it("renders the backend version once it resolves", async () => {
-    fetchBackendVersionMock.mockResolvedValue("9.9.9");
+  it("renders the version and the short commit once they resolve", async () => {
+    fetchBackendVersionMock.mockResolvedValue({
+      version: "9.9.9",
+      commit: "abc1234",
+    });
 
     render(<AppFooter />);
 
-    const version = await screen.findByTestId("app-footer-version");
-    expect(version).toHaveTextContent("v9.9.9");
-    expect(screen.getByTestId("app-footer").textContent).toBe("Task Notes v9.9.9");
+    const commit = await screen.findByTestId("app-footer-commit");
+    expect(commit).toHaveTextContent("(abc1234)");
+    expect(screen.getByTestId("app-footer-version")).toHaveTextContent("v9.9.9");
+    expect(screen.getByTestId("app-footer").textContent).toBe(
+      "Task Notes v9.9.9 (abc1234)",
+    );
+  });
+
+  it("renders the version alone when the backend reports no usable commit", async () => {
+    fetchBackendVersionMock.mockResolvedValue({ version: "9.9.9", commit: null });
+
+    render(<AppFooter />);
+
+    await screen.findByTestId("app-footer-version");
+    const footer = screen.getByTestId("app-footer");
+    expect(footer.textContent).toBe("Task Notes v9.9.9");
+    expect(screen.queryByTestId("app-footer-commit")).not.toBeInTheDocument();
+    expect(footer).not.toHaveTextContent(/undefined|null|unknown/);
+  });
+
+  it("renders the name alone when a commit arrives without a version", async () => {
+    fetchBackendVersionMock.mockResolvedValue({
+      version: null,
+      commit: "abc1234",
+    });
+
+    render(<AppFooter />);
+    await waitFor(() => expect(fetchBackendVersionMock).toHaveBeenCalledTimes(1));
+
+    expectNameOnlyFooter();
   });
 
   it("renders the name alone when the version request fails", async () => {
@@ -50,8 +81,8 @@ describe("AppFooter", () => {
     expectNameOnlyFooter();
   });
 
-  it("renders the name alone when the backend reports no usable version", async () => {
-    fetchBackendVersionMock.mockResolvedValue(null);
+  it("renders the name alone when the backend reports neither version nor commit", async () => {
+    fetchBackendVersionMock.mockResolvedValue({ version: null, commit: null });
 
     render(<AppFooter />);
     await waitFor(() => expect(fetchBackendVersionMock).toHaveBeenCalledTimes(1));
