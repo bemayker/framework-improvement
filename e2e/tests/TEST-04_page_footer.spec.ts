@@ -1,28 +1,43 @@
-import { readFileSync } from "node:fs";
-import path from "node:path";
-import { test, expect } from "@playwright/test";
+import { test, expect, type Page } from "@playwright/test";
 
-const frontendPackageJsonPath = path.resolve(__dirname, "../../frontend/package.json");
-const { version } = JSON.parse(readFileSync(frontendPackageJsonPath, "utf-8")) as {
-  version: string;
-};
+const VERSION_PATH = "/api/version";
+
+/**
+ * Opens the landing page and returns the version the browser received from
+ * `GET /api/version` (TEST-08 moved the footer's source from frontend/package.json
+ * to the backend). Matches by exact pathname, never a substring, because Vite
+ * serves `src/api/version.ts` from a URL containing the same substring.
+ */
+async function openLandingPageAndReadVersion(page: Page): Promise<string> {
+  const versionResponse = page.waitForResponse(
+    (response) =>
+      response.request().method() === "GET" &&
+      new URL(response.url()).pathname === VERSION_PATH &&
+      response.ok(),
+  );
+
+  await page.goto("/");
+
+  const body = (await (await versionResponse).json()) as { version: string };
+  return body.version;
+}
 
 test.describe("TEST-04 page footer", () => {
-  test("shows a footer with the app name and the version from frontend/package.json", async ({
+  test("shows a footer with the app name and the version from /api/version", async ({
     page,
   }) => {
-    await page.goto("/");
+    const version = await openLandingPageAndReadVersion(page);
 
     const footer = page.getByTestId("app-footer");
     await expect(footer).toBeVisible();
     await expect(footer).toContainText("Task Notes");
-    await expect(footer).toContainText(version);
+    await expect(footer).toContainText(`v${version}`);
   });
 
   test("exposes the footer as a contentinfo landmark", async ({ page }) => {
-    await page.goto("/");
+    const version = await openLandingPageAndReadVersion(page);
 
-    await expect(page.getByRole("contentinfo")).toContainText(version);
+    await expect(page.getByRole("contentinfo")).toContainText(`v${version}`);
   });
 
   test("leaves the existing landing-page heading and subtitle unchanged", async ({ page }) => {
@@ -38,10 +53,10 @@ test.describe("TEST-04 page footer", () => {
 
   test("keeps the footer visible on a mobile viewport", async ({ page }) => {
     await page.setViewportSize({ width: 375, height: 667 });
-    await page.goto("/");
+    const version = await openLandingPageAndReadVersion(page);
 
     const footer = page.getByTestId("app-footer");
     await expect(footer).toBeVisible();
-    await expect(footer).toContainText(version);
+    await expect(footer).toContainText(`v${version}`);
   });
 });
