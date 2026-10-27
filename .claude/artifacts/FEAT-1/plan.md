@@ -9,50 +9,57 @@
 >
 > ## Acceptance criteria
 >
-> * `GET /api/time` returns 200 with `{"now": "<ISO 8601 UTC with explicit offset>", "timezone": "UTC"}`.
-> * `now` is computed per request (two calls a second apart differ), serialised in UTC with an explicit offset, never naive.
-> * The response body is defined by a Pydantic schema in `backend/app/schemas/`, not by a bare dict in the router.
-> * Unit and integration tests cover the shape, the offset and the per-request freshness.
+> *   `GET /api/time` returns 200 with `{"now": "<ISO 8601 UTC with explicit offset>", "timezone": "UTC"}`.
+> *   `now` is computed per request (two calls a second apart differ), serialised in UTC with an explicit offset, never naive.
+> *   The response body is defined by a Pydantic schema in `backend/app/schemas/`, not by a bare dict in the router.
+> *   Unit and integration tests cover the shape, the offset and the per-request freshness.
 >
 > ## Notes
 >
 > Router under `backend/app/routers/`, registered in `backend/app/main.py`, following the TEST-06 shape. **It touches `main.py`'s router registration, so it must not be built concurrently with another backend item that does the same.**
 >
-> ## How the measured run uses this item (operator instructions, not part of the feature)
->
-> (Operator instructions for the measured run; not feature scope, not planned here.)
+> (The item's "How the measured run uses this item" block is operator instructions, not part of the feature, and is not planned.)
 
 ## Acceptance Criteria
-- [ ] `GET /api/time` returns 200 with `{"now": "<ISO 8601 UTC with explicit offset>", "timezone": "UTC"}`.
-- [ ] `now` is computed per request (two calls a second apart differ), serialised in UTC with an explicit offset, never naive.
-- [ ] The response body is defined by a Pydantic schema in `backend/app/schemas/`, not by a bare dict in the router.
-- [ ] Unit and integration tests cover the shape, the offset and the per-request freshness.
+- [ ] AC1: `GET /api/time` returns 200 with `{"now": "<ISO 8601 UTC with explicit offset>", "timezone": "UTC"}`.
+- [ ] AC2: `now` is computed per request (two calls a second apart differ), serialised in UTC with an explicit offset, never naive.
+- [ ] AC3: The response body is defined by a Pydantic schema in `backend/app/schemas/`, not by a bare dict in the router.
+- [ ] AC4: Unit and integration tests cover the shape, the offset and the per-request freshness.
 
 ## Re-Plan Feedback
-Source: one actionable tracker comment (newest first; the other 16 tracker comments are framework-posted plan-PR link comments from earlier, reset runs and carry no instruction). A tracker comment overrides the description where the two disagree; each of its four points is answered below.
+One actionable tracker comment, four numbered points, each answered below. Sixteen other comments on the item are framework notices that ask for nothing and were not carried into this dispatch.
 
-- Comment (tracker), point 1: "TEST-06 has merged to main (squash 73e544c8, PR #35) and its diff touches backend/app/main.py ... Re-check the insertion point against main as it now stands, and say what changed." → Addressed by: re-reading `backend/app/main.py` on this branch (equal to `origin/main` at 6439eec). Commit 73e544c (`feat(TEST-06): Echo endpoint (#35)`) **is** an ancestor of this branch, but its registration is **no longer in the file**: the sandbox reset 9dcba19 (#326) later removed the `echo`, `server_time` and `uptime` imports and `include_router` calls (and the uptime `app.state.process_start` line). As the file now stands, `create_app()` registers exactly three routers, in this order: `version_router`, `notes_router`, `health_router` (lines 54 to 56), and imports them alphabetically (lines 19 to 21). Insertion point: the import `from app.routers.server_time import router as server_time_router` goes between the `notes` and `version` imports (alphabetical, line 21), and `app.include_router(server_time_router)` goes immediately after `app.include_router(health_router)` (after line 56, before `return app`). The module docstring's list of registering features gains "FEAT-1 the server time router". Nothing else in the factory (lifespan, CORS middleware) changes. What changed versus the comment's premise: the TEST-06 echo registration it describes is not present on main today, so there is no echo line to sit beside.
-- Comment (tracker), point 2: "Also add a GET /api/echo?msg={text} endpoint returning {"echo": "<msg>"} while you are in main.py, so the two registrations land together." → Not acted on, because: the echo endpoint is the scope of a separate tracker item, TEST-06 (`feature/TEST-06-echo-endpoint` in `feature_map.md`), with its own dependants (TEST-11, BUG-05, CHORE-05) that specify contradictory whitespace behaviour still to be resolved. Building it under FEAT-1 adds an endpoint outside FEAT-1's four acceptance criteria (`user_story_alignment.md` Section 3, no gold plating; `review_standards.md` Section 3, no invented endpoints), and a squash under `feature/FEAT-1-...` would not move TEST-06 to Done, leaving that item open over code that already exists. This is a scope extension onto another item's work, not a correction of FEAT-1's criteria, so I read it as outside the "comment overrides description" rule. Assumption recorded instead of a blocking question: the echo endpoint is re-delivered under TEST-06's own ID. If the stakeholder wants it here regardless, a PR comment on this plan saying so triggers a re-plan that adds it (router, schema, tests and a fifth criterion).
-- Comment (tracker), point 3: "Pin it now rather than leaving it an assumption: decide between +00:00 and Z, state the choice in the Pydantic schema, and cover it with a test that asserts the exact suffix." → Addressed by: pinning **`+00:00`** with microsecond precision, e.g. `2026-10-27T19:44:51.123456+00:00`. Reason: the criterion says "explicit offset", and `+00:00` is the numeric offset form that the standard library's `datetime.isoformat()` produces and `datetime.fromisoformat()` round-trips on every supported Python. Mechanism in the schema (`backend/app/schemas/server_time.py`): `now` is typed `pydantic.AwareDatetime` (a naive datetime is rejected at construction), and a `@field_serializer("now")` returns `value.astimezone(timezone.utc).isoformat(timespec="microseconds")`. The serializer is required, not cosmetic: Pydantic v2's default JSON serialisation of a UTC datetime emits `Z`, so without it the wire format would silently be the other choice. `timespec="microseconds"` keeps the length fixed even when the microsecond is 0. Tests: a unit test asserts the exact string `2026-10-27T19:44:51.000000+00:00` for a fixed input and that it does not end in `Z`; an integration test asserts the live response matches `^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{6}\+00:00$`.
-- Comment (tracker), point 4: "Do not add a service module for this endpoint. Follow the decision taken on TEST-06 ... Record it as a planned deviation rather than leaving it silent." → Addressed by: no `services/server_time_service.py`. **Planned deviation** from `coding_standards.md` Section 2.2 (Router, Service, Repository): the router reads the clock through a one-line module-level function `current_utc_time()` in `backend/app/routers/server_time.py` and builds the schema; there is no service and no repository. Reason: Section 2.2 places business logic and transactional boundaries in the service, and reading the wall clock is neither; a service would be a pass-through. Verified against TEST-06's own plan at commit de8a77a ("Key decision 1: No service module ... a pass-through function with nothing to test beyond the router"). Counter-precedent noted honestly: TEST-05's `version_service.py` is a service for an equally logic-light endpoint, so the repo is not uniform here; this plan follows the comment and TEST-06. `current_utc_time()` exists as the test seam for per-request freshness, not as a layer.
-- Merged since the last plan: n/a (fresh plan, branched from current main; no prior plan on this branch).
+- Comment (tracker), point 1: "TEST-06 has merged to main (squash 73e544c8, PR #35) and its diff touches backend/app/main.py — the same router-registration block FEAT-1 plans to edit. Re-check the insertion point against main as it now stands, and say what changed." → Addressed by: re-checked against `origin/main` at `6439eec` (this branch sits on it with no commit of its own). The premise is out of date. `73e544c feat(TEST-06): Echo endpoint (#35)` is an ancestor of `origin/main`, but TEST-06 has since been merged and reset several times, and the last commit to touch `backend/app/main.py` is `9dcba19 chore: reset the sandbox after release run 0.3.443 T8 (#326)`, which deleted `backend/app/routers/echo.py`, `uptime.py` and `server_time.py` and removed their registrations. On main today `backend/app/routers/` holds only `health.py`, `notes.py` and `version.py`, and `create_app()` registers, in order, `version_router`, `notes_router`, `health_router`. So the echo registration is not on main and nothing FEAT-1 touches changed shape. Insertion point: the import `from app.routers.server_time import router as server_time_router` goes between the `notes` and `version` router imports (the block is alphabetical), and `app.include_router(server_time_router)` goes after `app.include_router(health_router)`, the last line before `return app`. The module docstring's list of registering features gains FEAT-1. If TEST-06 or TEST-07 does land on main before this item is built, the conflict is a textual one in those two adjacent lines and is resolved by keeping both registrations.
+- Comment (tracker), point 2: "Also add a GET /api/echo?msg={text} endpoint returning {"echo": "<msg>"} while you are in main.py, so the two registrations land together." → Not acted on, and this is a decision against the comment rather than an oversight. The echo endpoint is its own tracked work item, TEST-06 "Echo endpoint" in `.claude/feature_map.md`, with its own acceptance criteria (a required `msg`, a 200-character bound returning 422) and two items depending on it (TEST-11, BUG-05). It is in none of FEAT-1's four acceptance criteria, and the request rests on point 1's premise that TEST-06 is on main, which it is not. Building it here would ship a second, unreviewed answer to TEST-06's criteria under FEAT-1's ID, leave TEST-06 still open in the tracker, and turn TEST-06's own build into duplicate work. `user_story_alignment.md` Section 3 and `review_standards.md` Section 3 ("No invented endpoints") both bound this plan to the criteria. The plan therefore carries exactly one endpoint. If the stakeholder does want the two registrations together, the route is to build TEST-06 next, serialised after FEAT-1 per the feature map's shared-risk note, or to amend FEAT-1's acceptance criteria in the tracker and re-plan.
+- Comment (tracker), point 3: "The acceptance criterion says "ISO 8601 UTC with explicit offset" without spelling the offset. Pin it now rather than leaving it an assumption: decide between +00:00 and Z, state the choice in the Pydantic schema, and cover it with a test that asserts the exact suffix." → Addressed by: pinned to `+00:00`. Reason: AC1 and AC2 both say "explicit offset", and `+00:00` is a numeric offset, while `Z` is a zone designator that some clients do not parse as an offset. Pinning it is load-bearing, not cosmetic: Pydantic v2 (installed 2.13.4, per `backend/uv.lock`) serialises a UTC-aware `datetime` as `...Z` by default, so without an explicit serialiser the endpoint would ship `Z`. The schema states the choice in a module constant `UTC_OFFSET_SUFFIX = "+00:00"` and in a `field_serializer` on `now` that converts to UTC and returns `isoformat()`. Unit and integration tests assert the suffix exactly with `endswith("+00:00")` and a full-format regex, and assert `"Z"` is absent.
+- Comment (tracker), point 4: "Do not add a service module for this endpoint. Follow the decision taken on TEST-06: coding_standards.md Section 2.2's Router -> Service -> Repository pattern is scoped to business logic and transactional boundaries, and reading a clock is neither. Record it as a planned deviation rather than leaving it silent." → Addressed by: no `backend/app/services/server_time_service.py` is planned. Verified the precedent rather than taking it on trust: TEST-06's plan at `73e544c` records the same deviation in its Plan Overview. Recorded as a planned deviation from `coding_standards.md` Section 2.2 in this plan's Plan Overview and Backend Plan.
+- Merged since the last plan: n/a (fresh plan, branched from current main at `6439eec`; no `[merged-since]` lines were supplied). Point 1 above is the check against main as it stands.
 
 ## Plan Overview
-Backend only. One new GET endpoint, `/api/time`, in a new router `backend/app/routers/server_time.py`, returning a new Pydantic response schema `ServerTimeResponse` in `backend/app/schemas/server_time.py`. The router computes `datetime.now(timezone.utc)` on every request and returns `{"now": "<YYYY-MM-DDTHH:MM:SS.ffffff+00:00>", "timezone": "UTC"}`. The router is registered in `backend/app/main.py`'s `create_app()` after the health router. No service, no repository, no database, no migration, no frontend, no new dependency. Tests: unit tests for the schema (exact `+00:00` suffix, UTC conversion, naive rejected) and for per-request clock reads; one route-registration unit test in the existing `test_main_unit.py`; integration tests through the real HTTP cycle for shape, offset, freshness and 405 on POST. UAT artifacts per the build's Phase G.
+Backend-only feature. Add `GET /api/time` as one router (`backend/app/routers/server_time.py`) and one response schema (`backend/app/schemas/server_time.py`), registered in `create_app()` in `backend/app/main.py` the same way the version and health routers are. The handler reads the clock per request with `datetime.now(UTC)` and returns `ServerTimeResponse(now=..., timezone="UTC")`.
+
+The schema carries the whole correctness contract of AC1 and AC2:
+- `now: AwareDatetime` (Pydantic's built-in type) rejects a naive datetime at construction, so "never naive" is enforced by the type, not by convention.
+- a `field_serializer("now")` converts the value to UTC and returns `value.astimezone(UTC).isoformat()`, which yields the pinned `+00:00` suffix instead of Pydantic's default `Z`.
+- `timezone: Literal["UTC"]`, so no other value can be constructed.
+
+Deliberate deviation from `coding_standards.md` Section 2.2, recorded so the reviewer reads it as planned (tracker comment point 4): no service module is created. Section 2.2's Router to Service to Repository pattern holds business logic and transactional boundaries, and reading the system clock is neither. A service would be a one-line pass-through with nothing to test in isolation. The router still holds no business logic, which is the Section 2.2 rule that binds here; the serialisation rule lives in the schema. Local precedent agrees: the existing routers keep a service only where there is logic to hold (version resolution, the database probe).
+
+No frontend work, no repository, no migration, no new dependency, no database access (the endpoint answers with `DATABASE_URL` unset, like `/api/version`).
+
+## Infrastructure Scaffolding
+Not applicable: FEAT-1 is not the scaffold item (TEST-01 is, and is done), and `backend/`, `frontend/` and `e2e/` already exist.
 
 ## Frontend Plan
 No frontend changes required.
 
-- Design reference notes: AI freestyle
-
 ## Backend Plan
-- Endpoints: `GET /api/time`, report the server's current UTC time for client clock-skew detection. Router `APIRouter(prefix="/api", tags=["time"])`, handler `get_server_time()` declared with `response_model=ServerTimeResponse`, returning `ServerTimeResponse(now=current_utc_time())` (the `timezone` field defaults to `"UTC"`). `current_utc_time()` is a module-level function in the router returning `datetime.now(timezone.utc)`; it is called inside the handler, never at import time, so every request reads the clock afresh.
-- Schema: `ServerTimeResponse(BaseModel)` with `now: AwareDatetime` and `timezone: Literal["UTC"] = "UTC"`, plus `@field_serializer("now")` returning `value.astimezone(timezone.utc).isoformat(timespec="microseconds")`. Docstring states the `+00:00` choice and why the serializer exists (point 3 above).
-- Registration: in `backend/app/main.py`, add the import between the `notes` and `version` router imports and `app.include_router(server_time_router)` after `app.include_router(health_router)`; extend the module docstring's feature list.
-- Service layer: none (planned deviation from `coding_standards.md` Section 2.2, see Re-Plan Feedback point 4).
-- Repository layer: none (no data access).
+- Endpoints: `GET /api/time`, returns the server's current UTC time, computed per request. Router `APIRouter(prefix="/api", tags=["time"])`, handler `get_server_time() -> ServerTimeResponse`, declared with `response_model=ServerTimeResponse`. Takes no input. Clock read as `datetime.now(UTC)` inside the handler body, never at import or app startup.
+- Service layer: none, by planned deviation from `coding_standards.md` Section 2.2 (see Plan Overview and tracker comment point 4).
+- Repository layer: none, the endpoint touches no data store.
 - Migrations: none.
-- Error handling: the endpoint takes no input and has no failure path of its own; FastAPI answers 405 to non-GET methods. It needs no database, so it answers when `DATABASE_URL` is unset (the app lifespan already only warns in that case).
+- Schema `ServerTimeResponse` in `backend/app/schemas/server_time.py`: fields `now: AwareDatetime` and `timezone: Literal["UTC"]`; module constant `UTC_OFFSET_SUFFIX = "+00:00"` with a docstring stating the `+00:00` over `Z` choice; `@field_serializer("now")` returning `value.astimezone(UTC).isoformat()`. `isoformat()` omits the fractional part when microseconds are 0; both forms are valid ISO 8601 and the tests' regex accepts both.
+- Registration in `backend/app/main.py`: import between the `notes` and `version` router imports, `app.include_router(server_time_router)` after `app.include_router(health_router)`, docstring updated to name FEAT-1.
 
 ## API Integration Plan
 No external API integration.
@@ -60,90 +67,89 @@ No external API integration.
 ## API Contract
 - Method: GET
 - URL: `/api/time`
-- Request: no body, no query or path parameters.
-- Response: 200, `application/json`, schema `ServerTimeResponse`. `now` is always UTC, always the `+00:00` offset form, always six fractional digits; `timezone` is always the literal `UTC`. Example:
+- Request: no body, no query parameters.
+- Response: 200, `application/json`, body shaped by `ServerTimeResponse`:
 
 ```json
 {"now": "2026-10-27T19:44:51.123456+00:00", "timezone": "UTC"}
 ```
 
-- Errors: 405 Method Not Allowed for any method other than GET (FastAPI default).
+- `now`: ISO 8601, always UTC, always ending in `+00:00`, never `Z`, never naive. Fractional seconds present unless the clock reads exactly `.000000`.
+- `timezone`: always the literal string `UTC`.
+- Error responses: none of its own. A non-GET method gets FastAPI's 405.
 
 ## Technology Selection
-- Current-time source: chose the standard library's `datetime.now(timezone.utc)` over any third-party time library (`pendulum`, `arrow`), because the standard library covers an aware UTC timestamp completely.
-- ISO 8601 serialisation: chose the standard library's `datetime.isoformat(timespec="microseconds")` inside a Pydantic `field_serializer` over Pydantic's default datetime JSON encoding, because the default emits `Z` and the pinned format is `+00:00` (Re-Plan Feedback point 3); no new dependency.
-- Naive-datetime guard: chose Pydantic's built-in `AwareDatetime` type (Pydantic is already installed through FastAPI) over a hand-written validator, because the installed type already rejects a naive value.
-- Response schema `ServerTimeResponse`: chose a Pydantic `BaseModel` (installed through FastAPI, and required by criterion 3) over a dataclass or bare dict.
-- Router module: no stdlib call, native platform feature or installed dependency covers a project route, so it is built here with FastAPI's installed `APIRouter`.
+- Clock read: chose the standard library's `datetime.now(UTC)` over any time library; the stdlib covers an aware UTC timestamp completely.
+- Naive-datetime guard: chose Pydantic's built-in `AwareDatetime` type (installed dependency, Pydantic 2.13.4 via FastAPI) over a hand-written validator; it rejects naive values with no code of ours.
+- `+00:00` serialisation: chose a `field_serializer` calling the stdlib's `datetime.isoformat()` over a custom JSON encoder or a formatting library, because Pydantic's default emits `Z` and a three-line serialiser on the field is the smallest mechanism that pins the suffix in the schema itself.
+- Service module: chose to build the response in the router over a net-new `services/server_time_service.py`, because there is no business logic, transaction or external call for a service to own (planned Section 2.2 deviation, Plan Overview).
+- New dependencies: none.
 
 ## File Manifest
 ### New files
-- [B] backend/app/schemas/server_time.py: `ServerTimeResponse` Pydantic schema with `AwareDatetime` `now`, `Literal["UTC"]` `timezone`, and the `+00:00` field serializer.
-- [B] backend/app/routers/server_time.py: `GET /api/time` router with the `current_utc_time()` clock seam; no service.
-- [B] backend/tests/unit/test_server_time_unit.py: schema serialisation (exact `+00:00` suffix, never `Z`, fixed microsecond width), non-UTC aware input converted to UTC, naive input rejected, `timezone` literal; handler reads the clock once per call (seam monkeypatched to two different instants yields two different `now` values).
-- [B] backend/tests/integration/test_server_time_integration.py: full HTTP cycle: 200 with exactly the keys `now` and `timezone`, `timezone == "UTC"`, `now` matches the pinned regex and parses to a UTC offset of zero within a few seconds of the test clock, two requests return different `now` values with the second later than the first, POST returns 405.
-- [G] e2e/uat/scripts/FEAT-1_server_time_endpoint_uat_script.md: manual UAT script expanded from this plan's Manual verification plan.
-- [G] .claude/artifacts/FEAT-1/uat_script.md: copy of the manual UAT script (build-feature Section 14 step 3).
-- [G] e2e/uat/scenarios/FEAT-1_server_time_endpoint.feature: Gherkin scenarios, one per criterion plus an edge case (no `DATABASE_URL`), UAT Generation ENABLED.
+- [B] backend/app/schemas/server_time.py: `ServerTimeResponse` (AwareDatetime `now`, `Literal["UTC"]` timezone, `+00:00` field serialiser, `UTC_OFFSET_SUFFIX` constant)
+- [B] backend/app/routers/server_time.py: `GET /api/time` router, reads the clock per request and returns `ServerTimeResponse`
+- [B] backend/tests/unit/test_server_time_unit.py: schema unit tests (shape, exact `+00:00` suffix, non-UTC aware input converted to UTC, naive input rejected, non-UTC timezone literal rejected)
+- [B] backend/tests/integration/test_server_time_integration.py: router tests over the real HTTP cycle (200 and shape, exact suffix, per-request freshness with a stubbed clock and with the real clock bracketed, answers with DATABASE_URL unset, POST returns 405)
+- [G] e2e/uat/scenarios/FEAT-1_server_time_endpoint.feature: Gherkin scenarios, one per acceptance criterion plus one edge case (UAT Generation ENABLED)
+- [G] e2e/uat/scripts/FEAT-1_server_time_endpoint_uat_script.md: manual UAT script expanded from this plan's Manual verification plan
+- [G] .claude/artifacts/FEAT-1/uat_script.md: copy of the manual UAT script (build-feature Section 14 step 3)
 
 ### Modified files
-- [B] backend/app/main.py: import `server_time_router` between the notes and version router imports; `app.include_router(server_time_router)` after the health router; docstring feature list extended.
-- [B] backend/tests/unit/test_main_unit.py: add `test_create_app_registers_server_time_route` asserting `/api/time` is among the custom route paths, beside the existing version and health route tests.
+- [B] backend/app/main.py: import and register `server_time_router` after `health_router`; docstring names FEAT-1
+- [B] backend/tests/unit/test_main_unit.py: add `test_create_app_registers_time_route` asserting `/api/time` is a custom route (TEST-02 and TEST-05 precedent)
 
-No dependency is added or changed, so no lockfile (`backend/uv.lock`, `frontend/package-lock.json`) is regenerated. No project structure, run configuration, dependency or test infrastructure changes, so neither `README.md` nor `docs/DEVELOPMENT.md` needs an edit.
+No lockfile changes: no dependency is added or changed. No `README.md` or `docs/DEVELOPMENT.md` change: the feature changes no project structure, run configuration, dependency or test infrastructure, and neither file lists endpoints. No E2E spec under `e2e/tests/`: no criterion is assigned to E2E (Criterion coverage below).
 
 ## Testing Strategy
-- Unit tests: the response schema (`+00:00` serialisation with fixed microsecond width, conversion of a non-UTC aware datetime to UTC, rejection of a naive datetime with `pydantic.ValidationError`, `timezone` literal default) and the router handler called directly with `current_utc_time` monkeypatched (per-call clock read; happy path, edge case of a zero-microsecond instant, error case of a naive clock value raising `ValidationError`). Plus one route-registration test in `test_main_unit.py`.
+- Unit tests: the `ServerTimeResponse` schema in isolation, no app, no clock. Happy path: a fixed aware UTC datetime serialises via `model_dump(mode="json")` and `model_dump_json()` to `{"now": "...+00:00", "timezone": "UTC"}` exactly. Edge case: an aware non-UTC input (`+02:00`) serialises converted to UTC with `+00:00` and the hour shifted. Edge case: a value at `.000000` microseconds still ends in `+00:00`. Error cases: a naive datetime raises `ValidationError`; `timezone="Europe/Brussels"` raises `ValidationError`. Assertions on the suffix use `endswith("+00:00")`, a full-format regex `^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d{6})?\+00:00$`, and `"Z" not in value`. Plus the registration test in `test_main_unit.py`.
   - Directory: backend/tests/unit/
-  - Naming: test_{module}_unit.py (here `test_server_time_unit.py`; `test_main_unit.py` extended)
-- Integration tests: `GET /api/time` through the session `client` fixture from `backend/tests/conftest.py`: 200 and exact shape, pinned offset regex, parsed UTC offset zero, freshness across two requests, 405 on POST. No database needed, so no `database_url` fixture.
+  - Naming: test_{module}_unit.py, here test_server_time_unit.py
+- Integration tests: `GET /api/time` through the session `client` fixture from `backend/tests/conftest.py`. (1) 200 with exactly the keys `now` and `timezone`, `timezone == "UTC"`, `now` matching the regex above and parsing with `datetime.fromisoformat` to an aware value whose `utcoffset()` is zero. (2) Per-request freshness, deterministic: monkeypatch `app.routers.server_time.datetime` with a stub whose `now(tz)` returns two different fixed instants in sequence; two requests return those two instants in order, which proves the clock is read per request and not cached. (3) Per-request freshness against the real clock, no sleep: take `before = datetime.now(UTC)`, request, take `after`; assert `before <= now <= after`, then a second request's `now` is strictly later than the first's. (4) Answers 200 with `DATABASE_URL` unset (fresh app, as `test_version_integration.py` does). (5) `POST /api/time` returns 405. No database is needed, so these tests never skip for a missing `DATABASE_URL`.
   - Directory: backend/tests/integration/
-- E2E tests: not warranted. No acceptance criterion requires navigation or interaction through the UI: the endpoint has no frontend consumer (`testing_standards.md` Section 6, fourth question asked per criterion). No spec is written.
+  - Naming: test_{module}_integration.py, here test_server_time_integration.py
+- E2E tests: no spec. E2E Tests is ENABLED, but no criterion requires navigation or interaction through the UI (`testing_standards.md` Section 6, fourth question, answered per criterion below), and FEAT-1 has no frontend.
   - Directory: e2e/tests/
-  - File: none (would be `FEAT-1_server_time_endpoint.spec.ts`)
-- UAT scenarios: one Gherkin scenario per criterion plus an edge case (endpoint answers with `DATABASE_URL` unset), and the manual script driven by `curl`.
+  - File: none for this feature (would be FEAT-1_server_time_endpoint.spec.ts)
+- UAT scenarios: Gherkin scenarios per criterion plus one edge case (a non-GET method returns 405), validated for well-formedness; manual script expanded from the Manual verification plan.
   - Directory: e2e/uat/scenarios/ and e2e/uat/scripts/
 
 ### Criterion coverage
 | # | Acceptance Criterion | Covering tier | Why not E2E |
 |---|---|---|---|
-| 1 | `GET /api/time` returns 200 with `{"now": "<ISO 8601 UTC with explicit offset>", "timezone": "UTC"}` | Integration | Verifying it needs no navigation or interaction: it is a router response shape, checked through the real HTTP cycle; no UI consumes the endpoint. |
-| 2 | `now` is computed per request, serialised in UTC with an explicit offset, never naive | Unit and Integration | Verifying it needs no navigation or interaction: offset and naive rejection are schema rules (unit), per-request freshness is two HTTP calls (integration) plus the monkeypatched clock seam (unit). |
-| 3 | The response body is defined by a Pydantic schema in `backend/app/schemas/`, not a bare dict | Unit | Verifying it needs no navigation or interaction: it is a code-structure property, checked by unit tests importing `ServerTimeResponse` from `app.schemas.server_time` and by the handler's `response_model`. |
-| 4 | Unit and integration tests cover the shape, the offset and the per-request freshness | Unit and Integration | It is a statement about the unit and integration tiers themselves; the files listed above are its coverage, executed by the test gate and CI. |
+| 1 | `GET /api/time` returns 200 with `{"now": ..., "timezone": "UTC"}` | Integration | Verifying it needs no navigation or interaction: it is a router response over the HTTP cycle, and the feature has no UI. |
+| 2 | `now` computed per request, UTC with explicit offset, never naive | Integration (freshness, offset on the wire) and Unit (offset serialisation, naive rejected) | Verifying it needs no navigation or interaction: freshness is two HTTP calls and the offset and naive rules are schema behaviour. |
+| 3 | Response body defined by a Pydantic schema in `backend/app/schemas/` | Unit | Verifying it needs no navigation or interaction: it is a structural property, checked by the schema unit tests constructing `ServerTimeResponse` and by the router declaring it as `response_model` (review reads the router). |
+| 4 | Unit and integration tests cover shape, offset and per-request freshness | Unit and Integration | It is a criterion about the tests themselves; it is met by the two test modules above and has no UI behaviour. |
 
 ## Acceptance Test Outline
 | # | Acceptance Criterion | E2E Strategy | UAT Scenario Sketch |
 |---|---|---|---|
-| 1 | `GET /api/time` returns 200 with `now` and `timezone` | Covered at Integration, see Criterion coverage | Given the backend is running, When a client sends GET `/api/time`, Then the status is 200 and the body has exactly `now` and `timezone`, with `timezone` equal to `UTC` |
-| 2 | `now` per request, UTC, explicit offset, never naive | Covered at Unit and Integration, see Criterion coverage | Given the backend is running, When a client sends GET `/api/time` twice one second apart, Then the two `now` values differ, the second is later, and both end in `+00:00` |
-| 3 | Body defined by a Pydantic schema in `backend/app/schemas/` | Covered at Unit, see Criterion coverage | Given the backend is running, When a client fetches `/openapi.json`, Then `/api/time`'s 200 response references the `ServerTimeResponse` schema |
-| 4 | Unit and integration tests cover shape, offset, freshness | Covered at Unit and Integration, see Criterion coverage | Given the backend dependencies are installed, When the FEAT-1 unit and integration test files are run, Then the run reports 0 failed |
+| 1 | `GET /api/time` returns 200 with `now` and `timezone` | covered at Integration, see Criterion coverage | Given the backend is running, When I GET /api/time, Then the status is 200 and the body has exactly `now` and `timezone`, with `timezone` "UTC" |
+| 2 | `now` per request, UTC, explicit offset, never naive | covered at Integration and Unit, see Criterion coverage | Given the backend is running, When I GET /api/time twice a second apart, Then both `now` values end in "+00:00" and the second is later than the first |
+| 3 | Body defined by a Pydantic schema | covered at Unit, see Criterion coverage | Given the backend is running, When I open /openapi.json, Then the /api/time 200 response references the `ServerTimeResponse` schema |
+| 4 | Unit and integration tests cover shape, offset, freshness | covered at Unit and Integration, see Criterion coverage | Given the repository checked out, When I run the FEAT-1 unit and integration test files, Then the run reports 0 failed |
 
 ## Manual verification plan
-No acceptance criterion is verifiable through the UI: no screen consumes `GET /api/time`. The observable check is the HTTP response, read with `curl` against the compose stack (backend published on host port 8010 by `docker-compose.yml`).
+FEAT-1 has no UI, so no criterion can be verified by navigating a screen. Each block below is the observable check a person runs from a terminal instead.
 
-Prerequisites (all criteria): Docker running; repository on branch `feature/FEAT-1-server-time-endpoint`; from the repository root run `docker compose up -d --build` and wait until `docker compose ps` shows the `backend` service running.
+Prerequisites (shared by every block): Docker running; the stack started from the repository root with `docker compose up -d --build`; `docker compose ps` shows the `backend` service running; a terminal with `curl`. The backend is published on the host at `http://localhost:8010` (`docker-compose.yml`).
 
 ### Criterion 1: `GET /api/time` returns 200 with `{"now": "<ISO 8601 UTC with explicit offset>", "timezone": "UTC"}`
-1. In a terminal run `curl -i http://localhost:8010/api/time` → the first line reads `HTTP/1.1 200 OK` and a `content-type: application/json` header is present.
-2. Read the body → it has exactly two keys, `now` and `timezone`, for example `{"now":"2026-10-27T19:44:51.123456+00:00","timezone":"UTC"}`; `timezone` is exactly `UTC`.
+1. Run `curl -s -i http://localhost:8010/api/time` → the status line reads `HTTP/1.1 200 OK` and `content-type: application/json`.
+2. Read the body → it is one JSON object with exactly two keys, `now` and `timezone`, for example `{"now":"2026-10-27T19:44:51.123456+00:00","timezone":"UTC"}`.
+3. Check `timezone` → it reads exactly `UTC`.
 
 ### Criterion 2: `now` is computed per request, serialised in UTC with an explicit offset, never naive
-1. Run `curl -s http://localhost:8010/api/time; sleep 1; curl -s http://localhost:8010/api/time` → two bodies print.
-2. Compare the two `now` values → they differ, and the second is about one second later than the first.
-3. Check the end of each `now` value → each ends in `+00:00` (never `Z`, never without an offset) and has exactly six digits after the decimal point.
-4. Compare the hour with UTC on your machine (`date -u +%H:%M`) → the `now` hour and minute match UTC, not your local time zone.
+1. Run `curl -s http://localhost:8010/api/time` → note the `now` value; it ends in `+00:00`, not `Z` and not with no offset at all.
+2. Run `date -u +%Y-%m-%dT%H:%M:%S` in the same terminal → the date, hour and minute match `now` from step 1 (allow a few seconds for the gap between the two commands; a mismatch of whole hours means the value is not UTC).
+3. Wait about one second and run `curl -s http://localhost:8010/api/time` again → the new `now` is later than the one from step 1 and also ends in `+00:00`.
 
-### Criterion 3: the response body is defined by a Pydantic schema in `backend/app/schemas/`
-Not verifiable through the UI; the observable check is the OpenAPI document and the source.
-1. Run `curl -s http://localhost:8010/openapi.json` and search the output for `ServerTimeResponse` → the `/api/time` GET 200 response references `#/components/schemas/ServerTimeResponse`, and that component lists the properties `now` and `timezone`.
-2. Open `backend/app/schemas/server_time.py` → it defines `class ServerTimeResponse(BaseModel)`; open `backend/app/routers/server_time.py` → the route declares `response_model=ServerTimeResponse` and returns a `ServerTimeResponse`, not a dict literal.
+### Criterion 3: The response body is defined by a Pydantic schema in `backend/app/schemas/`
+1. Open `http://localhost:8010/openapi.json` in a browser, or run `curl -s http://localhost:8010/openapi.json` → under `paths`, `/api/time` → `get` → `responses` → `200`, the schema is a `$ref` to `#/components/schemas/ServerTimeResponse`.
+2. Under `components` → `schemas` → `ServerTimeResponse` → it lists the properties `now` (string, date-time format) and `timezone`.
+3. Open `backend/app/schemas/server_time.py` → it defines `ServerTimeResponse`, and `backend/app/routers/server_time.py` returns that model, not a dict literal.
 
-### Criterion 4: unit and integration tests cover the shape, the offset and the per-request freshness
-Prerequisites: `uv` installed on the host.
-1. From the repository root run `uv run --directory backend pytest -q tests/unit/test_server_time_unit.py tests/unit/test_main_unit.py tests/integration/test_server_time_integration.py` → the summary line reports `0 failed` (no database is required for these files).
-2. Open `backend/tests/unit/test_server_time_unit.py` → a test asserts the exact string `2026-10-27T19:44:51.000000+00:00` for a fixed instant, and a test asserts two calls with different clock instants return different `now` values.
-3. Open `backend/tests/integration/test_server_time_integration.py` → tests assert the response keys, the `+00:00` regex, and that two requests return different `now` values.
-
-Teardown: `docker compose down`.
+### Criterion 4: Unit and integration tests cover the shape, the offset and the per-request freshness
+1. From the repository root run `uv run --directory backend pytest -q tests/unit/test_server_time_unit.py tests/integration/test_server_time_integration.py tests/unit/test_main_unit.py` → the summary line reports `0 failed`, and no test in those files is reported skipped (they need no database).
+2. Open `backend/tests/integration/test_server_time_integration.py` → there is a test asserting the `+00:00` suffix exactly, and a test issuing two requests and asserting the two `now` values differ in order.
