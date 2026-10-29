@@ -5,7 +5,7 @@ Later features register their routers here without restructuring this factory:
 TEST-05 registers the version router, TEST-03 the notes router plus the
 startup schema initialisation and the CORS middleware the browser needs, and
 TEST-02 the health router, BUG-01 the uncached server-time router, and
-FEAT-10 the ping router.
+FEAT-10 the ping router, FEAT-11 the per-app ping counter it increments.
 """
 
 import logging
@@ -22,6 +22,7 @@ from app.routers.health import router as health_router
 from app.routers.notes import router as notes_router
 from app.routers.server_time import router as server_time_router
 from app.routers.version import router as version_router
+from app.services.ping_service import PingCounter
 
 logger = logging.getLogger(__name__)
 
@@ -54,6 +55,7 @@ def create_app() -> FastAPI:
         allow_methods=["GET", "POST"],
         allow_headers=["Content-Type"],
     )
+    app.state.ping_counter = PingCounter()
     app.include_router(version_router)
     app.include_router(notes_router)
     app.include_router(health_router)
