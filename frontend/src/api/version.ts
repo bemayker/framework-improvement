@@ -1,21 +1,38 @@
 import { API_BASE_URL } from "./config";
 
-// Only `version` is read: the backend may add fields to this body without
-// breaking the client.
+// Only `version` and `commit` are read: the backend may add fields to this
+// body without breaking the client.
 export type VersionResponse = {
   version: string;
+  commit: string;
+};
+
+// Both fields are null when the backend has no usable value for them.
+export type BackendVersion = {
+  version: string | null;
+  commit: string | null;
 };
 
 const VERSION_URL = `${API_BASE_URL}/api/version`;
 
-// What the backend reports when its package metadata is missing.
-const UNKNOWN_VERSION = "unknown";
+// What the backend reports when its package metadata or build commit is missing.
+const UNKNOWN_VALUE = "unknown";
+
+function normalise(value: unknown): string | null {
+  if (typeof value !== "string") {
+    return null;
+  }
+
+  const trimmed = value.trim();
+  return trimmed === "" || trimmed === UNKNOWN_VALUE ? null : trimmed;
+}
 
 /**
- * Fetches the backend's version. Resolves to null when the backend answered
- * but has no usable version; rejects on a network error or a non-OK response.
+ * Fetches the backend's version and build commit. Each field resolves to null
+ * when the backend answered but has no usable value; rejects on a network
+ * error or a non-OK response.
  */
-export async function fetchBackendVersion(): Promise<string | null> {
+export async function fetchBackendVersion(): Promise<BackendVersion> {
   const response = await fetch(VERSION_URL);
 
   if (!response.ok) {
@@ -25,12 +42,9 @@ export async function fetchBackendVersion(): Promise<string | null> {
   }
 
   const body = (await response.json()) as Partial<VersionResponse> | null;
-  const version = body?.version;
 
-  if (typeof version !== "string") {
-    return null;
-  }
-
-  const trimmed = version.trim();
-  return trimmed === "" || trimmed === UNKNOWN_VERSION ? null : trimmed;
+  return {
+    version: normalise(body?.version),
+    commit: normalise(body?.commit),
+  };
 }
