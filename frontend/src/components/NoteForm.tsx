@@ -1,4 +1,4 @@
-import { useRef, useState, type CSSProperties, type FormEvent } from "react";
+import { useState, type CSSProperties, type FormEvent } from "react";
 import { createNote, type Note } from "../api/notes";
 
 const FIELD_LABEL = "New note";
@@ -53,11 +53,6 @@ const buttonStyle: CSSProperties = {
   cursor: "pointer",
 };
 
-const savingButtonStyle: CSSProperties = {
-  opacity: 0.6,
-  cursor: "not-allowed",
-};
-
 const errorStyle: CSSProperties = {
   fontSize: "0.875rem",
   color: "#b3261e",
@@ -72,29 +67,18 @@ type NoteFormProps = {
 function NoteForm({ onCreated }: NoteFormProps) {
   const [text, setText] = useState("");
   const [error, setError] = useState<string | null>(null);
-  const [isSaving, setIsSaving] = useState(false);
-  const isSavingRef = useRef(false);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
-    // Checked on the ref, not the state: two submits can be dispatched before
-    // React re-renders, and both would still see isSaving as false.
-    if (isSavingRef.current) {
-      return;
-    }
-
     // A whitespace-only note counts as empty, and is rejected here so no
-    // request is sent at all. This stays ahead of the guard flag so a rejected
-    // empty submit never locks the form.
+    // request is sent at all.
     const trimmedText = text.trim();
     if (trimmedText.length === 0) {
       setError(EMPTY_NOTE_MESSAGE);
       return;
     }
 
-    isSavingRef.current = true;
-    setIsSaving(true);
     try {
       const savedNote = await createNote(trimmedText);
       setError(null);
@@ -102,9 +86,6 @@ function NoteForm({ onCreated }: NoteFormProps) {
       onCreated(savedNote);
     } catch {
       setError(SAVE_FAILED_MESSAGE);
-    } finally {
-      isSavingRef.current = false;
-      setIsSaving(false);
     }
   }
 
@@ -124,13 +105,7 @@ function NoteForm({ onCreated }: NoteFormProps) {
           style={inputStyle}
           onChange={(event) => setText(event.target.value)}
         />
-        <button
-          data-testid="note-submit"
-          type="submit"
-          disabled={isSaving}
-          aria-busy={isSaving}
-          style={isSaving ? { ...buttonStyle, ...savingButtonStyle } : buttonStyle}
-        >
+        <button data-testid="note-submit" type="submit" style={buttonStyle}>
           {SUBMIT_LABEL}
         </button>
       </div>
