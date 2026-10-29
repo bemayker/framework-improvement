@@ -40,7 +40,10 @@ describe("fetchBackendVersion", () => {
   it("returns the version from a 200 body, requested from the default base URL", async () => {
     fetchMock.mockResolvedValue(okResponse({ version: "0.1.0" }));
 
-    await expect(fetchBackendVersion()).resolves.toBe("0.1.0");
+    await expect(fetchBackendVersion()).resolves.toEqual({
+      version: "0.1.0",
+      commit: null,
+    });
 
     expect(fetchMock).toHaveBeenCalledTimes(1);
     expect(fetchMock).toHaveBeenCalledWith(DEFAULT_VERSION_URL, {
@@ -64,12 +67,39 @@ describe("fetchBackendVersion", () => {
     );
   });
 
-  it("ignores extra fields in the body", async () => {
+  it("returns the commit alongside the version when the body carries one", async () => {
     fetchMock.mockResolvedValue(
-      okResponse({ version: "0.1.0", commit: "abc123" }),
+      okResponse({ version: "0.1.0", commit: "4f2a9c1e8b7d" }),
     );
 
-    await expect(fetchBackendVersion()).resolves.toBe("0.1.0");
+    await expect(fetchBackendVersion()).resolves.toEqual({
+      version: "0.1.0",
+      commit: "4f2a9c1e8b7d",
+    });
+  });
+
+  it.each([
+    ["a missing commit", { version: "0.1.0" }],
+    ["an empty commit", { version: "0.1.0", commit: "" }],
+    ["a non-string commit", { version: "0.1.0", commit: 42 }],
+  ])("resolves with a null commit for %s", async (_label, body) => {
+    fetchMock.mockResolvedValue(okResponse(body));
+
+    await expect(fetchBackendVersion()).resolves.toEqual({
+      version: "0.1.0",
+      commit: null,
+    });
+  });
+
+  it("ignores unrelated extra fields in the body", async () => {
+    fetchMock.mockResolvedValue(
+      okResponse({ version: "0.1.0", extra: "abc123" }),
+    );
+
+    await expect(fetchBackendVersion()).resolves.toEqual({
+      version: "0.1.0",
+      commit: null,
+    });
   });
 
   it.each([

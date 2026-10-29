@@ -2,15 +2,21 @@
 // every unresolved outcome is a rejection the caller maps to "no version".
 import { API_BASE_URL } from "./baseUrl";
 
-type VersionResponse = { version: string };
+type VersionResponse = { version: string; commit: string };
+
+export type BackendVersion = { version: string; commit: string | null };
 
 const VERSION_URL = `${API_BASE_URL}/api/version`;
 const VERSION_REQUEST_TIMEOUT_MS = 5000;
 // The backend answers this when its package metadata is missing.
 const UNRESOLVED_BACKEND_VERSION = "unknown";
 
-/** Resolves the backend's version, or rejects when it cannot be determined. */
-export async function fetchBackendVersion(): Promise<string> {
+/**
+ * Resolves the backend's version and build commit, or rejects when the version
+ * cannot be determined. A missing or unusable commit is not a failure: the
+ * version is still valid, so the commit resolves to null.
+ */
+export async function fetchBackendVersion(): Promise<BackendVersion> {
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), VERSION_REQUEST_TIMEOUT_MS);
 
@@ -34,7 +40,12 @@ export async function fetchBackendVersion(): Promise<string> {
       throw new Error("Loading the backend version failed: backend version unresolved");
     }
 
-    return version;
+    const commit = body?.commit;
+
+    return {
+      version,
+      commit: typeof commit === "string" && commit !== "" ? commit : null,
+    };
   } finally {
     clearTimeout(timeoutId);
   }

@@ -2,7 +2,10 @@ import { useEffect, useState } from "react";
 import type { CSSProperties } from "react";
 import { fetchBackendVersion } from "../api/version";
 
+import type { BackendVersion } from "../api/version";
+
 const APP_NAME = "Task Notes";
+const SHORT_COMMIT_LENGTH = 7;
 
 const footerStyle: CSSProperties = {
   fontSize: "0.875rem",
@@ -11,14 +14,14 @@ const footerStyle: CSSProperties = {
 };
 
 function AppFooter() {
-  const [version, setVersion] = useState<string | null>(null);
+  const [backend, setBackend] = useState<BackendVersion | null>(null);
 
   useEffect(() => {
     let isMounted = true;
 
     fetchBackendVersion()
       .then((resolved) => {
-        if (isMounted) setVersion(resolved);
+        if (isMounted) setBackend(resolved);
       })
       .catch(() => {
         // Deliberate: the version is supplementary, so an unresolved one
@@ -33,7 +36,15 @@ function AppFooter() {
   return (
     <footer data-testid="app-footer" style={footerStyle}>
       {APP_NAME}
-      {version ? <span data-testid="app-footer-version"> v{version}</span> : null}
+      {backend ? (
+        <span data-testid="app-footer-version"> v{backend.version}</span>
+      ) : null}
+      {backend?.commit ? (
+        <span data-testid="app-footer-commit">
+          {" "}
+          ({backend.commit.slice(0, SHORT_COMMIT_LENGTH)})
+        </span>
+      ) : null}
     </footer>
   );
 }
