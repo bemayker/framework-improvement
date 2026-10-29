@@ -7,7 +7,7 @@ This item has no UI: every criterion is verified by an HTTP call (`curl`), a sou
 - Docker and Docker Compose installed and running.
 - Repository checked out locally, on branch `feature/TEST-09-version-build-commit` (or, once merged, on `main`).
 - Host port `8010` (backend) free.
-- No `BUILD_COMMIT` exported in the shell and none in a root `.env` file (step 4 relies on it being unset).
+- No `BUILD_COMMIT` exported in the shell and none in a root `.env` file (step 5 relies on it being unset).
 - A terminal with `curl`.
 - Steps 9 to 10: `uv` installed on the host. No database is needed for those test files.
 
