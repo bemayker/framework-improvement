@@ -12,3 +12,8 @@ This run's section of the repository-root `DECISIONS.md`, which is cumulative ac
 - [run] Re-ingest wave 2 boundary: FEAT-10 dropped (tracker complete, PR #371 squash b5394e4); FEAT-11 is the sole live node and is ready (its only depends_on is done, scaffold TEST-01 done).
 - [run] feature_map.md and project_state.json not written at this boundary: both rows and registry entries pre-exist, propose.sh returned 0/0, no follow-ups filed, so no reconcile and no Section L register publish is needed.
 - [run] No serialization hold: one live node; FEAT-11's ping.py overlap with FEAT-10 is resolved by FEAT-10 being merged on main.
+- [run] Run publish wave-2: arm=opened merge=merged PR #372 (bd311ad); pr-tests was a required check at merge time.
+- [run] FEAT-11 merged: PR #373 squash b1573ad; auto-Done run 40863641270 succeeded; tracker complete; test checkpoint passed on main b1573ad (pytest 78 passed 14 skipped, vitest 45 passed).
+- [run] Final boundary (wave 3): follow-ups filed: none (FEAT-11's PR lists no known improvements; no unaddressed comments).
+- [run] Re-ingestion at the wave 3 boundary (final): FEAT-10 and FEAT-11 both resolve complete in the tracker, the scope has no unfinished transitive dependency and this run filed no follow-up, so the graph is empty and nothing is dispatched or resumed.
+- [run] Map and registry untouched at the final boundary: every scoped row and registry entry already exists, the validator passes and the proposal helper returns zero wave and zero checkpoint proposals.
