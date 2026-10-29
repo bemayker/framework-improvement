@@ -261,11 +261,32 @@
       "id_source": "framework",
       "id_carrier": "title_prefix",
       "url": "https://app.clickup.com/t/123k99cyyp0"
+    },
+    "FEAT-9": {
+      "external_id": "123k99czcqa",
+      "external_identifier": "",
+      "id_source": "framework",
+      "id_carrier": "title_prefix",
+      "url": "https://app.clickup.com/t/123k99czcqa"
+    },
+    "FEAT-10": {
+      "external_id": "123k99czcqb",
+      "external_identifier": "",
+      "id_source": "framework",
+      "id_carrier": "title_prefix",
+      "url": "https://app.clickup.com/t/123k99czcqb"
+    },
+    "FEAT-11": {
+      "external_id": "123k99czcqc",
+      "external_identifier": "",
+      "id_source": "framework",
+      "id_carrier": "title_prefix",
+      "url": "https://app.clickup.com/t/123k99czcqc"
     }
   },
   "discovery": {
-    "last_scan_commit": "6196e644899df26e3c72c29ee17ffe53855bc1a5",
-    "scanned_at": "2026-10-27T15:51:27Z",
+    "last_scan_commit": "28ee20db53f6c838d4c0db484a6d34b252c5283d",
+    "scanned_at": "2026-10-29T10:09:45Z",
     "scanned_by": "/sync-project"
   },
   "framework": {
@@ -273,8 +294,8 @@
     "migrated_to": "0.3.453",
     "migrated_at": "2026-10-29T09:59:17Z",
     "synced": {
-      "plugin_version": "0.3.448",
-      "synced_at": "2026-10-27T15:53:28Z"
+      "plugin_version": "0.3.453",
+      "synced_at": "2026-10-29T10:09:47Z"
     }
   }
 }
