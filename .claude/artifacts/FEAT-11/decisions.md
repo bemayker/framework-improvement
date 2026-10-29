@@ -1,9 +1,0 @@
-- Plan base: bd311ad31bda0a2bc421b34d62ccf544505e9ce7
-- Tracker comments read: 0 (no assumptions carried). Status planning maps to "to do", already set: write skipped.
-- Plan verdict (orchestrator, run=deliver-20261029T104317Z): approve. Scope: every File Manifest entry maps to the ticket (route in backend/app/ping.py, {"count": N}, a pytest test for two pings then count gives 2); the new backend/app/services/ping_service.py is layering, not a feature, and is required by coding_standards.md Section 2.2 ("Router: NO business logic") now that the handler carries state, so user_story_alignment.md Section 3 (no gold plating) does not fire on it. The app.state line in main.py is the smallest change that keeps the existing session-scoped client fixture from leaking pings between tests. Counting only answered GET /api/ping (not /count, not a 405) is the ticket's own wording. Technology Selection walked the ladder (stdlib Lock, built-in app.state and Depends, Pydantic already installed, no new dependency). Criterion coverage table present with a tier and a reason on all four rows; E2E correctly none for a backend-only item.
-- Residual doubts, logged not revised: the 8-thread concurrency unit test and the "value() does not advance" case go beyond what the criteria ask, which is test depth rather than scope; criterion 4's covering tier (Integration, satisfied by the two-pings test existing) is a recorded choice, not a gap. The per-process count is a documented shared risk, not handled here, which is correct.
-- 6.3: [worktree-deps] installed=2 present=0 unlocked=0 failed=0 duration=2s
-- 6.3: [run-dir] move-item: moved=3 appended=0 kept=2 failed=0
-- 6.4: [merged-since] base=bd311ad (forced) ref=origin/main@bd311ad commits=0 overlap=0 verdict=clean
-- 6.5: reviewer VERDICT: PASS blocking=0 recommended=0 optional=0; no fix round.
-- 6.5: Refactor gate: no findings (6 files examined), report-only commit 98eb078.
