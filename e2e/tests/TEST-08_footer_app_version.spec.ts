@@ -55,7 +55,7 @@ test.describe("TEST-08 footer shows the app version", () => {
     const footer = page.getByTestId("app-footer");
     await expect(footer).toBeVisible();
     await expect.poll(() => aborted).toBe(true);
-    await expect(footer).toHaveText("Task Notes");
+    await expect(footer).toHaveText("Task NotesBuild note");
     await expect(page.getByTestId("app-footer-version")).toHaveCount(0);
     await expect(footer).not.toContainText(/undefined|null|unknown/);
   });

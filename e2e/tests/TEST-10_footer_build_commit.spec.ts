@@ -31,7 +31,7 @@ test.describe("TEST-10 footer shows the build commit", () => {
     await page.goto("/");
 
     const footer = page.getByTestId("app-footer");
-    await expect(footer).toHaveText("Task Notes v0.1.0 (a1b2c3d)");
+    await expect(footer).toHaveText("Task Notes v0.1.0 (a1b2c3d)Build note");
     await expect(page.getByTestId("app-footer-version")).toHaveText("v0.1.0");
     await expect(page.getByTestId("app-footer-commit")).toHaveText("(a1b2c3d)");
     await expect(footer).not.toContainText("a1b2c3d4");
@@ -43,7 +43,7 @@ test.describe("TEST-10 footer shows the build commit", () => {
     await page.goto("/");
 
     const footer = page.getByTestId("app-footer");
-    await expect(footer).toHaveText("Task Notes v0.1.0");
+    await expect(footer).toHaveText("Task Notes v0.1.0Build note");
     await expect(page.getByTestId("app-footer-commit")).toHaveCount(0);
     await expect(footer).not.toContainText(/undefined|null|unknown/);
   });
