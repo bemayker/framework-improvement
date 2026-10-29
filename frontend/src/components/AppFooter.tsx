@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import type { CSSProperties } from "react";
 import { fetchBackendVersion } from "../api/version";
-
 import type { BackendVersion } from "../api/version";
 
 const APP_NAME = "Task Notes";
