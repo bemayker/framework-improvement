@@ -296,6 +296,13 @@
       "id_source": "framework",
       "id_carrier": "title_prefix",
       "url": "https://app.clickup.com/t/123k99czd0x"
+    },
+    "CHORE-07": {
+      "external_id": "123k99czeru",
+      "external_identifier": "",
+      "id_source": "framework",
+      "id_carrier": "title_prefix",
+      "url": "https://app.clickup.com/t/123k99czeru"
     }
   },
   "discovery": {

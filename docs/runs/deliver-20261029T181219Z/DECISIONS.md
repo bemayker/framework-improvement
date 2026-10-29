@@ -19,3 +19,14 @@ This run's section of the repository-root `DECISIONS.md`, which is cumulative ac
 - [resume] BUG-04 and TEST-10 both at 6.1: no branch, PR, artifacts or worktree.
 - [schedule] Round 2: BUG-04 and TEST-10 planning in parallel (wave 3 before wave 4 for slot order). Builds concurrent only if the approved File Manifests are disjoint; else TEST-10's build waits for BUG-04's merge.
 - [note] BUG-04 still has no description or acceptance criteria; planner assumptions go in the plan and PR. Both items are authored test checkpoints; each merge runs the full suite at 6.10.
+- [publish] wave-2: arm=opened merge=merged https://github.com/bemayker/framework-improvement/pull/387 (branch chore/mayker-deliver-20261029T181219Z-wave-2); pr-tests was required on main at merge time (ruleset required_status_checks: pr-tests).
+- [merge] BUG-04 merged (#388, 205c6dd) on the orchestrator's verdict; repro before fail -> after pass; tracker complete. Checkpoint pass at 205c6dd. BUG-04-db torn down.
+- [merge] TEST-10 merged (#389, c43b40f) on the orchestrator's verdict, without a branch update (BUG-04's merge was disjoint); tracker complete. Checkpoint pass at c43b40f.
+- [wave] Waves 3 and 4 drained. Follow-ups filed: 1. TEST-10 known-improvements (the RECOMMENDED finding declined at its gate: TEST-08 E2E spec asserts the exact footer text, fails with BUILD_COMMIT set) -> ClickUp 123k99czeru, tag chore. BUG-04's known improvements are OPTIONAL only (not a source); unaddressed-comments read for BUG-04 and TEST-10 (none).
+- [re-ingest] Final boundary (waves 3 and 4 drained, main c43b40f): tracker re-read (36 tasks, none mayker:link, one new: 123k99czeru); BUG-04 and TEST-10 merged and dropped; graph is 1 node (CHORE-07), ready, 0 edges, no cycles; map re-validated (40 rows).
+- [register] Follow-up 123k99czeru registered as CHORE-07 (CHORE- from its chore tag, next number after CHORE-06), branch feature/CHORE-07-test-10-follow-up, depends_on [TEST-10]; stampless registry entry, no tracker write-back.
+- [waves] Accepted the helper's proposals for CHORE-07: wave 5 (one above TEST-10) and test_checkpoint ✅ (sink).
+- [shared-risk] CHORE-07 edits e2e/tests/TEST-08_footer_app_version.spec.ts; every other row touching it is complete or cancelled, so no live pair; partner notes appended to TEST-08 and TEST-10.
+- [resume] CHORE-07 at 6.1: no branch, PR, artifacts or worktree.
+- [schedule] Round 3: CHORE-07 alone (only ready node); its checkpoint runs at 6.10 and nothing remains to admit after it. Follow-ups are one level deep: CHORE-07's own known improvements are not filed.
+- [refusal] One session command refused by bash-shape-guard (state-lookup: `cut` in a lookup over .claude/feature_map.md); re-run with the shipped feature-id-resolve.sh show call. The TEST-10 gate dispatch had `printenv BUILD_COMMIT` refused ("Permission to use Bash has been denied.") and one compound command refused by bash-shape-guard (brace-param, cd-segment).
