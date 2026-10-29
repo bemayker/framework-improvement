@@ -4,6 +4,7 @@ import { fetchBackendBuildInfo } from "../api/version";
 import type { BackendBuildInfo } from "../api/version";
 
 const APP_NAME = "Task Notes";
+const BUILD_NOTE = "Build note";
 const SHORT_COMMIT_LENGTH = 7;
 
 const footerStyle: CSSProperties = {
@@ -55,6 +56,7 @@ function AppFooter() {
           ) : null}
         </>
       ) : null}
+      <div data-testid="app-footer-build-note">{BUILD_NOTE}</div>
     </footer>
   );
 }

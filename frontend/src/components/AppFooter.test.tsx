@@ -11,7 +11,7 @@ const fetchBuildInfoMock = vi.mocked(fetchBackendBuildInfo);
 
 function expectFooterText(text: string) {
   const footer = screen.getByTestId("app-footer");
-  expect(footer.textContent).toBe(text);
+  expect(footer.textContent).toBe(`${text}Build note`);
   for (const forbidden of ["undefined", "null", "unknown", "Error"]) {
     expect(footer.textContent).not.toContain(forbidden);
   }
@@ -79,6 +79,32 @@ describe("AppFooter", () => {
     await waitFor(() => expect(fetchBuildInfoMock).toHaveBeenCalledTimes(1));
     expectFooterText("Task Notes");
     expect(screen.queryByTestId("app-footer-commit")).not.toBeInTheDocument();
+  });
+
+  it("renders the build note on its own line in the footer", async () => {
+    fetchBuildInfoMock.mockResolvedValue({
+      version: "0.1.0",
+      commit: "a1b2c3d4e5f6",
+    });
+
+    render(<AppFooter />);
+    await screen.findByTestId("app-footer-version");
+
+    const note = screen.getByTestId("app-footer-build-note");
+    expect(note).toHaveTextContent("Build note");
+    expect(screen.getByTestId("app-footer")).toContainElement(note);
+    expect(screen.getByRole("contentinfo")).toContainElement(note);
+  });
+
+  it("renders the build note when the version request fails", async () => {
+    fetchBuildInfoMock.mockRejectedValue(new Error("network down"));
+
+    render(<AppFooter />);
+
+    await waitFor(() => expect(fetchBuildInfoMock).toHaveBeenCalledTimes(1));
+    expect(screen.getByTestId("app-footer").textContent).toBe(
+      "Task NotesBuild note",
+    );
   });
 
   it("is exposed as the contentinfo landmark and carries the app-footer test id", async () => {
