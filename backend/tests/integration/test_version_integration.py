@@ -1,4 +1,4 @@
-"""Integration tests for GET /api/version (TEST-05), full HTTP request/response cycle."""
+"""Integration tests for GET /api/version (TEST-05, TEST-09), full HTTP request/response cycle."""
 
 import tomllib
 from pathlib import Path
@@ -16,24 +16,52 @@ def _expected_version() -> str:
     return data["project"]["version"]
 
 
-def test_get_version_returns_200_with_version_from_pyproject(client: TestClient):
-    """Criterion 1: the endpoint reports the real pyproject.toml version."""
+def test_get_version_returns_200_with_version_from_pyproject(client: TestClient, monkeypatch):
+    """Criterion 1: the endpoint reports the real pyproject.toml version and a commit."""
+    monkeypatch.delenv("BUILD_COMMIT", raising=False)
+
     response = client.get("/api/version")
 
     assert response.status_code == 200
-    assert response.json() == {"version": _expected_version()}
+    assert response.json() == {"version": _expected_version(), "commit": "unknown"}
 
 
 def test_get_version_answers_when_database_url_is_unset(monkeypatch):
     """Criterion 3: no database connection is needed; DATABASE_URL may be absent."""
     monkeypatch.delenv("DATABASE_URL", raising=False)
+    monkeypatch.delenv("BUILD_COMMIT", raising=False)
 
     app = create_app()
     with TestClient(app) as fresh_client:
         response = fresh_client.get("/api/version")
 
     assert response.status_code == 200
-    assert response.json() == {"version": _expected_version()}
+    assert response.json() == {"version": _expected_version(), "commit": "unknown"}
+
+
+def test_get_version_returns_first_12_characters_of_a_40_character_build_commit(
+    client: TestClient, monkeypatch
+):
+    """Criterion 2: a full sha in BUILD_COMMIT is reported as its 12-character prefix."""
+    sha = "0123456789abcdef0123456789abcdef01234567"
+    monkeypatch.setenv("BUILD_COMMIT", sha)
+
+    response = client.get("/api/version")
+
+    assert response.status_code == 200
+    assert response.json() == {"version": _expected_version(), "commit": sha[:12]}
+
+
+def test_get_version_returns_unknown_commit_when_build_commit_is_unset(
+    client: TestClient, monkeypatch
+):
+    """Criterion 2: with BUILD_COMMIT absent the commit is the declared default."""
+    monkeypatch.delenv("BUILD_COMMIT", raising=False)
+
+    response = client.get("/api/version")
+
+    assert response.status_code == 200
+    assert response.json()["commit"] == "unknown"
 
 
 def test_post_version_returns_405_method_not_allowed(client: TestClient):
