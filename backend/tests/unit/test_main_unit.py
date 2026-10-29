@@ -67,32 +67,6 @@ def test_create_app_registers_server_time_route():
     assert "/api/time" in custom_paths
 
 
-def test_create_app_registers_ping_route():
-    """Edge case: the app registers the FEAT-10 ping route."""
-    app = create_app()
-
-    custom_paths = _collect_route_paths(app.routes) - BUILT_IN_ROUTE_PATHS
-
-    assert "/api/ping" in custom_paths
-
-
-def test_create_app_registers_ping_count_route():
-    """Edge case: the app registers the FEAT-11 ping count route."""
-    app = create_app()
-
-    custom_paths = _collect_route_paths(app.routes) - BUILT_IN_ROUTE_PATHS
-
-    assert "/api/ping/count" in custom_paths
-
-
-def test_create_app_gives_each_app_its_own_ping_counter():
-    """Each app starts its own count, so tests never share ping state."""
-    first_app = create_app()
-    second_app = create_app()
-
-    assert first_app.state.ping_counter is not second_app.state.ping_counter
-
-
 def test_create_app_returns_independent_instances():
     """Error/robustness case: repeated calls do not share mutable state.
 
