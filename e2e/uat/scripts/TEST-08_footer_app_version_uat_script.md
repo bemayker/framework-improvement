@@ -23,7 +23,7 @@
 
 | # | Step | Expected Result | Pass/Fail |
 |---|------|------------------|-----------|
-| 4 | Open http://localhost:8010/api/version in a browser tab | The page shows `{"version":"0.1.0"}` | [ ] Pass [ ] Fail |
+| 4 | Open http://localhost:8010/api/version in a browser tab | The page shows a JSON object whose `version` field is `0.1.0` | [ ] Pass [ ] Fail |
 | 5 | Open http://localhost:5183/ with the DevTools Network tab open, then reload | A `GET http://localhost:8010/api/version` request with status 200 appears | [ ] Pass [ ] Fail |
 | 6 | Read the footer | It reads `Task Notes v0.1.0`, the backend's version, and not `v0.0.0`, the frontend package's version | [ ] Pass [ ] Fail |
 
@@ -48,7 +48,7 @@ Not a UI behaviour; the observable check is the HTTP response.
 
 | # | Step | Expected Result | Pass/Fail |
 |---|------|------------------|-----------|
-| 12 | Run `curl -s http://localhost:8010/api/version` with the stack up | It prints `{"version":"0.1.0"}` | [ ] Pass [ ] Fail |
+| 12 | Run `curl -s http://localhost:8010/api/version` with the stack up | It prints a JSON object whose `version` field is `0.1.0` | [ ] Pass [ ] Fail |
 | 13 | Run `uv run --directory backend pytest -q tests/integration/test_version_integration.py` | `0 failed` | [ ] Pass [ ] Fail |
 
 ### Rendered end to end

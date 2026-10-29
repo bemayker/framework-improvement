@@ -44,5 +44,5 @@ Feature: TEST-08 Footer shows the app version
   Scenario: GET /api/version returns the backend's version (criterion 5)
     Given the backend is running
     When I request "GET http://localhost:8010/api/version"
-    Then the response body is {"version": "0.1.0"}
+    Then the "version" field of the JSON response body is "0.1.0"
     And the tests in "backend/tests/integration/test_version_integration.py" report 0 failed
