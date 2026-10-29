@@ -2,6 +2,8 @@ import { test, expect } from "@playwright/test";
 
 const VERSION_URL_PATTERN = "**/api/version";
 
+const escapeRegExp = (text: string): string => text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
 test.describe("TEST-08 footer shows the backend version", () => {
   test("shows the version the live backend reports (criterion 1)", async ({ page }) => {
     const versionResponse = page.waitForResponse(
@@ -9,9 +11,16 @@ test.describe("TEST-08 footer shows the backend version", () => {
     );
     await page.goto("/");
 
-    const { version } = (await (await versionResponse).json()) as { version: string };
+    const { version, commit } = (await (await versionResponse).json()) as {
+      version: string;
+      commit?: string;
+    };
 
-    await expect(page.getByTestId("app-footer")).toHaveText(`Task Notes v${version}`);
+    const footer = page.getByTestId("app-footer");
+    await expect(footer).toHaveText(new RegExp(`^Task Notes v${escapeRegExp(version)}`));
+    if (commit) {
+      await expect(footer).toContainText(`(${commit.slice(0, 7)})`);
+    }
     await expect(page.getByTestId("app-footer-version")).toBeVisible();
   });
 
