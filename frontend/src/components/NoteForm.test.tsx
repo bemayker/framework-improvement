@@ -93,4 +93,91 @@ describe("NoteForm", () => {
       expect(screen.queryByTestId("note-form-error")).not.toBeInTheDocument(),
     );
   });
+
+  describe("while a save is in flight", () => {
+    type Deferred = {
+      promise: Promise<{ id: number; text: string }>;
+      resolve: (note: { id: number; text: string }) => void;
+      reject: (reason: Error) => void;
+    };
+
+    function deferredSave(): Deferred {
+      let resolve!: Deferred["resolve"];
+      let reject!: Deferred["reject"];
+      const promise = new Promise<{ id: number; text: string }>((res, rej) => {
+        resolve = res;
+        reject = rej;
+      });
+      return { promise, resolve, reject };
+    }
+
+    it("sends one request when the form is submitted twice before the first save settles", async () => {
+      const save = deferredSave();
+      createNoteMock.mockReturnValue(save.promise);
+      const onCreated = vi.fn();
+      render(<NoteForm onCreated={onCreated} />);
+
+      typeNote("Buy milk");
+      fireEvent.click(screen.getByTestId("note-submit"));
+      fireEvent.click(screen.getByTestId("note-submit"));
+
+      expect(createNoteMock).toHaveBeenCalledTimes(1);
+
+      save.resolve({ id: 1, text: "Buy milk" });
+      await waitFor(() => expect(onCreated).toHaveBeenCalledTimes(1));
+    });
+
+    it("sends one request when the form element is submitted twice (Enter key path)", async () => {
+      const save = deferredSave();
+      createNoteMock.mockReturnValue(save.promise);
+      const onCreated = vi.fn();
+      render(<NoteForm onCreated={onCreated} />);
+
+      typeNote("Buy milk");
+      fireEvent.submit(screen.getByTestId("note-form"));
+      fireEvent.submit(screen.getByTestId("note-form"));
+
+      expect(createNoteMock).toHaveBeenCalledTimes(1);
+
+      save.resolve({ id: 1, text: "Buy milk" });
+      await waitFor(() => expect(onCreated).toHaveBeenCalledTimes(1));
+    });
+
+    it("disables the button while pending and enables it again after success", async () => {
+      const save = deferredSave();
+      createNoteMock.mockReturnValue(save.promise);
+      render(<NoteForm onCreated={vi.fn()} />);
+
+      typeNote("Buy milk");
+      expect(screen.getByTestId("note-submit")).toBeEnabled();
+      submitForm();
+
+      await waitFor(() => expect(screen.getByTestId("note-submit")).toBeDisabled());
+
+      save.resolve({ id: 1, text: "Buy milk" });
+
+      await waitFor(() => expect(screen.getByTestId("note-submit")).toBeEnabled());
+    });
+
+    it("re-enables the button, keeps the text and allows a retry after a failed save", async () => {
+      const save = deferredSave();
+      createNoteMock.mockReturnValueOnce(save.promise);
+      render(<NoteForm onCreated={vi.fn()} />);
+
+      typeNote("Buy milk");
+      submitForm();
+      await waitFor(() => expect(screen.getByTestId("note-submit")).toBeDisabled());
+
+      save.reject(new Error("Saving the note failed: 500"));
+
+      expect(await screen.findByTestId("note-form-error")).toBeInTheDocument();
+      expect(screen.getByTestId("note-submit")).toBeEnabled();
+      expect(screen.getByTestId("note-input")).toHaveValue("Buy milk");
+
+      createNoteMock.mockResolvedValueOnce({ id: 2, text: "Buy milk" });
+      submitForm();
+
+      await waitFor(() => expect(createNoteMock).toHaveBeenCalledTimes(2));
+    });
+  });
 });
