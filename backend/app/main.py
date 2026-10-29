@@ -28,11 +28,12 @@ logger = logging.getLogger(__name__)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncIterator[None]:
-    """Create the notes table on startup, when a database is configured.
+    """Record the process start for the uptime endpoint, then initialise the notes schema.
 
-    Skipped with a warning when DATABASE_URL is unset: the version endpoint
-    needs no database and must still answer, so startup never hard-requires
-    one (the notes endpoints then fail loudly per request instead).
+    The notes table is created only when a database is configured. It is
+    skipped with a warning when DATABASE_URL is unset: the version and uptime
+    endpoints need no database and must still answer, so startup never
+    hard-requires one (the notes endpoints then fail loudly per request instead).
     """
     # First, so the uptime endpoint never depends on the database branch below.
     app.state.process_start = capture_process_start()
