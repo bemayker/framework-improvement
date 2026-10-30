@@ -2,6 +2,8 @@
 
 from importlib.metadata import PackageNotFoundError
 
+from app.routers.version import router as version_router
+from app.schemas.version import VersionResponse
 from app.services import version_service
 
 
@@ -68,3 +70,20 @@ def test_get_build_commit_returns_shorter_value_unchanged(monkeypatch):
     monkeypatch.setenv("BUILD_COMMIT", "abc1234")
 
     assert version_service.get_build_commit() == "abc1234"
+
+
+def test_version_response_declares_version_and_commit_as_str_fields():
+    """Criterion 3: both response fields are strings, and the schema has no others."""
+    fields = VersionResponse.model_fields
+
+    assert set(fields) == {"version", "commit"}
+    assert fields["version"].annotation is str
+    assert fields["commit"].annotation is str
+
+
+def test_version_route_uses_version_response_as_its_response_model():
+    """Criterion 3: GET /api/version is declared with VersionResponse as its model."""
+    routes = [route for route in version_router.routes if route.path == "/api/version"]
+
+    assert len(routes) == 1
+    assert routes[0].response_model is VersionResponse
