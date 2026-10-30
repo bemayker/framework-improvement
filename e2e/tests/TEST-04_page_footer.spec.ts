@@ -1,22 +1,14 @@
+import { readFileSync } from "node:fs";
+import path from "node:path";
 import { test, expect } from "@playwright/test";
 
-// The footer no longer shows the frontend package version: since TEST-08 it
-// shows the version the backend reports, so these specs pin that response.
-const BACKEND_VERSION = "1.2.3-e2e";
+const frontendPackageJsonPath = path.resolve(__dirname, "../../frontend/package.json");
+const { version } = JSON.parse(readFileSync(frontendPackageJsonPath, "utf-8")) as {
+  version: string;
+};
 
 test.describe("TEST-04 page footer", () => {
-  test.beforeEach(async ({ page }) => {
-    await page.route("**/api/version", (route) =>
-      route.fulfill({
-        status: 200,
-        contentType: "application/json",
-        headers: { "access-control-allow-origin": "*" },
-        body: JSON.stringify({ version: BACKEND_VERSION }),
-      }),
-    );
-  });
-
-  test("shows a footer with the app name and the version the backend reports", async ({
+  test("shows a footer with the app name and the version from frontend/package.json", async ({
     page,
   }) => {
     await page.goto("/");
@@ -24,13 +16,13 @@ test.describe("TEST-04 page footer", () => {
     const footer = page.getByTestId("app-footer");
     await expect(footer).toBeVisible();
     await expect(footer).toContainText("Task Notes");
-    await expect(footer).toContainText(BACKEND_VERSION);
+    await expect(footer).toContainText(version);
   });
 
   test("exposes the footer as a contentinfo landmark", async ({ page }) => {
     await page.goto("/");
 
-    await expect(page.getByRole("contentinfo")).toContainText(BACKEND_VERSION);
+    await expect(page.getByRole("contentinfo")).toContainText(version);
   });
 
   test("leaves the existing landing-page heading and subtitle unchanged", async ({ page }) => {
@@ -50,6 +42,6 @@ test.describe("TEST-04 page footer", () => {
 
     const footer = page.getByTestId("app-footer");
     await expect(footer).toBeVisible();
-    await expect(footer).toContainText(BACKEND_VERSION);
+    await expect(footer).toContainText(version);
   });
 });
