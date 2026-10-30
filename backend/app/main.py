@@ -4,7 +4,8 @@ TEST-01 (the scaffold feature) instantiates the app with no feature routes.
 Later features register their routers here without restructuring this factory:
 TEST-05 registers the version router, TEST-03 the notes router plus the
 startup schema initialisation and the CORS middleware the browser needs, and
-TEST-02 the health router.
+TEST-02 the health router, TEST-07 the uptime router plus the process clock
+captured on `app.state` in `create_app()`.
 """
 
 import logging
@@ -18,7 +19,9 @@ from app.core.config import get_settings
 from app.core.db import ensure_schema
 from app.routers.health import router as health_router
 from app.routers.notes import router as notes_router
+from app.routers.uptime import router as uptime_router
 from app.routers.version import router as version_router
+from app.services import uptime_service
 
 logger = logging.getLogger(__name__)
 
@@ -45,6 +48,8 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
 def create_app() -> FastAPI:
     settings = get_settings()
     app = FastAPI(title=settings.app_title, lifespan=lifespan)
+    # Captured once per app instance; requests only read it (TEST-07).
+    app.state.process_clock = uptime_service.start_clock()
     app.add_middleware(
         CORSMiddleware,
         allow_origins=list(settings.cors_origins),
@@ -54,6 +59,7 @@ def create_app() -> FastAPI:
     app.include_router(version_router)
     app.include_router(notes_router)
     app.include_router(health_router)
+    app.include_router(uptime_router)
     return app
 
 
