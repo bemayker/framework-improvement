@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import NoteForm from "./NoteForm";
-import { createNote } from "../api/notes";
+import { createNote, type Note } from "../api/notes";
 
 vi.mock("../api/notes", () => ({
   createNote: vi.fn(),
@@ -15,6 +15,17 @@ function submitForm() {
 
 function typeNote(text: string) {
   fireEvent.change(screen.getByTestId("note-input"), { target: { value: text } });
+}
+
+// A save whose settlement the test controls, so the in-flight window is deterministic.
+function deferredSave() {
+  let resolve!: (note: Note) => void;
+  let reject!: (reason: Error) => void;
+  const promise = new Promise<Note>((res, rej) => {
+    resolve = res;
+    reject = rej;
+  });
+  return { promise, resolve, reject };
 }
 
 describe("NoteForm", () => {
@@ -77,6 +88,88 @@ describe("NoteForm", () => {
     expect(await screen.findByTestId("note-form-error")).toBeInTheDocument();
     expect(screen.getByTestId("note-input")).toHaveValue("Buy milk");
     expect(onCreated).not.toHaveBeenCalled();
+  });
+
+  it("submits only once when the form is submitted twice before the save resolves", async () => {
+    const pending = deferredSave();
+    createNoteMock.mockReturnValue(pending.promise);
+    render(<NoteForm onCreated={vi.fn()} />);
+
+    typeNote("Buy milk");
+    submitForm();
+    submitForm();
+
+    expect(createNoteMock).toHaveBeenCalledTimes(1);
+
+    pending.resolve({ id: 10, text: "Buy milk" });
+    await waitFor(() => expect(screen.getByTestId("note-submit")).toBeEnabled());
+  });
+
+  // Submit events bypass the disabled button, so this is what proves the
+  // synchronous in-flight guard rather than the disabled attribute.
+  it("ignores a second submit event dispatched on the form while the save is pending", async () => {
+    const pending = deferredSave();
+    createNoteMock.mockReturnValue(pending.promise);
+    render(<NoteForm onCreated={vi.fn()} />);
+
+    typeNote("Buy milk");
+    const form = screen.getByTestId("note-form");
+    fireEvent.submit(form);
+    fireEvent.submit(form);
+
+    expect(createNoteMock).toHaveBeenCalledTimes(1);
+
+    pending.resolve({ id: 14, text: "Buy milk" });
+    await waitFor(() => expect(screen.getByTestId("note-submit")).toBeEnabled());
+  });
+
+  it("disables the submit button while the save is pending and enables it after it resolves", async () => {
+    const pending = deferredSave();
+    createNoteMock.mockReturnValue(pending.promise);
+    render(<NoteForm onCreated={vi.fn()} />);
+
+    typeNote("Buy milk");
+    submitForm();
+
+    await waitFor(() => expect(screen.getByTestId("note-submit")).toBeDisabled());
+
+    pending.resolve({ id: 11, text: "Buy milk" });
+
+    await waitFor(() => expect(screen.getByTestId("note-submit")).toBeEnabled());
+  });
+
+  it("re-enables the button, keeps the text and shows the error when the save is rejected", async () => {
+    const pending = deferredSave();
+    createNoteMock.mockReturnValue(pending.promise);
+    render(<NoteForm onCreated={vi.fn()} />);
+
+    typeNote("Buy milk");
+    submitForm();
+    await waitFor(() => expect(screen.getByTestId("note-submit")).toBeDisabled());
+
+    pending.reject(new Error("Saving the note failed: 500"));
+
+    expect(await screen.findByTestId("note-form-error")).toBeInTheDocument();
+    expect(screen.getByTestId("note-submit")).toBeEnabled();
+    expect(screen.getByTestId("note-input")).toHaveValue("Buy milk");
+  });
+
+  it("accepts a new save once the first one has completed", async () => {
+    createNoteMock
+      .mockResolvedValueOnce({ id: 12, text: "First" })
+      .mockResolvedValueOnce({ id: 13, text: "Second" });
+    render(<NoteForm onCreated={vi.fn()} />);
+
+    typeNote("First");
+    submitForm();
+    await waitFor(() => expect(screen.getByTestId("note-input")).toHaveValue(""));
+    await waitFor(() => expect(screen.getByTestId("note-submit")).toBeEnabled());
+
+    typeNote("Second");
+    submitForm();
+
+    await waitFor(() => expect(createNoteMock).toHaveBeenCalledTimes(2));
+    expect(createNoteMock).toHaveBeenLastCalledWith("Second");
   });
 
   it("clears a previous validation message once a valid note is saved", async () => {
