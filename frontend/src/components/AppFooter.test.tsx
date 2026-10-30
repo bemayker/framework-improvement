@@ -14,13 +14,40 @@ describe("AppFooter", () => {
     getBackendVersionMock.mockReset();
   });
 
-  it("renders the application name and the backend version once it resolves", async () => {
-    getBackendVersionMock.mockResolvedValue("9.9.9");
+  it("renders the application name, the backend version and the 7-character commit once it resolves", async () => {
+    getBackendVersionMock.mockResolvedValue({
+      version: "9.9.9",
+      commit: "abcdef1234567",
+    });
 
     render(<AppFooter />);
 
     expect(await screen.findByTestId("app-version")).toHaveTextContent("v9.9.9");
-    expect(screen.getByTestId("app-footer")).toHaveTextContent(/^Task Notes v9\.9\.9$/);
+    expect(screen.getByTestId("app-commit").textContent).toBe("abcdef1");
+    expect(screen.getByTestId("app-footer").textContent).toBe(
+      "Task Notes v9.9.9 (abcdef1)",
+    );
+  });
+
+  it("shows a commit shorter than 7 characters whole", async () => {
+    getBackendVersionMock.mockResolvedValue({ version: "9.9.9", commit: "abc" });
+
+    render(<AppFooter />);
+
+    expect(await screen.findByTestId("app-commit")).toHaveTextContent("abc");
+    expect(screen.getByTestId("app-footer").textContent).toBe(
+      "Task Notes v9.9.9 (abc)",
+    );
+  });
+
+  it("renders the version alone when the response carries no commit", async () => {
+    getBackendVersionMock.mockResolvedValue({ version: "9.9.9", commit: null });
+
+    render(<AppFooter />);
+
+    await screen.findByTestId("app-version");
+    expect(screen.getByTestId("app-footer").textContent).toBe("Task Notes v9.9.9");
+    expect(screen.queryByTestId("app-commit")).not.toBeInTheDocument();
   });
 
   it("renders the application name alone while the version is loading", () => {
@@ -30,6 +57,7 @@ describe("AppFooter", () => {
 
     expect(screen.getByTestId("app-footer").textContent).toBe("Task Notes");
     expect(screen.queryByTestId("app-version")).not.toBeInTheDocument();
+    expect(screen.queryByTestId("app-commit")).not.toBeInTheDocument();
   });
 
   it("renders the application name alone when the version cannot be loaded", async () => {
@@ -42,10 +70,11 @@ describe("AppFooter", () => {
 
     const text = screen.getByTestId("app-footer").textContent;
     expect(text).toBe("Task Notes");
-    for (const forbidden of ["undefined", "null", "unknown", "v "]) {
+    for (const forbidden of ["undefined", "null", "Error", "unknown", "v ", "("]) {
       expect(text).not.toContain(forbidden);
     }
     expect(screen.queryByTestId("app-version")).not.toBeInTheDocument();
+    expect(screen.queryByTestId("app-commit")).not.toBeInTheDocument();
   });
 
   it("is exposed as the contentinfo landmark and carries the app-footer test id", () => {
@@ -58,7 +87,7 @@ describe("AppFooter", () => {
   });
 
   it("requests the version once on mount", async () => {
-    getBackendVersionMock.mockResolvedValue("1.2.3");
+    getBackendVersionMock.mockResolvedValue({ version: "1.2.3", commit: "abc1234" });
 
     render(<AppFooter />);
     await screen.findByTestId("app-version");

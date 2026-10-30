@@ -38,16 +38,36 @@ describe("version API client", () => {
   it("returns the version from the body, from the default base URL", async () => {
     fetchMock.mockResolvedValue(okResponse({ version: "0.1.0" }));
 
-    await expect(getBackendVersion()).resolves.toBe("0.1.0");
+    const result = await getBackendVersion();
 
+    expect(result.version).toBe("0.1.0");
     expect(fetchMock).toHaveBeenCalledTimes(1);
     expect(fetchMock.mock.calls[0][0]).toBe(DEFAULT_VERSION_URL);
   });
 
-  it("ignores additional fields in the response", async () => {
-    fetchMock.mockResolvedValue(okResponse({ version: "0.1.0", commit: "abc123" }));
+  it("returns the commit untruncated when the body carries one", async () => {
+    fetchMock.mockResolvedValue(
+      okResponse({ version: "0.1.0", commit: "abc1234def56" }),
+    );
 
-    await expect(getBackendVersion()).resolves.toBe("0.1.0");
+    await expect(getBackendVersion()).resolves.toEqual({
+      version: "0.1.0",
+      commit: "abc1234def56",
+    });
+  });
+
+  it.each([
+    ["a missing commit", { version: "0.1.0" }],
+    ["a non-string commit", { version: "0.1.0", commit: 1 }],
+    ["an empty commit", { version: "0.1.0", commit: "" }],
+    ["a blank commit", { version: "0.1.0", commit: "   " }],
+  ])("resolves the version with a null commit on %s", async (_label, body) => {
+    fetchMock.mockResolvedValue(okResponse(body));
+
+    await expect(getBackendVersion()).resolves.toEqual({
+      version: "0.1.0",
+      commit: null,
+    });
   });
 
   it("passes an abort signal so a hung backend cannot wait forever", async () => {
