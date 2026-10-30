@@ -10,7 +10,8 @@ test.describe("TEST-08 footer shows the app version", () => {
     const footer = page.getByTestId("app-footer");
     await expect(footer).toContainText("Task Notes");
     await expect(page.getByTestId("app-version")).toHaveText(`v${backendVersion}`);
-    await expect(footer).toHaveText(`Task Notes v${backendVersion}`);
+    // The footer also carries the build commit (TEST-10), so only the prefix is exact here.
+    await expect(footer).toContainText(`Task Notes v${backendVersion}`);
   });
 
   test("renders the app name alone when the version request is aborted", async ({ page }) => {
@@ -28,5 +29,6 @@ test.describe("TEST-08 footer shows the app version", () => {
     await expect(footer).toBeVisible();
     await expect(footer).toHaveText("Task Notes");
     await expect(page.getByTestId("app-version")).toHaveCount(0);
+    await expect(page.getByTestId("app-commit")).toHaveCount(0);
   });
 });
