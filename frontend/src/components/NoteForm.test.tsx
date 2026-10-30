@@ -105,6 +105,24 @@ describe("NoteForm", () => {
     await waitFor(() => expect(screen.getByTestId("note-submit")).toBeEnabled());
   });
 
+  // Submit events bypass the disabled button, so this is what proves the
+  // synchronous in-flight guard rather than the disabled attribute.
+  it("ignores a second submit event dispatched on the form while the save is pending", async () => {
+    const pending = deferredSave();
+    createNoteMock.mockReturnValue(pending.promise);
+    render(<NoteForm onCreated={vi.fn()} />);
+
+    typeNote("Buy milk");
+    const form = screen.getByTestId("note-form");
+    fireEvent.submit(form);
+    fireEvent.submit(form);
+
+    expect(createNoteMock).toHaveBeenCalledTimes(1);
+
+    pending.resolve({ id: 14, text: "Buy milk" });
+    await waitFor(() => expect(screen.getByTestId("note-submit")).toBeEnabled());
+  });
+
   it("disables the submit button while the save is pending and enables it after it resolves", async () => {
     const pending = deferredSave();
     createNoteMock.mockReturnValue(pending.promise);
