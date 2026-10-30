@@ -15,8 +15,14 @@ test.describe("TEST-08 footer shows the app version", () => {
 
   test("renders the app name alone when the version request is aborted", async ({ page }) => {
     await page.route("**/api/version", (route) => route.abort());
+    // Registered before navigation so the assertions below only run once the
+    // rejection path has actually been taken, not while the request is in flight.
+    const versionRequestFailed = page.waitForEvent("requestfailed", (request) =>
+      request.url().endsWith("/api/version"),
+    );
 
     await page.goto("/");
+    await versionRequestFailed;
 
     const footer = page.getByTestId("app-footer");
     await expect(footer).toBeVisible();
