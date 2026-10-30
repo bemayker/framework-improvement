@@ -14,3 +14,21 @@ Autonomous-run decisions that affect more than one item (`autonomy.md` Section 3
 - 2026-09-14 [run] Dispatch order wave-ascending among ready items: FEAT-1 and TEST-07 (wave 2) then TEST-08 (wave 3); TEST-08 dispatched in the same round because no lower-wave item was ready for a build slot (TEST-07 held by the serialization above). Wave is an ordering key, never a gate.
 - 2026-09-14 [TEST-07] Precondition in the 2026-09-07 tracker comment ("do not run /deliver until the revert has merged") verified satisfied: revert 0ac6818 (#29) is on main. Comment is a process note, not a feature change.
 - 2026-09-14 [TEST-08] Tracker correction comment overrides acceptance criterion 2: the version is fetched from the backend at runtime via the existing GET /api/version (shipped by TEST-05), never from package.json. Carried into the planner dispatch verbatim.
+
+## Run deliver-20261030T185944Z
+
+- [run] Ingestion re-derived from ground truth after reset commit 8e90cb7: five tracker items at `to do` are the nodes (TEST-09, TEST-08, BUG-01, BUG-04, TEST-10); FEAT-1 and BUG-05 are `complete` and TEST-01..05 `done`, so the four leaves are ready and TEST-10 waits on TEST-08 and TEST-09.
+- [run] BUG-01 kept as a node despite its stale tracker tag `mayker:to-verify`: status `to do` resolves to `todo`, and the server_time router is absent from main after the reset.
+- [run] No map or registry write at ingestion: every node has a row and a registry entry; registered=none.
+- [run] Planned order serializes TEST-09/BUG-01 (backend/app/main.py) and TEST-08/BUG-04 (LandingPage.tsx) from the map's shared-risk notes; round 1 dispatches TEST-09 (wave 2) and TEST-08 (wave 3, longer chain), leaving the third slot empty rather than co-dispatching a flagged pair.
+- [run] Round 1 deviation from the ingestion plan: BUG-01 planned and built in parallel with TEST-09, because TEST-09's approved plan does not list backend/app/main.py, so the map note's serialization condition (both manifests list main.py) never held; the BUG-01 plan verdict confirmed the union manifests disjoint.
+- [run] Merged TEST-09 (PR #421, squash 7781632), TEST-08 (PR #422, squash 5fecc80) and BUG-01 (PR #423, squash 73a10fd) on green CI and orchestrator merge verdicts; auto-Done succeeded for all three; BUG-01 took the to-verify arm (complete + tag mayker:to-verify) because its reproduction is deployed-only.
+- [run] Test checkpoints passed after TEST-08 (head 5fecc80) and BUG-01 (head 73a10fd); TEST-09 not due.
+- [run] Wave 2 boundary: follow-ups filed: none (TEST-09 known improvements are OPTIONAL only; no unaddressed comments). Re-ingest: 36 tracker tasks, all registered, registered=none, no map or registry write, 0 proposals.
+- [run] TEST-10 held behind BUG-04: both rows flag frontend/src/components/LandingPage.tsx; BUG-04 goes first on the wave key (3 before 4). Third slot left empty rather than planning TEST-10 against a file BUG-04 is changing.
+- [run] wave-2 publish (Section L): arm=opened pr=https://github.com/bemayker/framework-improvement/pull/424 merge=merged; pr-tests required-at-merge not read by this session (the docs-only diff skipped every tier and the aggregate went green).
+- [run] TEST-10 released from its LandingPage.tsx hold: neither BUG-04's nor TEST-10's approved manifest lists that file (union-of-phases disjoint), so both were planned and built concurrently; TEST-10's CHORE-02 hold does not apply (CHORE-02 cancelled).
+- [run] Merged TEST-10 (PR #426, squash ef546c1) and BUG-04 (PR #425, squash 54af29c); auto-Done succeeded; checkpoints passed after both (heads ef546c1, 54af29c).
+- [run] BUG-04 CI anomaly: the feature-map check stayed in_progress for 15+ min while its workflow run 41116652277 concluded success; `gh run rerun` was refused by GitHub (personal access token lacks the scope); the rerun-checks row's fallback, one empty commit (3fcebdb), re-triggered and went green 6/6.
+- [run] Final boundary: follow-ups filed: none (every known improvement OPTIONAL; no unaddressed comments). Re-ingest: 36 tracker tasks, registered=none, no map or registry write, graph empty.
+- [run] Observed, left for a human: BUG-02 is cancelled but still carries the tag mayker:ready-for-fix; a tag is not a status, so it was not treated as re-opened.
