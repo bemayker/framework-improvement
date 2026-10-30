@@ -22,7 +22,12 @@ import os
 
 import pytest
 
-from app.core.config import DEFAULT_CORS_ORIGINS, Settings, get_settings
+from app.core.config import (
+    DEFAULT_BUILD_COMMIT,
+    DEFAULT_CORS_ORIGINS,
+    Settings,
+    get_settings,
+)
 
 
 def test_get_settings_returns_the_configured_app_title():
@@ -80,6 +85,29 @@ def test_settings_database_url_is_optional_and_never_a_hardcoded_credential():
         None,
         os.environ.get("DATABASE_URL"),
     )
+
+
+def test_settings_build_commit_reads_build_commit_env_untruncated(monkeypatch):
+    """Set path: settings hold the raw declared value; truncation is the service's job."""
+    full_sha = "3f9c2a1b7d4e5f60718293a4b5c6d7e8f9012345"
+    monkeypatch.setenv("BUILD_COMMIT", f" {full_sha} ")
+
+    assert get_settings().build_commit == full_sha
+
+
+def test_settings_build_commit_defaults_to_unknown_when_unset(monkeypatch):
+    """Unset path: with BUILD_COMMIT absent the documented default applies."""
+    monkeypatch.delenv("BUILD_COMMIT", raising=False)
+
+    assert get_settings().build_commit == DEFAULT_BUILD_COMMIT == "unknown"
+
+
+@pytest.mark.parametrize("blank", ["", "   "])
+def test_settings_build_commit_treats_blank_value_as_unset(monkeypatch, blank):
+    """A blank BUILD_COMMIT (compose passes one when unexported) reports the default."""
+    monkeypatch.setenv("BUILD_COMMIT", blank)
+
+    assert get_settings().build_commit == DEFAULT_BUILD_COMMIT
 
 
 def test_settings_cors_origins_parses_comma_separated_env_value(monkeypatch):
