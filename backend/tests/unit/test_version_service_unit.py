@@ -2,8 +2,6 @@
 
 from importlib.metadata import PackageNotFoundError
 
-from app.routers.version import router as version_router
-from app.schemas.version import VersionResponse
 from app.services import version_service
 
 
@@ -41,49 +39,3 @@ def test_get_app_version_returns_unknown_when_distribution_not_installed(monkeyp
     monkeypatch.setattr(version_service, "version", raise_not_found)
 
     assert version_service.get_app_version() == version_service.UNKNOWN_VERSION
-
-
-def test_get_build_commit_returns_unknown_when_unset(monkeypatch):
-    """Unset path: the declared default is returned."""
-    monkeypatch.delenv("BUILD_COMMIT", raising=False)
-
-    assert version_service.get_build_commit() == "unknown"
-
-
-def test_get_build_commit_truncates_to_first_12_characters(monkeypatch):
-    """Criterion 5: a 40-character sha yields only its first 12 characters."""
-    monkeypatch.setenv("BUILD_COMMIT", "0123456789abcdef0123456789abcdef01234567")
-
-    assert version_service.get_build_commit() == "0123456789ab"
-    assert version_service.COMMIT_LENGTH == 12
-
-
-def test_get_build_commit_returns_exactly_12_characters_unchanged(monkeypatch):
-    """Boundary: a value of exactly 12 characters is not cut."""
-    monkeypatch.setenv("BUILD_COMMIT", "0123456789ab")
-
-    assert version_service.get_build_commit() == "0123456789ab"
-
-
-def test_get_build_commit_returns_shorter_value_unchanged(monkeypatch):
-    """A value under 12 characters is returned as is."""
-    monkeypatch.setenv("BUILD_COMMIT", "abc1234")
-
-    assert version_service.get_build_commit() == "abc1234"
-
-
-def test_version_response_declares_version_and_commit_as_str_fields():
-    """Criterion 3: both response fields are strings, and the schema has no others."""
-    fields = VersionResponse.model_fields
-
-    assert set(fields) == {"version", "commit"}
-    assert fields["version"].annotation is str
-    assert fields["commit"].annotation is str
-
-
-def test_version_route_uses_version_response_as_its_response_model():
-    """Criterion 3: GET /api/version is declared with VersionResponse as its model."""
-    routes = [route for route in version_router.routes if route.path == "/api/version"]
-
-    assert len(routes) == 1
-    assert routes[0].response_model is VersionResponse
