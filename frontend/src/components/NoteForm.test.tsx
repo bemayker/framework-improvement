@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import NoteForm from "./NoteForm";
-import { createNote } from "../api/notes";
+import { createNote, type Note } from "../api/notes";
 
 vi.mock("../api/notes", () => ({
   createNote: vi.fn(),
@@ -15,6 +15,17 @@ function submitForm() {
 
 function typeNote(text: string) {
   fireEvent.change(screen.getByTestId("note-input"), { target: { value: text } });
+}
+
+// Makes the next createNote call stay pending until the returned function runs.
+function mockPendingSave() {
+  let resolveSave: (note: Note) => void = () => {};
+  createNoteMock.mockReturnValue(
+    new Promise((resolve) => {
+      resolveSave = resolve;
+    }),
+  );
+  return (note: Note) => resolveSave(note);
 }
 
 describe("NoteForm", () => {
@@ -80,12 +91,7 @@ describe("NoteForm", () => {
   });
 
   it("sends one request and reports one note when submitted twice while the save is pending", async () => {
-    let resolveSave: (note: { id: number; text: string }) => void = () => {};
-    createNoteMock.mockReturnValue(
-      new Promise((resolve) => {
-        resolveSave = resolve;
-      }),
-    );
+    const resolveSave = mockPendingSave();
     const onCreated = vi.fn();
     render(<NoteForm onCreated={onCreated} />);
 
@@ -103,12 +109,7 @@ describe("NoteForm", () => {
   });
 
   it("disables the submit button while a save is pending and enables it afterwards", async () => {
-    let resolveSave: (note: { id: number; text: string }) => void = () => {};
-    createNoteMock.mockReturnValue(
-      new Promise((resolve) => {
-        resolveSave = resolve;
-      }),
-    );
+    const resolveSave = mockPendingSave();
     render(<NoteForm onCreated={vi.fn()} />);
 
     typeNote("Buy milk");
