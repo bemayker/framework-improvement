@@ -22,7 +22,8 @@ Feature: TEST-10 Footer shows the build commit
     Then the footer reads "Task Notes v0.1.0 (unknown)"
 
   Scenario: Footer shows the app name alone while the request is pending
-    Given the "/api/version" request is slowed down
+    Given the backend was built with BUILD_COMMIT "abc1234def5678"
+    And the "/api/version" request is slowed down
     When I open the landing page
     Then until the request completes the footer reads exactly "Task Notes"
     And it contains no commit, no parentheses and no "undefined" text
@@ -36,7 +37,8 @@ Feature: TEST-10 Footer shows the build commit
     And it contains no "undefined", "null" or "Error" text and no empty parentheses
 
   Scenario: Footer recovers once the backend is back
-    Given the backend was stopped and has been started again
+    Given the backend was built with BUILD_COMMIT "abc1234def5678"
+    And the backend was stopped and has been started again
     When I reload the landing page
     Then the footer reads "Task Notes v0.1.0 (abc1234)"
 

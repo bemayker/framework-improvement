@@ -23,6 +23,24 @@ test.describe("TEST-10 footer shows the build commit", () => {
     await expect(footer).toHaveText(`Task Notes v${body.version} (${shortCommit})`);
   });
 
+  test("cuts a long commit to its first 7 characters", async ({ page }) => {
+    // The live backend serves "unknown" (exactly 7 characters) locally and in
+    // compose CI, so only a stubbed response can prove the cut itself.
+    await page.route("**/api/version", (route) =>
+      route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        headers: { "access-control-allow-origin": "*" },
+        body: JSON.stringify({ version: "9.9.9", commit: "abcdef1234567" }),
+      }),
+    );
+
+    await page.goto("/");
+
+    await expect(page.getByTestId("app-footer")).toHaveText("Task Notes v9.9.9 (abcdef1)");
+    await expect(page.getByTestId("app-commit")).toHaveText("abcdef1");
+  });
+
   test("shows the version alone when the response carries no commit", async ({ page }) => {
     await page.route("**/api/version", (route) =>
       route.fulfill({
