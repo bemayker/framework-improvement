@@ -53,6 +53,20 @@ def test_get_health_returns_503_degraded_when_the_database_is_unreachable(monkey
     }
 
 
+def test_cors_origin_configured_with_trailing_slash_is_allowed_for_the_browser_origin(
+    monkeypatch,
+):
+    """BUG-02: `CORS_ORIGINS` with a trailing slash still matches the browser's `Origin`."""
+    monkeypatch.setenv("CORS_ORIGINS", "http://localhost:5183/")
+
+    # Not a context manager, as above: the CORS header does not depend on the lifespan.
+    unmanaged_client = TestClient(create_app())
+
+    response = unmanaged_client.get("/api/health", headers={"Origin": "http://localhost:5183"})
+
+    assert response.headers["access-control-allow-origin"] == "http://localhost:5183"
+
+
 def test_post_health_returns_405_method_not_allowed(client: TestClient):
     """Error case: the endpoint is read-only and accepts no input."""
     response = client.post("/api/health")
