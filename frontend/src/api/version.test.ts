@@ -17,16 +17,58 @@ describe("fetchBackendVersion", () => {
   });
 
   it("returns the version and requests /api/version", async () => {
-    const fetchMock = respondWith({ version: "0.1.0" });
+    const fetchMock = respondWith({ version: "0.1.0", commit: "3f9c2a1b7d4e" });
 
-    await expect(fetchBackendVersion()).resolves.toBe("0.1.0");
+    await expect(fetchBackendVersion()).resolves.toEqual({
+      version: "0.1.0",
+      commit: "3f9c2a1b7d4e",
+    });
     expect(fetchMock.mock.calls[0][0]).toMatch(/\/api\/version$/);
   });
 
-  it("ignores fields it does not use", async () => {
+  it("returns the commit as the backend reported it", async () => {
     respondWith({ version: "0.1.0", commit: "abc123" });
 
-    await expect(fetchBackendVersion()).resolves.toBe("0.1.0");
+    await expect(fetchBackendVersion()).resolves.toEqual({
+      version: "0.1.0",
+      commit: "abc123",
+    });
+  });
+
+  it("returns a null commit when the body has no commit", async () => {
+    respondWith({ version: "0.1.0" });
+
+    await expect(fetchBackendVersion()).resolves.toEqual({
+      version: "0.1.0",
+      commit: null,
+    });
+  });
+
+  it("returns a null commit when the commit is not a string", async () => {
+    respondWith({ version: "0.1.0", commit: 12345 });
+
+    await expect(fetchBackendVersion()).resolves.toEqual({
+      version: "0.1.0",
+      commit: null,
+    });
+  });
+
+  it("returns a null commit when the commit is empty", async () => {
+    respondWith({ version: "0.1.0", commit: "" });
+
+    await expect(fetchBackendVersion()).resolves.toEqual({
+      version: "0.1.0",
+      commit: null,
+    });
+  });
+
+  it("returns a null commit for the backend's unknown sentinel", async () => {
+    respondWith({ version: "0.1.0", commit: "unknown" });
+
+    await expect(fetchBackendVersion()).resolves.toEqual({
+      version: "0.1.0",
+      commit: null,
+    });
   });
 
   it("returns null on a non-2xx answer", async () => {
