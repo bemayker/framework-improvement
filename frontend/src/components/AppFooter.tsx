@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
 import type { CSSProperties } from "react";
 import { getBackendVersion } from "../api/version";
+import type { BackendVersion } from "../api/version";
 
 const APP_NAME = "Task Notes";
+const COMMIT_DISPLAY_LENGTH = 7;
 
 const footerStyle: CSSProperties = {
   fontSize: "0.875rem",
@@ -11,19 +13,21 @@ const footerStyle: CSSProperties = {
 };
 
 function AppFooter() {
-  const [version, setVersion] = useState<string | null>(null);
+  const [backendVersion, setBackendVersion] = useState<BackendVersion | null>(
+    null,
+  );
 
   useEffect(() => {
     let isMounted = true;
 
     getBackendVersion()
-      .then((backendVersion) => {
-        if (isMounted) setVersion(backendVersion);
+      .then((resolved) => {
+        if (isMounted) setBackendVersion(resolved);
       })
       .catch(() => {
         // The footer is informational: an unreachable backend shows the app
         // name alone, the same render as while the request is in flight.
-        if (isMounted) setVersion(null);
+        if (isMounted) setBackendVersion(null);
       });
 
     return () => {
@@ -34,10 +38,19 @@ function AppFooter() {
   return (
     <footer data-testid="app-footer" style={footerStyle}>
       {APP_NAME}
-      {version !== null && (
+      {backendVersion !== null && (
         <>
           {" "}
-          <span data-testid="app-version">v{version}</span>
+          <span data-testid="app-version">v{backendVersion.version}</span>
+          {backendVersion.commit !== null && (
+            <>
+              {" ("}
+              <span data-testid="app-commit">
+                {backendVersion.commit.slice(0, COMMIT_DISPLAY_LENGTH)}
+              </span>
+              {")"}
+            </>
+          )}
         </>
       )}
     </footer>
