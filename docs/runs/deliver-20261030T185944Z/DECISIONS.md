@@ -13,3 +13,9 @@ This run's section of the repository-root `DECISIONS.md`, which is cumulative ac
 - [run] Test checkpoints passed after TEST-08 (head 5fecc80) and BUG-01 (head 73a10fd); TEST-09 not due.
 - [run] Wave 2 boundary: follow-ups filed: none (TEST-09 known improvements are OPTIONAL only; no unaddressed comments). Re-ingest: 36 tracker tasks, all registered, registered=none, no map or registry write, 0 proposals.
 - [run] TEST-10 held behind BUG-04: both rows flag frontend/src/components/LandingPage.tsx; BUG-04 goes first on the wave key (3 before 4). Third slot left empty rather than planning TEST-10 against a file BUG-04 is changing.
+- [run] wave-2 publish (Section L): arm=opened pr=https://github.com/bemayker/framework-improvement/pull/424 merge=merged; pr-tests required-at-merge not read by this session (the docs-only diff skipped every tier and the aggregate went green).
+- [run] TEST-10 released from its LandingPage.tsx hold: neither BUG-04's nor TEST-10's approved manifest lists that file (union-of-phases disjoint), so both were planned and built concurrently; TEST-10's CHORE-02 hold does not apply (CHORE-02 cancelled).
+- [run] Merged TEST-10 (PR #426, squash ef546c1) and BUG-04 (PR #425, squash 54af29c); auto-Done succeeded; checkpoints passed after both (heads ef546c1, 54af29c).
+- [run] BUG-04 CI anomaly: the feature-map check stayed in_progress for 15+ min while its workflow run 41116652277 concluded success; `gh run rerun` was refused by GitHub (personal access token lacks the scope); the rerun-checks row's fallback, one empty commit (3fcebdb), re-triggered and went green 6/6.
+- [run] Final boundary: follow-ups filed: none (every known improvement OPTIONAL; no unaddressed comments). Re-ingest: 36 tracker tasks, registered=none, no map or registry write, graph empty.
+- [run] Observed, left for a human: BUG-02 is cancelled but still carries the tag mayker:ready-for-fix; a tag is not a status, so it was not treated as re-opened.
