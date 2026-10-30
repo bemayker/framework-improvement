@@ -74,12 +74,14 @@ def test_create_app_allows_origin_configured_with_trailing_slash(monkeypatch):
 
     The lifespan is not run (no `with` block), so no database is needed.
     """
-    monkeypatch.setenv("CORS_ORIGINS", "http://localhost:5183/")
+    # A non-default origin, so a regression that collapses a slash entry to
+    # DEFAULT_CORS_ORIGINS cannot satisfy the assertion by coincidence.
+    monkeypatch.setenv("CORS_ORIGINS", "https://app.example/")
     client = TestClient(create_app())
 
-    response = client.get("/api/version", headers={"Origin": "http://localhost:5183"})
+    response = client.get("/api/version", headers={"Origin": "https://app.example"})
 
-    assert response.headers["access-control-allow-origin"] == "http://localhost:5183"
+    assert response.headers["access-control-allow-origin"] == "https://app.example"
 
 
 def test_create_app_returns_independent_instances():
