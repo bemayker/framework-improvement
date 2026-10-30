@@ -1,0 +1,14 @@
+- Plan base: 8e90cb7d476e7db784dd45607b723562bd7ad03a
+- Tracker comments: 22 read, 1 actionable (the correction: version from the backend at runtime, loading and failure states recorded); the rest are framework PR notices and an operator reset note.
+
+## 2026-10-30 run=deliver-20261030T185944Z plan verdict: APPROVE (orchestrator, /deliver 6.2 step 1)
+
+- **Decision:** approve `.claude/artifacts/TEST-08/plan.md` as the build contract; no re-plan.
+- **Rationale:** every acceptance criterion maps to a covering tier with a reason on each non-E2E row (criterion 1 E2E, 2 to 4 Unit); the actionable tracker comment is honoured as an override of criterion 2 (runtime `GET /api/version`), the loading and failure states are recorded as explicit choices (`Task Notes` alone, chosen over `unknown` and over blank, with the reason), and the "backend change" the comment asked to be declared is addressed by stating that the endpoint already exists from TEST-05 (verified on main: `backend/app/routers/version.py`, registered in `backend/app/main.py`, CORS middleware present), so the manifest carries no `[B]` entry and the scope stays frontend-only. Scope containment holds (`user_story_alignment.md` Section 3): no `commit` rendering (left to TEST-10), no base-URL refactor, and the TEST-04 spec edit is a consequence of the changed footer text, not an extra. Layering holds (`coding_standards.md` Section 4, as `frontend/src/api/notes.ts` already applies it): the fetch lives in a dedicated client module and `AppFooter` only consumes it. Technology Selection names every net-new entry and walks the ladder (native `fetch`, native `AbortSignal.timeout`, installed React state; no new dependency). Manifest validator: `[plan-manifest] valid (10 entries; A=5 D=2 G=3)`.
+- **Residual notes for the builder (not a revise):** `frontend/src/api/notes.ts` is not in the File Manifest, so the "import the base URL" option in the Frontend Plan is closed: duplicate the two-line base-URL resolution in `version.ts` rather than exporting it from `notes.ts`. The E2E edge case routes `**/api/version` to a 500; that is a browser check, the covering tier for criterion 3 stays Unit as the plan records.
+- **Serialization carried from shared_risks.md:** overlap with BUG-04 on `LandingPage.test.tsx` and with CHORE-02 on `AppFooter.tsx` / `version.ts`; hold either back while TEST-08 is in flight (scheduling round's concern, noted here for provenance).
+- [run-dir] move-item: moved=3 appended=0 kept=4 failed=0
+- worktree-deps: installed=2 present=0 unlocked=0 failed=0
+- [merged-since] base=8e90cb7 (forced) ref=origin/main@8e90cb7 commits=0 overlap=0 verdict=clean
+- Self-review: VERDICT PASS blocking=0 recommended=0 optional=1; Review closure: none (no BLOCKING findings).
+- Refactor gate: no findings (7 files examined), commit 87fb248 (refactor_report.md only).
