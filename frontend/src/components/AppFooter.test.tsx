@@ -14,13 +14,28 @@ describe("AppFooter", () => {
     fetchBackendVersionMock.mockReset();
   });
 
-  it("renders the app name and the backend version when one resolves", async () => {
-    fetchBackendVersionMock.mockResolvedValue("0.1.0");
+  it("renders the version and the first 7 characters of the commit", async () => {
+    fetchBackendVersionMock.mockResolvedValue({
+      version: "0.1.0",
+      commit: "3f9c2a1b7d4e",
+    });
 
     render(<AppFooter />);
 
     await waitFor(() =>
-      expect(screen.getByTestId("app-footer")).toHaveTextContent("Task Notes v0.1.0"),
+      expect(screen.getByTestId("app-footer").textContent).toBe(
+        "Task Notes v0.1.0 (3f9c2a1)",
+      ),
+    );
+  });
+
+  it("renders the version alone when there is no commit", async () => {
+    fetchBackendVersionMock.mockResolvedValue({ version: "0.1.0", commit: null });
+
+    render(<AppFooter />);
+
+    await waitFor(() =>
+      expect(screen.getByTestId("app-footer").textContent).toBe("Task Notes v0.1.0"),
     );
   });
 
@@ -32,7 +47,7 @@ describe("AppFooter", () => {
     await waitFor(() => expect(fetchBackendVersionMock).toHaveBeenCalledTimes(1));
     const footer = screen.getByTestId("app-footer");
     expect(footer.textContent).toBe("Task Notes");
-    expect(footer.textContent).not.toMatch(/v|undefined|null/);
+    expect(footer.textContent).not.toMatch(/v|undefined|null|\(/);
   });
 
   it("renders the app name alone before the version resolves", () => {
@@ -40,11 +55,16 @@ describe("AppFooter", () => {
 
     render(<AppFooter />);
 
-    expect(screen.getByTestId("app-footer").textContent).toBe("Task Notes");
+    const footer = screen.getByTestId("app-footer");
+    expect(footer.textContent).toBe("Task Notes");
+    expect(footer.textContent).not.toMatch(/undefined|null|\(/);
   });
 
   it("is exposed as the contentinfo landmark and carries the app-footer test id", async () => {
-    fetchBackendVersionMock.mockResolvedValue("0.1.0");
+    fetchBackendVersionMock.mockResolvedValue({
+      version: "0.1.0",
+      commit: "3f9c2a1b7d4e",
+    });
 
     render(<AppFooter />);
 
