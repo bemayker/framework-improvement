@@ -4,8 +4,7 @@ TEST-01 (the scaffold feature) instantiates the app with no feature routes.
 Later features register their routers here without restructuring this factory:
 TEST-05 registers the version router, TEST-03 the notes router plus the
 startup schema initialisation and the CORS middleware the browser needs,
-TEST-02 the health router, BUG-01 the server-time router, and FEAT-14 the
-GET /api/verify510 route, declared here because it has no logic to layer.
+TEST-02 the health router, and BUG-01 the server-time router.
 """
 
 import logging
@@ -23,8 +22,6 @@ from app.routers.server_time import router as server_time_router
 from app.routers.version import router as version_router
 
 logger = logging.getLogger(__name__)
-
-VERIFY510_RESPONSE = {"status": "ok"}
 
 
 @asynccontextmanager
@@ -59,11 +56,6 @@ def create_app() -> FastAPI:
     app.include_router(notes_router)
     app.include_router(health_router)
     app.include_router(server_time_router)
-
-    @app.get("/api/verify510")
-    def verify510() -> dict[str, str]:
-        return VERIFY510_RESPONSE
-
     return app
 
 
