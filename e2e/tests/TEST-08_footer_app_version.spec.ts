@@ -56,7 +56,10 @@ test.describe("TEST-08 footer shows the backend version", () => {
 
     const footer = page.getByTestId("app-footer");
     await expect(footer.getByTestId("app-footer-version")).toHaveText(`v${backendVersion}`);
-    await expect(footer).toHaveText(`Task Notes v${backendVersion}`);
+    // The footer may also carry a commit after the version (TEST-10) when the
+    // backend runs with BUILD_COMMIT set, so only the start of the text is fixed.
+    const startsWithVersion = new RegExp(`^Task Notes v${backendVersion.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}`);
+    await expect(footer).toHaveText(startsWithVersion);
   });
 
   test("shows the backend version when it differs from the frontend package version", async ({
