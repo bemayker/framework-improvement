@@ -16,6 +16,15 @@ from dataclasses import dataclass, field
 DEFAULT_CORS_ORIGINS = ("http://localhost:5183",)
 
 
+# Reported when BUILD_COMMIT is unset or blank (a local run has no build sha).
+DEFAULT_BUILD_COMMIT = "unknown"
+
+
+def _read_build_commit() -> str:
+    """Return BUILD_COMMIT stripped, or the default when it is unset or blank."""
+    return os.environ.get("BUILD_COMMIT", "").strip() or DEFAULT_BUILD_COMMIT
+
+
 def _read_cors_origins() -> tuple[str, ...]:
     """Return CORS_ORIGINS split on commas, or the default when none are given."""
     entries = (entry.strip() for entry in (os.environ.get("CORS_ORIGINS") or "").split(","))
@@ -32,6 +41,8 @@ class Settings:
     )
     # CORS_ORIGINS (comma-separated), read per call; unset or blank uses the default.
     cors_origins: tuple[str, ...] = field(default_factory=_read_cors_origins)
+    # BUILD_COMMIT, read per call; unset or blank uses DEFAULT_BUILD_COMMIT.
+    build_commit: str = field(default_factory=_read_build_commit)
 
 
 def get_settings() -> Settings:
