@@ -1,0 +1,17 @@
+# Decisions (TEST-09, after its final push): deliver-20261101T052615Z
+
+The entries `.claude/artifacts/TEST-09/decisions.md` received after the last push of its branch (c0f3fd1), the head its pull request merged. The entries before them reached the default branch in that file.
+
+- PR: opened https://github.com/bemayker/framework-improvement/pull/448 (draft); body fit=unchanged chars=8119; PR label: #448 mayker:in-progress; Item-to-PR link: ClickUp comment 1200230000123147
+- Gate verdict: test-gate: verdict recorded for this push (head c0f3fd1: full after 2s; counts: root: pytest 51 passed, 0 failed, 14 skipped + vitest 26 passed, 0 failed, 0 skipped)
+- CI: 7/7 checks done, green, poll 1
+- Handover rebuild: status=rebuilt sha=c0f3fd1+dirty (dirty = decisions.md entries appended after the final commit) services=3/3 health=pass project=framework-improvement-test-09-handover urls=backend=http://localhost:30819,db=localhost:30820,frontend=http://localhost:30821 duration=13s
+- PR #448 converted out of draft; status to test (in_review); PR label: #448 mayker:in-review (removed mayker:in-progress)
+- 6.8 round 1: PR inline comments 0, general comments 0, reviews 0; tracker comments 21 read, 0 new since 6.1 besides this run own PR link. mergeable=MERGEABLE mergeStateStatus=CLEAN reviewDecision empty. Pre-verdict checks: verdict=green next=none failed=0 poll=1 (7/7).
+- 2026-11-01 [TEST-09] Merge verdict (orchestrator, run=deliver-20261101T052615Z, /deliver 6.9): **merge** PR #448 by squash. Rationale: `autonomy.md` Section 5 holds on all five conditions. (1) Self-review `VERDICT: PASS blocking=0 recommended=0 optional=1`; the refactor gate applied the one OPTIONAL finding (stale docstring in `backend/tests/unit/test_config_unit.py`, 1 improvement applied, 11 files examined) and added no file, so no re-check was due. (2) `ci-poll.sh` pre-verdict read `verdict=green next=none failed=0 poll=1`, 7/7 checks counted; PR is out of draft, `mergeable=MERGEABLE`, `mergeStateStatus=CLEAN`. (3) All four acceptance criteria are checked in the PR body and backed by the diff: `Settings.build_commit` per-call read with `unknown` default (`config.py`), 12-character truncation in `version_service.py` (the tracker clarification), `VersionResponse.commit: str` in `schemas/version.py`, router returns the service value with no literal, and unit plus integration tests cover the set and unset paths (push gate: pytest 51 passed / 0 failed / 14 skipped, vitest 26 passed). (4) PR surface: 0 inline, 0 general, 0 reviews, `reviewDecision` empty, so no unresolved change request; tracker surface: 0 new comments since 6.1 besides the run's own PR link, and the one actionable planning comment was folded into criterion 2 and is answered by the implementation. (5) Escalation bar not triggered: an additive backend field and a compose env passthrough, fully reversible by a revert PR, with no destructive migration, secret or external side effect.
+- Merge: PR #448 squash-merged as 37d7357 on the orchestrator verdict (merge, logged).
+- auto-done: run 41278013045 succeeded; re-read status complete; PR label mayker:done. No backstop flip ran.
+- Standards provenance: 8 dispatches; both always-on standards SELF-REPORTED as read by 3 of 8 (self-reported, no pass bar); 0 unbacked claims, no MISMATCH; 5 of 8 not assessed.
+- [pull] result=pulled head=37d7357 removed=none set-aside=none blocked-by=none
+- Checkpoint: due=no verdict=not-due reason=none-merged
+- Teardown: no env line of this run for TEST-09 (no service provisioned).
