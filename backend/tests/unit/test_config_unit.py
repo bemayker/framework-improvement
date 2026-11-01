@@ -105,6 +105,33 @@ def test_settings_cors_origins_treats_blank_value_as_unset(monkeypatch, blank):
     assert get_settings().cors_origins == DEFAULT_CORS_ORIGINS
 
 
+def test_settings_cors_origins_strips_trailing_slash(monkeypatch):
+    """BUG-02: a trailing slash is dropped so it matches the browser's Origin."""
+    monkeypatch.setenv("CORS_ORIGINS", "http://localhost:5183/")
+
+    assert get_settings().cors_origins == ("http://localhost:5183",)
+
+
+def test_settings_cors_origins_strips_trailing_slash_from_mixed_entries(monkeypatch):
+    """BUG-02: slashed and slash-less entries in one list both normalise."""
+    monkeypatch.setenv("CORS_ORIGINS", "https://a.example/, https://b.example ,https://c.example/")
+
+    assert get_settings().cors_origins == (
+        "https://a.example",
+        "https://b.example",
+        "https://c.example",
+    )
+
+
+def test_settings_cors_origins_slash_only_entry_trailing_slash_falls_back_to_default(
+    monkeypatch,
+):
+    """BUG-02 edge case: an entry that is only `/` is empty once stripped."""
+    monkeypatch.setenv("CORS_ORIGINS", "/")
+
+    assert get_settings().cors_origins == DEFAULT_CORS_ORIGINS
+
+
 def test_settings_build_commit_reads_env_value(monkeypatch):
     """BUILD_COMMIT set: the value is returned as configured."""
     monkeypatch.setenv("BUILD_COMMIT", "abc123")
