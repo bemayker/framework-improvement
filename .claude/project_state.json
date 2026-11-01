@@ -313,8 +313,8 @@
     }
   },
   "discovery": {
-    "last_scan_commit": "3e3d145cfc0a3a5a4c904e180b9f87959128acb6",
-    "scanned_at": "2026-11-01T02:25:05Z",
+    "last_scan_commit": "a3a1d7b7797852349e6120255b1e08b055470bff",
+    "scanned_at": "2026-11-01T03:29:24Z",
     "scanned_by": "/sync-project"
   },
   "framework": {
