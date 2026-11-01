@@ -19,8 +19,8 @@
     "effective_path": {
       "path": "gh",
       "host": "github.com",
-      "verified_at": "2026-10-30T13:21:27Z",
-      "plugin_version": "0.3.455",
+      "verified_at": "2026-11-01T02:25:05Z",
+      "plugin_version": "0.3.460",
       "mcp_server_url": ""
     }
   },
@@ -303,11 +303,18 @@
       "id_source": "framework",
       "id_carrier": "title_prefix",
       "url": "https://app.clickup.com/t/123k99czeru"
+    },
+    "FEAT-14": {
+      "external_id": "123k99czk8j",
+      "external_identifier": "",
+      "id_source": "framework",
+      "id_carrier": "title_prefix",
+      "url": "https://app.clickup.com/t/123k99czk8j"
     }
   },
   "discovery": {
-    "last_scan_commit": "a90e1812dec3496bad0e42a790b3f7fcc7ef6ee1",
-    "scanned_at": "2026-10-30T13:21:27Z",
+    "last_scan_commit": "3e3d145cfc0a3a5a4c904e180b9f87959128acb6",
+    "scanned_at": "2026-11-01T02:25:05Z",
     "scanned_by": "/sync-project"
   },
   "framework": {
@@ -315,8 +322,8 @@
     "migrated_to": "0.3.460",
     "migrated_at": "2026-11-01T02:18:05Z",
     "synced": {
-      "plugin_version": "0.3.455",
-      "synced_at": "2026-10-30T13:23:34Z"
+      "plugin_version": "0.3.460",
+      "synced_at": "2026-11-01T02:26:56Z"
     }
   }
 }
