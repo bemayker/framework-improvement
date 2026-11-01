@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, afterEach } from "vitest";
 import { API_BASE_URL } from "./baseUrl";
-import { getBackendVersion } from "./version";
+import { getBackendBuild } from "./version";
 
 function stubFetch(response: Partial<Response> & { json?: () => Promise<unknown> }) {
   const fetchMock = vi.fn().mockResolvedValue(response);
@@ -8,7 +8,7 @@ function stubFetch(response: Partial<Response> & { json?: () => Promise<unknown>
   return fetchMock;
 }
 
-describe("getBackendVersion", () => {
+describe("getBackendBuild", () => {
   afterEach(() => {
     vi.unstubAllGlobals();
   });
@@ -19,26 +19,29 @@ describe("getBackendVersion", () => {
       json: async () => ({ version: " 0.1.0 " }),
     });
 
-    await expect(getBackendVersion()).resolves.toBe("0.1.0");
+    await expect(getBackendBuild()).resolves.toEqual({
+      version: "0.1.0",
+      commit: null,
+    });
     expect(fetchMock).toHaveBeenCalledWith(`${API_BASE_URL}/api/version`);
   });
 
   it("returns null when the backend reports unknown", async () => {
     stubFetch({ ok: true, json: async () => ({ version: "unknown" }) });
 
-    await expect(getBackendVersion()).resolves.toBeNull();
+    await expect(getBackendBuild()).resolves.toBeNull();
   });
 
   it("returns null when the version is blank", async () => {
     stubFetch({ ok: true, json: async () => ({ version: "   " }) });
 
-    await expect(getBackendVersion()).resolves.toBeNull();
+    await expect(getBackendBuild()).resolves.toBeNull();
   });
 
   it("throws with the status when the response is not OK", async () => {
     stubFetch({ ok: false, status: 500, statusText: "Server Error" });
 
-    await expect(getBackendVersion()).rejects.toThrow(
+    await expect(getBackendBuild()).rejects.toThrow(
       "Loading the version failed: 500 Server Error",
     );
   });
@@ -46,27 +49,59 @@ describe("getBackendVersion", () => {
   it("throws when the body has an unexpected shape", async () => {
     stubFetch({ ok: true, json: async () => ({ version: 3 }) });
 
-    await expect(getBackendVersion()).rejects.toThrow("unexpected response shape");
+    await expect(getBackendBuild()).rejects.toThrow("unexpected response shape");
   });
 
   it("throws when the body is not an object", async () => {
     stubFetch({ ok: true, json: async () => null });
 
-    await expect(getBackendVersion()).rejects.toThrow("unexpected response shape");
+    await expect(getBackendBuild()).rejects.toThrow("unexpected response shape");
   });
 
   it("propagates a rejected fetch", async () => {
     vi.stubGlobal("fetch", vi.fn().mockRejectedValue(new TypeError("offline")));
 
-    await expect(getBackendVersion()).rejects.toThrow("offline");
+    await expect(getBackendBuild()).rejects.toThrow("offline");
   });
 
-  it("ignores extra fields in the body", async () => {
+  it("cuts a 12-character commit to its first 7 characters", async () => {
     stubFetch({
       ok: true,
-      json: async () => ({ version: "0.1.0", build_commit: "abc123" }),
+      json: async () => ({ version: "0.1.0", commit: "0123456789ab" }),
     });
 
-    await expect(getBackendVersion()).resolves.toBe("0.1.0");
+    await expect(getBackendBuild()).resolves.toEqual({
+      version: "0.1.0",
+      commit: "0123456",
+    });
+  });
+
+  it("keeps a commit of 7 characters or fewer", async () => {
+    stubFetch({
+      ok: true,
+      json: async () => ({ version: "0.1.0", commit: "abc12" }),
+    });
+
+    await expect(getBackendBuild()).resolves.toEqual({
+      version: "0.1.0",
+      commit: "abc12",
+    });
+  });
+
+  it.each([
+    ["unknown", { commit: "unknown" }],
+    ["blank", { commit: "  " }],
+    ["missing", {}],
+    ["non-string", { commit: 3 }],
+  ])("gives a null commit and keeps the version when the commit is %s", async (_label, extra) => {
+    stubFetch({
+      ok: true,
+      json: async () => ({ version: "0.1.0", ...extra }),
+    });
+
+    await expect(getBackendBuild()).resolves.toEqual({
+      version: "0.1.0",
+      commit: null,
+    });
   });
 });
