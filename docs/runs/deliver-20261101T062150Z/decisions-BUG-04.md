@@ -1,0 +1,13 @@
+# Decisions (BUG-04, after its final push): deliver-20261101T062150Z
+
+The entries `.claude/artifacts/BUG-04/decisions.md` received after the last push of its branch (7c3d6af), the head its pull request merged. The entries before them reached the default branch in that file.
+
+- 6.7: CI: 7/7 checks done, 3m28s, green (poll 3)
+- 6.7: Repro: before fail -> after pass (npm --prefix frontend test -- src/components/NoteForm.test.tsx)
+- 6.7: handover-rebuild status=rebuilt sha=7c3d6af services=3/3 health=pass project=framework-improvement-bug-04-handover urls=backend=http://localhost:31133,frontend=http://localhost:31135 duration=11s
+- 2026-11-01 [BUG-04] run=deliver-20261101T062150Z 6.9: merge verdict: merge (PR #458, squash). Rationale: autonomy.md Section 5 holds on all five conditions. (1) Self-review verdict line `PASS blocking=0 recommended=0 optional=2`, the two OPTIONAL findings recorded under the PR's Known improvements; refactor gate no findings (3 files examined). (2) `ci-poll.sh` re-read at this decision: `verdict=green next=none failed=0 poll=1`, 7/7 checks done, every check counted, PR converted out of draft and `mergeable=MERGEABLE`. (3) All three acceptance criteria (title-derived, the assumption restated in the PR body) are met: 5 new NoteForm unit tests cover the single-request guard and the re-enable after success or failure, the E2E spec covers the note appearing exactly once, and the defect repro reads `before fail -> after pass (npm --prefix frontend test -- src/components/NoteForm.test.tsx)`. (4) Both feedback surfaces are clear: PR #458 has 0 comments, 0 reviews, 0 inline comments and an empty reviewDecision, so no unresolved change request; the tracker item carries nothing beyond this run's own PR-opened notice, so nothing is unanswered. (5) Escalation bar not triggered: the change is a client-side submit guard in one component (NoteForm.tsx plus tests, E2E and UAT files), no migration, secret, or external side effect, and fully revertible. Concurrency: TEST-10 builds on disjoint files, so the merge creates no overlap for it. Post-merge: the item is a test_checkpoint, so the full suite runs at this merge per CLAUDE.md Full suite command (auto = gate command).
+- 6.9: merged PR #458 (squash) at 6770a5fe99651897b2710f416b442b4cebdcd5ee
+- 6.10: auto-done: run 41282826003 succeeded
+- 6.10: standards-provenance: 9 dispatches; both always-on standards self-reported as read by 3 of 9 (self-reported); 0 unbacked claims; 0 MISMATCH
+- 6.10: pull result=pulled head=6770a5f; checkpoint due=yes items=BUG-04 head=6770a5f verdict=pass
+- 6.10: teardown: docker rm -f BUG-04-db (done)
