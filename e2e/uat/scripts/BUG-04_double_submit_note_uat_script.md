@@ -12,7 +12,7 @@
 |---|------|------------------|-----------|
 | 1 | Open `http://localhost:5183/`, open DevTools, Network tab, set throttling to "Slow 3G" and filter on `notes` | The "Task Notes" page shows the "New note" field and the "Save note" button | [ ] Pass [ ] Fail |
 | 2 | Type `Double click check 1` in the "New note" field | The text appears in the field | [ ] Pass [ ] Fail |
-| 3 | Click "Save note" twice, quickly (a double click) | The button turns disabled (greyed, not clickable) after the first click | [ ] Pass [ ] Fail |
+| 3 | Click "Save note" twice, quickly (a double click) | The second click does nothing; the Network panel shows one `POST /api/notes` pending (the button looks the same, it is disabled without a visual change) | [ ] Pass [ ] Fail |
 | 4 | Wait for the request to finish | The Network panel shows exactly one `POST /api/notes` row with status 201, the field is empty, and the list shows `Double click check 1` once | [ ] Pass [ ] Fail |
 | 5 | Set throttling back to "No throttling" and reload the page | The list still shows `Double click check 1` exactly once | [ ] Pass [ ] Fail |
 | 6 | Repeat steps 1 to 4 with `Double enter check 1`, pressing Enter twice in the field instead of clicking | One `POST /api/notes` row, the note listed once | [ ] Pass [ ] Fail |
