@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import type { CSSProperties } from "react";
-import { getBackendVersion } from "../api/version";
+import { getBackendBuild } from "../api/version";
+import type { BackendBuild } from "../api/version";
 
 const APP_NAME = "Task Notes";
 
@@ -12,16 +13,17 @@ const footerStyle: CSSProperties = {
 
 function AppFooter() {
   // null covers loading, failure and an unresolved version alike: the footer
-  // then reads exactly the app name, never a placeholder or "unknown".
-  const [version, setVersion] = useState<string | null>(null);
+  // then reads exactly the app name, never a placeholder or "unknown". A
+  // resolved build with a null commit shows the version alone.
+  const [build, setBuild] = useState<BackendBuild | null>(null);
 
   useEffect(() => {
     let isMounted = true;
 
-    getBackendVersion()
-      .then((backendVersion) => {
+    getBackendBuild()
+      .then((backendBuild) => {
         if (isMounted) {
-          setVersion(backendVersion);
+          setBuild(backendBuild);
         }
       })
       .catch(() => {
@@ -36,7 +38,10 @@ function AppFooter() {
   return (
     <footer data-testid="app-footer" style={footerStyle}>
       {APP_NAME}
-      {version !== null && <span data-testid="app-version"> v{version}</span>}
+      {build !== null && <span data-testid="app-version"> v{build.version}</span>}
+      {build?.commit != null && (
+        <span data-testid="app-commit"> ({build.commit})</span>
+      )}
     </footer>
   );
 }

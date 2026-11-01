@@ -1,34 +1,41 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, waitFor } from "@testing-library/react";
+import { act, render, screen } from "@testing-library/react";
 import AppFooter from "./AppFooter";
-import { getBackendVersion } from "../api/version";
+import { getBackendBuild } from "../api/version";
 
 vi.mock("../api/version", () => ({
-  getBackendVersion: vi.fn(),
+  getBackendBuild: vi.fn(),
 }));
 
-const getBackendVersionMock = vi.mocked(getBackendVersion);
+const getBackendBuildMock = vi.mocked(getBackendBuild);
 
 function footerText(): string | null {
   return screen.getByTestId("app-footer").textContent;
 }
 
+// Flushes the already-settled mocked promise so state updates from .then/.catch
+// have been applied before the assertions run.
+async function settle(): Promise<void> {
+  await act(async () => {});
+}
+
 describe("AppFooter", () => {
   beforeEach(() => {
-    getBackendVersionMock.mockReset();
+    getBackendBuildMock.mockReset();
   });
 
-  it("renders the backend version once it resolves", async () => {
-    getBackendVersionMock.mockResolvedValue("0.1.0");
+  it("renders the backend version and short commit once they resolve", async () => {
+    getBackendBuildMock.mockResolvedValue({ version: "0.1.0", commit: "0123456" });
 
     render(<AppFooter />);
 
-    expect(await screen.findByTestId("app-version")).toBeInTheDocument();
-    expect(footerText()).toBe("Task Notes v0.1.0");
+    expect(await screen.findByTestId("app-commit")).toBeInTheDocument();
+    expect(screen.getByTestId("app-version")).toBeInTheDocument();
+    expect(footerText()).toBe("Task Notes v0.1.0 (0123456)");
   });
 
   it("renders the fetched version, not the frontend package version", async () => {
-    getBackendVersionMock.mockResolvedValue("9.9.9");
+    getBackendBuildMock.mockResolvedValue({ version: "9.9.9", commit: null });
 
     render(<AppFooter />);
 
@@ -36,38 +43,53 @@ describe("AppFooter", () => {
     expect(footerText()).toBe("Task Notes v9.9.9");
   });
 
-  it("reads exactly the app name while the version is still loading", () => {
-    getBackendVersionMock.mockReturnValue(new Promise(() => {}));
+  it("shows the version alone when the commit is null", async () => {
+    getBackendBuildMock.mockResolvedValue({ version: "0.1.0", commit: null });
 
     render(<AppFooter />);
 
-    expect(footerText()).toBe("Task Notes");
-    expect(screen.queryByTestId("app-version")).not.toBeInTheDocument();
+    await screen.findByTestId("app-version");
+    expect(footerText()).toBe("Task Notes v0.1.0");
+    expect(screen.queryByTestId("app-commit")).not.toBeInTheDocument();
   });
 
-  it("reads exactly the app name when the version request fails", async () => {
-    getBackendVersionMock.mockRejectedValue(new Error("offline"));
+  it("reads exactly the app name while the build is still loading", () => {
+    getBackendBuildMock.mockReturnValue(new Promise(() => {}));
 
     render(<AppFooter />);
 
-    await waitFor(() => expect(getBackendVersionMock).toHaveBeenCalledTimes(1));
     expect(footerText()).toBe("Task Notes");
-    expect(footerText()).not.toMatch(/undefined|null|unknown/);
     expect(screen.queryByTestId("app-version")).not.toBeInTheDocument();
+    expect(screen.queryByTestId("app-commit")).not.toBeInTheDocument();
+  });
+
+  it("reads exactly the app name when the build request fails", async () => {
+    getBackendBuildMock.mockRejectedValue(new Error("offline"));
+
+    render(<AppFooter />);
+
+    await settle();
+    expect(getBackendBuildMock).toHaveBeenCalledTimes(1);
+    expect(footerText()).toBe("Task Notes");
+    expect(footerText()).not.toMatch(/undefined|null|unknown|Error/);
+    expect(screen.queryByTestId("app-version")).not.toBeInTheDocument();
+    expect(screen.queryByTestId("app-commit")).not.toBeInTheDocument();
   });
 
   it("reads exactly the app name when the client resolves to null", async () => {
-    getBackendVersionMock.mockResolvedValue(null);
+    getBackendBuildMock.mockResolvedValue(null);
 
     render(<AppFooter />);
 
-    await waitFor(() => expect(getBackendVersionMock).toHaveBeenCalledTimes(1));
+    await settle();
+    expect(getBackendBuildMock).toHaveBeenCalledTimes(1);
     expect(footerText()).toBe("Task Notes");
     expect(screen.queryByTestId("app-version")).not.toBeInTheDocument();
+    expect(screen.queryByTestId("app-commit")).not.toBeInTheDocument();
   });
 
   it("is exposed as the contentinfo landmark and carries the app-footer test id", () => {
-    getBackendVersionMock.mockReturnValue(new Promise(() => {}));
+    getBackendBuildMock.mockReturnValue(new Promise(() => {}));
 
     render(<AppFooter />);
 
