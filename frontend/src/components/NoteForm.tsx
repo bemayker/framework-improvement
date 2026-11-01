@@ -1,4 +1,4 @@
-import { useState, type CSSProperties, type FormEvent } from "react";
+import { useRef, useState, type CSSProperties, type FormEvent } from "react";
 import { createNote, type Note } from "../api/notes";
 
 const FIELD_LABEL = "New note";
@@ -67,6 +67,8 @@ type NoteFormProps = {
 function NoteForm({ onCreated }: NoteFormProps) {
   const [text, setText] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
+  const isSavingRef = useRef(false);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -79,6 +81,14 @@ function NoteForm({ onCreated }: NoteFormProps) {
       return;
     }
 
+    // A ref, not state: a second submit fired before React re-renders must
+    // already see the flag the first one set.
+    if (isSavingRef.current) {
+      return;
+    }
+    isSavingRef.current = true;
+    setIsSaving(true);
+
     try {
       const savedNote = await createNote(trimmedText);
       setError(null);
@@ -86,6 +96,9 @@ function NoteForm({ onCreated }: NoteFormProps) {
       onCreated(savedNote);
     } catch {
       setError(SAVE_FAILED_MESSAGE);
+    } finally {
+      isSavingRef.current = false;
+      setIsSaving(false);
     }
   }
 
@@ -105,7 +118,12 @@ function NoteForm({ onCreated }: NoteFormProps) {
           style={inputStyle}
           onChange={(event) => setText(event.target.value)}
         />
-        <button data-testid="note-submit" type="submit" style={buttonStyle}>
+        <button
+          data-testid="note-submit"
+          type="submit"
+          style={buttonStyle}
+          disabled={isSaving}
+        >
           {SUBMIT_LABEL}
         </button>
       </div>
