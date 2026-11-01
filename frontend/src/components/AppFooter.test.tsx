@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, waitFor } from "@testing-library/react";
+import { act, render, screen } from "@testing-library/react";
 import AppFooter from "./AppFooter";
 import { getBackendBuild } from "../api/version";
 
@@ -11,6 +11,12 @@ const getBackendBuildMock = vi.mocked(getBackendBuild);
 
 function footerText(): string | null {
   return screen.getByTestId("app-footer").textContent;
+}
+
+// Flushes the already-settled mocked promise so state updates from .then/.catch
+// have been applied before the assertions run.
+async function settle(): Promise<void> {
+  await act(async () => {});
 }
 
 describe("AppFooter", () => {
@@ -62,7 +68,8 @@ describe("AppFooter", () => {
 
     render(<AppFooter />);
 
-    await waitFor(() => expect(getBackendBuildMock).toHaveBeenCalledTimes(1));
+    await settle();
+    expect(getBackendBuildMock).toHaveBeenCalledTimes(1);
     expect(footerText()).toBe("Task Notes");
     expect(footerText()).not.toMatch(/undefined|null|unknown|Error/);
     expect(screen.queryByTestId("app-version")).not.toBeInTheDocument();
@@ -74,7 +81,8 @@ describe("AppFooter", () => {
 
     render(<AppFooter />);
 
-    await waitFor(() => expect(getBackendBuildMock).toHaveBeenCalledTimes(1));
+    await settle();
+    expect(getBackendBuildMock).toHaveBeenCalledTimes(1);
     expect(footerText()).toBe("Task Notes");
     expect(screen.queryByTestId("app-version")).not.toBeInTheDocument();
     expect(screen.queryByTestId("app-commit")).not.toBeInTheDocument();
