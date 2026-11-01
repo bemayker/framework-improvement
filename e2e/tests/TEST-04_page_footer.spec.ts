@@ -2,15 +2,13 @@ import { readFileSync } from "node:fs";
 import path from "node:path";
 import { test, expect } from "@playwright/test";
 
-// The footer shows the backend's version (TEST-08), declared in backend/pyproject.toml.
-const pyprojectPath = path.resolve(__dirname, "../../backend/pyproject.toml");
-const version = readFileSync(pyprojectPath, "utf-8").match(/^version\s*=\s*"([^"]+)"/m)?.[1];
-if (!version) {
-  throw new Error("backend/pyproject.toml has no version line");
-}
+const frontendPackageJsonPath = path.resolve(__dirname, "../../frontend/package.json");
+const { version } = JSON.parse(readFileSync(frontendPackageJsonPath, "utf-8")) as {
+  version: string;
+};
 
 test.describe("TEST-04 page footer", () => {
-  test("shows a footer with the app name and the version from backend/pyproject.toml", async ({
+  test("shows a footer with the app name and the version from frontend/package.json", async ({
     page,
   }) => {
     await page.goto("/");

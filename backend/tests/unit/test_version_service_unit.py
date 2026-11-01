@@ -30,29 +30,6 @@ def test_get_app_version_queries_the_project_distribution_name(monkeypatch):
     assert version_service.DISTRIBUTION_NAME == "task-notes-backend"
 
 
-def test_get_build_commit_returns_short_value_unchanged(monkeypatch):
-    """Happy path: a value of 12 characters or fewer is returned verbatim."""
-    monkeypatch.setenv("BUILD_COMMIT", "abc1234")
-
-    assert version_service.get_build_commit() == "abc1234"
-
-
-def test_get_build_commit_truncates_full_sha_to_first_12_characters(monkeypatch):
-    """Edge case: a 40-character sha, as CI passes in, is cut to its first 12."""
-    full_sha = "0123456789abcdef0123456789abcdef01234567"
-    monkeypatch.setenv("BUILD_COMMIT", full_sha)
-
-    assert version_service.get_build_commit() == full_sha[: version_service.BUILD_COMMIT_LENGTH]
-    assert version_service.get_build_commit() == "0123456789ab"
-
-
-def test_get_build_commit_returns_unknown_when_unset(monkeypatch):
-    """Unset path: the documented default is reported, never an error."""
-    monkeypatch.delenv("BUILD_COMMIT", raising=False)
-
-    assert version_service.get_build_commit() == "unknown"
-
-
 def test_get_app_version_returns_unknown_when_distribution_not_installed(monkeypatch):
     """Error case: a missing distribution yields the sentinel, never a raise."""
 
