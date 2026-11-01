@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, afterEach } from "vitest";
+import { API_BASE_URL } from "./baseUrl";
 import { getBackendVersion } from "./version";
 
 function stubFetch(response: Partial<Response> & { json?: () => Promise<unknown> }) {
@@ -12,14 +13,14 @@ describe("getBackendVersion", () => {
     vi.unstubAllGlobals();
   });
 
-  it("returns the trimmed version from the default base URL", async () => {
+  it("returns the trimmed version from the configured base URL", async () => {
     const fetchMock = stubFetch({
       ok: true,
       json: async () => ({ version: " 0.1.0 " }),
     });
 
     await expect(getBackendVersion()).resolves.toBe("0.1.0");
-    expect(fetchMock).toHaveBeenCalledWith("http://localhost:8010/api/version");
+    expect(fetchMock).toHaveBeenCalledWith(`${API_BASE_URL}/api/version`);
   });
 
   it("returns null when the backend reports unknown", async () => {
