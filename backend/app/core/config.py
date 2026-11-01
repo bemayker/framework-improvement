@@ -26,8 +26,15 @@ def _read_build_commit() -> str:
 
 
 def _read_cors_origins() -> tuple[str, ...]:
-    """Return CORS_ORIGINS split on commas, or the default when none are given."""
-    entries = (entry.strip() for entry in (os.environ.get("CORS_ORIGINS") or "").split(","))
+    """Return CORS_ORIGINS split on commas, or the default when none are given.
+
+    A trailing slash is dropped from each entry: browsers send the origin
+    without one and CORSMiddleware matches `allow_origins` exactly.
+    """
+    entries = (
+        entry.strip().rstrip("/").strip()
+        for entry in (os.environ.get("CORS_ORIGINS") or "").split(",")
+    )
     return tuple(entry for entry in entries if entry) or DEFAULT_CORS_ORIGINS
 
 
