@@ -15,22 +15,46 @@ describe("AppFooter", () => {
     fetchBackendVersionMock.mockReset();
   });
 
-  it("renders the app name and the backend version once it resolves", async () => {
-    fetchBackendVersionMock.mockResolvedValue("0.1.0");
+  it("renders the app name, the backend version and the short commit once it resolves", async () => {
+    fetchBackendVersionMock.mockResolvedValue({
+      version: "0.1.0",
+      commit: "0123456",
+    });
 
     render(<AppFooter />);
 
     expect(await screen.findByTestId("app-footer-version")).toHaveTextContent(
       "v0.1.0",
     );
-    expect(screen.getByTestId("app-footer")).toHaveTextContent(
-      "Task Notes v0.1.0",
+    expect(screen.getByTestId("app-footer-commit")).toHaveTextContent(
+      "(0123456)",
     );
+    expect(screen.getByTestId("app-footer").textContent).toBe(
+      "Task Notes v0.1.0 (0123456)",
+    );
+  });
+
+  it("shows the version alone when the commit is null", async () => {
+    fetchBackendVersionMock.mockResolvedValue({
+      version: "0.1.0",
+      commit: null,
+    });
+
+    render(<AppFooter />);
+
+    await screen.findByTestId("app-footer-version");
+    const footer = screen.getByTestId("app-footer");
+    expect(footer.textContent).toBe("Task Notes v0.1.0");
+    expect(footer).not.toHaveTextContent(/undefined|null|unknown|\(\)/);
+    expect(screen.queryByTestId("app-footer-commit")).not.toBeInTheDocument();
   });
 
   it("shows the backend version even when it differs from package.json", async () => {
     const divergingVersion = `${packageVersion}-backend`;
-    fetchBackendVersionMock.mockResolvedValue(divergingVersion);
+    fetchBackendVersionMock.mockResolvedValue({
+      version: divergingVersion,
+      commit: null,
+    });
 
     render(<AppFooter />);
 
@@ -47,6 +71,7 @@ describe("AppFooter", () => {
     const footer = screen.getByTestId("app-footer");
     expect(footer.textContent).toBe("Task Notes");
     expect(screen.queryByTestId("app-footer-version")).not.toBeInTheDocument();
+    expect(screen.queryByTestId("app-footer-commit")).not.toBeInTheDocument();
   });
 
   it("shows the app name alone when the version request is rejected", async () => {
@@ -58,6 +83,7 @@ describe("AppFooter", () => {
     const footer = screen.getByTestId("app-footer");
     expect(footer.textContent).toBe("Task Notes");
     expect(screen.queryByTestId("app-footer-version")).not.toBeInTheDocument();
+    expect(screen.queryByTestId("app-footer-commit")).not.toBeInTheDocument();
   });
 
   it("shows the app name alone when no version is resolved", async () => {
@@ -70,6 +96,7 @@ describe("AppFooter", () => {
     expect(footer.textContent).toBe("Task Notes");
     expect(footer).not.toHaveTextContent(/undefined|null|unknown/);
     expect(screen.queryByTestId("app-footer-version")).not.toBeInTheDocument();
+    expect(screen.queryByTestId("app-footer-commit")).not.toBeInTheDocument();
   });
 
   it("is exposed as the contentinfo landmark and carries the app-footer test id", () => {
