@@ -8,10 +8,22 @@ any code change when that value is bumped.
 import logging
 from importlib.metadata import PackageNotFoundError, version
 
+from app.core.config import get_settings
+
 logger = logging.getLogger(__name__)
 
 DISTRIBUTION_NAME = "task-notes-backend"
 UNKNOWN_VERSION = "unknown"
+SHORT_COMMIT_LENGTH = 12
+
+
+def get_build_commit() -> str:
+    """Return the build commit, truncated to its first SHORT_COMMIT_LENGTH characters.
+
+    CI passes a full 40-character sha; shorter values are returned unchanged.
+    Settings are read per call so the value always reflects the environment.
+    """
+    return get_settings().build_commit[:SHORT_COMMIT_LENGTH]
 
 
 def get_app_version() -> str:

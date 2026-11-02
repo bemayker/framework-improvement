@@ -39,3 +39,27 @@ def test_get_app_version_returns_unknown_when_distribution_not_installed(monkeyp
     monkeypatch.setattr(version_service, "version", raise_not_found)
 
     assert version_service.get_app_version() == version_service.UNKNOWN_VERSION
+
+
+def test_get_build_commit_truncates_a_full_sha_to_twelve_characters(monkeypatch):
+    """Happy path: CI passes a 40-character sha, only its first 12 are reported."""
+    sha = "0123456789abcdef0123456789abcdef01234567"
+    monkeypatch.setenv("BUILD_COMMIT", sha)
+
+    assert version_service.SHORT_COMMIT_LENGTH == 12
+    assert version_service.get_build_commit() == sha[:12]
+    assert len(version_service.get_build_commit()) == 12
+
+
+def test_get_build_commit_returns_short_value_unchanged(monkeypatch):
+    """Edge case: a value of 12 characters or fewer is not padded or cut."""
+    monkeypatch.setenv("BUILD_COMMIT", "abc1234")
+
+    assert version_service.get_build_commit() == "abc1234"
+
+
+def test_get_build_commit_returns_unknown_when_unset(monkeypatch):
+    """Error case: a missing variable yields the default, never a raise."""
+    monkeypatch.delenv("BUILD_COMMIT", raising=False)
+
+    assert version_service.get_build_commit() == "unknown"
