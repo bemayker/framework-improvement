@@ -1,21 +1,13 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import LandingPage from "./LandingPage";
+import { version } from "../../package.json";
 import { listNotes, createNote } from "../api/notes";
-import { fetchAppVersion } from "../api/version";
 
 vi.mock("../api/notes", () => ({
   listNotes: vi.fn(),
   createNote: vi.fn(),
 }));
-
-vi.mock("../api/version", () => ({
-  fetchAppVersion: vi.fn(),
-}));
-
-const BACKEND_VERSION = "9.9.9";
-const BACKEND_COMMIT = "a1b2c3d";
-const fetchAppVersionMock = vi.mocked(fetchAppVersion);
 
 const listNotesMock = vi.mocked(listNotes);
 const createNoteMock = vi.mocked(createNote);
@@ -31,11 +23,6 @@ describe("LandingPage", () => {
     listNotesMock.mockReset();
     createNoteMock.mockReset();
     listNotesMock.mockResolvedValue([]);
-    fetchAppVersionMock.mockReset();
-    fetchAppVersionMock.mockResolvedValue({
-      version: BACKEND_VERSION,
-      commit: BACKEND_COMMIT,
-    });
   });
 
   it("renders the app title 'Task Notes'", async () => {
@@ -56,14 +43,11 @@ describe("LandingPage", () => {
     expect(screen.getByRole("heading", { name: "Task Notes" })).toBeInTheDocument();
   });
 
-  it("renders the footer with the app name, version and commit", async () => {
+  it("renders the footer with the app name and version", async () => {
     await renderLandingPage();
 
-    await waitFor(() =>
-      expect(screen.getByTestId("app-footer")).toHaveTextContent(
-        `Task Notes v${BACKEND_VERSION} (${BACKEND_COMMIT})`,
-      ),
-    );
+    expect(screen.getByTestId("app-footer")).toHaveTextContent("Task Notes");
+    expect(screen.getByTestId("app-footer")).toHaveTextContent(version);
   });
 
   it("renders the note form and the note list", async () => {
