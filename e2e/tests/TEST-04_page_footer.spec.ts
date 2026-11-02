@@ -1,14 +1,8 @@
-import { readFileSync } from "node:fs";
-import path from "node:path";
 import { test, expect } from "@playwright/test";
-
-const frontendPackageJsonPath = path.resolve(__dirname, "../../frontend/package.json");
-const { version } = JSON.parse(readFileSync(frontendPackageJsonPath, "utf-8")) as {
-  version: string;
-};
+import { backendVersion as version } from "../helpers/backendVersion";
 
 test.describe("TEST-04 page footer", () => {
-  test("shows a footer with the app name and the version from frontend/package.json", async ({
+  test("shows a footer with the app name and the version from the backend", async ({
     page,
   }) => {
     await page.goto("/");
