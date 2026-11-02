@@ -35,13 +35,36 @@ describe("version API client", () => {
     vi.unstubAllEnvs();
   });
 
-  it("returns the version the backend sent, from the default base URL", async () => {
-    fetchMock.mockResolvedValue(okResponse({ version: "0.1.0" }));
+  it("returns the version and commit the backend sent, from the default base URL", async () => {
+    fetchMock.mockResolvedValue(
+      okResponse({ version: "0.1.0", commit: "abc1234def56" }),
+    );
 
-    await expect(getBackendVersion()).resolves.toBe("0.1.0");
+    await expect(getBackendVersion()).resolves.toEqual({
+      version: "0.1.0",
+      commit: "abc1234def56",
+    });
 
     expect(fetchMock).toHaveBeenCalledTimes(1);
     expect(fetchMock).toHaveBeenCalledWith(DEFAULT_VERSION_URL);
+  });
+
+  it("returns an undefined commit when the backend sends none", async () => {
+    fetchMock.mockResolvedValue(okResponse({ version: "0.1.0" }));
+
+    await expect(getBackendVersion()).resolves.toEqual({
+      version: "0.1.0",
+      commit: undefined,
+    });
+  });
+
+  it("returns an undefined commit when it is not a string, keeping the version", async () => {
+    fetchMock.mockResolvedValue(okResponse({ version: "0.1.0", commit: 1234 }));
+
+    await expect(getBackendVersion()).resolves.toEqual({
+      version: "0.1.0",
+      commit: undefined,
+    });
   });
 
   it("throws with the status and reason when the response is not OK", async () => {
