@@ -18,7 +18,7 @@ Feature: TEST-08 Footer shows the app version
     When I open "http://localhost:5183"
     Then the footer shows the backend's version
     And the footer does not show the frontend package's version
-    And the browser made one "GET /api/version" request to the backend
+    And the browser made at least one "GET /api/version" request to the backend, each with status 200 and the backend's version
 
   Scenario: Footer omits an unresolved version (criterion 3)
     Given the backend is stopped

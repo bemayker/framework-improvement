@@ -22,7 +22,7 @@
 | # | Step | Expected Result | Pass/Fail |
 |---|------|------------------|-----------|
 | 2.1 | Open `http://localhost:5183/` and read the footer | It reads `Task Notes v0.1.0`, the backend's version, and not `Task Notes v0.0.0` | [ ] Pass [ ] Fail |
-| 2.2 | Open the browser's developer tools, Network tab, reload the page | One `GET` request to `http://localhost:8010/api/version` with status 200 and response `{"version":"0.1.0"}` | [ ] Pass [ ] Fail |
+| 2.2 | Open the browser's developer tools, Network tab, reload the page | At least one `GET` request to `http://localhost:8010/api/version`, each with status 200 and response `{"version":"0.1.0"}` (React StrictMode in dev sends two) | [ ] Pass [ ] Fail |
 | 2.3 | Open `frontend/src/components/AppFooter.tsx` in an editor | It contains no `package.json` import and no version string literal | [ ] Pass [ ] Fail |
 
 ### Criterion 3: An unresolved version is omitted, never shown as undefined, null, unknown or a gap
