@@ -17,6 +17,19 @@ function typeNote(text: string) {
   fireEvent.change(screen.getByTestId("note-input"), { target: { value: text } });
 }
 
+type StoredNote = { id: number; text: string };
+
+/** Makes the next createNote call stay pending until the returned function resolves it. */
+function holdNextSave(): (note: StoredNote) => void {
+  let resolveSave: (note: StoredNote) => void = () => {};
+  createNoteMock.mockReturnValue(
+    new Promise((resolve) => {
+      resolveSave = resolve;
+    }),
+  );
+  return (note) => resolveSave(note);
+}
+
 describe("NoteForm", () => {
   beforeEach(() => {
     createNoteMock.mockReset();
@@ -80,12 +93,7 @@ describe("NoteForm", () => {
   });
 
   it("does not send a second save while the first is still in flight", async () => {
-    let resolveSave: (note: { id: number; text: string }) => void = () => {};
-    createNoteMock.mockReturnValue(
-      new Promise((resolve) => {
-        resolveSave = resolve;
-      }),
-    );
+    const resolveSave = holdNextSave();
     const onCreated = vi.fn();
     render(<NoteForm onCreated={onCreated} />);
 
@@ -100,12 +108,7 @@ describe("NoteForm", () => {
   });
 
   it("ignores a second submit event dispatched in the same tick", async () => {
-    let resolveSave: (note: { id: number; text: string }) => void = () => {};
-    createNoteMock.mockReturnValue(
-      new Promise((resolve) => {
-        resolveSave = resolve;
-      }),
-    );
+    const resolveSave = holdNextSave();
     const onCreated = vi.fn();
     render(<NoteForm onCreated={onCreated} />);
 
@@ -121,12 +124,7 @@ describe("NoteForm", () => {
   });
 
   it("disables the button while saving and enables it again after success", async () => {
-    let resolveSave: (note: { id: number; text: string }) => void = () => {};
-    createNoteMock.mockReturnValue(
-      new Promise((resolve) => {
-        resolveSave = resolve;
-      }),
-    );
+    const resolveSave = holdNextSave();
     render(<NoteForm onCreated={vi.fn()} />);
 
     typeNote("Buy milk");

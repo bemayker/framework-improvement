@@ -30,7 +30,7 @@
 | 8 | Type `BUG-04 second note` and click "Save note" | It saves and appears once, below the first note | [ ] Pass [ ] Fail |
 | 9 | Set throttling back to "No throttling". Stop the backend: `docker compose stop backend` | The page stays open | [ ] Pass [ ] Fail |
 | 10 | Type `BUG-04 retry check` and click "Save note" | The message "The note could not be saved. Please try again." appears, the text stays in the field and "Save note" is enabled | [ ] Pass [ ] Fail |
-| 11 | Start the backend again: `docker compose start backend`, and wait until `http://localhost:8010/health` answers | The health endpoint responds | [ ] Pass [ ] Fail |
+| 11 | Start the backend again: `docker compose start backend`, and wait until `http://localhost:8010/api/health` answers | The health endpoint responds | [ ] Pass [ ] Fail |
 | 12 | Click "Save note" once | The error disappears, the field clears and `BUG-04 retry check` appears in the list exactly once | [ ] Pass [ ] Fail |
 | 13 | Type `BUG-04 same text`, click "Save note", wait for it to appear, then type the same text again and click "Save note" once more | `BUG-04 same text` is listed twice, and still twice after a reload (two deliberate saves are both kept) | [ ] Pass [ ] Fail |
 | 14 | From the repository root run `npm --prefix frontend test -- src/components/NoteForm.test.tsx` | The NoteForm tests, including `does not send a second save while the first is still in flight`, report 0 failed | [ ] Pass [ ] Fail |
