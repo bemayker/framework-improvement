@@ -5,7 +5,7 @@
 - Docker and Docker Compose installed and running.
 - Repository checked out locally, on branch `feature/BUG-04-double-submit-note` (or later, once merged, on `main`).
 - Copy `.env.example` to `.env` in the repository root if it does not exist yet (defaults are usable as-is).
-- A way to see the app's network traffic: the browser dev tools **Network** tab (filter on `notes`). Steps 5, 7 and 9 verify that only one request is sent, which is only observable there.
+- A way to see the app's network traffic: the browser dev tools **Network** tab (filter on `notes`). Steps 5 and 8 verify that only one request is sent, which is only observable there.
 
 ## Test Environment Setup
 

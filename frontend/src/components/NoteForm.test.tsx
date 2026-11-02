@@ -29,6 +29,7 @@ describe("NoteForm", () => {
 
     expect(await screen.findByTestId("note-form-error")).toBeInTheDocument();
     expect(createNoteMock).not.toHaveBeenCalled();
+    expect(screen.getByTestId("note-submit")).toBeEnabled();
   });
 
   it("treats a whitespace-only note as empty and makes no API call", async () => {
@@ -39,6 +40,7 @@ describe("NoteForm", () => {
 
     expect(await screen.findByTestId("note-form-error")).toBeInTheDocument();
     expect(createNoteMock).not.toHaveBeenCalled();
+    expect(screen.getByTestId("note-submit")).toBeEnabled();
   });
 
   it("saves a non-empty note, clears the input, and reports the stored note", async () => {
