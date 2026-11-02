@@ -1,0 +1,12 @@
+# Decisions (BUG-06, after its final push): deliver-20261102T005126Z
+
+The entries `.claude/artifacts/BUG-06/decisions.md` received after the last push of its branch (be25683), the head its pull request merged. The entries before them reached the default branch in that file.
+
+- 2026-11-02 [BUG-06] Merge verdict: merge (run=deliver-20261102T005126Z, orchestrator, 6.9). Rationale: autonomy.md Section 5 holds on all five conditions. (1) Self-review VERDICT: PASS blocking=0 recommended=1 optional=1, the recommended finding applied by the refactor gate at a805632. (2) ci-poll.sh re-read `verdict=green next=none failed=0 poll=1`, 7/7 checks done, notification check included. (3) Both acceptance criteria met: health.py passes `Cache-Control: no-store` on the one JSONResponse both the 200 and 503 branches return, status codes and body untouched; test_health_cache_control_integration.py asserts the header, status and body on each branch against its own literal, and the repro line reads `before fail -> after pass`. (4) PR #468: 0 comments, 0 inline, 0 reviews, reviewDecision empty, no change request; tracker: 1 comment (plan PR link), non-actionable, nothing to answer. (5) Escalation bar not triggered: one response header on a health endpoint, reversible by revert.
+- 6.7: CI green 6/6 then 7/7 (ci-poll). Repro: before fail -> after pass. Handover rebuild: status=rebuilt sha=be25683 services=3/3 health=pass project=framework-improvement-bug-06-handover urls=backend=http://localhost:27808,db=localhost:27809,frontend=http://localhost:27810 duration=13s. PR label: #468 mayker:in-review (removed mayker:in-progress).
+- 6.8: 0 PR comments, 0 inline, 0 reviews; 1 tracker comment, non-actionable.
+- Merged: PR #468 squash, 5a65628c35ce280dd86514e06715586e82f7a5c8.
+- auto-done: run 41370582178 succeeded. Tracker re-read: complete, still tagged mayker:to-verify (stale tag from item setup; the class is local-automated, no backstop flip; the tag makes the item read as awaiting verification until a human removes it).
+- Standards provenance: 6 dispatches; both always-on standards SELF-REPORTED as read by 4 of 6; 0 unbacked provenance claims; 0 MISMATCH lines.
+- [checkpoint] due=yes items=BUG-06 head=5a65628 verdict=pass (backend 61 passed, 15 skipped: no database in the primary checkout; frontend 48 passed).
+- [pull] result=pulled head=5a65628 removed=none set-aside=none blocked-by=none
