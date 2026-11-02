@@ -104,6 +104,20 @@ def test_settings_cors_origins_treats_blank_value_as_unset(monkeypatch, blank):
     assert get_settings().cors_origins == DEFAULT_CORS_ORIGINS
 
 
+def test_settings_cors_origins_trailing_slash_is_stripped(monkeypatch):
+    """BUG-02: the browser sends its Origin without a trailing slash, so must the setting."""
+    monkeypatch.setenv("CORS_ORIGINS", "http://localhost:5183/")
+
+    assert get_settings().cors_origins == ("http://localhost:5183",)
+
+
+def test_settings_cors_origins_trailing_slash_only_entry_is_dropped(monkeypatch):
+    """Edge case: an entry that is nothing but a slash is empty once stripped, so the default applies."""
+    monkeypatch.setenv("CORS_ORIGINS", "/")
+
+    assert get_settings().cors_origins == DEFAULT_CORS_ORIGINS
+
+
 def test_settings_build_commit_reads_env_value(monkeypatch):
     """BUILD_COMMIT is read per call and returned as set."""
     monkeypatch.setenv("BUILD_COMMIT", "0123456789abcdef")

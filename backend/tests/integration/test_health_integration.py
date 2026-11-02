@@ -53,6 +53,23 @@ def test_get_health_returns_503_degraded_when_the_database_is_unreachable(monkey
     }
 
 
+def test_cors_allows_the_browser_origin_when_configured_with_a_trailing_slash(monkeypatch):
+    """BUG-02: a configured trailing slash must not hide the browser's slashless Origin.
+
+    The header is asserted whatever the health status is, so the test does not
+    depend on the database being reachable.
+    """
+    monkeypatch.setenv("CORS_ORIGINS", "http://localhost:5183/")
+    monkeypatch.setenv("DATABASE_URL", UNREACHABLE_DATABASE_URL)
+
+    # Not a context manager, for the same lifespan reason as the 503 test above.
+    unmanaged_client = TestClient(create_app())
+
+    response = unmanaged_client.get("/api/health", headers={"Origin": "http://localhost:5183"})
+
+    assert response.headers.get("access-control-allow-origin") == "http://localhost:5183"
+
+
 def test_post_health_returns_405_method_not_allowed(client: TestClient):
     """Error case: the endpoint is read-only and accepts no input."""
     response = client.post("/api/health")
