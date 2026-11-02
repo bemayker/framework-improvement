@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, waitFor } from "@testing-library/react";
+import { act, render, screen, waitFor } from "@testing-library/react";
 import AppFooter from "./AppFooter";
 import { getBackendVersion } from "../api/version";
 
@@ -8,6 +8,12 @@ vi.mock("../api/version", () => ({
 }));
 
 const getBackendVersionMock = vi.mocked(getBackendVersion);
+
+// Flushes the promise chain (then/catch) the footer attached, so assertions on
+// the failure and unknown paths run after the state update would have landed.
+async function settlePendingPromises() {
+  await act(async () => {});
+}
 
 describe("AppFooter", () => {
   beforeEach(() => {
@@ -43,7 +49,7 @@ describe("AppFooter", () => {
     render(<AppFooter />);
 
     await waitFor(() => expect(getBackendVersionMock).toHaveBeenCalledTimes(1));
-    await Promise.resolve();
+    await settlePendingPromises();
     expect(screen.getByTestId("app-footer")).toHaveTextContent(/^Task Notes$/);
     expect(screen.queryByTestId("app-footer-version")).not.toBeInTheDocument();
   });
@@ -54,7 +60,7 @@ describe("AppFooter", () => {
     render(<AppFooter />);
 
     await waitFor(() => expect(getBackendVersionMock).toHaveBeenCalledTimes(1));
-    await Promise.resolve();
+    await settlePendingPromises();
     expect(screen.getByTestId("app-footer")).toHaveTextContent(/^Task Notes$/);
     expect(screen.queryByTestId("app-footer-version")).not.toBeInTheDocument();
   });
