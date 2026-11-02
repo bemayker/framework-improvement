@@ -32,9 +32,18 @@ test.describe("TEST-08 footer shows the app version", () => {
 
     await page.goto("/");
 
-    const { version } = (await (await versionResponse).json()) as { version: string };
+    const { version, commit } = (await (await versionResponse).json()) as {
+      version: string;
+      commit?: string;
+    };
+    // TEST-10 appends the first 7 characters of a usable commit to the version.
+    const trimmedCommit = typeof commit === "string" ? commit.trim() : "";
+    const commitSuffix =
+      trimmedCommit !== "" && trimmedCommit !== "unknown"
+        ? ` (${trimmedCommit.slice(0, 7)})`
+        : "";
     const footer = page.getByTestId("app-footer");
-    await expect(footer).toHaveText(`Task Notes v${version}`);
+    await expect(footer).toHaveText(`Task Notes v${version}${commitSuffix}`);
   });
 
   test("shows the backend's version when it differs from the frontend package's", async ({
