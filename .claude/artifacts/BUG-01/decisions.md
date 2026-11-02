@@ -1,0 +1,24 @@
+- run=deliver-20261102T222558Z 6.1 status planning: tracker already "to do" (planning maps to "to do"), no write needed.
+- run=deliver-20261102T222558Z tracker comments read: 20, actionable 0 (all are framework PR-opened notes from earlier runs).
+- Plan base: ba107dfc9b2ab91f986202c06873b0c7e787a1df
+
+## run=deliver-20261102T222558Z, plan verdict (orchestrator, /deliver 6.2 step 1): approve
+
+- **Verdict:** approve, first plan, no re-plan needed.
+- **Scope containment** (`user_story_alignment.md` Section 3): the plan recreates FEAT-1's `GET /api/time` endpoint, which is wider than the three BUG-01 criteria read literally. Verified it is forced rather than gold plating: `backend/app/` on `main` at ba107df holds no `server_time` module (`find` lists routers version, health, notes only; `main.py` registers only those three), and the `feature_map.md` BUG-01 row records the same gap. A `Cache-Control` header cannot be set on a route that does not exist. The plan bounds the recreation to FEAT-1's own contract plus the header, sets the header on the one route rather than app-wide middleware, and requires the PR description to state the assumption (Section 4, autonomous mode).
+- **Layering** (`coding_standards.md` Section 1, KISS; Router to Service to Schema as the version slice does): checked against `backend/app/routers/version.py` (`APIRouter(prefix="/api")`, handler returning a Pydantic schema built from a service call). The plan mirrors it exactly: router, `server_time_service.get_server_now()`, `schemas/server_time.py`. No repository, no migration, nothing invented.
+- **Testing strategy:** `### Criterion coverage` has a row for every criterion (1 to 3), each with a tier and a one-line reason for not E2E. Criterion 3 is tiered Integration plus a human check on the deployed environment, which is the honest answer: the defect only reproduces behind a CDN no local tier has. That is a recorded choice, not a missing row. E2E correctly not warranted: no UI, no navigation.
+- **File Manifest:** exact, phase-tagged, union covers the five backend files, two UAT files, the artifact copy, and the two modified files (`main.py`, `test_main_unit.py`, whose existing `test_create_app_registers_*_route` pattern the new test extends).
+- **Technology Selection:** every net-new entry carries a chosen-over line (stdlib `datetime.now(timezone.utc)`; FastAPI `Response` header over middleware or a cache package; Pydantic over hand-serialised ISO). No new dependency. Nothing to revise.
+- **Residual doubt (logged, not blocking):** criterion 3 can only be closed by a human after deploy; the merge verdict will treat criteria 1 and 2 as the machine-verifiable set and report criterion 3 as left for a human. Shared risk on `backend/app/main.py` and `test_main_unit.py` with TEST-09 stands: serialize those two builds when both manifests list `main.py`.
+- Standards read for this verdict: autonomy.md, work_items.md, coding_standards.md, user_story_alignment.md.
+- run=deliver-20261102T222558Z 6.2 status: plan review -> on hold (ready_for_build). Readiness labels: none on the item (only mayker:to-verify), no remove-label call.
+- Repro: deployed-only: curl -s https://<deployed-host>/api/time; sleep 1; curl -s https://<deployed-host>/api/time returns two different now values, and curl -sI shows cache-control: no-store with no CDN cache hit (source: item). Reason: the stale response comes from the CDN edge cache in front of the deployed API, which no local tier has. Environment: the deployed environment the item names (docs/DEVELOPMENT.md Test environments has no row).
+- run=deliver-20261102T222558Z 6.3 branch feature/BUG-01-server-time-edge-cache cut --no-track from origin/main at ba107df; worktree .claude/worktrees/BUG-01.
+- run=deliver-20261102T222558Z [worktree-deps] installed=2 present=0 unlocked=0 failed=0 duration=1s
+- run=deliver-20261102T222558Z [run-dir] move-item: moved=3 appended=0 kept=4 failed=0
+- run=deliver-20261102T222558Z 6.3 status in progress. Scheduler: no File Manifest overlap with TEST-09 (orchestrator verdict on the whole-manifest unions), builds run concurrently.
+- run=deliver-20261102T222558Z 6.4 [merged-since] base=ba107df (forced) ref=origin/main@ba107df commits=0 overlap=0 verdict=clean
+- run=deliver-20261102T222558Z 6.4 phases: B (feat(BUG-01): implement backend), G (test(BUG-01): add UAT scenarios and manual script); documentation check committed nothing (no endpoint index in README or DEVELOPMENT.md). Phase D not dispatched (no E2E criterion).
+- run=deliver-20261102T222558Z 6.5 self-review VERDICT: PASS blocking=0 recommended=1 optional=1. Review closure: no BLOCKING findings.
+- run=deliver-20261102T222558Z 6.5 refactor gate: 2 improvements applied (7 files examined); RECOMMENDED finding 1 (UAT Background step) applied, OPTIONAL finding 2 (main.py docstring) applied. Step 2a: [gate-recheck] skipped: the refactor gate added no source or test file.
