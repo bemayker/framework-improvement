@@ -1,0 +1,1 @@
+{"BUG-06":{"phase":"6.10","state":"merged","status":"to_verify","branch":"feature/BUG-06-health-endpoint-omits-cache-control","pr":468,"merge":"5a65628","repo":"bemayker/framework-improvement","retries":0,"blocked":null}}
