@@ -1,4 +1,4 @@
-"""Router for GET /api/health (TEST-02)."""
+"""Router for GET /api/health (TEST-02, BUG-06)."""
 
 from fastapi import APIRouter, Response, status
 from fastapi.responses import JSONResponse
@@ -7,6 +7,9 @@ from app.schemas.health import DatabaseTarget, HealthResponse
 from app.services import health_service
 
 router = APIRouter(prefix="/api", tags=["health"])
+
+# An edge cache must never serve a stale health answer.
+NO_STORE_CACHE_CONTROL = "no-store"
 
 
 @router.get(
@@ -30,4 +33,8 @@ def get_health() -> Response:
         if report.status == health_service.STATUS_OK
         else status.HTTP_503_SERVICE_UNAVAILABLE
     )
-    return JSONResponse(status_code=status_code, content=body.model_dump())
+    return JSONResponse(
+        status_code=status_code,
+        content=body.model_dump(),
+        headers={"Cache-Control": NO_STORE_CACHE_CONTROL},
+    )
