@@ -12,7 +12,11 @@ test.describe("TEST-08 footer shows the backend version", () => {
   test("shows the app name and the backend version on the landing page", async ({ page }) => {
     await page.goto("/");
 
-    await expect(page.getByTestId("app-footer")).toHaveText(`Task Notes v${backendVersion}`);
+    // A stack started with BUILD_COMMIT set appends " (xxxxxxx)" (TEST-10), so the suffix is optional.
+    const escapedVersion = backendVersion.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    await expect(page.getByTestId("app-footer")).toHaveText(
+      new RegExp(`^Task Notes v${escapedVersion}( \\([^)]+\\))?$`),
+    );
   });
 
   test("shows the app name alone when the version request fails", async ({ page }) => {
