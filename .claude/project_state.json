@@ -310,11 +310,18 @@
       "id_source": "framework",
       "id_carrier": "title_prefix",
       "url": "https://app.clickup.com/t/123k99czk8j"
+    },
+    "BUG-06": {
+      "external_id": "123k99czmqx",
+      "external_identifier": "",
+      "id_source": "framework",
+      "id_carrier": "title_prefix",
+      "url": "https://app.clickup.com/t/123k99czmqx"
     }
   },
   "discovery": {
-    "last_scan_commit": "a3a1d7b7797852349e6120255b1e08b055470bff",
-    "scanned_at": "2026-11-01T03:29:24Z",
+    "last_scan_commit": "446ab65d4b9f10d29e9655be3fdac18ff5b2c141",
+    "scanned_at": "2026-11-02T00:39:51Z",
     "scanned_by": "/sync-project"
   },
   "framework": {
@@ -322,8 +329,8 @@
     "migrated_to": "0.3.463",
     "migrated_at": "2026-11-02T00:31:30Z",
     "synced": {
-      "plugin_version": "0.3.460",
-      "synced_at": "2026-11-01T02:26:56Z"
+      "plugin_version": "0.3.463",
+      "synced_at": "2026-11-02T00:39:55Z"
     }
   }
 }

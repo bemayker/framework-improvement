@@ -195,5 +195,6 @@ its API marks the story Done early. The merge order above is what prevents it.
 | FEAT-13 | VERIFY MDF-505: backend GET /api/pong/count returns a counter | [FEAT-12] | feature/FEAT-13-api-pong-count | | | ➖ | 3 | |
 | CHORE-1 | TEST-10 follow-up: known-improvements | [TEST-10] | feature/CHORE-1-test-10-follow-up | | ⚠️ CHORE-1 (TEST-10 follow-up) plausibly edits frontend/src/components/AppFooter.tsx and the version API client, as CHORE-03, BUG-03 and FEAT-6 do; serialize if run concurrently | ➖ | 5 | |
 | FEAT-14 | VERIFY MDF-510: backend GET /api/verify510 returns ok | [TEST-01] | feature/FEAT-14-verify-mdf-510-backend-get-api-verify510 | | ⚠️ FEAT-14 adds a route in backend/app/main.py, where BUG-02 edits the CORS middleware; serialize if run concurrently | ✅ | 2 | |
+| BUG-06 | VERIFY MDF-515: Health endpoint omits the Cache-Control no-store header | [TEST-02] | feature/BUG-06-health-endpoint-omits-cache-control | | | ✅ | 3 | |
 
 Scaffold gate: TEST-01 (`scaffold: true` in its frontmatter) is **done**, so the gate passes. TEST-01 through TEST-07 and FEAT-1 are done; TEST-08, TEST-09 and BUG-01 are ready (TEST-09 registers a router in `backend/app/main.py`, BUG-01 edits only `server_time.py`, TEST-08 is frontend only); TEST-10 waits on TEST-08 and TEST-09.
