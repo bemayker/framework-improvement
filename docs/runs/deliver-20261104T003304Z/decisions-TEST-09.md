@@ -1,0 +1,12 @@
+# Decisions (TEST-09, after its final push): deliver-20261104T003304Z
+
+The entries `.claude/artifacts/TEST-09/decisions.md` received after the last push of its branch (583124a), the head its pull request merged. The entries before them reached the default branch in that file.
+
+- 6.6 push: test-gate: verdict recorded for this push (head 583124a: full after 4s; pytest 65 passed, 0 failed, 0 skipped + vitest 26 passed); upstream-ok. PR #519 opened (draft).
+- 6.7 CI: 7/7 checks done, 3m09s (green). 6.8: 0 PR comments, 0 new actionable tracker comments. Handover rebuild: status=rebuilt sha=583124a+dirty health=pass project=framework-improvement-test-09-handover duration=11s. PR #519 ready; PR label: #519 mayker:in-review; tracker status to test.
+- 2026-11-04 [TEST-09] Merge verdict: MERGE PR #519 (run=deliver-20261104T003304Z, orchestrator, /deliver 6.9). Rationale: all five `autonomy.md` Section 5 conditions hold. (1) Self-review clean: re-pass 1 VERDICT: PASS blocking=0 recommended=0 optional=0; pass 1's one BLOCKING (README line 70) was disproved with evidence and the re-pass accepted it. (2) CI green: ci-poll `verdict=green next=none failed=0 poll=1`, 7/7 checks done; PR OPEN, not draft, MERGEABLE, mergeStateStatus CLEAN. (3) All four acceptance criteria met: `commit` field on `VersionResponse`, read from `BUILD_COMMIT` in `config.py` with the `"unknown"` default and 12-character truncation in `version_service.py`, no literal in the router; unit and integration tests cover set, unset and blank paths (push gate 65 passed, 0 failed). (4) Both feedback surfaces answered: 0 PR comments, reviewDecision empty (no change request), 0 new actionable tracker comments; the one actionable tracker comment (12-character BUILD_COMMIT clarification) was carried at planning and is implemented. (5) Escalation bar not triggered: additive, reversible change with no migration, secret or external side effect. Merge method squash (CLAUDE.md -> Autonomy).
+- 6.9 merged: PR #519 squash e6c97b8.
+- 6.10 auto-done: run 41751038018 succeeded. Re-read: status complete. No backstop flip.
+- 6.10 standards provenance: 10 dispatches; both always-on standards SELF-REPORTED as read by 4 of 10 (self-reported, no pass bar); 0 unbacked provenance claims; no MISMATCH lines.
+- 6.10 checkpoint: due=no reason=none-merged verdict=not-due. Pull: result=up-to-date head=e6c97b8.
+- 6.10 teardown: docker rm -f TEST-09-db (this run - env: line). Handover stack framework-improvement-test-09-handover left running for the tester.
