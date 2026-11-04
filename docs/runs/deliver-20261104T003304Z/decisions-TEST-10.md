@@ -1,0 +1,12 @@
+# Decisions (TEST-10, after its final push): deliver-20261104T003304Z
+
+The entries `.claude/artifacts/TEST-10/decisions.md` received after the last push of its branch (7e8f1ac), the head its pull request merged. The entries before them reached the default branch in that file.
+
+- 6.6 push: test-gate: verdict recorded for this push (head 7e8f1ac: full after 3s; pytest 59 passed, 0 failed, 14 skipped + vitest 39 passed); upstream-ok. PR #521 opened (draft).
+- 6.7 CI: 7/7 checks done, 2m43s (green). 6.8: 0 PR comments, 0 new actionable tracker comments. Handover rebuild: status=rebuilt sha=7e8f1ac+dirty health=pass project=framework-improvement-test-10-handover duration=10s. PR #521 ready; PR label: #521 mayker:in-review; tracker status to test.
+- 2026-11-04 [TEST-10] 6.9 merge verdict: MERGE PR #521 (orchestrator, run=deliver-20261104T003304Z). Rationale: all five `autonomy.md` Section 5 conditions hold. (1) Self-review VERDICT: PASS blocking=0 recommended=1 optional=2, the RECOMMENDED finding applied by the refactor gate, both OPTIONAL findings recorded on the PR's known improvements. (2) ci-poll `verdict=green next=none failed=0 poll=1`, 7/7 checks done; PR OPEN, not draft, mergeable MERGEABLE, mergeStateStatus CLEAN. (3) All three acceptance criteria met by the implementation: footer renders `Task Notes v{version} ({commit7})` from `GET /api/version` via `frontend/src/api/version.ts`; pending, failed, non-string or blank commit renders the version alone; `AppFooter.test.tsx` covers success, pending and failure. (4) 0 PR review comments, reviewDecision empty (no change request), 0 actionable tracker comments across 22 read. (5) Escalation bar not triggered: frontend-only change, fully reversible by revert. Residual note, not a hold: `docs/DEVELOPMENT.md:669` edit deviates from the plan's "no doc edit" manifest line; the plan's line was wrong and the deviation is visible on the PR.
+- 6.9 merged: PR #521 squash c651d8d.
+- 6.10 auto-done: run 41754281422 succeeded. Re-read: status complete. No backstop flip.
+- 6.10 standards provenance: 9 dispatches; both always-on standards SELF-REPORTED as read by 5 of 9 (self-reported, no pass bar); 0 unbacked provenance claims; no MISMATCH lines.
+- 6.10 checkpoint: due=yes verdict=pass head=90fa8ba (TEST-10 and BUG-04 integrated). Pull: result=pulled head=90fa8ba set-aside=none.
+- 6.10 teardown: no - env: line of this run, nothing to tear down. Handover stack framework-improvement-test-10-handover left running for the tester.
