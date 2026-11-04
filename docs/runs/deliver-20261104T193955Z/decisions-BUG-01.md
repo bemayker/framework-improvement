@@ -1,0 +1,11 @@
+# Decisions (BUG-01, after its final push): deliver-20261104T193955Z
+
+The entries `.claude/artifacts/BUG-01/decisions.md` received after the last push of its branch (aaf27a8), the head its pull request merged. The entries before them reached the default branch in that file.
+
+- 2026-11-04 [BUG-01] Merge verdict: merge PR #548 (squash), item lands in to_verify rather than Done. Rationale: autonomy.md Section 5 holds: (1) reviewer VERDICT: PASS blocking=0, the one RECOMMENDED and one OPTIONAL finding applied by the refactor gate; (2) ci-poll.sh verdict=green (7/7, failed=0) after conversion, test gate at head aaf27a8 pytest 51/0 + vitest 26/0; (3) criteria 1-2 verified by the implementation and tests; criterion 3 (the edge-cache behaviour) is not reproducible locally — repro verdict exit 0 records "not runnable locally: the edge cache exists only on the deployed environment", so it is a deployed human check, flagged with the mayker:to-verify PR label and the to_verify status; a code fix that can be reverted by PR is not the escalation bar (Section 4 needs irreversible AND ambiguous), so the deferred verification is recorded here, not a hold; (4) 0 PR comments, mergeable=MERGEABLE, no actionable tracker comment; (5) escalation bar not triggered. Residual doubt: criterion 3 is unverified until a human checks the deployed environment per .claude/artifacts/run/test_steps-BUG-01.md; report it under "left for a human".
+- 6.7 CI: verdict=green 7/7 failed=0. Repro verdict exit 0 (deployed-only). PR label mayker:to-verify added to #548 (gh pr edit exit 0). Handover rebuild: status=rebuilt sha=aaf27a8 health=pass project=framework-improvement-bug-01-handover. ready-pr #548; status -> to test; PR label: #548 mayker:in-review.
+- 6.8: 0 PR comments, 0 reviews; tracker re-read: no new actionable comment.
+- 6.9 merged #548 squash -> b8e3073.
+- 6.10 auto-done: run 41902648342 succeeded; tracker status complete + tag mayker:to-verify (status_mapping has no to_verify) — counted as fired, to-verify arm; not moved to done by this run.
+- Standards provenance: 4 dispatches; both always-on standards SELF-REPORTED as read by 2 of 4; 0 unbacked provenance claims; 1 not assessed.
+- [checkpoint] due=yes items=BUG-01 head=8488648 tip=origin/main@8488648 verdict=pass
