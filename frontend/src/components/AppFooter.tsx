@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
 import type { CSSProperties } from "react";
-import { getBackendVersion } from "../api/version";
+import { getBackendBuildInfo } from "../api/version";
+import type { BackendBuildInfo } from "../api/version";
 
 const APP_NAME = "Task Notes";
+const SHORT_COMMIT_LENGTH = 7;
 
 const footerStyle: CSSProperties = {
   fontSize: "0.875rem",
@@ -11,22 +13,22 @@ const footerStyle: CSSProperties = {
 };
 
 function AppFooter() {
-  // null covers both "still loading" and "could not be resolved": either way
-  // the footer shows the app name only, never blank and never "unknown".
-  const [version, setVersion] = useState<string | null>(null);
+  // null covers both "still loading" and "request failed": either way the
+  // footer shows the app name only, never blank and never "unknown".
+  const [buildInfo, setBuildInfo] = useState<BackendBuildInfo | null>(null);
 
   useEffect(() => {
     let isMounted = true;
 
-    getBackendVersion()
-      .then((backendVersion) => {
+    getBackendBuildInfo()
+      .then((info) => {
         if (isMounted) {
-          setVersion(backendVersion);
+          setBuildInfo(info);
         }
       })
       .catch(() => {
         if (isMounted) {
-          setVersion(null);
+          setBuildInfo(null);
         }
       });
 
@@ -35,10 +37,17 @@ function AppFooter() {
     };
   }, []);
 
+  const version = buildInfo?.version ?? null;
+  // The commit is only shown next to a resolved version.
+  const commit = version !== null ? (buildInfo?.commit ?? null) : null;
+
   return (
     <footer data-testid="app-footer" style={footerStyle}>
       {APP_NAME}
       {version !== null && <span data-testid="app-footer-version"> v{version}</span>}
+      {commit !== null && (
+        <span data-testid="app-footer-commit"> ({commit.slice(0, SHORT_COMMIT_LENGTH)})</span>
+      )}
     </footer>
   );
 }
