@@ -14,3 +14,8 @@ This run's section of the repository-root `DECISIONS.md`, which is cumulative ac
 - [run] checkpoint after BUG-01 and TEST-08: due=yes verdict=pass head=e6c97b8; TEST-09 not flagged (not-due).
 - [run] Section W wave-2 boundary, step 1: no follow-ups filed. known-improvements: every merged PR lists none (TEST-08's RECOMMENDED finding was applied by its gate); unaddressed-comments: none at merge on any item.
 - [run] Section W step 2 re-ingest: 42 items resolved, nodes=TEST-10,BUG-04 (done=9 to_verify=1 unmapped=30). Reconcile wrote nothing (registered=none, propose 0/0, map valid). BUG-04 and TEST-10 dispatched to planning concurrently; TEST-10's build serializes behind BUG-04's merge only if the approved whole-manifest unions share a file.
+- [run] round 4 to 6: BUG-04 and TEST-10 planned, built, reviewed and merged concurrently (whole-manifest unions disjoint). TEST-10 Phase D held behind BUG-04: smoke run ports. Merged: TEST-10 #521 c651d8d, BUG-04 #522 90fa8ba.
+- [BUG-04] self-review BLOCKING 1 (plan-recorded disabled button style missing) fixed in fix round 1 (1647c15) and closed by re-pass 1. Repro: before fail -> after pass. Tracker description empty; criteria derived from the title.
+- [run] checkpoints after TEST-10 and BUG-04: due=yes verdict=pass head=90fa8ba.
+- [run] Section W final boundary, step 1: no follow-ups filed. known-improvements: TEST-10 lists two OPTIONAL findings only, BUG-04 none; unaddressed-comments: none at merge.
+- [run] Section W final boundary, step 2 re-ingest: 42 items resolved (38 tracker, 4 local); nodes=0 done=11 to_verify=1 unmapped=30; backlog drained. Reconcile wrote nothing (registered=none, propose 0/0, map valid 42 rows 43 edges). BUG-01 stays to_verify (complete with mayker:to-verify).
