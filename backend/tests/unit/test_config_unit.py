@@ -6,15 +6,8 @@ FastAPI instance in `create_app()` and `database_url` is the only credential-
 shaped value in the package, so an unnoticed change to either is a silent
 production-configuration change.
 
-One thing is deliberately NOT asserted here, and the reason is a source defect
-rather than a gap in these tests. `Settings.database_url`'s default is written
-as a plain dataclass field default, so it is evaluated **once at class
-definition**, while `get_settings()`'s own docstring promises a value "read
-fresh from the environment". Those two cannot both be true. Asserting either
-one would encode a contested contract: asserting freshness fails today, and
-asserting import-time capture would pin the defect and break the moment it is
-fixed. So these tests cover the part of the contract that holds either way and
-the mismatch is reported instead (see the generate-tests report and PR).
+All environment-backed fields are read on every `get_settings()` call, and the
+per-call tests below pin that.
 """
 
 import dataclasses
@@ -22,7 +15,12 @@ import os
 
 import pytest
 
-from app.core.config import DEFAULT_CORS_ORIGINS, Settings, get_settings
+from app.core.config import (
+    DEFAULT_BUILD_COMMIT,
+    DEFAULT_CORS_ORIGINS,
+    Settings,
+    get_settings,
+)
 
 
 def test_get_settings_returns_the_configured_app_title():
@@ -102,3 +100,34 @@ def test_settings_cors_origins_treats_blank_value_as_unset(monkeypatch, blank):
     monkeypatch.setenv("CORS_ORIGINS", blank)
 
     assert get_settings().cors_origins == DEFAULT_CORS_ORIGINS
+
+
+def test_settings_build_commit_reads_env_value(monkeypatch):
+    """BUILD_COMMIT set: the settings field carries it, stripped."""
+    monkeypatch.setenv("BUILD_COMMIT", " abc1234 ")
+
+    assert get_settings().build_commit == "abc1234"
+
+
+def test_settings_build_commit_defaults_when_unset(monkeypatch):
+    """BUILD_COMMIT unset: the declared default is reported."""
+    monkeypatch.delenv("BUILD_COMMIT", raising=False)
+
+    assert get_settings().build_commit == DEFAULT_BUILD_COMMIT == "unknown"
+
+
+@pytest.mark.parametrize("blank", ["", "   "])
+def test_settings_build_commit_treats_blank_value_as_unset(monkeypatch, blank):
+    """A blank BUILD_COMMIT (the compose passthrough default) falls back to the default."""
+    monkeypatch.setenv("BUILD_COMMIT", blank)
+
+    assert get_settings().build_commit == DEFAULT_BUILD_COMMIT
+
+
+def test_settings_build_commit_is_read_per_call_not_at_import(monkeypatch):
+    """An environment change after import is seen by the next get_settings() call."""
+    monkeypatch.setenv("BUILD_COMMIT", "first")
+    first = get_settings().build_commit
+    monkeypatch.setenv("BUILD_COMMIT", "second")
+
+    assert (first, get_settings().build_commit) == ("first", "second")
