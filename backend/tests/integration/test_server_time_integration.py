@@ -5,7 +5,6 @@ from datetime import datetime, timedelta, timezone
 from fastapi.testclient import TestClient
 
 from app.routers import server_time
-from app.routers.server_time import NO_STORE
 
 
 def test_get_time_returns_200_with_now_and_timezone_keys(client: TestClient):
@@ -28,7 +27,7 @@ def test_get_time_sets_cache_control_no_store(client: TestClient):
     """BUG-01 criterion 2: the response forbids any cache from storing it."""
     response = client.get("/api/time")
 
-    assert response.headers["cache-control"] == NO_STORE
+    assert response.headers["cache-control"] == "no-store"
 
 
 def test_get_time_returns_different_now_on_each_call(client: TestClient, monkeypatch):
