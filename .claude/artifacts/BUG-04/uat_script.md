@@ -15,7 +15,8 @@
    docker compose up --build
    ```
 2. Wait until the `db`, `backend`, and `frontend` services report as started (`db` reaches "healthy", and the `frontend` log shows the Vite dev server listening).
-3. Notes from earlier runs stay in the database volume, so the list may already contain entries. That is expected: every step below is about the note you add.
+3. Notes from earlier runs stay in the database volume, so the list may already contain entries, including notes with the same text from an earlier pass. That is expected.
+4. Pick a unique suffix for this pass, for example the current time as `HHMMSS`. Append it, after a space, to every note text you type below (`BUG-04 double click check 142530`), and use that full text wherever a step names a note. Counts such as "exactly once" refer to that full text.
 
 ## Steps
 

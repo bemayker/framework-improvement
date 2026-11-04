@@ -3,6 +3,9 @@ Feature: BUG-04 Saving a note twice quickly stores it once
   I want a quick double click on "Save note" to store my note only once
   So that my notes list does not fill up with accidental duplicates
 
+  # Note texts below are shown without the suffix. Each run appends its own unique
+  # suffix (for example the current time) so repeated runs against the same database
+  # never see notes saved by an earlier run, and counts apply to the full text.
   Background:
     Given the Task Notes project infrastructure (frontend, backend, database) is set up per docker-compose.yml
     And the application is running at "http://localhost:5183"

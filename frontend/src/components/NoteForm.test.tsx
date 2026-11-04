@@ -107,6 +107,26 @@ describe("NoteForm", () => {
     expect(createNoteMock).toHaveBeenCalledTimes(1);
   });
 
+  it("drops a form submit that arrives while a save is pending, even past the disabled button", async () => {
+    const pending = deferred<Note>();
+    createNoteMock.mockReturnValue(pending.promise);
+    const onCreated = vi.fn();
+    render(<NoteForm onCreated={onCreated} />);
+
+    typeNote("Buy milk");
+    const form = screen.getByTestId("note-form");
+    // Submitting the form directly bypasses the disabled button, so only the
+    // in-flight guard in the handler can stop the second request.
+    fireEvent.submit(form);
+    fireEvent.submit(form);
+
+    expect(createNoteMock).toHaveBeenCalledTimes(1);
+
+    pending.resolve({ id: 1, text: "Buy milk" });
+    await waitFor(() => expect(onCreated).toHaveBeenCalledTimes(1));
+    expect(createNoteMock).toHaveBeenCalledTimes(1);
+  });
+
   it("disables the submit button while saving and enables it again after success", async () => {
     const pending = deferred<Note>();
     createNoteMock.mockReturnValue(pending.promise);
