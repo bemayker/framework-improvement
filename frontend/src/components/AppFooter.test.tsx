@@ -16,6 +16,22 @@ describe("AppFooter", () => {
     expect(screen.getByTestId("app-footer")).toHaveTextContent(version);
   });
 
+  it("renders the app name followed by the version when a version is given", () => {
+    render(<AppFooter version="1.2.3" />);
+
+    expect(screen.getByTestId("app-footer")).toHaveTextContent(/^Task Notes v1\.2\.3$/);
+  });
+
+  it.each([
+    ["null", null],
+    ["an empty string", ""],
+    ["whitespace", "   "],
+  ])("renders only the app name when the version is %s", (_label, value) => {
+    render(<AppFooter version={value} />);
+
+    expect(screen.getByTestId("app-footer")).toHaveTextContent(/^Task Notes$/);
+  });
+
   it("is exposed as the contentinfo landmark and carries the app-footer test id", () => {
     render(<AppFooter />);
 

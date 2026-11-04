@@ -1,5 +1,5 @@
 import type { CSSProperties } from "react";
-import { version } from "../../package.json";
+import { version as packageVersion } from "../../package.json";
 
 const APP_NAME = "Task Notes";
 
@@ -9,10 +9,17 @@ const footerStyle: CSSProperties = {
   marginTop: "1.5rem",
 };
 
-function AppFooter() {
+type AppFooterProps = {
+  // Overridable so the unresolved-version path is testable without mocking the JSON module.
+  version?: string | null;
+};
+
+function AppFooter({ version = packageVersion }: AppFooterProps) {
+  const trimmedVersion = typeof version === "string" ? version.trim() : "";
+
   return (
     <footer data-testid="app-footer" style={footerStyle}>
-      {APP_NAME} v{version}
+      {trimmedVersion !== "" ? `${APP_NAME} v${trimmedVersion}` : APP_NAME}
     </footer>
   );
 }
