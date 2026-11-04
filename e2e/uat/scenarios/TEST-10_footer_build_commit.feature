@@ -17,7 +17,8 @@ Feature: TEST-10 Footer shows the build commit
     And the browser requests "GET /api/version" from the backend once
 
   Scenario: Footer shows the app name alone while the request is pending (criterion 2)
-    Given the "/api/version" request is slow to answer
+    Given the backend runs with BUILD_COMMIT "0123456789abcdef0123456789abcdef01234567"
+    And the "/api/version" request is slow to answer
     When I open the landing page
     Then until the request completes the footer reads exactly "Task Notes"
     And the footer does not contain "undefined", "null" or an error text

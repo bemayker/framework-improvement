@@ -1,11 +1,20 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, waitFor } from "@testing-library/react";
+import { act, render, screen } from "@testing-library/react";
 import AppFooter from "./AppFooter";
 import { fetchBackendVersion } from "../api/version";
 
 vi.mock("../api/version");
 
 const fetchBackendVersionMock = vi.mocked(fetchBackendVersion);
+
+// Lets the component's .then/.catch handlers run before asserting, so a failure or
+// unresolved-version state is checked after it was handled, not before.
+async function settlePromiseHandlers() {
+  await act(async () => {
+    await Promise.resolve();
+    await Promise.resolve();
+  });
+}
 
 function expectFooterWithoutVersion() {
   const footer = screen.getByTestId("app-footer");
@@ -67,16 +76,16 @@ describe("AppFooter", () => {
     fetchBackendVersionMock.mockRejectedValue(new Error("network down"));
     render(<AppFooter />);
 
-    await waitFor(() => expect(fetchBackendVersionMock).toHaveBeenCalled());
-    await waitFor(() => expectFooterWithoutVersion());
+    await settlePromiseHandlers();
+    expectFooterWithoutVersion();
   });
 
   it("renders the app name alone when the backend version is unresolved", async () => {
     fetchBackendVersionMock.mockResolvedValue(null);
     render(<AppFooter />);
 
-    await waitFor(() => expect(fetchBackendVersionMock).toHaveBeenCalled());
-    await waitFor(() => expectFooterWithoutVersion());
+    await settlePromiseHandlers();
+    expectFooterWithoutVersion();
   });
 
   it("is exposed as the contentinfo landmark and carries the app-footer test id", async () => {
