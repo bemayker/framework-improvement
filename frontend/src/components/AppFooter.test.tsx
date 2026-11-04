@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, waitFor } from "@testing-library/react";
+import { act, render, screen } from "@testing-library/react";
 import AppFooter from "./AppFooter";
 import { getBackendVersion } from "../api/version";
 
@@ -8,6 +8,12 @@ vi.mock("../api/version", () => ({
 }));
 
 const getBackendVersionMock = vi.mocked(getBackendVersion);
+
+// The mocked request is already settled when the footer mounts; flushing the
+// pending promise callbacks lets the resulting state update land before asserting.
+async function settleVersionRequest() {
+  await act(async () => {});
+}
 
 describe("AppFooter", () => {
   beforeEach(() => {
@@ -39,7 +45,7 @@ describe("AppFooter", () => {
 
     render(<AppFooter />);
 
-    await waitFor(() => expect(getBackendVersionMock).toHaveBeenCalled());
+    await settleVersionRequest();
     const footer = screen.getByTestId("app-footer");
     expect(footer.textContent).toBe("Task Notes");
     expect(footer).not.toHaveTextContent(/undefined|null|unknown/);
@@ -51,7 +57,7 @@ describe("AppFooter", () => {
 
     render(<AppFooter />);
 
-    await waitFor(() => expect(getBackendVersionMock).toHaveBeenCalled());
+    await settleVersionRequest();
     expect(screen.getByTestId("app-footer").textContent).toBe("Task Notes");
     expect(screen.queryByTestId("app-footer-version")).not.toBeInTheDocument();
   });
