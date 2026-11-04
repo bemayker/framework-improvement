@@ -17,6 +17,18 @@ function typeNote(text: string) {
   fireEvent.change(screen.getByTestId("note-input"), { target: { value: text } });
 }
 
+// Makes createNote hang until the returned function resolves it, so a test can
+// act while a save is still in flight.
+function mockPendingSave() {
+  let resolveSave: (note: { id: number; text: string }) => void = () => {};
+  createNoteMock.mockReturnValue(
+    new Promise((resolve) => {
+      resolveSave = resolve;
+    }),
+  );
+  return (note: { id: number; text: string }) => resolveSave(note);
+}
+
 describe("NoteForm", () => {
   beforeEach(() => {
     createNoteMock.mockReset();
@@ -80,12 +92,7 @@ describe("NoteForm", () => {
   });
 
   it("two rapid submits call createNote once", async () => {
-    let resolveSave: (note: { id: number; text: string }) => void = () => {};
-    createNoteMock.mockReturnValue(
-      new Promise((resolve) => {
-        resolveSave = resolve;
-      }),
-    );
+    const resolveSave = mockPendingSave();
     const onCreated = vi.fn();
     render(<NoteForm onCreated={onCreated} />);
 
@@ -100,12 +107,7 @@ describe("NoteForm", () => {
   });
 
   it("disables the submit button while saving and ignores Enter-style submits", async () => {
-    let resolveSave: (note: { id: number; text: string }) => void = () => {};
-    createNoteMock.mockReturnValue(
-      new Promise((resolve) => {
-        resolveSave = resolve;
-      }),
-    );
+    const resolveSave = mockPendingSave();
     render(<NoteForm onCreated={vi.fn()} />);
 
     typeNote("Buy milk");
