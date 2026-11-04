@@ -2,6 +2,8 @@
 
 from importlib.metadata import PackageNotFoundError
 
+import pytest
+
 from app.services import version_service
 
 
@@ -39,3 +41,44 @@ def test_get_app_version_returns_unknown_when_distribution_not_installed(monkeyp
     monkeypatch.setattr(version_service, "version", raise_not_found)
 
     assert version_service.get_app_version() == version_service.UNKNOWN_VERSION
+
+
+FULL_SHA = "0123456789abcdef0123456789abcdef01234567"
+
+
+def test_get_build_commit_truncates_a_full_sha_to_its_first_12_characters(monkeypatch):
+    """Happy path: a 40-character sha is reported as its 12-character prefix."""
+    monkeypatch.setenv("BUILD_COMMIT", FULL_SHA)
+
+    assert version_service.COMMIT_LENGTH == 12
+    assert version_service.get_build_commit() == "0123456789ab"
+
+
+@pytest.mark.parametrize("value", ["0123456789ab", "abc1234"])
+def test_get_build_commit_returns_values_of_12_characters_or_fewer_unchanged(
+    monkeypatch, value
+):
+    """Edge case: the boundary length and a shorter value are not altered."""
+    monkeypatch.setenv("BUILD_COMMIT", value)
+
+    assert version_service.get_build_commit() == value
+
+
+@pytest.mark.parametrize("blank", [None, "", "  "])
+def test_get_build_commit_returns_unknown_when_unset_or_blank(monkeypatch, blank):
+    """Error-ish case: no usable value yields the declared default, never a raise."""
+    if blank is None:
+        monkeypatch.delenv("BUILD_COMMIT", raising=False)
+    else:
+        monkeypatch.setenv("BUILD_COMMIT", blank)
+
+    assert version_service.get_build_commit() == "unknown"
+
+
+def test_get_build_commit_reads_settings_on_every_call(monkeypatch):
+    """Two calls across an environment change differ: nothing is cached at import."""
+    monkeypatch.setenv("BUILD_COMMIT", "aaaa")
+    first = version_service.get_build_commit()
+    monkeypatch.setenv("BUILD_COMMIT", "bbbb")
+
+    assert (first, version_service.get_build_commit()) == ("aaaa", "bbbb")
