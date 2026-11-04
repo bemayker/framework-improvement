@@ -84,6 +84,28 @@ def test_settings_cors_origins_parses_comma_separated_env_value(monkeypatch):
     assert get_settings().cors_origins == ("https://a.example", "https://b.example")
 
 
+def test_settings_cors_origins_strips_trailing_slash(monkeypatch):
+    """A trailing slash is removed so the entry matches the browser's slashless Origin."""
+    monkeypatch.setenv("CORS_ORIGINS", "http://localhost:5183/")
+
+    assert get_settings().cors_origins == ("http://localhost:5183",)
+
+
+def test_settings_cors_origins_strips_trailing_slash_in_comma_list(monkeypatch):
+    """Each entry of a comma list is normalised, slashed or not."""
+    monkeypatch.setenv("CORS_ORIGINS", "https://a.example/, https://b.example")
+
+    assert get_settings().cors_origins == ("https://a.example", "https://b.example")
+
+
+@pytest.mark.parametrize("lone_slash", ["/", " / ,"])
+def test_settings_cors_origins_drops_lone_slash_entry(monkeypatch, lone_slash):
+    """An entry that is only a slash is dropped like a blank one, falling back to the default."""
+    monkeypatch.setenv("CORS_ORIGINS", lone_slash)
+
+    assert get_settings().cors_origins == DEFAULT_CORS_ORIGINS
+
+
 def test_settings_cors_origins_defaults_when_unset(monkeypatch):
     """With CORS_ORIGINS unset the frontend's default origin is allowed."""
     monkeypatch.delenv("CORS_ORIGINS", raising=False)
