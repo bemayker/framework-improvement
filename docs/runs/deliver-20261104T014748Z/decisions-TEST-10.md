@@ -1,0 +1,15 @@
+# Decisions (TEST-10, after its final push): deliver-20261104T014748Z
+
+The entries `.claude/artifacts/TEST-10/decisions.md` received after the last push of its branch (0f629b0), the head its pull request merged. The entries before them reached the default branch in that file.
+
+- PR: opened https://github.com/bemayker/framework-improvement/pull/530 (draft); PR label: #530 mayker:in-progress
+- Gate verdict: test-gate: verdict recorded for this push (head 0f629b0: full after 7s; pytest 61 passed, 14 skipped + vitest 50 passed)
+- CI: 7/7 checks done, 3m34s (green)
+- Handover rebuild: status=rebuilt sha=0f629b0+dirty services=3/3 health=pass project=framework-improvement-test-10-handover urls=backend=http://localhost:20873,db=localhost:20874,frontend=http://localhost:20875 duration=11s
+- PR label: #530 mayker:in-review (removed mayker:in-progress); converted out of draft; tracker status to test
+- Comments (6.8 round 1): PR inline and general counted below; tracker 0 new since 6.1 beyond this runs PR-link notice.
+- 2026-11-04 [TEST-10] Merge verdict: MERGE (run=deliver-20261104T014748Z, orchestrator, /deliver 6.9, squash). Rationale: autonomy.md Section 5 holds on all five conditions. (1) Reviewer verdict line `VERDICT: PASS blocking=0 recommended=0 optional=1`, the one optional note a design-fidelity remark with no design reference, and no BLOCKING finding ever opened. (2) `ci-poll.sh` at the merge decision reads `verdict=green next=none failed=0 poll=1` (7/7 checks, 4m14s), every check counted; PR #530 is out of draft, mergeable=MERGEABLE, mergeStateStatus=CLEAN against main 8ab89c8 (BUG-04 merged since the plan base, disjoint files). (3) Criteria verified against the worktree: criterion 1 by `version.ts` `toDisplayCommit` (trim, `slice(0, 7)`) and the `app-commit` span rendered after `app-version` in `AppFooter.tsx`; criterion 2 by the null state while pending and after a swallowed rejection, so the footer reads exactly `Task Notes` with no undefined, null or error text, and `Task Notes v{version}` when the commit is missing, blank or "unknown" (the interpretation recorded at plan time in Re-Plan Feedback, the PR body and the tracker notice); criterion 3 by `AppFooter.test.tsx`, which asserts the exact footer text on success with and without commit, pending and failure. Observed: Vitest 50 passed at Phase A and the gate, pytest 61 passed/14 skipped at the push gate (head 0f629b0), Phase D E2E 5 passed and the CI E2E step green. (4) Both surfaces answered: 0 inline and 0 general PR comments, reviewDecision empty, no change request; tracker comments 0 new since 6.1 beyond this run's own PR-link notice. (5) Escalation bar not triggered: frontend-only change, reversible with a revert PR, nothing irreversible or ambiguous.
+- Merge: #530 squash-merged as 7ddea42 (state MERGED)
+- auto-done: run 41761181752 succeeded; tracker re-read: complete (fired, no backstop)
+- Standards provenance: 9 dispatches; both always-on standards SELF-REPORTED as read by 3 of 9 (self-reported); 0 unbacked claims; no MISMATCH.
+- [checkpoint] due=yes items=TEST-10 head=7ddea42 tip=origin/main@7ddea42 verdict=pass
