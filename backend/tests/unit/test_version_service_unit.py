@@ -2,7 +2,31 @@
 
 from importlib.metadata import PackageNotFoundError
 
+from app.core.config import DEFAULT_BUILD_COMMIT
 from app.services import version_service
+
+
+def test_get_build_commit_truncates_a_full_sha_to_twelve_characters(monkeypatch):
+    """Happy path: CI passes a 40-character sha; only its first 12 are reported."""
+    sha = "0123456789abcdef0123456789abcdef01234567"
+    monkeypatch.setenv("BUILD_COMMIT", sha)
+
+    assert version_service.BUILD_COMMIT_LENGTH == 12
+    assert version_service.get_build_commit() == sha[:12] == "0123456789ab"
+
+
+def test_get_build_commit_returns_a_short_value_unchanged(monkeypatch):
+    """Edge case: a value of 12 characters or fewer is not padded or cut."""
+    monkeypatch.setenv("BUILD_COMMIT", "abc1234")
+
+    assert version_service.get_build_commit() == "abc1234"
+
+
+def test_get_build_commit_returns_default_when_unset(monkeypatch):
+    """Error case: with no BUILD_COMMIT the configured default is reported."""
+    monkeypatch.delenv("BUILD_COMMIT", raising=False)
+
+    assert version_service.get_build_commit() == DEFAULT_BUILD_COMMIT
 
 
 def test_get_app_version_returns_installed_distribution_version(monkeypatch):
