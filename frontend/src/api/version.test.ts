@@ -37,16 +37,48 @@ describe("version API client", () => {
   it("returns the version the backend sent, from the default base URL", async () => {
     fetchMock.mockResolvedValue(okResponse({ version: "0.1.0" }));
 
-    await expect(fetchBackendVersion()).resolves.toBe("0.1.0");
+    await expect(fetchBackendVersion()).resolves.toEqual({ version: "0.1.0", commit: null });
 
     expect(fetchMock).toHaveBeenCalledTimes(1);
     expect(fetchMock).toHaveBeenCalledWith(DEFAULT_VERSION_URL);
   });
 
-  it("ignores additional response fields", async () => {
+  it("shortens a 12-character commit to its first 7 characters", async () => {
+    fetchMock.mockResolvedValue(
+      okResponse({ version: "0.1.0", commit: "0123456789ab" }),
+    );
+
+    await expect(fetchBackendVersion()).resolves.toEqual({
+      version: "0.1.0",
+      commit: "0123456",
+    });
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("keeps a commit shorter than 7 characters as it is", async () => {
     fetchMock.mockResolvedValue(okResponse({ version: "0.1.0", commit: "abc" }));
 
-    await expect(fetchBackendVersion()).resolves.toBe("0.1.0");
+    await expect(fetchBackendVersion()).resolves.toEqual({ version: "0.1.0", commit: "abc" });
+  });
+
+  it.each([
+    ["the unknown sentinel", "unknown"],
+    ["blank", "  "],
+    ["empty", ""],
+    ["not a string", 42],
+    ["null", null],
+  ])("returns a null commit, not an error, when the commit is %s", async (_label, commit) => {
+    fetchMock.mockResolvedValue(okResponse({ version: "0.1.0", commit }));
+
+    await expect(fetchBackendVersion()).resolves.toEqual({ version: "0.1.0", commit: null });
+  });
+
+  it("returns null when the version is unknown even with a known commit", async () => {
+    fetchMock.mockResolvedValue(
+      okResponse({ version: "unknown", commit: "0123456789ab" }),
+    );
+
+    await expect(fetchBackendVersion()).resolves.toBeNull();
   });
 
   it("returns null when the backend reports the unknown sentinel", async () => {
