@@ -20,3 +20,14 @@ This run's section of the repository-root `DECISIONS.md`, which is cumulative ac
 - [run] Wave-2 boundary: follow-ups filed none (TEST-09 known improvements all OPTIONAL; BUG-01 and TEST-08 none outstanding; no unaddressed comments).
 - [run] Wave-2 re-ingest: 2 nodes (BUG-04, TEST-10); no new task; registered=none; validator passed on 42 rows.
 - [run] Round 3: plan BUG-04 and TEST-10 concurrently; TEST-10 build held until BUG-04 merges or the whole-feature manifest unions are disjoint (candidate overlap LandingPage.test.tsx).
+- [run] Section L wave-2 publish: arm=opened merge=merged PR #550 (chore/mayker-deliver-20261104T193955Z-wave-2); pr-tests was a required check on main at merge time.
+- [run] BUG-04 plan self-approved; Repro class local-automated (npm --prefix frontend test -- src/components/NoteForm.test.tsx).
+- [run] TEST-10 plan self-approved. TEST-10 hold behind BUG-04 released: whole-feature File Manifest unions disjoint (BUG-04: NoteForm.tsx, NoteForm.test.tsx and its own e2e/uat files; TEST-10: version.ts, version.test.ts, AppFooter.tsx, AppFooter.test.tsx, LandingPage.test.tsx and its own e2e/uat files); CHORE-02 cancelled. Both build concurrently.
+- [run] Round 3 builds: BUG-04 Phase A and TEST-10 Phase A dispatched; merged-since clean on both (base=0515c74 forced, commits=0).
+- [run] TEST-10 Phase D held behind BUG-04: smoke run ports
+- [run] Merged BUG-04 (PR #551, squash -> 158f6aa) on the orchestrator's verdict: autonomy.md Section 5 held on all five conditions; repro before fail -> after pass; manifest disjoint from in-flight TEST-10.
+- [run] Merged TEST-10 (PR #552, squash -> af29e17) on the orchestrator's verdict: all five Section 5 conditions held; BUG-04's intervening merge is file-disjoint.
+- [run] Post-merge: auto-done runs 41906093081 (BUG-04) and 41906597535 (TEST-10) succeeded; checkpoints BUG-04 (head 158f6aa) and TEST-10 (head af29e17) verdict=pass. BUG-04-db torn down.
+- [run] Final boundary: follow-ups filed none (BUG-04 known improvements none; TEST-10 known improvements one OPTIONAL only; no unaddressed comments).
+- [run] FINAL re-ingest: 0 nodes; fresh list read (38 tasks, all registered, none new); BUG-04 and TEST-10 drop as done; BUG-01 stays to_verify; 30 cancelled tasks unmapped; registered=none; validator passed on 42 rows; map not written.
+- [run] Run ends at the final boundary: graph empty, nothing blocked, no follow-up filed.
