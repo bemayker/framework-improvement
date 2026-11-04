@@ -59,7 +59,7 @@ const disabledButtonStyle: CSSProperties = {
   cursor: "not-allowed",
 };
 
-const errorStyle:CSSProperties = {
+const errorStyle: CSSProperties = {
   fontSize: "0.875rem",
   color: "#b3261e",
   margin: 0,

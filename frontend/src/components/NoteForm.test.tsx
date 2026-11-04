@@ -88,7 +88,6 @@ describe("NoteForm", () => {
     submitForm();
 
     await waitFor(() => expect(createNoteMock).toHaveBeenCalledTimes(1));
-    expect(createNoteMock).toHaveBeenCalledTimes(1);
   });
 
   it("disables the submit button while saving and enables it again after success", async () => {

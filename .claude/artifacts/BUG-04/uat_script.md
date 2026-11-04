@@ -4,8 +4,8 @@
 
 - Backend and frontend running; the frontend is served at `http://localhost:5183`.
 - Browser DevTools open on the **Network** tab, filtered to `notes`.
-- For scenarios 1 to 3, network throttling set to "Slow 3G" so a save stays in flight long enough to click twice.
-- For scenario 3, the ability to stop and start the backend (for example `docker compose stop backend` and `docker compose start backend`).
+- For criteria 1 and 2, network throttling set to "Slow 3G" so a save stays in flight long enough to click twice.
+- For criterion 3, the ability to stop and start the backend (for example `docker compose stop backend` and `docker compose start backend`).
 - Notes from earlier runs may already be listed; every step concerns the note you add.
 
 ## Steps

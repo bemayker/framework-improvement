@@ -9,7 +9,7 @@ Feature: BUG-04 Saving a note twice quickly stores it twice
 
   Scenario: A double submit while the save is in flight stores one note
     Given the landing page is open
-    And the first save of a note is still in flight
+    And the network is throttled so a save stays in flight long enough to submit twice
     When I type "Buy milk twice-test" into the note field identified by "note-input"
     And I double-click the save button identified by "note-submit"
     Then exactly one save request is sent to the backend
@@ -18,7 +18,7 @@ Feature: BUG-04 Saving a note twice quickly stores it twice
 
   Scenario: Pressing Enter and then clicking Save sends one request
     Given the landing page is open
-    And the first save of a note is still in flight
+    And the network is throttled so a save stays in flight long enough to submit twice
     When I type "Walk dog enter-test" into the note field identified by "note-input"
     And I press Enter in the field and immediately click the save button identified by "note-submit"
     Then exactly one save request is sent to the backend
