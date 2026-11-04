@@ -27,3 +27,23 @@ export async function openLandingPageAndReadBackendVersion(page: Page): Promise<
   const body = (await (await versionResponse).json()) as { version: string };
   return body.version;
 }
+
+export interface BackendBuild {
+  version: string;
+  commit: string;
+}
+
+/**
+ * Opens the landing page and returns the full `{ version, commit }` body the
+ * page's own `GET /api/version` call received, so a spec compares the footer
+ * with the live backend instead of a commit typed into the spec.
+ */
+export async function openLandingPageAndReadBackendBuild(page: Page): Promise<BackendBuild> {
+  const versionResponse = page.waitForResponse(
+    (response: Response) => isVersionApiUrl(response.url()) && response.ok(),
+  );
+
+  await page.goto("/");
+
+  return (await (await versionResponse).json()) as BackendBuild;
+}
