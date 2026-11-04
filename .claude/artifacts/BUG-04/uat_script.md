@@ -4,7 +4,7 @@
 
 - The stack is running (`docker compose up`) and the frontend is reachable at http://localhost:5183.
 - Browser devtools open on the Network tab, filtered on `notes`.
-- Criterion 2 step 2 and 3 stop and start the backend with `docker compose stop backend` and `docker compose start backend`.
+- Criterion 2 steps 7 and 8 stop and start the backend with `docker compose stop backend` and `docker compose start backend`.
 
 ## Steps
 
