@@ -9,11 +9,6 @@ vi.mock("../api/notes", () => ({
   createNote: vi.fn(),
 }));
 
-// The footer fetches the build commit on mount; a pending promise keeps this suite off the network.
-vi.mock("../api/version", () => ({
-  getVersionInfo: vi.fn(() => new Promise(() => {})),
-}));
-
 const listNotesMock = vi.mocked(listNotes);
 const createNoteMock = vi.mocked(createNote);
 
