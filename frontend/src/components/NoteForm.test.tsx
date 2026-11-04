@@ -100,6 +100,20 @@ describe("NoteForm", () => {
     await waitFor(() => expect(screen.getByTestId("note-submit")).toBeDisabled());
   });
 
+  it("greys out the submit button with a not-allowed cursor while saving", async () => {
+    createNoteMock.mockReturnValue(new Promise(() => {}));
+    render(<NoteForm onCreated={vi.fn()} />);
+
+    typeNote("Buy milk");
+    submitForm();
+
+    await waitFor(() => expect(screen.getByTestId("note-submit")).toBeDisabled());
+    expect(screen.getByTestId("note-submit")).toHaveStyle({
+      cursor: "not-allowed",
+      opacity: "0.6",
+    });
+  });
+
   it("re-enables the submit button after a successful save", async () => {
     createNoteMock.mockResolvedValue({ id: 10, text: "Buy milk" });
     render(<NoteForm onCreated={vi.fn()} />);

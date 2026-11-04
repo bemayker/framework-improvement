@@ -53,6 +53,12 @@ const buttonStyle: CSSProperties = {
   cursor: "pointer",
 };
 
+const disabledButtonStyle: CSSProperties = {
+  ...buttonStyle,
+  cursor: "not-allowed",
+  opacity: 0.6,
+};
+
 const errorStyle: CSSProperties = {
   fontSize: "0.875rem",
   color: "#b3261e",
@@ -122,7 +128,7 @@ function NoteForm({ onCreated }: NoteFormProps) {
           data-testid="note-submit"
           type="submit"
           disabled={isSaving}
-          style={buttonStyle}
+          style={isSaving ? disabledButtonStyle : buttonStyle}
         >
           {SUBMIT_LABEL}
         </button>
