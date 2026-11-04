@@ -18,16 +18,61 @@ describe("fetchBackendVersion", () => {
     vi.unstubAllGlobals();
   });
 
-  it("returns the version on a 200 response", async () => {
+  it("returns the version and a null commit when the body has no commit", async () => {
     mockFetchJson({ version: "0.1.0" });
 
-    await expect(fetchBackendVersion()).resolves.toBe("0.1.0");
+    await expect(fetchBackendVersion()).resolves.toEqual({
+      version: "0.1.0",
+      commit: null,
+    });
   });
 
-  it("ignores extra fields in the body", async () => {
-    mockFetchJson({ version: "0.1.0", commit: "abc123" });
+  it("shortens a 12-character commit to its first 7 characters", async () => {
+    mockFetchJson({ version: "0.1.0", commit: "5796772ab1cd" });
 
-    await expect(fetchBackendVersion()).resolves.toBe("0.1.0");
+    await expect(fetchBackendVersion()).resolves.toEqual({
+      version: "0.1.0",
+      commit: "5796772",
+    });
+  });
+
+  it("leaves a commit shorter than 7 characters unchanged", async () => {
+    mockFetchJson({ version: "0.1.0", commit: "abc12" });
+
+    await expect(fetchBackendVersion()).resolves.toEqual({
+      version: "0.1.0",
+      commit: "abc12",
+    });
+  });
+
+  it("trims whitespace around the commit before shortening", async () => {
+    mockFetchJson({ version: "0.1.0", commit: "  5796772ab1cd  " });
+
+    await expect(fetchBackendVersion()).resolves.toEqual({
+      version: "0.1.0",
+      commit: "5796772",
+    });
+  });
+
+  it.each([["unknown"], [""], ["   "], [7], [null]])(
+    "gives a null commit for %j without rejecting",
+    async (commit) => {
+      mockFetchJson({ version: "0.1.0", commit });
+
+      await expect(fetchBackendVersion()).resolves.toEqual({
+        version: "0.1.0",
+        commit: null,
+      });
+    },
+  );
+
+  it("keeps a null version and a valid commit when the version is unknown", async () => {
+    mockFetchJson({ version: "unknown", commit: "5796772ab1cd" });
+
+    await expect(fetchBackendVersion()).resolves.toEqual({
+      version: null,
+      commit: "5796772",
+    });
   });
 
   it("calls the configured base URL at /api/version", async () => {
@@ -41,7 +86,10 @@ describe("fetchBackendVersion", () => {
   it("returns null when the backend reports the unknown sentinel", async () => {
     mockFetchJson({ version: "unknown" });
 
-    await expect(fetchBackendVersion()).resolves.toBeNull();
+    await expect(fetchBackendVersion()).resolves.toEqual({
+      version: null,
+      commit: null,
+    });
   });
 
   it("rejects on a non-2xx status", async () => {

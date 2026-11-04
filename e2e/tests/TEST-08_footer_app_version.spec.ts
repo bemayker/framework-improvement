@@ -16,8 +16,10 @@ test.describe("TEST-08 footer shows the backend version", () => {
     const backendVersion = await openLandingPageAndReadBackendVersion(page);
 
     const footer = page.getByTestId("app-footer");
-    await expect(footer).toHaveText(`Task Notes v${backendVersion}`);
-    await expect(page.getByTestId("app-version")).toBeVisible();
+    // Not exact footer text: a backend built with BUILD_COMMIT also shows the
+    // commit after the version (TEST-10).
+    await expect(page.getByTestId("app-version")).toHaveText(`v${backendVersion}`);
+    await expect(footer).toContainText(`Task Notes v${backendVersion}`);
 
     // The two sources differ today; when they do, the footer must not show the
     // frontend package's version.
