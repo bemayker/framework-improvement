@@ -31,3 +31,5 @@ This run's section of the repository-root `DECISIONS.md`, which is cumulative ac
 - [run] Final boundary: follow-ups filed none (BUG-04 known improvements none; TEST-10 known improvements one OPTIONAL only; no unaddressed comments).
 - [run] FINAL re-ingest: 0 nodes; fresh list read (38 tasks, all registered, none new); BUG-04 and TEST-10 drop as done; BUG-01 stays to_verify; 30 cancelled tasks unmapped; registered=none; validator passed on 42 rows; map not written.
 - [run] Run ends at the final boundary: graph empty, nothing blocked, no follow-up filed.
+- [run] Report dispatch: every block line written in its facts' arm; Waves, Test checkpoints (flagged set) and Decisions of note read from feature_map.md and DECISIONS.md; Shared risk takes the not-run arm (0 cells inferred) with this run's 3 serialized pairs named; Standards provenance summed to 14 of 20 dispatches.
+- [run] Fallback wakeups: none scheduled (background dispatches awaited by notification, waiting policy 2.1).
