@@ -17,8 +17,15 @@ DEFAULT_CORS_ORIGINS = ("http://localhost:5183",)
 
 
 def _read_cors_origins() -> tuple[str, ...]:
-    """Return CORS_ORIGINS split on commas, or the default when none are given."""
-    entries = (entry.strip() for entry in (os.environ.get("CORS_ORIGINS") or "").split(","))
+    """Return CORS_ORIGINS split on commas, or the default when none are given.
+
+    A trailing slash is dropped from each entry: a browser's Origin header never
+    carries one, and CORSMiddleware compares the strings exactly.
+    """
+    entries = (
+        entry.strip().rstrip("/")
+        for entry in (os.environ.get("CORS_ORIGINS") or "").split(",")
+    )
     return tuple(entry for entry in entries if entry) or DEFAULT_CORS_ORIGINS
 
 
@@ -30,7 +37,8 @@ class Settings:
     database_url: str | None = field(
         default_factory=lambda: os.environ.get("DATABASE_URL")
     )
-    # CORS_ORIGINS (comma-separated), read per call; unset or blank uses the default.
+    # CORS_ORIGINS (comma-separated, trailing slashes stripped), read per call;
+    # unset or blank uses the default.
     cors_origins: tuple[str, ...] = field(default_factory=_read_cors_origins)
 
 
