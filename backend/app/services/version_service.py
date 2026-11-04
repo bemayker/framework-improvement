@@ -2,25 +2,16 @@
 
 The version is read from installed package metadata rather than hardcoded,
 so it always reflects `[project].version` in backend/pyproject.toml without
-any code change when that value is bumped. The build commit (TEST-09) comes
-from the declared BUILD_COMMIT setting and is reported as its first 12 characters.
+any code change when that value is bumped.
 """
 
 import logging
 from importlib.metadata import PackageNotFoundError, version
 
-from app.core.config import get_settings
-
 logger = logging.getLogger(__name__)
 
 DISTRIBUTION_NAME = "task-notes-backend"
 UNKNOWN_VERSION = "unknown"
-BUILD_COMMIT_LENGTH = 12
-
-
-def get_build_commit() -> str:
-    """Return the first 12 characters of the declared build commit."""
-    return get_settings().build_commit[:BUILD_COMMIT_LENGTH]
 
 
 def get_app_version() -> str:
