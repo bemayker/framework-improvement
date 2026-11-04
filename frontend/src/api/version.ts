@@ -7,7 +7,8 @@ const VERSION_URL = `${API_BASE_URL}/api/version`;
 /**
  * The value the backend returns when it cannot resolve its own version or
  * build commit. Counterpart of UNKNOWN_VERSION in
- * backend/app/services/version_service.py.
+ * backend/app/services/version_service.py and of DEFAULT_BUILD_COMMIT in
+ * backend/app/core/config.py.
  */
 export const BACKEND_UNKNOWN_VERSION = "unknown";
 
