@@ -1,1 +1,0 @@
-{"run_id":"deliver-20261104T193955Z","round":"final","items":{"TEST-09":{"phase":"done","pr":547,"merge":"f542b6a"},"BUG-01":{"phase":"to_verify","pr":548,"merge":"b8e3073"},"TEST-08":{"phase":"done","pr":549,"merge":"8488648"},"BUG-04":{"phase":"done","pr":551,"merge":"158f6aa"},"TEST-10":{"phase":"done","pr":552,"merge":"af29e17"}}}
