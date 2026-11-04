@@ -32,7 +32,11 @@ test.describe("TEST-08 footer shows the backend version", () => {
       (route) => route.abort(),
     );
 
+    const failedRequest = page.waitForEvent("requestfailed", (request) =>
+      isVersionApiUrl(request.url()),
+    );
     await page.goto("/");
+    await failedRequest;
 
     const footer = page.getByTestId("app-footer");
     await expect(footer).toBeVisible();

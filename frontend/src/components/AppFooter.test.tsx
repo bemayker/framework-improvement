@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, waitFor } from "@testing-library/react";
+import { act, render, screen, waitFor } from "@testing-library/react";
 import AppFooter from "./AppFooter";
 import { fetchBackendVersion } from "../api/version";
 import { version as packageVersion } from "../../package.json";
@@ -40,6 +40,8 @@ describe("AppFooter", () => {
     render(<AppFooter />);
 
     await waitFor(() => expect(fetchBackendVersionMock).toHaveBeenCalled());
+    // Let the rejection settle so the assertions below see the post-failure state.
+    await act(async () => {});
     const footer = screen.getByTestId("app-footer");
     expect(footer.textContent).toBe("Task Notes");
     expect(screen.queryByTestId("app-version")).not.toBeInTheDocument();
@@ -51,6 +53,8 @@ describe("AppFooter", () => {
     render(<AppFooter />);
 
     await waitFor(() => expect(fetchBackendVersionMock).toHaveBeenCalled());
+    // Let the resolved null settle so the assertions below see the post-resolution state.
+    await act(async () => {});
     expect(screen.getByTestId("app-footer").textContent).toBe("Task Notes");
     expect(screen.queryByTestId("app-version")).not.toBeInTheDocument();
   });
