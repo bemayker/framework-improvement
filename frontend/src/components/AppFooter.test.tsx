@@ -1,29 +1,41 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen } from "@testing-library/react";
 import AppFooter from "./AppFooter";
-import { getBackendVersion } from "../api/version";
+import { getBackendBuildInfo } from "../api/version";
 
 vi.mock("../api/version", () => ({
-  getBackendVersion: vi.fn(),
+  getBackendBuildInfo: vi.fn(),
 }));
 
-const getBackendVersionMock = vi.mocked(getBackendVersion);
+const getBackendBuildInfoMock = vi.mocked(getBackendBuildInfo);
 
 describe("AppFooter", () => {
   beforeEach(() => {
-    getBackendVersionMock.mockReset();
-    getBackendVersionMock.mockResolvedValue("0.1.0");
+    getBackendBuildInfoMock.mockReset();
+    getBackendBuildInfoMock.mockResolvedValue({
+      version: "0.1.0",
+      commit: "3f2a9c1",
+    });
   });
 
-  it("renders the app name and the backend version once it resolves", async () => {
+  it("renders the app name, the version and the short commit once it resolves", async () => {
+    render(<AppFooter />);
+
+    expect(await screen.findByText("Task Notes v0.1.0 (3f2a9c1)")).toBeInTheDocument();
+    expect(getBackendBuildInfoMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("renders the version alone when the backend reports no usable commit", async () => {
+    getBackendBuildInfoMock.mockResolvedValue({ version: "0.1.0", commit: null });
+
     render(<AppFooter />);
 
     expect(await screen.findByText("Task Notes v0.1.0")).toBeInTheDocument();
-    expect(getBackendVersionMock).toHaveBeenCalledTimes(1);
+    expect(screen.getByTestId("app-footer").textContent).not.toMatch(/\(|\)/);
   });
 
-  it("renders exactly the app name while the version is loading", () => {
-    getBackendVersionMock.mockReturnValue(new Promise(() => {}));
+  it("renders exactly the app name while the request is pending", () => {
+    getBackendBuildInfoMock.mockReturnValue(new Promise(() => {}));
 
     render(<AppFooter />);
 
@@ -31,28 +43,28 @@ describe("AppFooter", () => {
   });
 
   it("renders exactly the app name when the backend reports no version", async () => {
-    getBackendVersionMock.mockResolvedValue(null);
+    getBackendBuildInfoMock.mockResolvedValue(null);
 
     render(<AppFooter />);
 
-    await vi.waitFor(() => expect(getBackendVersionMock).toHaveBeenCalled());
+    await vi.waitFor(() => expect(getBackendBuildInfoMock).toHaveBeenCalled());
     expect(screen.getByTestId("app-footer").textContent).toBe("Task Notes");
   });
 
-  it("renders exactly the app name when the version request fails", async () => {
-    getBackendVersionMock.mockRejectedValue(new Error("network down"));
+  it("renders exactly the app name when the request fails", async () => {
+    getBackendBuildInfoMock.mockRejectedValue(new Error("network down"));
 
     render(<AppFooter />);
 
-    await vi.waitFor(() => expect(getBackendVersionMock).toHaveBeenCalled());
+    await vi.waitFor(() => expect(getBackendBuildInfoMock).toHaveBeenCalled());
     await Promise.resolve();
     const text = screen.getByTestId("app-footer").textContent;
     expect(text).toBe("Task Notes");
-    expect(text).not.toMatch(/undefined|null|unknown/);
+    expect(text).not.toMatch(/undefined|null|unknown|\(\)/);
   });
 
   it("is exposed as the contentinfo landmark and carries the app-footer test id", () => {
-    getBackendVersionMock.mockReturnValue(new Promise(() => {}));
+    getBackendBuildInfoMock.mockReturnValue(new Promise(() => {}));
 
     render(<AppFooter />);
 

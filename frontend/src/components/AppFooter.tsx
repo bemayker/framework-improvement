@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import type { CSSProperties } from "react";
-import { getBackendVersion } from "../api/version";
+import { getBackendBuildInfo } from "../api/version";
+import type { BackendBuildInfo } from "../api/version";
 
 const APP_NAME = "Task Notes";
 
@@ -10,18 +11,23 @@ const footerStyle: CSSProperties = {
   marginTop: "1.5rem",
 };
 
+function formatFooterText({ version, commit }: BackendBuildInfo): string {
+  const nameAndVersion = `${APP_NAME} v${version}`;
+  return commit === null ? nameAndVersion : `${nameAndVersion} (${commit})`;
+}
+
 function AppFooter() {
   // null covers loading, failure and "backend reported no version": all render
   // the app name alone, never a placeholder.
-  const [version, setVersion] = useState<string | null>(null);
+  const [buildInfo, setBuildInfo] = useState<BackendBuildInfo | null>(null);
 
   useEffect(() => {
     let isMounted = true;
 
-    getBackendVersion()
-      .then((backendVersion) => {
+    getBackendBuildInfo()
+      .then((backendBuildInfo) => {
         if (isMounted) {
-          setVersion(backendVersion);
+          setBuildInfo(backendBuildInfo);
         }
       })
       .catch(() => {
@@ -35,7 +41,7 @@ function AppFooter() {
 
   return (
     <footer data-testid="app-footer" style={footerStyle}>
-      {version === null ? APP_NAME : `${APP_NAME} v${version}`}
+      {buildInfo === null ? APP_NAME : formatFooterText(buildInfo)}
     </footer>
   );
 }

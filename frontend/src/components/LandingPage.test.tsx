@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import LandingPage from "./LandingPage";
 import { listNotes, createNote } from "../api/notes";
-import { getBackendVersion } from "../api/version";
+import { getBackendBuildInfo } from "../api/version";
 
 vi.mock("../api/notes", () => ({
   listNotes: vi.fn(),
@@ -10,11 +10,12 @@ vi.mock("../api/notes", () => ({
 }));
 
 vi.mock("../api/version", () => ({
-  getBackendVersion: vi.fn(),
+  getBackendBuildInfo: vi.fn(),
 }));
 
 const BACKEND_VERSION = "7.7.7-backend";
-const getBackendVersionMock = vi.mocked(getBackendVersion);
+const BACKEND_COMMIT = "3f2a9c1";
+const getBackendBuildInfoMock = vi.mocked(getBackendBuildInfo);
 
 const listNotesMock = vi.mocked(listNotes);
 const createNoteMock = vi.mocked(createNote);
@@ -30,8 +31,11 @@ describe("LandingPage", () => {
     listNotesMock.mockReset();
     createNoteMock.mockReset();
     listNotesMock.mockResolvedValue([]);
-    getBackendVersionMock.mockReset();
-    getBackendVersionMock.mockResolvedValue(BACKEND_VERSION);
+    getBackendBuildInfoMock.mockReset();
+    getBackendBuildInfoMock.mockResolvedValue({
+      version: BACKEND_VERSION,
+      commit: BACKEND_COMMIT,
+    });
   });
 
   it("renders the app title 'Task Notes'", async () => {
@@ -52,11 +56,12 @@ describe("LandingPage", () => {
     expect(screen.getByRole("heading", { name: "Task Notes" })).toBeInTheDocument();
   });
 
-  it("renders the footer with the app name and version", async () => {
+  it("renders the footer with the app name, version and short commit", async () => {
     await renderLandingPage();
 
-    expect(await screen.findByText(`Task Notes v${BACKEND_VERSION}`)).toBeInTheDocument();
-    expect(screen.getByTestId("app-footer")).toHaveTextContent(BACKEND_VERSION);
+    const footerText = `Task Notes v${BACKEND_VERSION} (${BACKEND_COMMIT})`;
+    expect(await screen.findByText(footerText)).toBeInTheDocument();
+    expect(screen.getByTestId("app-footer")).toHaveTextContent(footerText);
   });
 
   it("renders the note form and the note list", async () => {
