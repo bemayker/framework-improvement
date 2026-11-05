@@ -18,17 +18,18 @@ export interface BackendBuildInfo {
   commit: string | null;
 }
 
+/** Trimmed text, or null when the value is not a string, blank, or the sentinel. */
+function usableText(value: unknown, unknownSentinel: string): string | null {
+  if (typeof value !== "string") {
+    return null;
+  }
+
+  const trimmed = value.trim();
+  return trimmed === "" || trimmed === unknownSentinel ? null : trimmed;
+}
+
 function toShortCommit(commit: unknown): string | null {
-  if (typeof commit !== "string") {
-    return null;
-  }
-
-  const trimmed = commit.trim();
-  if (trimmed === "" || trimmed === BACKEND_UNKNOWN_COMMIT) {
-    return null;
-  }
-
-  return trimmed.slice(0, SHORT_COMMIT_LENGTH);
+  return usableText(commit, BACKEND_UNKNOWN_COMMIT)?.slice(0, SHORT_COMMIT_LENGTH) ?? null;
 }
 
 /**
@@ -50,16 +51,11 @@ export async function getBackendBuildInfo(): Promise<BackendBuildInfo | null> {
     version?: unknown;
     commit?: unknown;
   } | null;
-  const version = body?.version;
+  const version = usableText(body?.version, BACKEND_UNKNOWN_VERSION);
 
-  if (typeof version !== "string") {
+  if (version === null) {
     return null;
   }
 
-  const trimmedVersion = version.trim();
-  if (trimmedVersion === "" || trimmedVersion === BACKEND_UNKNOWN_VERSION) {
-    return null;
-  }
-
-  return { version: trimmedVersion, commit: toShortCommit(body?.commit) };
+  return { version, commit: toShortCommit(body?.commit) };
 }
