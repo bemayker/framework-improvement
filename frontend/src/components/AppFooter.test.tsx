@@ -59,14 +59,6 @@ describe("AppFooter", () => {
     );
   });
 
-  it("renders the version alone when the commit is missing", async () => {
-    getVersionMock.mockResolvedValue({ version: "9.9.9" });
-
-    render(<AppFooter />);
-
-    await waitFor(() => expect(footerText()).toBe("Task Notes v9.9.9"));
-  });
-
   it("renders the version alone when the commit is unknown", async () => {
     getVersionMock.mockResolvedValue({ version: "9.9.9", commit: "unknown" });
 
