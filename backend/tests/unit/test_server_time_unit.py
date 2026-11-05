@@ -52,6 +52,14 @@ def test_server_time_response_rejects_timezone_other_than_utc():
         ServerTimeResponse(now=datetime(2026, 11, 5, tzinfo=UTC), timezone="Europe/Brussels")
 
 
+def test_server_time_response_output_schema_declares_date_time_format():
+    """Regression pin: the serializer's `-> str` must not drop `format: date-time`."""
+    now_schema = ServerTimeResponse.model_json_schema(mode="serialization")["properties"]["now"]
+
+    assert now_schema["type"] == "string"
+    assert now_schema["format"] == "date-time"
+
+
 def test_get_server_time_reads_the_clock_on_every_call(monkeypatch):
     """Freshness: each handler call reads the clock again."""
     first = datetime(2026, 11, 5, 1, 29, 16, tzinfo=UTC)

@@ -3,7 +3,7 @@
 from datetime import UTC, datetime
 from typing import Literal
 
-from pydantic import AwareDatetime, BaseModel, field_serializer
+from pydantic import AwareDatetime, BaseModel, Field, field_serializer
 
 # The explicit UTC offset every serialised `now` ends with.
 UTC_OFFSET_SUFFIX = "+00:00"
@@ -18,7 +18,9 @@ class ServerTimeResponse(BaseModel):
     datetime is rejected at construction, so it can never be serialised.
     """
 
-    now: AwareDatetime
+    # The serializer below is annotated `-> str`, which makes the generated
+    # output schema a plain string; the extra pins `format: date-time` back.
+    now: AwareDatetime = Field(json_schema_extra={"format": "date-time"})
     timezone: Literal["UTC"] = "UTC"
 
     @field_serializer("now")
