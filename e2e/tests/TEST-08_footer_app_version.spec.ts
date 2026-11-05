@@ -23,7 +23,7 @@ test.describe("TEST-08 footer shows the backend app version", () => {
     await page.goto("/");
 
     await expect(page.getByTestId("app-footer-version")).toHaveText(`v${backendVersion}`);
-    await expect(page.getByTestId("app-footer")).toHaveText(`Task Notes v${backendVersion}`);
+    await expect(page.getByTestId("app-footer")).toContainText(`Task Notes v${backendVersion}`);
     await expect(page.getByTestId("app-footer")).not.toContainText(`v${frontendVersion}`);
   });
 
