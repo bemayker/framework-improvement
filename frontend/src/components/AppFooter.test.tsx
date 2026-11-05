@@ -46,6 +46,67 @@ describe("AppFooter", () => {
     expect(footerText()).toBe("Task Notes");
   });
 
+  it("renders the first 7 characters of the commit next to the version", async () => {
+    getVersionMock.mockResolvedValue({
+      version: "9.9.9",
+      commit: "abc1234def56",
+    });
+
+    render(<AppFooter />);
+
+    await waitFor(() =>
+      expect(footerText()).toBe("Task Notes v9.9.9 (abc1234)"),
+    );
+  });
+
+  it("renders the version alone when the commit is missing", async () => {
+    getVersionMock.mockResolvedValue({ version: "9.9.9" });
+
+    render(<AppFooter />);
+
+    await waitFor(() => expect(footerText()).toBe("Task Notes v9.9.9"));
+  });
+
+  it("renders the version alone when the commit is unknown", async () => {
+    getVersionMock.mockResolvedValue({ version: "9.9.9", commit: "unknown" });
+
+    render(<AppFooter />);
+
+    await waitFor(() => expect(footerText()).toBe("Task Notes v9.9.9"));
+  });
+
+  it("shows a commit shorter than 7 characters whole", async () => {
+    getVersionMock.mockResolvedValue({ version: "9.9.9", commit: "abc" });
+
+    render(<AppFooter />);
+
+    await waitFor(() => expect(footerText()).toBe("Task Notes v9.9.9 (abc)"));
+  });
+
+  it("never shows undefined, null, an error or empty parentheses while pending or rejected", async () => {
+    getVersionMock.mockReturnValueOnce(new Promise(() => {}));
+    const pending = render(<AppFooter />);
+    expect(footerText()).toBe("Task Notes");
+    pending.unmount();
+
+    getVersionMock.mockRejectedValueOnce(new Error("Loading the version failed"));
+    render(<AppFooter />);
+    await act(async () => {});
+
+    expect(footerText()).toBe("Task Notes");
+    expect(footerText()).not.toMatch(/undefined|null|Error|\(\)/);
+  });
+
+  it("renders exactly the app name when the version is unknown even with a real commit", async () => {
+    getVersionMock.mockResolvedValue({ version: "unknown", commit: "abc1234def56" });
+
+    render(<AppFooter />);
+
+    await waitFor(() => expect(getVersionMock).toHaveBeenCalledTimes(1));
+    await act(async () => {});
+    expect(footerText()).toBe("Task Notes");
+  });
+
   it("renders exactly the app name when the backend reports unknown", async () => {
     getVersionMock.mockResolvedValue({ version: "unknown" });
 

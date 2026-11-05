@@ -49,8 +49,34 @@ describe("version API client", () => {
     );
   });
 
+  it("returns the commit when the response carries a usable one", async () => {
+    fetchMock.mockResolvedValue(
+      okResponse({ version: "0.1.0", commit: "abc1234def56" }),
+    );
+
+    await expect(getVersion()).resolves.toEqual({
+      version: "0.1.0",
+      commit: "abc1234def56",
+    });
+  });
+
   it("ignores extra fields in the response", async () => {
-    fetchMock.mockResolvedValue(okResponse({ version: "0.1.0", commit: "abc" }));
+    fetchMock.mockResolvedValue(
+      okResponse({ version: "0.1.0", commit: "abc1234", build: "nightly" }),
+    );
+
+    await expect(getVersion()).resolves.toEqual({
+      version: "0.1.0",
+      commit: "abc1234",
+    });
+  });
+
+  it.each([
+    ["missing", { version: "0.1.0" }],
+    ["not a string", { version: "0.1.0", commit: 1234 }],
+    ["blank", { version: "0.1.0", commit: "   " }],
+  ])("returns the version alone when commit is %s", async (_label, body) => {
+    fetchMock.mockResolvedValue(okResponse(body));
 
     await expect(getVersion()).resolves.toEqual({ version: "0.1.0" });
   });
