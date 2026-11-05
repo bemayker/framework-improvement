@@ -1,0 +1,15 @@
+- Plan base: 7edc323
+- Tracker comments read: 28 (2 pages); actionable: 0 (framework PR-opened notes only).
+- Admitted at the wave-2 boundary (TEST-08 and TEST-09 merged in this run).
+
+## run=deliver-20261105T180408Z — Plan verdict (/deliver 6.2 step 1): APPROVE
+
+- **Decision:** approve the plan at `.claude/artifacts/TEST-10/plan.md` (base `7edc323`) on the first pass; no re-plan.
+- **Criteria vs plan:** all 3 acceptance criteria map to manifest entries and rendered states (criterion 1: `version.ts` 7-char slice plus `AppFooter.tsx` ` ({commit})`; criterion 2: pending/failure/no-version render `Task Notes` unchanged from TEST-08; criterion 3: `AppFooter.test.tsx` success, pending and failure cases).
+- **Scope containment** (`user_story_alignment.md` Section 3): frontend-only, as the item's notes require; no second request, no caching, no backend or route change, no new test id. The recorded assumptions (same-response version+commit; parenthesised format) are reasonable and the format is already what `docs/DEVELOPMENT.md` line 671 documents, verified on `main`, so the plan matches the docs rather than inventing a format.
+- **Layering** (`coding_standards.md` Sections 1 and 4): the only fetch stays in the dedicated client module `frontend/src/api/version.ts`, typed parse (`{ version?: unknown; commit?: unknown }`, no `any`), display concern (7-char cut) in the client, component state local to `AppFooter`. KISS: one named constant, one template string.
+- **Testing strategy:** present; `### Criterion coverage` has a row for every criterion, criterion 1 at E2E, criteria 2 and 3 at Unit each with a one-line reason (no navigation needed; criterion 3 is itself a component test). E2E uses a fulfilled `/api/version` route with exact-pathname matching because CI leaves `BUILD_COMMIT` unset (verified: it appears only in `docker-compose.yml` with an empty default, not in any workflow or `playwright.config.ts`), so the existing TEST-08 and TEST-04 specs' exact `Task Notes v{version}` assertions keep holding.
+- **Technology Selection:** section present; no net-new component, module or dependency; `String.prototype.slice` and the existing `useState`/`useEffect` chosen over any helper. Nothing to revise.
+- **File Manifest:** exact, every entry phase-tagged; `getBackendVersion` is referenced on `main` by exactly the three files the plan lists as following the rename (`AppFooter.tsx`, `LandingPage.test.tsx`, `version.ts`), verified by grep.
+- **Residual doubts:** none blocking. The rename of the exported client function means any concurrent item touching `frontend/src/api/version.ts` or `AppFooter.tsx` (shared_risks.md names CHORE-02) must be serialized behind TEST-10.
+- **Conflict check vs BUG-04** (`.claude/worktrees/BUG-04/.claude/artifacts/BUG-04/plan.md`, union of all phases): BUG-04 touches `NoteForm.tsx`, `NoteForm.test.tsx` and its own spec/UAT files; TEST-10 touches `version.ts`, `version.test.ts`, `AppFooter.tsx`, `AppFooter.test.tsx`, `LandingPage.test.tsx` and its own spec/UAT files. No overlap; no serialization hold needed.
