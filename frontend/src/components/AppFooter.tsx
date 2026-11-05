@@ -1,11 +1,15 @@
 import { useEffect, useState } from "react";
 import type { CSSProperties } from "react";
 import { getVersion } from "../api/version";
+import type { VersionResponse } from "../api/version";
 
 const APP_NAME = "Task Notes";
+const COMMIT_DISPLAY_LENGTH = 7;
 
-// The backend reports this when its package metadata is absent; it is not a
-// version, so the footer treats it the same as a failed lookup.
+// The backend reports this literal for both fields when it cannot resolve
+// them (package metadata absent, BUILD_COMMIT unset); it is not a version or
+// a commit, so the footer treats an unknown version as a failed lookup and
+// an unknown commit as absent.
 const UNKNOWN_BACKEND_VERSION = "unknown";
 
 const footerStyle: CSSProperties = {
@@ -15,7 +19,7 @@ const footerStyle: CSSProperties = {
 };
 
 function AppFooter() {
-  const [version, setVersion] = useState<string | null>(null);
+  const [versionInfo, setVersionInfo] = useState<VersionResponse | null>(null);
 
   useEffect(() => {
     let isMounted = true;
@@ -23,7 +27,7 @@ function AppFooter() {
     getVersion()
       .then((response) => {
         if (isMounted && response.version !== UNKNOWN_BACKEND_VERSION) {
-          setVersion(response.version);
+          setVersionInfo(response);
         }
       })
       .catch(() => {
@@ -35,10 +39,17 @@ function AppFooter() {
     };
   }, []);
 
+  const commit = versionInfo?.commit;
+  const shortCommit =
+    commit && commit !== UNKNOWN_BACKEND_VERSION
+      ? commit.slice(0, COMMIT_DISPLAY_LENGTH)
+      : null;
+
   return (
     <footer data-testid="app-footer" style={footerStyle}>
       {APP_NAME}
-      {version !== null ? ` v${version}` : null}
+      {versionInfo !== null ? ` v${versionInfo.version}` : null}
+      {versionInfo !== null && shortCommit !== null ? ` (${shortCommit})` : null}
     </footer>
   );
 }
