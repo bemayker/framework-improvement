@@ -19,7 +19,7 @@ Feature: TEST-08 Footer shows the app version
     When I open the landing page
     Then the footer shows "v0.1.0"
     And the footer does not show "v0.0.0"
-    And the browser made one "GET /api/version" request that returned status 200
+    And the browser made at least one "GET /api/version" request that returned status 200
 
   Scenario: Footer renders without a version when it cannot be resolved
     Given the backend is stopped so "/api/version" is unreachable

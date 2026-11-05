@@ -22,7 +22,7 @@
 | # | Step | Expected Result | Pass/Fail |
 |---|------|------------------|-----------|
 | 2.1 | Open http://localhost:5183/ and look at the footer | It reads `Task Notes v0.1.0` (the backend's version), not `v0.0.0` (the frontend package's version) | [ ] Pass [ ] Fail |
-| 2.2 | Open DevTools Network tab, filter on `version`, reload the page | One `GET http://localhost:8010/api/version` request with status 200 and body `{"version":"0.1.0"}` is listed | [ ] Pass [ ] Fail |
+| 2.2 | Open DevTools Network tab, filter on `version`, reload the page | At least one `GET http://localhost:8010/api/version` request with status 200 and body `{"version":"0.1.0"}` is listed (the dev server's React.StrictMode may show two) | [ ] Pass [ ] Fail |
 | 2.3 | Open `frontend/src/components/AppFooter.tsx` and search for `0.1.0` and for `package.json` | Neither appears; the version comes only from `getBackendVersion()` | [ ] Pass [ ] Fail |
 
 ### Criterion 3: When the version cannot be resolved, the footer renders without it
