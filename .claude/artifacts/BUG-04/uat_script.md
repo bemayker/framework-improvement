@@ -4,7 +4,7 @@
 
 - The app stack is running: frontend at `http://localhost:5183`, backend and database up.
 - A browser with DevTools open on the Network tab, filtered to `notes`.
-- Criterion 2, step 5: Node dependencies installed (`npm --prefix frontend install`).
+- Step 12: Node dependencies installed (`npm --prefix frontend install`).
 
 ## Steps
 
