@@ -17,7 +17,7 @@ Prerequisites: repository checked out on the BUG-01 branch, `uv` installed.
 ## Criterion 3: After deploy, the reproduction returns two different values (deployed environment only)
 Not reproducible locally (there is no edge cache locally); these steps pass before and after the fix when run locally, so run them against the deployed environment, performed by a human after merge.
 Prerequisites: the merge is deployed; you know the deployed API host (`docs/DEVELOPMENT.md` -> Test environments has no row yet, so take the host from whoever operates the deployment).
-1. Run `curl -sI https://<deployed-host>/api/time` -> the response carries `Cache-Control: no-store`, with no `age:` header greater than 0 and no CDN cache-hit marker (such as `x-cache: HIT` or `cf-cache-status: HIT`).
+1. Run `curl -si https://<deployed-host>/api/time` -> the response carries `Cache-Control: no-store`, with no `age:` header greater than 0 and no CDN cache-hit marker (such as `x-cache: HIT` or `cf-cache-status: HIT`).
 2. Run `curl -s https://<deployed-host>/api/time`, wait one second, and run it again.
 3. Expected: the two `now` values differ (the edge cache no longer serves a stale response). Before the fix they were identical.
 4. Pass: remove the `mayker:to-verify` tag from BUG-01. Fail: run `/fix BUG-01` with the observed responses.
