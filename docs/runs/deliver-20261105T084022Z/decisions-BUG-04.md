@@ -1,7 +1,0 @@
-# Decisions (BUG-04, after its final push): deliver-20261105T084022Z
-
-The entries `.claude/artifacts/BUG-04/decisions.md` received after the last push of its branch (52033f7), the head its pull request merged. The entries before them reached the default branch in that file.
-
-- 2026-11-05 [BUG-04] Merge verdict: merge (orchestrator, /deliver 6.9, autonomy.md Section 5). Rationale: (1) self-review VERDICT: PASS blocking=0, the one RECOMMENDED applied in the refactor gate (81be6f3); (2) ci-poll verdict=green failed=0 on 7/7 checks, PR OPEN, not draft, MERGEABLE/CLEAN; (3) both derived criteria met in NoteForm.tsx (synchronous savingRef guard after the empty-note check, disabled={isSaving}, both cleared in finally), repro before fail -> after pass, E2E 2 passed against the real stack, push gate pytest 76 + vitest 41 all passed; (4) 0 PR comments or reviews, no change request, tracker comments re-read with nothing actionable beyond this run's PR notice; (5) escalation bar not triggered: a reversible frontend-only change with no migration, secret or external side effect. Serialization: TEST-10 builds concurrently on a disjoint file set, no hold.
-- 2026-11-05 [BUG-04] Merged PR #577 by squash as 968a066. auto-done: run 42000990377 succeeded; re-read status complete (pipeline arm, no backstop).
-- 2026-11-05 [BUG-04] [checkpoint] due=yes items=BUG-04 head=968a066 verdict=pass (pytest 62 passed 14 skipped; vitest 41 passed). Teardown: docker rm -f BUG-04-db done. Standards provenance: 8 dispatches, 0 unbacked claims (self-reported).
