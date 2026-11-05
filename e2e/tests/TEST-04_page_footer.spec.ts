@@ -1,17 +1,27 @@
-import { readFileSync } from "node:fs";
-import path from "node:path";
-import { test, expect } from "@playwright/test";
+import { test, expect, type Page, type Response } from "@playwright/test";
 
-const frontendPackageJsonPath = path.resolve(__dirname, "../../frontend/package.json");
-const { version } = JSON.parse(readFileSync(frontendPackageJsonPath, "utf-8")) as {
-  version: string;
-};
+// The footer shows the backend's version (TEST-08), so the expected value is
+// whatever the page's own GET /api/version call reported, not a file on disk.
+function isVersionApiResponse(response: Response): boolean {
+  return new URL(response.url()).pathname === "/api/version";
+}
+
+async function openAndReadReportedVersion(page: Page): Promise<string> {
+  const versionResponse = page.waitForResponse(
+    (response) => isVersionApiResponse(response) && response.ok(),
+  );
+
+  await page.goto("/");
+
+  const { version } = (await (await versionResponse).json()) as { version: string };
+  return version;
+}
 
 test.describe("TEST-04 page footer", () => {
-  test("shows a footer with the app name and the version from frontend/package.json", async ({
+  test("shows a footer with the app name and the version the backend reported", async ({
     page,
   }) => {
-    await page.goto("/");
+    const version = await openAndReadReportedVersion(page);
 
     const footer = page.getByTestId("app-footer");
     await expect(footer).toBeVisible();
@@ -20,7 +30,7 @@ test.describe("TEST-04 page footer", () => {
   });
 
   test("exposes the footer as a contentinfo landmark", async ({ page }) => {
-    await page.goto("/");
+    const version = await openAndReadReportedVersion(page);
 
     await expect(page.getByRole("contentinfo")).toContainText(version);
   });
@@ -38,7 +48,7 @@ test.describe("TEST-04 page footer", () => {
 
   test("keeps the footer visible on a mobile viewport", async ({ page }) => {
     await page.setViewportSize({ width: 375, height: 667 });
-    await page.goto("/");
+    const version = await openAndReadReportedVersion(page);
 
     const footer = page.getByTestId("app-footer");
     await expect(footer).toBeVisible();
