@@ -1,8 +1,34 @@
 """Unit tests for the version service (backend/app/services/version_service.py)."""
 
 from importlib.metadata import PackageNotFoundError
+from types import SimpleNamespace
+
+import pytest
 
 from app.services import version_service
+
+
+def _patch_build_commit(monkeypatch, value: str) -> None:
+    monkeypatch.setattr(
+        version_service, "get_settings", lambda: SimpleNamespace(build_commit=value)
+    )
+
+
+def test_get_build_commit_truncates_a_full_sha_to_twelve_characters(monkeypatch):
+    """Happy path: a 40-character sha comes back as its first 12."""
+    sha = "3f9c2a1b7d4e8f6a5c0b9d2e1f4a7c3b6d8e0f12"
+    _patch_build_commit(monkeypatch, sha)
+
+    assert version_service.get_build_commit() == "3f9c2a1b7d4e"
+    assert version_service.COMMIT_LENGTH == 12
+
+
+@pytest.mark.parametrize("value", ["3f9c2a1b7d4e", "abc1234", "unknown"])
+def test_get_build_commit_returns_values_of_twelve_or_fewer_unchanged(monkeypatch, value):
+    """Edge case: the boundary length and shorter values pass through."""
+    _patch_build_commit(monkeypatch, value)
+
+    assert version_service.get_build_commit() == value
 
 
 def test_get_app_version_returns_installed_distribution_version(monkeypatch):
