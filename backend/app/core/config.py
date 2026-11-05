@@ -14,12 +14,6 @@ from dataclasses import dataclass, field
 # The browser at :5183 calls the backend at :8010 directly (the
 # VITE_API_BASE_URL wiring in docker-compose.yml), which is cross-origin.
 DEFAULT_CORS_ORIGINS = ("http://localhost:5183",)
-DEFAULT_BUILD_COMMIT = "unknown"
-
-
-def _read_build_commit() -> str:
-    """Return BUILD_COMMIT stripped, or the default when it is unset or blank."""
-    return (os.environ.get("BUILD_COMMIT") or "").strip() or DEFAULT_BUILD_COMMIT
 
 
 def _read_cors_origins() -> tuple[str, ...]:
@@ -38,8 +32,6 @@ class Settings:
     )
     # CORS_ORIGINS (comma-separated), read per call; unset or blank uses the default.
     cors_origins: tuple[str, ...] = field(default_factory=_read_cors_origins)
-    # BUILD_COMMIT, read per call; unset or blank uses DEFAULT_BUILD_COMMIT.
-    build_commit: str = field(default_factory=_read_build_commit)
 
 
 def get_settings() -> Settings:
