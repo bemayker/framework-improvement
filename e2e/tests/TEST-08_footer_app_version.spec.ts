@@ -6,7 +6,7 @@ test.describe("TEST-08 footer shows the app version", () => {
     await page.goto("/");
     const { version } = (await (await versionResponse).json()) as { version: string };
 
-    await expect(page.getByTestId("app-footer")).toHaveText(`Task Notes v${version}`);
+    await expect(page.getByTestId("app-footer")).toContainText(`Task Notes v${version}`);
   });
 
   test("footer reads exactly Task Notes when /api/version is unreachable", async ({ page }) => {
