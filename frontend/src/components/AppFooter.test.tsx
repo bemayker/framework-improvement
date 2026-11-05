@@ -14,18 +14,33 @@ describe("AppFooter", () => {
     getBackendVersionMock.mockReset();
   });
 
-  it("renders the version from the backend once it resolves", async () => {
-    getBackendVersionMock.mockResolvedValue("0.1.0");
+  it("renders the version and the commit once the request resolves", async () => {
+    getBackendVersionMock.mockResolvedValue({ version: "0.1.0", commit: "0123456" });
 
     render(<AppFooter />);
 
     expect(await screen.findByTestId("app-footer-version")).toHaveTextContent(
       "v0.1.0",
     );
-    expect(screen.getByTestId("app-footer")).toHaveTextContent("Task Notes v0.1.0");
+    expect(screen.getByTestId("app-footer-commit")).toHaveTextContent("(0123456)");
+    expect(screen.getByTestId("app-footer").textContent).toBe(
+      "Task Notes v0.1.0 (0123456)",
+    );
   });
 
-  it("renders the app name alone when the version request rejects", async () => {
+  it("renders the version alone when the commit is null", async () => {
+    getBackendVersionMock.mockResolvedValue({ version: "0.1.0", commit: null });
+
+    render(<AppFooter />);
+
+    expect(await screen.findByTestId("app-footer-version")).toHaveTextContent(
+      "v0.1.0",
+    );
+    expect(screen.getByTestId("app-footer").textContent).toBe("Task Notes v0.1.0");
+    expect(screen.queryByTestId("app-footer-commit")).not.toBeInTheDocument();
+  });
+
+  it("renders the app name alone when the request rejects", async () => {
     getBackendVersionMock.mockRejectedValue(new Error("network down"));
 
     render(<AppFooter />);
@@ -33,10 +48,12 @@ describe("AppFooter", () => {
 
     const footer = screen.getByTestId("app-footer");
     expect(footer.textContent).toBe("Task Notes");
+    expect(footer.textContent).not.toMatch(/undefined|null/);
     expect(screen.queryByTestId("app-footer-version")).not.toBeInTheDocument();
+    expect(screen.queryByTestId("app-footer-commit")).not.toBeInTheDocument();
   });
 
-  it("renders the app name alone when the version resolves null", async () => {
+  it("renders the app name alone when the request resolves null", async () => {
     getBackendVersionMock.mockResolvedValue(null);
 
     render(<AppFooter />);
@@ -46,6 +63,7 @@ describe("AppFooter", () => {
     expect(footer.textContent).toBe("Task Notes");
     expect(footer.textContent).not.toMatch(/undefined|null/);
     expect(screen.queryByTestId("app-footer-version")).not.toBeInTheDocument();
+    expect(screen.queryByTestId("app-footer-commit")).not.toBeInTheDocument();
   });
 
   it("renders only the app name while the request is pending", () => {
@@ -53,8 +71,11 @@ describe("AppFooter", () => {
 
     render(<AppFooter />);
 
-    expect(screen.getByTestId("app-footer").textContent).toBe("Task Notes");
+    const footer = screen.getByTestId("app-footer");
+    expect(footer.textContent).toBe("Task Notes");
+    expect(footer.textContent).not.toMatch(/undefined|null/);
     expect(screen.queryByTestId("app-footer-version")).not.toBeInTheDocument();
+    expect(screen.queryByTestId("app-footer-commit")).not.toBeInTheDocument();
   });
 
   it("is exposed as the contentinfo landmark and carries the app-footer test id", () => {

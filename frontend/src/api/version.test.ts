@@ -18,10 +18,13 @@ describe("getBackendVersion", () => {
     vi.resetModules();
   });
 
-  it("resolves the version string and calls the version endpoint", async () => {
+  it("resolves the version and calls the version endpoint", async () => {
     const fetchMock = stubFetch(okBody({ version: "0.1.0" }));
 
-    await expect(getBackendVersion()).resolves.toBe("0.1.0");
+    await expect(getBackendVersion()).resolves.toEqual({
+      version: "0.1.0",
+      commit: null,
+    });
     expect(fetchMock).toHaveBeenCalledWith("http://localhost:8010/api/version");
   });
 
@@ -52,9 +55,44 @@ describe("getBackendVersion", () => {
   });
 
   it("ignores extra fields in the body", async () => {
-    stubFetch(okBody({ version: "0.1.0", commit: "abc123" }));
+    stubFetch(okBody({ version: "0.1.0", extra: "x" }));
 
-    await expect(getBackendVersion()).resolves.toBe("0.1.0");
+    await expect(getBackendVersion()).resolves.toEqual({
+      version: "0.1.0",
+      commit: null,
+    });
+  });
+
+  it("truncates the commit to its first 7 characters", async () => {
+    stubFetch(okBody({ version: "0.1.0", commit: "0123456789ab" }));
+
+    await expect(getBackendVersion()).resolves.toEqual({
+      version: "0.1.0",
+      commit: "0123456",
+    });
+  });
+
+  it("keeps a commit shorter than 7 characters as sent", async () => {
+    stubFetch(okBody({ version: "0.1.0", commit: "abc" }));
+
+    await expect(getBackendVersion()).resolves.toEqual({
+      version: "0.1.0",
+      commit: "abc",
+    });
+  });
+
+  it.each([
+    ["the unknown sentinel", "unknown"],
+    ["an empty string", ""],
+    ["a missing field", undefined],
+    ["a non-string value", 12345],
+  ])("resolves commit null and keeps the version for %s", async (_label, commit) => {
+    stubFetch(okBody({ version: "0.1.0", commit }));
+
+    await expect(getBackendVersion()).resolves.toEqual({
+      version: "0.1.0",
+      commit: null,
+    });
   });
 
   it("honours VITE_API_BASE_URL", async () => {
