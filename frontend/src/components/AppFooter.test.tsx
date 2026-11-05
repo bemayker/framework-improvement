@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, waitFor } from "@testing-library/react";
+import { act, render, screen, waitFor } from "@testing-library/react";
 import AppFooter from "./AppFooter";
 import { getVersion } from "../api/version";
 import { version as packageVersion } from "../../package.json";
@@ -42,7 +42,7 @@ describe("AppFooter", () => {
     render(<AppFooter />);
 
     await waitFor(() => expect(getVersionMock).toHaveBeenCalledTimes(1));
-    await Promise.resolve();
+    await act(async () => {});
     expect(footerText()).toBe("Task Notes");
   });
 
@@ -52,7 +52,7 @@ describe("AppFooter", () => {
     render(<AppFooter />);
 
     await waitFor(() => expect(getVersionMock).toHaveBeenCalledTimes(1));
-    await Promise.resolve();
+    await act(async () => {});
     expect(footerText()).toBe("Task Notes");
   });
 
