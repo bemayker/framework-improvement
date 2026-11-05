@@ -99,6 +99,26 @@ describe("NoteForm", () => {
     await waitFor(() => expect(onCreated).toHaveBeenCalledTimes(1));
   });
 
+  it("ignores a form submit (Enter key) while the first save is pending", async () => {
+    let resolveSave: (note: { id: number; text: string }) => void = () => {};
+    createNoteMock.mockReturnValue(
+      new Promise((resolve) => {
+        resolveSave = resolve;
+      }),
+    );
+    const onCreated = vi.fn();
+    render(<NoteForm onCreated={onCreated} />);
+
+    typeNote("Buy milk");
+    submitForm();
+    fireEvent.submit(screen.getByTestId("note-form"));
+
+    expect(createNoteMock).toHaveBeenCalledTimes(1);
+
+    resolveSave({ id: 1, text: "Buy milk" });
+    await waitFor(() => expect(onCreated).toHaveBeenCalledTimes(1));
+  });
+
   it("disables the submit button while the save is pending and re-enables it after success", async () => {
     let resolveSave: (note: { id: number; text: string }) => void = () => {};
     createNoteMock.mockReturnValue(
