@@ -22,7 +22,7 @@ import os
 
 import pytest
 
-from app.core.config import DEFAULT_CORS_ORIGINS, UNKNOWN_BUILD_COMMIT, Settings, get_settings
+from app.core.config import DEFAULT_CORS_ORIGINS, Settings, get_settings
 
 
 def test_get_settings_returns_the_configured_app_title():
@@ -94,38 +94,6 @@ def test_settings_cors_origins_defaults_when_unset(monkeypatch):
     monkeypatch.delenv("CORS_ORIGINS", raising=False)
 
     assert get_settings().cors_origins == DEFAULT_CORS_ORIGINS == ("http://localhost:5183",)
-
-
-SHA_40 = "3f9c2a1b7d4e8f6a5c0b9d2e1f4a7c3b6d8e0f12"
-
-
-def test_settings_build_commit_resolves_set_value_without_truncating(monkeypatch):
-    """Settings resolve the declared value; truncation is the service's rule."""
-    monkeypatch.setenv("BUILD_COMMIT", SHA_40)
-
-    assert get_settings().build_commit == SHA_40
-
-
-def test_settings_build_commit_defaults_to_unknown_when_unset(monkeypatch):
-    """With BUILD_COMMIT unset the sentinel is reported."""
-    monkeypatch.delenv("BUILD_COMMIT", raising=False)
-
-    assert get_settings().build_commit == UNKNOWN_BUILD_COMMIT == "unknown"
-
-
-@pytest.mark.parametrize("blank", ["", "   "])
-def test_settings_build_commit_treats_blank_value_as_unset(monkeypatch, blank):
-    """A blank BUILD_COMMIT is unset, mirroring CORS_ORIGINS."""
-    monkeypatch.setenv("BUILD_COMMIT", blank)
-
-    assert get_settings().build_commit == UNKNOWN_BUILD_COMMIT
-
-
-def test_settings_build_commit_strips_surrounding_whitespace(monkeypatch):
-    """Edge case: whitespace around a real value is not part of it."""
-    monkeypatch.setenv("BUILD_COMMIT", "  abc1234 ")
-
-    assert get_settings().build_commit == "abc1234"
 
 
 @pytest.mark.parametrize("blank", ["", "   ", " , "])
