@@ -3,7 +3,7 @@ import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import LandingPage from "./LandingPage";
 import { listNotes, createNote } from "../api/notes";
 
-const BACKEND_VERSION = "9.9.9";
+const { BACKEND_VERSION } = vi.hoisted(() => ({ BACKEND_VERSION: "9.9.9" }));
 
 vi.mock("../api/notes", () => ({
   listNotes: vi.fn(),
@@ -11,7 +11,7 @@ vi.mock("../api/notes", () => ({
 }));
 
 vi.mock("../api/version", () => ({
-  fetchBackendVersion: vi.fn().mockResolvedValue("9.9.9"),
+  fetchBackendVersion: vi.fn().mockResolvedValue(BACKEND_VERSION),
 }));
 
 const listNotesMock = vi.mocked(listNotes);

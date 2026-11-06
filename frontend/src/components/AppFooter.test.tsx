@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, waitFor } from "@testing-library/react";
+import { act, render, screen, waitFor } from "@testing-library/react";
 import AppFooter from "./AppFooter";
 import { fetchBackendVersion } from "../api/version";
 
@@ -13,6 +13,11 @@ function expectNoVersionText(footer: HTMLElement) {
   expect(footer.textContent).toBe("Task Notes");
   expect(footer.textContent).not.toMatch(/undefined|null|unknown/);
   expect(screen.queryByTestId("app-version")).not.toBeInTheDocument();
+}
+
+/** Lets the mocked version promise settle and its state update flush. */
+async function settlePendingPromises() {
+  await act(async () => {});
 }
 
 describe("AppFooter", () => {
@@ -48,7 +53,7 @@ describe("AppFooter", () => {
 
     render(<AppFooter />);
 
-    await waitFor(() => expect(fetchBackendVersionMock).toHaveBeenCalled());
+    await settlePendingPromises();
     expectNoVersionText(screen.getByTestId("app-footer"));
   });
 
@@ -57,7 +62,7 @@ describe("AppFooter", () => {
 
     render(<AppFooter />);
 
-    await waitFor(() => expect(fetchBackendVersionMock).toHaveBeenCalled());
+    await settlePendingPromises();
     expectNoVersionText(screen.getByTestId("app-footer"));
   });
 
