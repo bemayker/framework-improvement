@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, waitFor } from "@testing-library/react";
+import { act, render, screen, waitFor } from "@testing-library/react";
 import AppFooter from "./AppFooter";
 import { fetchBackendVersion } from "../api/version";
 
@@ -13,6 +13,8 @@ const fetchBackendVersionMock = vi.mocked(fetchBackendVersion);
 async function renderFooter() {
   render(<AppFooter />);
   await waitFor(() => expect(fetchBackendVersionMock).toHaveBeenCalledTimes(1));
+  // Flush the mock's promise chain so setVersion has run before any assertion.
+  await act(async () => {});
 }
 
 describe("AppFooter", () => {
@@ -37,9 +39,6 @@ describe("AppFooter", () => {
 
     await renderFooter();
 
-    await waitFor(() =>
-      expect(fetchBackendVersionMock).toHaveReturnedTimes(1),
-    );
     expect(screen.getByTestId("app-footer")).toHaveTextContent(/^Task Notes$/);
   });
 
