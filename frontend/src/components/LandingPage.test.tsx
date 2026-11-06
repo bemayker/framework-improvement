@@ -11,7 +11,9 @@ vi.mock("../api/notes", () => ({
 }));
 
 vi.mock("../api/version", () => ({
-  fetchBackendVersion: vi.fn().mockResolvedValue(BACKEND_VERSION),
+  fetchBackendVersion: vi
+    .fn()
+    .mockResolvedValue({ version: BACKEND_VERSION, commit: null }),
 }));
 
 const listNotesMock = vi.mocked(listNotes);
