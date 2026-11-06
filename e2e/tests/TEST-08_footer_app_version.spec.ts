@@ -6,11 +6,16 @@ test.describe("TEST-08 footer shows the app version", () => {
     await page.goto("/");
     const response = await responsePromise;
     expect(response.ok()).toBe(true);
-    const { version } = (await response.json()) as { version: string };
+    const { version, commit } = (await response.json()) as { version: string; commit?: string };
+    // TEST-10 appends the short commit when the backend reports a real one.
+    const hasCommit = typeof commit === "string" && commit.trim() !== "" && commit.trim() !== "unknown";
+    const expectedText = hasCommit
+      ? `Task Notes v${version} (${commit.trim().slice(0, 7)})`
+      : `Task Notes v${version}`;
 
     const footer = page.getByTestId("app-footer");
     await expect(footer).toBeVisible();
-    await expect(footer).toHaveText(`Task Notes v${version}`);
+    await expect(footer).toHaveText(expectedText);
     await expect(page.getByTestId("app-footer-version")).toBeVisible();
   });
 
