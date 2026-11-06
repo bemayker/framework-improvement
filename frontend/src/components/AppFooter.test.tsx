@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, waitFor } from "@testing-library/react";
 import AppFooter from "./AppFooter";
 import { getBackendVersion } from "../api/version";
+import type { BackendVersion } from "../api/version";
 import { version as packageVersion } from "../../package.json";
 
 vi.mock("../api/version", () => ({
@@ -13,7 +14,25 @@ const getBackendVersionMock = vi.mocked(getBackendVersion);
 describe("AppFooter", () => {
   beforeEach(() => {
     getBackendVersionMock.mockReset();
-    getBackendVersionMock.mockResolvedValue("9.9.9");
+    getBackendVersionMock.mockResolvedValue({ version: "9.9.9", commit: "abc1234" });
+  });
+
+  it("renders the short commit next to the version", async () => {
+    render(<AppFooter />);
+
+    const footer = screen.getByTestId("app-footer");
+    await waitFor(() => expect(footer.textContent).toBe("Task Notes v9.9.9 (abc1234)"));
+    expect(screen.getByTestId("app-footer-commit")).toHaveTextContent("(abc1234)");
+  });
+
+  it("renders the version alone when the commit is null", async () => {
+    getBackendVersionMock.mockResolvedValue({ version: "9.9.9", commit: null });
+
+    render(<AppFooter />);
+
+    await screen.findByTestId("app-footer-version");
+    expect(screen.getByTestId("app-footer").textContent).toBe("Task Notes v9.9.9");
+    expect(screen.queryByTestId("app-footer-commit")).not.toBeInTheDocument();
   });
 
   it("renders the application name", async () => {
@@ -41,7 +60,9 @@ describe("AppFooter", () => {
     await Promise.resolve();
     const footer = screen.getByTestId("app-footer");
     expect(footer.textContent).toBe("Task Notes");
+    expect(footer.textContent).not.toContain("undefined");
     expect(screen.queryByTestId("app-footer-version")).not.toBeInTheDocument();
+    expect(screen.queryByTestId("app-footer-commit")).not.toBeInTheDocument();
   });
 
   it("renders the name alone when the client rejects the unknown sentinel", async () => {
@@ -57,12 +78,13 @@ describe("AppFooter", () => {
   });
 
   it("renders the name alone while the version is still loading", () => {
-    getBackendVersionMock.mockReturnValue(new Promise<string>(() => {}));
+    getBackendVersionMock.mockReturnValue(new Promise<BackendVersion>(() => {}));
 
     render(<AppFooter />);
 
     expect(screen.getByTestId("app-footer").textContent).toBe("Task Notes");
     expect(screen.queryByTestId("app-footer-version")).not.toBeInTheDocument();
+    expect(screen.queryByTestId("app-footer-commit")).not.toBeInTheDocument();
   });
 
   it("is exposed as the contentinfo landmark and carries the app-footer test id", async () => {

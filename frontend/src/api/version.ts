@@ -8,6 +8,18 @@ export type VersionResponse = {
 // version (UNKNOWN_VERSION in backend/app/services/version_service.py).
 const BACKEND_UNKNOWN_VERSION = "unknown";
 
+// The same kind of sentinel for the build commit (UNKNOWN_BUILD_COMMIT in
+// backend/app/core/config.py).
+const BACKEND_UNKNOWN_COMMIT = "unknown";
+
+const SHORT_COMMIT_LENGTH = 7;
+
+export type BackendVersion = {
+  version: string;
+  // null when the backend has no usable commit; the version is still good.
+  commit: string | null;
+};
+
 const VERSION_URL = `${API_BASE_URL}/api/version`;
 
 function isVersionResponse(body: unknown): body is VersionResponse {
@@ -18,12 +30,25 @@ function isVersionResponse(body: unknown): body is VersionResponse {
   return typeof version === "string" && version !== "";
 }
 
+function shortCommit(body: object): string | null {
+  const { commit } = body as { commit?: unknown };
+  if (typeof commit !== "string") {
+    return null;
+  }
+  const trimmed = commit.trim();
+  if (trimmed === "" || trimmed === BACKEND_UNKNOWN_COMMIT) {
+    return null;
+  }
+  return trimmed.slice(0, SHORT_COMMIT_LENGTH);
+}
+
 /**
- * Fetches the backend's version. Rejects whenever no usable version can be
- * resolved (network error, non-OK status, malformed body, or the backend's
- * "unknown" sentinel), so callers treat every rejection as "no version".
+ * Fetches the backend's version and short build commit. Rejects whenever no
+ * usable version can be resolved (network error, non-OK status, malformed
+ * body, or the backend's "unknown" sentinel), so callers treat every rejection
+ * as "no version". An unusable commit never rejects: it resolves as null.
  */
-export async function getBackendVersion(): Promise<string> {
+export async function getBackendVersion(): Promise<BackendVersion> {
   const response = await fetch(VERSION_URL);
 
   if (!response.ok) {
@@ -42,5 +67,5 @@ export async function getBackendVersion(): Promise<string> {
     throw new Error("Loading the version failed: backend version is unknown");
   }
 
-  return body.version;
+  return { version: body.version, commit: shortCommit(body) };
 }
