@@ -52,4 +52,3 @@ Feature: BUG-04 Saving a note twice quickly stores it once
     When I type "Repeat text check" into the note field identified by "note-input" again
     And I press the save button identified by "note-submit"
     Then "Repeat text check" is shown twice in the notes list identified by "note-list"
-    And only simultaneous submits are ignored, deliberate repeat saves are kept
