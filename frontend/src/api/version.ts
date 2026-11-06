@@ -1,10 +1,16 @@
 import { API_BASE_URL } from "./config";
 
-type VersionResponse = { version: string };
+type VersionResponse = { version: string; commit?: unknown };
+
+export type BackendVersion = { version: string; commit: string | null };
 
 // The backend reports this sentinel when its distribution metadata is missing
 // (backend/app/services/version_service.py). It means the same as "cannot tell".
 const BACKEND_UNKNOWN_VERSION = "unknown";
+
+// Same idea for the build commit: mirrors DEFAULT_BUILD_COMMIT in
+// backend/app/core/config.py, served when BUILD_COMMIT is unset or blank.
+const BACKEND_UNKNOWN_COMMIT = "unknown";
 
 const VERSION_URL = `${API_BASE_URL}/api/version`;
 
@@ -16,12 +22,24 @@ function isVersionResponse(body: unknown): body is VersionResponse {
   );
 }
 
+/** A usable commit is a non-blank string that is not the backend's sentinel. */
+function resolveCommit(body: VersionResponse): string | null {
+  const { commit } = body;
+  if (typeof commit !== "string") {
+    return null;
+  }
+
+  const trimmed = commit.trim();
+  return trimmed === "" || trimmed === BACKEND_UNKNOWN_COMMIT ? null : trimmed;
+}
+
 /**
- * Reads the backend's version at runtime. Resolves to null when the backend
- * answered without a usable version; rejects on a non-OK status or a network
- * failure. Fields other than `version` are ignored.
+ * Reads the backend's version and build commit at runtime. Resolves to null
+ * when the backend answered without a usable version; the commit alone being
+ * unusable only makes `commit` null. Rejects on a non-OK status or a network
+ * failure.
  */
-export async function fetchBackendVersion(): Promise<string | null> {
+export async function fetchBackendVersion(): Promise<BackendVersion | null> {
   const response = await fetch(VERSION_URL);
 
   if (!response.ok) {
@@ -41,5 +59,5 @@ export async function fetchBackendVersion(): Promise<string | null> {
     return null;
   }
 
-  return version;
+  return { version, commit: resolveCommit(body) };
 }

@@ -37,18 +37,39 @@ describe("version API client", () => {
   it("returns the backend version, requested from the default base URL", async () => {
     fetchMock.mockResolvedValue(okResponse({ version: "0.1.0" }));
 
-    await expect(fetchBackendVersion()).resolves.toBe("0.1.0");
+    await expect(fetchBackendVersion()).resolves.toEqual({
+      version: "0.1.0",
+      commit: null,
+    });
 
     expect(fetchMock).toHaveBeenCalledTimes(1);
     expect(fetchMock).toHaveBeenCalledWith(DEFAULT_VERSION_URL);
   });
 
-  it("ignores fields other than version", async () => {
+  it("returns the version together with the build commit", async () => {
     fetchMock.mockResolvedValue(
       okResponse({ version: "0.1.0", commit: "abcdef123456" }),
     );
 
-    await expect(fetchBackendVersion()).resolves.toBe("0.1.0");
+    await expect(fetchBackendVersion()).resolves.toEqual({
+      version: "0.1.0",
+      commit: "abcdef123456",
+    });
+  });
+
+  it.each([
+    ["the backend's unknown sentinel", { version: "0.1.0", commit: "unknown" }],
+    ["an empty string", { version: "0.1.0", commit: "" }],
+    ["a whitespace-only string", { version: "0.1.0", commit: "   " }],
+    ["a missing commit", { version: "0.1.0" }],
+    ["a non-string commit", { version: "0.1.0", commit: 1 }],
+  ])("returns the version with a null commit for %s", async (_label, body) => {
+    fetchMock.mockResolvedValue(okResponse(body));
+
+    await expect(fetchBackendVersion()).resolves.toEqual({
+      version: "0.1.0",
+      commit: null,
+    });
   });
 
   it.each([
