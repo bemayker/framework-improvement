@@ -30,12 +30,60 @@ describe("version API client", () => {
   });
 
   it("returns the backend version and requests /api/version", async () => {
+    fetchMock.mockResolvedValue(okResponse({ version: "1.2.3", commit: "abc1234" }));
+    const { getBackendVersion } = await loadClient();
+
+    await expect(getBackendVersion()).resolves.toEqual({
+      version: "1.2.3",
+      commit: "abc1234",
+    });
+    expect(fetchMock).toHaveBeenCalledWith(DEFAULT_VERSION_URL);
+  });
+
+  it("truncates a 12-character commit to its first 7 characters", async () => {
+    fetchMock.mockResolvedValue(
+      okResponse({ version: "1.2.3", commit: "0123456789ab" }),
+    );
+    const { getBackendVersion } = await loadClient();
+
+    await expect(getBackendVersion()).resolves.toEqual({
+      version: "1.2.3",
+      commit: "0123456",
+    });
+  });
+
+  it("resolves a null commit for the backend's unknown sentinel", async () => {
+    fetchMock.mockResolvedValue(okResponse({ version: "1.2.3", commit: "unknown" }));
+    const { getBackendVersion } = await loadClient();
+
+    await expect(getBackendVersion()).resolves.toEqual({
+      version: "1.2.3",
+      commit: null,
+    });
+  });
+
+  it("resolves a null commit when the commit field is missing", async () => {
     fetchMock.mockResolvedValue(okResponse({ version: "1.2.3" }));
     const { getBackendVersion } = await loadClient();
 
-    await expect(getBackendVersion()).resolves.toBe("1.2.3");
-    expect(fetchMock).toHaveBeenCalledWith(DEFAULT_VERSION_URL);
+    await expect(getBackendVersion()).resolves.toEqual({
+      version: "1.2.3",
+      commit: null,
+    });
   });
+
+  it.each([["empty", ""], ["blank", "   "], ["not a string", 123]])(
+    "resolves a null commit when the commit is %s",
+    async (_label, commit) => {
+      fetchMock.mockResolvedValue(okResponse({ version: "1.2.3", commit }));
+      const { getBackendVersion } = await loadClient();
+
+      await expect(getBackendVersion()).resolves.toEqual({
+        version: "1.2.3",
+        commit: null,
+      });
+    },
+  );
 
   it("rejects on a non-OK response", async () => {
     fetchMock.mockResolvedValue({
