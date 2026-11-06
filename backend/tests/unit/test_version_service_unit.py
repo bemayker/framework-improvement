@@ -5,6 +5,28 @@ from importlib.metadata import PackageNotFoundError
 from app.services import version_service
 
 
+def test_get_build_commit_truncates_full_sha_to_first_12_characters(monkeypatch):
+    """Happy path: CI's 40-character sha is reported as its first 12."""
+    monkeypatch.setenv("BUILD_COMMIT", "0123456789abcdef0123456789abcdef01234567")
+
+    assert version_service.get_build_commit() == "0123456789ab"
+    assert version_service.COMMIT_LENGTH == 12
+
+
+def test_get_build_commit_returns_short_value_unchanged(monkeypatch):
+    """Edge case: a value of 12 characters or fewer is not padded or altered."""
+    monkeypatch.setenv("BUILD_COMMIT", "abc1234")
+
+    assert version_service.get_build_commit() == "abc1234"
+
+
+def test_get_build_commit_returns_unknown_when_unset(monkeypatch):
+    """Error case: with nothing set at build time the default passes through."""
+    monkeypatch.delenv("BUILD_COMMIT", raising=False)
+
+    assert version_service.get_build_commit() == "unknown"
+
+
 def test_get_app_version_returns_installed_distribution_version(monkeypatch):
     """Happy path: the resolved metadata value is returned verbatim."""
     monkeypatch.setattr(version_service, "version", lambda name: "9.9.9")
