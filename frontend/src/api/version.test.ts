@@ -53,6 +53,7 @@ describe("version API client", () => {
     ["the backend's unknown sentinel", { version: "unknown" }],
     ["an empty version", { version: "" }],
     ["a missing version", {}],
+    ["a JSON null body", null],
     ["a non-string version", { version: 3 }],
   ])("returns null for %s", async (_label, body) => {
     fetchMock.mockResolvedValue(okResponse(body));

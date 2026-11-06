@@ -22,8 +22,13 @@ export async function getBackendVersion(): Promise<string | null> {
     );
   }
 
-  const body = (await response.json()) as VersionResponse;
-  const { version } = body;
+  const body: unknown = await response.json();
+
+  if (typeof body !== "object" || body === null) {
+    return null;
+  }
+
+  const { version } = body as VersionResponse;
 
   if (
     typeof version !== "string" ||
