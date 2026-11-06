@@ -1,6 +1,6 @@
 import { API_BASE_URL } from "./config";
 
-type VersionResponse = { version: string };
+type VersionResponse = { version: string; commit?: unknown };
 
 export type BackendVersion = { version: string; commit: string | null };
 
@@ -24,7 +24,7 @@ function isVersionResponse(body: unknown): body is VersionResponse {
 
 /** A usable commit is a non-blank string that is not the backend's sentinel. */
 function resolveCommit(body: VersionResponse): string | null {
-  const commit = (body as Record<string, unknown>).commit;
+  const { commit } = body;
   if (typeof commit !== "string") {
     return null;
   }
