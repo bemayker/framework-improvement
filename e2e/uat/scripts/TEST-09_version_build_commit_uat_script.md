@@ -49,7 +49,7 @@ No criterion is verifiable through the UI: no frontend consumes `GET /api/versio
 | # | Step | Expected Result | Pass/Fail |
 |---|------|------------------|-----------|
 | 10 | Run `uv run --directory backend pytest -q tests/unit/test_config_unit.py tests/unit/test_version_service_unit.py tests/integration/test_version_integration.py` | The run ends with `0 failed` | [ ] Pass [ ] Fail |
-| 11 | Read the test names in those three files | Each file has at least one test for a set `BUILD_COMMIT` (a 40-character sha yielding its first 12 characters) and one for an unset `BUILD_COMMIT` (yielding `unknown`) | [ ] Pass [ ] Fail |
+| 11 | Read the test names in those three files | Each file has a test for a set `BUILD_COMMIT` and one for an unset `BUILD_COMMIT` (yielding `unknown`); the first-12-characters truncation of a 40-character sha is asserted only in the service unit and integration tests, while the config unit test asserts the full sha | [ ] Pass [ ] Fail |
 
 ### Edge case: a blank `BUILD_COMMIT` reports `unknown`
 
