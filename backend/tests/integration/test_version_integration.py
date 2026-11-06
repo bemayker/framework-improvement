@@ -75,6 +75,21 @@ def test_get_version_returns_unknown_when_build_commit_is_blank(
     assert response.json()["commit"] == "unknown"
 
 
+def test_openapi_documents_version_response_with_required_string_fields(client: TestClient):
+    """Criterion 3: the OpenAPI document names VersionResponse with required string fields."""
+    spec = client.get("/openapi.json").json()
+
+    ok_schema = spec["paths"]["/api/version"]["get"]["responses"]["200"]["content"][
+        "application/json"
+    ]["schema"]
+    assert ok_schema["$ref"] == "#/components/schemas/VersionResponse"
+
+    component = spec["components"]["schemas"]["VersionResponse"]
+    assert {"version", "commit"} <= set(component["required"])
+    assert component["properties"]["version"]["type"] == "string"
+    assert component["properties"]["commit"]["type"] == "string"
+
+
 def test_post_version_returns_405_method_not_allowed(client: TestClient):
     """Only reachable error case: the endpoint accepts no input and is read-only."""
     response = client.post("/api/version")
