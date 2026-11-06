@@ -1,23 +1,77 @@
-import { describe, it, expect } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { describe, it, expect, vi, beforeEach } from "vitest";
+import { render, screen, waitFor } from "@testing-library/react";
 import AppFooter from "./AppFooter";
-import { version } from "../../package.json";
+import { fetchBackendVersion } from "../api/version";
+
+vi.mock("../api/version", () => ({
+  fetchBackendVersion: vi.fn(),
+}));
+
+const fetchBackendVersionMock = vi.mocked(fetchBackendVersion);
+
+/** Waits for the mount-time request to be made, then lets it settle. */
+async function renderFooter() {
+  render(<AppFooter />);
+  await waitFor(() => expect(fetchBackendVersionMock).toHaveBeenCalledTimes(1));
+}
 
 describe("AppFooter", () => {
-  it("renders the application name", () => {
-    render(<AppFooter />);
-
-    expect(screen.getByTestId("app-footer")).toHaveTextContent("Task Notes");
+  beforeEach(() => {
+    fetchBackendVersionMock.mockReset();
   });
 
-  it("renders the version imported from package.json", () => {
-    render(<AppFooter />);
+  it("renders the app name and the backend version when it resolves", async () => {
+    fetchBackendVersionMock.mockResolvedValue("0.1.0");
 
-    expect(screen.getByTestId("app-footer")).toHaveTextContent(version);
+    await renderFooter();
+
+    await waitFor(() =>
+      expect(screen.getByTestId("app-footer")).toHaveTextContent(
+        /^Task Notes v0\.1\.0$/,
+      ),
+    );
   });
 
-  it("is exposed as the contentinfo landmark and carries the app-footer test id", () => {
-    render(<AppFooter />);
+  it("renders the app name alone when the request is rejected", async () => {
+    fetchBackendVersionMock.mockRejectedValue(new Error("network down"));
+
+    await renderFooter();
+
+    await waitFor(() =>
+      expect(fetchBackendVersionMock).toHaveReturnedTimes(1),
+    );
+    expect(screen.getByTestId("app-footer")).toHaveTextContent(/^Task Notes$/);
+  });
+
+  it("renders the app name alone when the backend reports unknown", async () => {
+    fetchBackendVersionMock.mockResolvedValue("unknown");
+
+    await renderFooter();
+
+    expect(screen.getByTestId("app-footer")).toHaveTextContent(/^Task Notes$/);
+    expect(screen.getByTestId("app-footer")).not.toHaveTextContent("unknown");
+  });
+
+  it("renders the app name alone when the version is an empty string", async () => {
+    fetchBackendVersionMock.mockResolvedValue("");
+
+    await renderFooter();
+
+    expect(screen.getByTestId("app-footer")).toHaveTextContent(/^Task Notes$/);
+  });
+
+  it("renders the app name alone while the request is pending", async () => {
+    fetchBackendVersionMock.mockReturnValue(new Promise(() => {}));
+
+    await renderFooter();
+
+    expect(screen.getByTestId("app-footer").textContent).toBe("Task Notes");
+  });
+
+  it("is exposed as the contentinfo landmark and carries the app-footer test id", async () => {
+    fetchBackendVersionMock.mockResolvedValue("0.1.0");
+
+    await renderFooter();
 
     const footer = screen.getByRole("contentinfo");
     expect(footer).toHaveAttribute("data-testid", "app-footer");
