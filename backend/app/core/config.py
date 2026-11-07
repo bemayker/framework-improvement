@@ -21,6 +21,7 @@ def _read_cors_origins() -> tuple[str, ...]:
     entries = (entry.strip() for entry in (os.environ.get("CORS_ORIGINS") or "").split(","))
     return tuple(entry for entry in entries if entry) or DEFAULT_CORS_ORIGINS
 
+
 # Reported when BUILD_COMMIT is unset or blank. The only place this default lives.
 UNKNOWN_BUILD_COMMIT = "unknown"
 
