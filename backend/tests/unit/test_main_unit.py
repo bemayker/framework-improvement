@@ -58,6 +58,27 @@ def test_create_app_registers_health_route():
     assert "/api/health" in custom_paths
 
 
+def test_create_app_registers_uptime_route():
+    """Edge case: the app registers the TEST-07 uptime route."""
+    app = create_app()
+
+    custom_paths = _collect_route_paths(app.routes) - BUILT_IN_ROUTE_PATHS
+
+    assert "/api/uptime" in custom_paths
+
+
+def test_create_app_captures_its_own_process_start_per_call():
+    """Each create_app() call carries its own process_start, captured at call time."""
+    first_app = create_app()
+    second_app = create_app()
+
+    assert first_app.state.process_start is not second_app.state.process_start
+    assert (
+        second_app.state.process_start.monotonic_start
+        >= first_app.state.process_start.monotonic_start
+    )
+
+
 def test_create_app_returns_independent_instances():
     """Error/robustness case: repeated calls do not share mutable state.
 
