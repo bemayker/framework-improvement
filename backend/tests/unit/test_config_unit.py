@@ -89,6 +89,20 @@ def test_settings_cors_origins_parses_comma_separated_env_value(monkeypatch):
     assert get_settings().cors_origins == ("https://a.example", "https://b.example")
 
 
+def test_settings_cors_origins_strips_trailing_slash(monkeypatch):
+    """A trailing slash must not survive: the browser's Origin header has none."""
+    monkeypatch.setenv("CORS_ORIGINS", "http://localhost:5183/")
+
+    assert get_settings().cors_origins == ("http://localhost:5183",)
+
+
+def test_settings_cors_origins_mixed_list_with_trailing_slash_entries(monkeypatch):
+    """Slashes are stripped per entry, and a '/'-only entry is dropped like an empty one."""
+    monkeypatch.setenv("CORS_ORIGINS", " https://a.example/ ,https://b.example,/")
+
+    assert get_settings().cors_origins == ("https://a.example", "https://b.example")
+
+
 def test_settings_cors_origins_defaults_when_unset(monkeypatch):
     """With CORS_ORIGINS unset the frontend's default origin is allowed."""
     monkeypatch.delenv("CORS_ORIGINS", raising=False)
