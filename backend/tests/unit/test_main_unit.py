@@ -63,24 +63,26 @@ def test_create_app_registers_health_route():
 def test_cors_preflight_allows_origin_configured_with_trailing_slash(monkeypatch):
     """BUG-02: an origin configured with a trailing slash matches the browser's.
 
-    Browsers send `Origin: http://localhost:5183` with no trailing slash, so a
-    configured `http://localhost:5183/` must still be allowed. TestClient is
-    used without its context manager so the lifespan (and the database) never
-    runs; CORSMiddleware answers the preflight itself.
+    Browsers send `Origin: http://app.example` with no trailing slash, so a
+    configured `http://app.example/` must still be allowed. The origin is
+    deliberately not the default, so the test fails if create_app() stops
+    reading CORS_ORIGINS. TestClient is used without its context manager so
+    the lifespan (and the database) never runs; CORSMiddleware answers the
+    preflight itself.
     """
-    monkeypatch.setenv("CORS_ORIGINS", "http://localhost:5183/")
+    monkeypatch.setenv("CORS_ORIGINS", "http://app.example/")
     client = TestClient(create_app())
 
     response = client.options(
         "/api/health",
         headers={
-            "Origin": "http://localhost:5183",
+            "Origin": "http://app.example",
             "Access-Control-Request-Method": "GET",
         },
     )
 
     assert response.status_code == 200
-    assert response.headers.get("access-control-allow-origin") == "http://localhost:5183"
+    assert response.headers.get("access-control-allow-origin") == "http://app.example"
 
 
 def test_create_app_returns_independent_instances():
