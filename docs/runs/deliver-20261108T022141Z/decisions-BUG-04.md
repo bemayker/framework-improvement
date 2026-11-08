@@ -1,0 +1,11 @@
+# Decisions (BUG-04, after its final push): deliver-20261108T022141Z
+
+The entries `.claude/artifacts/BUG-04/decisions.md` received after the last push of its branch (4d23d5c), the head its pull request merged. The entries before them reached the default branch in that file.
+
+- 2026-11-08 [BUG-04] Merge verdict: merge PR #656 (squash). Rationale: autonomy.md Section 5 holds on every condition: (1) self-review `PASS blocking=0`, refactor gate no findings; (2) `ci-poll.sh` `verdict=green failed=0`, 7/7 checks done after ready-for-review, `mergeStateStatus=CLEAN`, not draft; (3) both criteria (one POST per double-click; button disabled in flight, re-enabled after success or failure) are met and covered by the NoteForm unit cases, the BUG-04 E2E spec and the repro line `before fail -> after pass`, push gate full green (pytest 75, vitest 40); (4) 0 PR comments, 0 reviews, no change request, no new tracker comment since 6.1; (5) escalation bar not triggered: a frontend-only, reversible change with no migration, secret or external side effect. Residual note: the item has no description, so both criteria are title-derived assumptions recorded in the PR body; a server-side dedupe was deliberately left out, which is the right scope call for a double-submit defect.
+- Push: test-gate: verdict recorded for this push (head 4d23d5c: full after 3s; counts: root: pytest 75 passed, 0 failed, 0 skipped + vitest 40 passed, 0 failed, 0 skipped); upstream verdict=upstream-ok.
+- PR: opened https://github.com/bemayker/framework-improvement/pull/656 (draft); labels mayker:in-progress then mayker:in-review; item-to-PR comment posted (ClickUp comment 1200230000133121).
+- CI: 7/7 green; Repro: before fail -> after pass (npm --prefix frontend test -- src/components/NoteForm.test.tsx); handover rebuild status=rebuilt sha=4d23d5c services=3/3 health=pass.
+- Merged: PR #656 squash 6867eb785665d7019c9ea364229c49d2375296c2 (merge verdict: merge, logged by orchestrator).
+- auto-done: run 42440547065 succeeded; re-read: status complete. No backstop flip.
+- Standards provenance: 9 dispatch(es); both always-on standards SELF-REPORTED as read by 4 of 9 (information only, no pass bar); 0 unbacked provenance claim(s); 6 of 9 not assessed; no MISMATCH.
