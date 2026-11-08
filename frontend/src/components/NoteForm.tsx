@@ -1,4 +1,4 @@
-import { useState, type CSSProperties, type FormEvent } from "react";
+import { useRef, useState, type CSSProperties, type FormEvent } from "react";
 import { createNote, type Note } from "../api/notes";
 
 const FIELD_LABEL = "New note";
@@ -53,6 +53,11 @@ const buttonStyle: CSSProperties = {
   cursor: "pointer",
 };
 
+const buttonDisabledStyle: CSSProperties = {
+  opacity: 0.6,
+  cursor: "not-allowed",
+};
+
 const errorStyle: CSSProperties = {
   fontSize: "0.875rem",
   color: "#b3261e",
@@ -67,9 +72,17 @@ type NoteFormProps = {
 function NoteForm({ onCreated }: NoteFormProps) {
   const [text, setText] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
+  const isSavingRef = useRef(false);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+
+    // The ref is read synchronously, so a second submit in the same tick as the
+    // first is refused before React has re-rendered the disabled button.
+    if (isSavingRef.current) {
+      return;
+    }
 
     // A whitespace-only note counts as empty, and is rejected here so no
     // request is sent at all.
@@ -79,6 +92,8 @@ function NoteForm({ onCreated }: NoteFormProps) {
       return;
     }
 
+    isSavingRef.current = true;
+    setIsSaving(true);
     try {
       const savedNote = await createNote(trimmedText);
       setError(null);
@@ -86,6 +101,9 @@ function NoteForm({ onCreated }: NoteFormProps) {
       onCreated(savedNote);
     } catch {
       setError(SAVE_FAILED_MESSAGE);
+    } finally {
+      isSavingRef.current = false;
+      setIsSaving(false);
     }
   }
 
@@ -105,7 +123,12 @@ function NoteForm({ onCreated }: NoteFormProps) {
           style={inputStyle}
           onChange={(event) => setText(event.target.value)}
         />
-        <button data-testid="note-submit" type="submit" style={buttonStyle}>
+        <button
+          data-testid="note-submit"
+          type="submit"
+          disabled={isSaving}
+          style={isSaving ? { ...buttonStyle, ...buttonDisabledStyle } : buttonStyle}
+        >
           {SUBMIT_LABEL}
         </button>
       </div>
