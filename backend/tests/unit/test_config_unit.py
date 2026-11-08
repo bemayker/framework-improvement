@@ -22,12 +22,7 @@ import os
 
 import pytest
 
-from app.core.config import (
-    DEFAULT_CORS_ORIGINS,
-    UNKNOWN_BUILD_COMMIT,
-    Settings,
-    get_settings,
-)
+from app.core.config import DEFAULT_CORS_ORIGINS, Settings, get_settings
 
 
 def test_get_settings_returns_the_configured_app_title():
@@ -107,26 +102,3 @@ def test_settings_cors_origins_treats_blank_value_as_unset(monkeypatch, blank):
     monkeypatch.setenv("CORS_ORIGINS", blank)
 
     assert get_settings().cors_origins == DEFAULT_CORS_ORIGINS
-
-
-def test_settings_build_commit_reads_env_value(monkeypatch):
-    """BUILD_COMMIT is returned stripped and untruncated (truncation is the service's)."""
-    full_sha = "0123456789abcdef0123456789abcdef01234567"
-    monkeypatch.setenv("BUILD_COMMIT", f"  {full_sha} ")
-
-    assert get_settings().build_commit == full_sha
-
-
-def test_settings_build_commit_defaults_to_unknown_when_unset(monkeypatch):
-    """With BUILD_COMMIT unset the documented default is used."""
-    monkeypatch.delenv("BUILD_COMMIT", raising=False)
-
-    assert get_settings().build_commit == UNKNOWN_BUILD_COMMIT == "unknown"
-
-
-@pytest.mark.parametrize("blank", ["", "   "])
-def test_settings_build_commit_treats_blank_value_as_unset(monkeypatch, blank):
-    """A blank BUILD_COMMIT (e.g. an empty compose forward) falls back to the default."""
-    monkeypatch.setenv("BUILD_COMMIT", blank)
-
-    assert get_settings().build_commit == UNKNOWN_BUILD_COMMIT
