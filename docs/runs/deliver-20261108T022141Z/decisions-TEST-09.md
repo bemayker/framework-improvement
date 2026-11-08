@@ -1,0 +1,10 @@
+# Decisions (TEST-09, after its final push): deliver-20261108T022141Z
+
+The entries `.claude/artifacts/TEST-09/decisions.md` received after the last push of its branch (2f56541), the head its pull request merged. The entries before them reached the default branch in that file.
+
+- Push: test-gate: verdict recorded for this push (head 2f56541: full after 4s; counts: root: pytest 53 passed, 0 failed, 14 skipped + vitest 26 passed, 0 failed, 0 skipped); upstream verdict=upstream-ok.
+- PR: opened https://github.com/bemayker/framework-improvement/pull/654 (draft); PR label: #654 mayker:in-progress; item-to-PR comment posted (ClickUp comment 1200230000133118).
+- 2026-11-08 [TEST-09] Merge verdict: merge (run=deliver-20261108T022141Z, orchestrator, /deliver 6.9, PR #654 head 2f56541, squash). Rationale: autonomy.md Section 5 holds on all five conditions: (1) self-review VERDICT: PASS blocking=0, refactor gate no findings; (2) ci-poll verdict=green next=none failed=0 (7/7 checks done, notification check included), pr-mergeable CLEAN/MERGEABLE, not draft; (3) all four criteria verified against the worktree: router passes get_build_commit() with no literal, service caps at COMMIT_DISPLAY_LENGTH=12, the one default lives in config.py, VersionResponse declares version and commit, unit and integration tests cover set, unset, blank, exact-12 and 40-char-cut paths (53 passed, 0 failed at the push gate); (4) 0 PR comments or reviews, no new tracker comment since 6.1 and the one actionable one (12-character cap) is implemented and tested; (5) nothing irreversible: additive endpoint field, no migration, no secret. Residual, for a human: no CI step exports the sha into BUILD_COMMIT yet, so CI-built images report "unknown" (out of scope, PR body Known improvements).
+- Merged: PR #654 squash d54252d1d8db2b912a99a01807955a1650da3ace (merge verdict: merge, logged by orchestrator).
+- auto-done: run 42439433358 succeeded; re-read: status complete. No backstop flip.
+- Standards provenance: 8 dispatch(es); both always-on standards SELF-REPORTED as read by 4 of 8 (information only, no pass bar); 0 unbacked provenance claim(s); 5 of 8 not assessed; no MISMATCH.

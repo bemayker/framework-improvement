@@ -1,0 +1,15 @@
+# Decisions (TEST-08, after its final push): deliver-20261108T022141Z
+
+The entries `.claude/artifacts/TEST-08/decisions.md` received after the last push of its branch (6f69caf), the head its pull request merged. The entries before them reached the default branch in that file.
+
+
+## run=deliver-20261108T022141Z, 2026-11-08: merge verdict (orchestrator, /deliver 6.9)
+
+- 2026-11-08 [TEST-08] Verdict: **merge** PR #655 (squash). Rationale: all five conditions of `autonomy.md` Section 5 hold. (1) Self-review `VERDICT: PASS blocking=0 recommended=3 optional=0`, all three RECOMMENDED findings applied by the refactor gate, no closure outstanding. (2) `ci-poll.sh` reads `verdict=green next=none failed=0 poll=1`, 7/7 checks done after the ready-for-review conversion, the notification-only check included; pr-mergeable reports `state=OPEN isDraft=false mergeable=MERGEABLE mergeStateStatus=CLEAN`. (3) All four acceptance criteria, as amended by the tracker correction, are met in the worktree: `AppFooter.tsx` fetches through `frontend/src/api/version.ts` on mount and renders ` v{version}` only once resolved (criteria 1 and 2, no literal and no `package.json` import); the client maps a missing, empty or `"unknown"` version to `null` and rejects on non-OK or network failure, and the component renders exactly `Task Notes` for pending, rejected and null (criterion 3); `AppFooter.test.tsx` holds a version-present case and three version-absent cases (criterion 4); Phase D smoke 6/6 and the push gate at 6f69caf (pytest 42 passed, vitest 36 passed) back it. (4) PR surface: 0 inline, 0 conversation, 0 reviews, no change request; tracker surface: the one actionable correction comment is answered in the plan, the PR body and this run's PR-link comment, and no new comment since 6.1. (5) No escalation: a footer text change is fully reversible and the intent is unambiguous.
+- Residual notes: main moved since the branch was cut (BUG-01 #653, TEST-09 #654); GitHub reports CLEAN and TEST-09's `commit` field on `GET /api/version` is additive, the client reads only `version`. The refactor-gate edit to `e2e/tests/TEST-04_page_footer.spec.ts` had CI as its first run after the edit, and CI is green, so that risk is closed. Not a defect item.
+- Push: test-gate: verdict recorded for this push (head 6f69caf: full after 3s; counts: root: pytest 42 passed, 0 failed, 14 skipped + vitest 36 passed, 0 failed, 0 skipped); upstream verdict=upstream-ok.
+- PR: opened https://github.com/bemayker/framework-improvement/pull/655 (draft); PR label: #655 mayker:in-progress, then mayker:in-review at handover; item-to-PR comment posted (ClickUp comment 1200230000133120).
+- CI: 7/7 checks green; handover rebuild status=rebuilt sha=6f69caf services=3/3 health=pass.
+- Merged: PR #655 squash a765934e21eb55211c551b27ae256a1a2dbae7eb (merge verdict: merge, logged by orchestrator).
+- auto-done: run 42439736837 succeeded; re-read: status complete. No backstop flip.
+- Standards provenance: 9 dispatch(es); both always-on standards SELF-REPORTED as read by 3 of 9 (information only, no pass bar); 0 unbacked provenance claim(s); 6 of 9 not assessed; no MISMATCH.
