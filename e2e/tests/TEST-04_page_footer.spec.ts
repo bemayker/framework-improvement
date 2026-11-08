@@ -5,7 +5,11 @@ import { test, expect } from "@playwright/test";
 // The footer shows the version the live backend reports (TEST-08), which is
 // backend/pyproject.toml's [project].version, not frontend/package.json's.
 const backendPyprojectPath = path.resolve(__dirname, "../../backend/pyproject.toml");
-const version = /^version\s*=\s*"([^"]+)"/m.exec(readFileSync(backendPyprojectPath, "utf-8"))?.[1] ?? "";
+const versionMatch = /^version\s*=\s*"([^"]+)"/m.exec(readFileSync(backendPyprojectPath, "utf-8"));
+if (!versionMatch) {
+  throw new Error(`No version found in ${backendPyprojectPath}`);
+}
+const version = versionMatch[1];
 
 test.describe("TEST-04 page footer", () => {
   test("shows a footer with the app name and the version from the backend", async ({
