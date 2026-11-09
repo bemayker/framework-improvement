@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, waitFor } from "@testing-library/react";
+import { act, render, screen, waitFor } from "@testing-library/react";
 import AppFooter from "./AppFooter";
 import { fetchBackendVersion } from "../api/version";
 
@@ -8,6 +8,12 @@ vi.mock("../api/version", () => ({
 }));
 
 const fetchBackendVersionMock = vi.mocked(fetchBackendVersion);
+
+// Flushes the already-settled mocked request so its then/catch handlers have
+// run before a failure-path assertion, which would otherwise pass vacuously.
+async function settlePendingRequest() {
+  await act(async () => {});
+}
 
 function expectNoVersionArtifacts(text: string | null) {
   expect(text).toBe("Task Notes");
@@ -38,7 +44,7 @@ describe("AppFooter", () => {
 
     render(<AppFooter />);
 
-    await waitFor(() => expect(fetchBackendVersionMock).toHaveBeenCalled());
+    await settlePendingRequest();
     expectNoVersionArtifacts(screen.getByTestId("app-footer").textContent);
   });
 
@@ -47,7 +53,7 @@ describe("AppFooter", () => {
 
     render(<AppFooter />);
 
-    await waitFor(() => expect(fetchBackendVersionMock).toHaveBeenCalled());
+    await settlePendingRequest();
     expectNoVersionArtifacts(screen.getByTestId("app-footer").textContent);
   });
 
