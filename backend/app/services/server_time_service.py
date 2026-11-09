@@ -1,8 +1,9 @@
 """Business logic for reporting the server's current time (FEAT-1)."""
 
 from datetime import UTC, datetime
+from typing import Final
 
-UTC_TIMEZONE_NAME = "UTC"
+UTC_TIMEZONE_NAME: Final = "UTC"
 
 
 def get_current_utc_time() -> datetime:
