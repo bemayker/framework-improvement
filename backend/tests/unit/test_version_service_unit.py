@@ -39,3 +39,46 @@ def test_get_app_version_returns_unknown_when_distribution_not_installed(monkeyp
     monkeypatch.setattr(version_service, "version", raise_not_found)
 
     assert version_service.get_app_version() == version_service.UNKNOWN_VERSION
+
+
+def test_get_build_commit_returns_short_value_verbatim(monkeypatch):
+    """Happy path: a value within the limit is returned unchanged."""
+    monkeypatch.setenv("BUILD_COMMIT", "abc1234")
+
+    assert version_service.get_build_commit() == "abc1234"
+
+
+def test_get_build_commit_truncates_full_sha_to_first_12_characters(monkeypatch):
+    """Edge case: a 40-character sha (what CI passes in) is cut to 12."""
+    monkeypatch.setenv("BUILD_COMMIT", "3f9a1c2b7d4e5f60718293a4b5c6d7e8f9012345")
+
+    assert version_service.get_build_commit() == "3f9a1c2b7d4e"
+
+
+def test_get_build_commit_keeps_value_of_exactly_12_characters(monkeypatch):
+    """Boundary: exactly the limit is not shortened."""
+    monkeypatch.setenv("BUILD_COMMIT", "123456789abc")
+
+    assert version_service.get_build_commit() == "123456789abc"
+
+
+def test_get_build_commit_returns_unknown_when_unset(monkeypatch):
+    """Error case: no declared source yields the sentinel, never a raise."""
+    monkeypatch.delenv("BUILD_COMMIT", raising=False)
+
+    assert version_service.get_build_commit() == version_service.UNKNOWN_COMMIT == "unknown"
+
+
+def test_get_build_commit_returns_unknown_when_blank_or_whitespace(monkeypatch):
+    """Edge case: blank and whitespace-only values count as unset."""
+    for blank in ("", "   "):
+        monkeypatch.setenv("BUILD_COMMIT", blank)
+
+        assert version_service.get_build_commit() == "unknown"
+
+
+def test_get_build_commit_strips_surrounding_whitespace_before_truncating(monkeypatch):
+    """Edge case: padding does not eat into the 12 kept characters."""
+    monkeypatch.setenv("BUILD_COMMIT", "  3f9a1c2b7d4e5f60  ")
+
+    assert version_service.get_build_commit() == "3f9a1c2b7d4e"

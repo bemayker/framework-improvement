@@ -32,6 +32,11 @@ class Settings:
     )
     # CORS_ORIGINS (comma-separated), read per call; unset or blank uses the default.
     cors_origins: tuple[str, ...] = field(default_factory=_read_cors_origins)
+    # BUILD_COMMIT (set at build time), read per call. The one declared source
+    # of the commit the version endpoint reports; normalized in version_service.
+    build_commit: str | None = field(
+        default_factory=lambda: os.environ.get("BUILD_COMMIT")
+    )
 
 
 def get_settings() -> Settings:
