@@ -1,22 +1,84 @@
-import { describe, it, expect } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { describe, it, expect, vi, beforeEach } from "vitest";
+import { act, render, screen, waitFor } from "@testing-library/react";
 import AppFooter from "./AppFooter";
-import { version } from "../../package.json";
+import { fetchBackendVersion } from "../api/version";
+
+vi.mock("../api/version", () => ({
+  fetchBackendVersion: vi.fn(),
+}));
+
+const fetchBackendVersionMock = vi.mocked(fetchBackendVersion);
+
+// Flushes the already-settled mocked request so its then/catch handlers have
+// run before a failure-path assertion, which would otherwise pass vacuously.
+async function settlePendingRequest() {
+  await act(async () => {});
+}
+
+function expectNoVersionArtifacts(text: string | null) {
+  expect(text).toBe("Task Notes");
+  for (const artifact of ["undefined", "null", "unknown", " v"]) {
+    expect(text).not.toContain(artifact);
+  }
+}
 
 describe("AppFooter", () => {
-  it("renders the application name", () => {
-    render(<AppFooter />);
-
-    expect(screen.getByTestId("app-footer")).toHaveTextContent("Task Notes");
+  beforeEach(() => {
+    fetchBackendVersionMock.mockReset();
   });
 
-  it("renders the version imported from package.json", () => {
+  it("renders the app name and the backend version when it resolves", async () => {
+    fetchBackendVersionMock.mockResolvedValue("9.9.9");
+
     render(<AppFooter />);
 
-    expect(screen.getByTestId("app-footer")).toHaveTextContent(version);
+    await waitFor(() =>
+      expect(screen.getByTestId("app-footer").textContent).toBe(
+        "Task Notes v9.9.9",
+      ),
+    );
+  });
+
+  it("renders the app name alone when the version cannot be loaded", async () => {
+    fetchBackendVersionMock.mockRejectedValue(new Error("network down"));
+
+    render(<AppFooter />);
+
+    await settlePendingRequest();
+    expectNoVersionArtifacts(screen.getByTestId("app-footer").textContent);
+  });
+
+  it("renders the app name alone when the backend version is unknown", async () => {
+    fetchBackendVersionMock.mockResolvedValue(null);
+
+    render(<AppFooter />);
+
+    await settlePendingRequest();
+    expectNoVersionArtifacts(screen.getByTestId("app-footer").textContent);
+  });
+
+  it("renders the app name alone while the version is still loading", () => {
+    fetchBackendVersionMock.mockReturnValue(new Promise(() => {}));
+
+    render(<AppFooter />);
+
+    expectNoVersionArtifacts(screen.getByTestId("app-footer").textContent);
+  });
+
+  it("requests the version once on mount", async () => {
+    fetchBackendVersionMock.mockResolvedValue("9.9.9");
+
+    render(<AppFooter />);
+
+    await waitFor(() =>
+      expect(screen.getByTestId("app-footer")).toHaveTextContent("v9.9.9"),
+    );
+    expect(fetchBackendVersionMock).toHaveBeenCalledTimes(1);
   });
 
   it("is exposed as the contentinfo landmark and carries the app-footer test id", () => {
+    fetchBackendVersionMock.mockReturnValue(new Promise(() => {}));
+
     render(<AppFooter />);
 
     const footer = screen.getByRole("contentinfo");
