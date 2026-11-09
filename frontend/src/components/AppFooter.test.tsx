@@ -17,7 +17,7 @@ async function settlePendingRequest() {
 
 function expectNoVersionArtifacts(text: string | null) {
   expect(text).toBe("Task Notes");
-  for (const artifact of ["undefined", "null", "unknown", " v"]) {
+  for (const artifact of ["undefined", "null", "unknown", " v", "(", "Error"]) {
     expect(text).not.toContain(artifact);
   }
 }
@@ -27,8 +27,26 @@ describe("AppFooter", () => {
     fetchBackendVersionMock.mockReset();
   });
 
-  it("renders the app name and the backend version when it resolves", async () => {
-    fetchBackendVersionMock.mockResolvedValue("9.9.9");
+  it("renders the app name, the backend version and the short commit when it resolves", async () => {
+    fetchBackendVersionMock.mockResolvedValue({
+      version: "9.9.9",
+      shortCommit: "0123456",
+    });
+
+    render(<AppFooter />);
+
+    await waitFor(() =>
+      expect(screen.getByTestId("app-footer").textContent).toBe(
+        "Task Notes v9.9.9 (0123456)",
+      ),
+    );
+  });
+
+  it("renders the version alone when the commit is absent", async () => {
+    fetchBackendVersionMock.mockResolvedValue({
+      version: "9.9.9",
+      shortCommit: null,
+    });
 
     render(<AppFooter />);
 
@@ -66,7 +84,10 @@ describe("AppFooter", () => {
   });
 
   it("requests the version once on mount", async () => {
-    fetchBackendVersionMock.mockResolvedValue("9.9.9");
+    fetchBackendVersionMock.mockResolvedValue({
+      version: "9.9.9",
+      shortCommit: "0123456",
+    });
 
     render(<AppFooter />);
 
