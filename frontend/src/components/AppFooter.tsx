@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import type { CSSProperties } from "react";
 import { fetchBackendVersion } from "../api/version";
+import type { BackendVersion } from "../api/version";
 
 const APP_NAME = "Task Notes";
 
@@ -11,7 +12,7 @@ const footerStyle: CSSProperties = {
 };
 
 function AppFooter() {
-  const [version, setVersion] = useState<string | null>(null);
+  const [backend, setBackend] = useState<BackendVersion | null>(null);
 
   useEffect(() => {
     let isMounted = true;
@@ -19,10 +20,10 @@ function AppFooter() {
     // While pending, and on any failure, the footer shows the app name alone.
     fetchBackendVersion()
       .then((resolved) => {
-        if (isMounted) setVersion(resolved);
+        if (isMounted) setBackend(resolved);
       })
       .catch(() => {
-        if (isMounted) setVersion(null);
+        if (isMounted) setBackend(null);
       });
 
     return () => {
@@ -33,7 +34,12 @@ function AppFooter() {
   return (
     <footer data-testid="app-footer" style={footerStyle}>
       {APP_NAME}
-      {version !== null && <span data-testid="app-version"> v{version}</span>}
+      {backend !== null && (
+        <span data-testid="app-version"> v{backend.version}</span>
+      )}
+      {backend !== null && backend.commit !== null && (
+        <span data-testid="app-commit"> ({backend.commit})</span>
+      )}
     </footer>
   );
 }

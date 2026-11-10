@@ -6,13 +6,20 @@ const VERSION_URL = `${API_BASE_URL}/api/version`;
 // (see backend/app/services/version_service.py); it means "no version".
 export const UNRESOLVED_BACKEND_VERSION = "unknown";
 
-type VersionBody = { version?: unknown };
+// The backend cuts the commit to 12 characters; the footer shows 7.
+export const SHORT_COMMIT_LENGTH = 7;
+
+export type BackendVersion = { version: string; commit: string | null };
+
+type VersionBody = { version?: unknown; commit?: unknown };
 
 /**
- * Fetches the backend's version. Returns null when the backend did not supply
- * a usable one; throws on a non-OK answer and rejects on a network error.
+ * Fetches the backend's version and short build commit from one response.
+ * Returns null when the backend did not supply a usable version; the commit is
+ * null when it is missing, empty, not a string, or the unknown sentinel.
+ * Throws on a non-OK answer and rejects on a network error.
  */
-export async function fetchBackendVersion(): Promise<string | null> {
+export async function fetchBackendVersion(): Promise<BackendVersion | null> {
   const response = await fetch(VERSION_URL);
 
   if (!response.ok) {
@@ -32,5 +39,13 @@ export async function fetchBackendVersion(): Promise<string | null> {
     return null;
   }
 
-  return version;
+  const rawCommit = body?.commit;
+  const commit =
+    typeof rawCommit === "string" &&
+    rawCommit !== "" &&
+    rawCommit !== UNRESOLVED_BACKEND_VERSION
+      ? rawCommit.slice(0, SHORT_COMMIT_LENGTH)
+      : null;
+
+  return { version, commit };
 }
