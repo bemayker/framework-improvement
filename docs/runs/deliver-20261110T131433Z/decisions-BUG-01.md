@@ -1,0 +1,15 @@
+# Decisions (BUG-01, after its final push): deliver-20261110T131433Z
+
+The entries `.claude/artifacts/BUG-01/decisions.md` received after the last push of its branch (57cd438), the head its pull request merged. The entries before them reached the default branch in that file.
+
+- 2026-11-10 [BUG-01] Merge verdict: merge PR #706 by squash at head 57cd438 (run=deliver-20261110T131433Z, /deliver 6.9). Rationale: autonomy.md Section 5 holds on all five conditions: (1) self-review `VERDICT: PASS blocking=0 recommended=0 optional=0`; (2) ci-poll `verdict=green next=none failed=0`, 7/7 checks done, PR converted from draft, mergeable=MERGEABLE mergeStateStatus=CLEAN; (3) criteria 1 and 2 are met by the handler's `Cache-Control: no-store` and its integration test (push gate: pytest 50 passed, 0 failed, 14 skipped + vitest 26 passed, 0 failed); (4) 0 inline, 0 conversation, 0 reviews on the PR, no change request, and no new tracker comment since 6.1 other than this run's own PR-link note; (5) escalation bar not triggered, the change is additive backend code a revert PR undoes.
+- 2026-11-10 [BUG-01] Criterion 3 is not claimed as verified by this merge. Rationale: it reads "after deploy ... verified by a human on the deployed environment", so it can only be checked once the change is merged and deployed, and no local tier has an edge cache (repro class deployed-only); the implementation delivers its cause (criterion 1's header), and the PR carries the `mayker:to-verify` label so the merge moves the item to to_verify rather than Done. Left for a human: run the curl pair on the deployed host (docs/DEVELOPMENT.md has no Test environments row), then remove the tag.
+- 6.6 push: test-gate: verdict recorded for this push (head 57cd438: full after 3s; counts: root: pytest 50 passed, 0 failed, 14 skipped + vitest 26 passed, 0 failed, 0 skipped); upstream-ok. PR #706 opened draft. PR label: #706 mayker:in-progress. Item-to-PR link comment posted.
+- 6.7 CI: 7/7 checks done, 4m54s (green). Repro verdict exit 0 (deployed-only). PR label mayker:to-verify added to #706 (exit 0).
+- 6.7 handover: status=rebuilt compose=docker-compose.yml sha=57cd438 services=3/3 health=pass project=framework-improvement-bug-01-handover urls=backend=http://localhost:25785,db=localhost:25786,frontend=http://localhost:25787 duration=15s. PR converted; PR label: #706 mayker:in-review (removed mayker:in-progress). Status -> to test.
+- 6.8 comments: PR 0 inline / 0 conversation / 0 reviews; tracker: no new comment since 6.1.
+- 6.9 merged #706 squash -> 6b27a6e.
+- 6.10 auto-done: run 42825648641 succeeded. Status re-read: complete + tracker tag mayker:to-verify (to-verify arm; status_mapping has no to_verify). Not verified until a human removes the tag.
+- 6.10 provenance: 8 dispatches; both always-on standards SELF-REPORTED as read by 4 of 8 (information only, no pass bar); 0 unbacked provenance claims; no MISMATCH.
+- 6.10 checkpoint: [pull] result=pulled head=9e9b182; due=yes items=BUG-01 head=9e9b182 tip=origin/main@9e9b182 verdict=pass (backend 60 passed 14 skipped; frontend 26 passed).
+- 6.10 teardown: no - env: line of this run (nothing provisioned).
