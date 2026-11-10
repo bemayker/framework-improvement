@@ -58,6 +58,16 @@ def test_create_app_registers_health_route():
     assert "/api/health" in custom_paths
 
 
+def test_create_app_registers_uptime_route_and_captures_process_start():
+    """Edge case: the TEST-07 route is wired and the start is set before any request."""
+    app = create_app()
+
+    custom_paths = _collect_route_paths(app.routes) - BUILT_IN_ROUTE_PATHS
+
+    assert "/api/uptime" in custom_paths
+    assert app.state.process_start.started_at.utcoffset() is not None
+
+
 def test_create_app_returns_independent_instances():
     """Error/robustness case: repeated calls do not share mutable state.
 
