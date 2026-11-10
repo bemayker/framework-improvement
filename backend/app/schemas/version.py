@@ -7,3 +7,4 @@ class VersionResponse(BaseModel):
     """Response body for GET /api/version."""
 
     version: str
+    commit: str

@@ -5,6 +5,35 @@ from importlib.metadata import PackageNotFoundError
 from app.services import version_service
 
 
+def test_get_build_commit_with_short_value_returns_it_unchanged(monkeypatch):
+    """Set path: a value under the limit is returned whole."""
+    monkeypatch.setenv("BUILD_COMMIT", "abc1234")
+
+    assert version_service.get_build_commit() == "abc1234"
+
+
+def test_get_build_commit_with_exactly_12_chars_returns_it_unchanged(monkeypatch):
+    """Boundary: a 12-character value is not truncated."""
+    monkeypatch.setenv("BUILD_COMMIT", "0123456789ab")
+
+    assert version_service.get_build_commit() == "0123456789ab"
+
+
+def test_get_build_commit_with_40_char_sha_returns_first_12_chars(monkeypatch):
+    """Set path: a full sha is cut to its first 12 characters."""
+    monkeypatch.setenv("BUILD_COMMIT", "0123456789abcdef0123456789abcdef01234567")
+
+    assert version_service.get_build_commit() == "0123456789ab"
+    assert version_service.COMMIT_LENGTH == 12
+
+
+def test_get_build_commit_when_unset_returns_unknown(monkeypatch):
+    """Unset path: no variable yields the unknown sentinel."""
+    monkeypatch.delenv("BUILD_COMMIT", raising=False)
+
+    assert version_service.get_build_commit() == "unknown"
+
+
 def test_get_app_version_returns_installed_distribution_version(monkeypatch):
     """Happy path: the resolved metadata value is returned verbatim."""
     monkeypatch.setattr(version_service, "version", lambda name: "9.9.9")

@@ -670,6 +670,18 @@ npx playwright test
 
 ---
 
+### Build commit (`BUILD_COMMIT`)
+
+The backend's version endpoint reports the commit its image was built from. The value is a Docker build argument that `backend/Dockerfile` turns into the `BUILD_COMMIT` environment variable, which `backend/app/core/config.py` reads on every call. Pass it when you build the image:
+
+```bash
+docker compose build --build-arg BUILD_COMMIT=$(git rev-parse HEAD) backend
+```
+
+- The endpoint returns only the **first 12 characters**, so a full 40-character SHA is fine to pass.
+- When the argument is not passed, or is blank, the value is `"unknown"`. The Dockerfile sets no default of its own; `config.py` owns the fallback.
+- It is optional: nothing fails without it, and the unit and integration tests read the environment variable directly.
+
 ## Test environments
 
 Every pull request `/build-feature`, `/fix` and `/deliver` opens carries a `## Test` section, printed by the plugin's `hooks/lib/pr-test-section.sh` and pasted verbatim: how to test the change locally (the suites, the key names in `.env.example`, the test data, the manual steps), how to test it on each environment in the table below, and a deploy checklist whenever the branch adds or removes an environment key, adds a migration, or changes deploy configuration. Fill in one row per deployed test environment: its name, its URL, how a branch reaches it, the roles a tester signs in with, the ids of the test records the steps use, and its secrets **as vault references only** (a vault path or a secret's name, never a value: this file is committed and its rows are copied into pull requests). With no row, each pull request says `Deployed: not configured`. No command fills this table; `/sync-project` reports it while it is empty.
