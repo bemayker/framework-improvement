@@ -14,6 +14,7 @@ function expectFooterWithoutVersion() {
   expect(footer.textContent).toBe("Task Notes");
   expect(footer.textContent).not.toMatch(/undefined|null|unknown| v$/);
   expect(screen.queryByTestId("app-version")).not.toBeInTheDocument();
+  expect(screen.queryByTestId("app-commit")).not.toBeInTheDocument();
 }
 
 describe("AppFooter", () => {
@@ -21,13 +22,28 @@ describe("AppFooter", () => {
     fetchVersionMock.mockReset();
   });
 
-  it("renders the app name and the backend version once it resolves", async () => {
-    fetchVersionMock.mockResolvedValue("9.9.9");
+  it("renders the app name, the backend version and the short commit once it resolves", async () => {
+    fetchVersionMock.mockResolvedValue({ version: "9.9.9", commit: "a1b2c3d" });
 
     render(<AppFooter />);
 
     expect(await screen.findByTestId("app-version")).toHaveTextContent("v9.9.9");
-    expect(screen.getByTestId("app-footer")).toHaveTextContent("Task Notes v9.9.9");
+    expect(screen.getByTestId("app-commit").textContent).toBe(" (a1b2c3d)");
+    expect(screen.getByTestId("app-footer").textContent).toBe(
+      "Task Notes v9.9.9 (a1b2c3d)",
+    );
+  });
+
+  it("renders the version alone when the response carries no usable commit", async () => {
+    fetchVersionMock.mockResolvedValue({ version: "9.9.9", commit: null });
+
+    render(<AppFooter />);
+
+    await screen.findByTestId("app-version");
+    const footer = screen.getByTestId("app-footer");
+    expect(footer.textContent).toBe("Task Notes v9.9.9");
+    expect(footer.textContent).not.toMatch(/undefined|null|unknown|\(|\)/);
+    expect(screen.queryByTestId("app-commit")).not.toBeInTheDocument();
   });
 
   it("renders the app name alone while the version is still pending", () => {
@@ -59,7 +75,7 @@ describe("AppFooter", () => {
   });
 
   it("is exposed as the contentinfo landmark and carries the app-footer test id", async () => {
-    fetchVersionMock.mockResolvedValue("9.9.9");
+    fetchVersionMock.mockResolvedValue({ version: "9.9.9", commit: "a1b2c3d" });
 
     render(<AppFooter />);
     await screen.findByTestId("app-version");
