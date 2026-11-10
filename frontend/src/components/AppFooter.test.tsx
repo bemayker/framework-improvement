@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, waitFor } from "@testing-library/react";
+import { act, render, screen, waitFor } from "@testing-library/react";
 import AppFooter from "./AppFooter";
 import { getBackendBuildInfo } from "../api/version";
 
@@ -57,8 +57,8 @@ describe("AppFooter", () => {
 
     render(<AppFooter />);
 
-    await waitFor(() => expect(getBackendBuildInfoMock).toHaveBeenCalled());
-    await Promise.resolve();
+    await act(async () => {});
+    expect(getBackendBuildInfoMock).toHaveBeenCalled();
 
     const footer = screen.getByTestId("app-footer");
     expect(footer).toHaveTextContent(/^Task Notes$/);
@@ -76,7 +76,8 @@ describe("AppFooter", () => {
 
     render(<AppFooter />);
 
-    await waitFor(() => expect(getBackendBuildInfoMock).toHaveBeenCalled());
+    await act(async () => {});
+    expect(getBackendBuildInfoMock).toHaveBeenCalled();
 
     expect(screen.getByTestId("app-footer")).toHaveTextContent(/^Task Notes$/);
   });
