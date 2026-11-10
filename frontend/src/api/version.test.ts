@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, afterEach } from "vitest";
+import { API_BASE_URL } from "./baseUrl";
 import { getBackendVersion } from "./version";
 
 function stubFetch(response: Partial<Response> & { json?: () => unknown }) {
@@ -33,7 +34,7 @@ describe("getBackendVersion", () => {
 
     await getBackendVersion();
 
-    expect(fetchMock).toHaveBeenCalledWith("http://localhost:8010/api/version");
+    expect(fetchMock).toHaveBeenCalledWith(`${API_BASE_URL}/api/version`);
   });
 
   it("rejects with the status when the response is not OK", async () => {
