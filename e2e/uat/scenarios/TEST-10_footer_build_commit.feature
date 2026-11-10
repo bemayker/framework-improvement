@@ -16,7 +16,8 @@ Feature: TEST-10 Footer shows the build commit
     And the footer shows 7 commit characters, not the 12 the endpoint returns
 
   Scenario: Footer shows the app name alone while the version request is pending
-    Given the network is throttled so "/api/version" stays pending
+    Given the backend was built with BUILD_COMMIT "a1b2c3d4e5f60718293a4b5c6d7e8f9012345678"
+    And the network is throttled so "/api/version" stays pending
     When I open "http://localhost:5183"
     Then the footer reads exactly "Task Notes" until the response arrives
     And the footer shows no "undefined", "null", "unknown" or error text
