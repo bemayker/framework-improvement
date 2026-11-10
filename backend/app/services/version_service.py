@@ -8,10 +8,14 @@ any code change when that value is bumped.
 import logging
 from importlib.metadata import PackageNotFoundError, version
 
+from app.core.config import get_settings
+
 logger = logging.getLogger(__name__)
 
 DISTRIBUTION_NAME = "task-notes-backend"
 UNKNOWN_VERSION = "unknown"
+# Short-sha length reported by the API (TEST-09); CI passes the full sha.
+COMMIT_LENGTH = 12
 
 
 def get_app_version() -> str:
@@ -33,3 +37,12 @@ def get_app_version() -> str:
             UNKNOWN_VERSION,
         )
         return UNKNOWN_VERSION
+
+
+def get_build_commit() -> str:
+    """Return the build commit sha truncated to COMMIT_LENGTH characters.
+
+    The value comes from Settings, which reports "unknown" when BUILD_COMMIT is
+    unset or blank, so the endpoint always answers 200.
+    """
+    return get_settings().build_commit[:COMMIT_LENGTH]
