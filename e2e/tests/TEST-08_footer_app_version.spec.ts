@@ -7,9 +7,17 @@ test.describe("TEST-08 footer shows the app version", () => {
     );
     await page.goto("/");
 
-    const { version } = (await (await versionResponse).json()) as { version: string };
+    const { version, commit } = (await (await versionResponse).json()) as {
+      version: string;
+      commit: string;
+    };
 
-    await expect(page.getByTestId("app-footer")).toHaveText(`Task Notes v${version}`);
+    // The footer appends the short commit only when the backend reports a real one.
+    const expectedText =
+      commit && commit !== "unknown"
+        ? `Task Notes v${version} (${commit.slice(0, 7)})`
+        : `Task Notes v${version}`;
+    await expect(page.getByTestId("app-footer")).toHaveText(expectedText);
   });
 
   test("shows exactly the app name when /api/version is unreachable", async ({ page }) => {
