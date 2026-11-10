@@ -20,3 +20,11 @@ This run's section of the repository-root `DECISIONS.md`, which is cumulative ac
 - [re-ingest wave-2] Nodes = TEST-08, TEST-10, BUG-04 (items=42 nodes=3 done=8 to_verify=1 unmapped=30 link=0 labels-ignored=0). TEST-09 dropped as done; BUG-01 dropped as to_verify.
 - [re-ingest wave-2] No backlog change since run start: 38 tracker items, all registered and mapped; registered=none; feature_map.md valid and unchanged.
 - [order] After TEST-08's merge: BUG-04 (wave 3) and TEST-10 (wave 4) both ready; both plan concurrently (plans only write artifacts); their builds are serialized on the LandingPage risk unless their whole-feature manifests are disjoint.
+- [publish wave-2] arm=opened pr=https://github.com/bemayker/framework-improvement/pull/709 merge=merged (class framework, paths docs/runs/deliver-20261110T131433Z). Required status checks on main at merge time (ruleset read): ["pr-tests"] — the check was required.
+- [order] Round 4: BUG-04 and TEST-10 dispatched to planning concurrently (plan base 0b16aad); neither has an actionable tracker comment.
+- [hold] TEST-10 Phase D held behind BUG-04: smoke run ports
+- [merge] BUG-04 #710 -> efb5ed9 (squash); auto-done run 42828524703 succeeded; tracker complete. Repro: before fail -> after pass. Checkpoint pass head=b0e9a62. Teardown: docker rm -f BUG-04-db.
+- [merge] TEST-10 #711 -> b0e9a62 (squash); auto-done run 42828634673 succeeded; tracker complete. Checkpoint pass head=b0e9a62.
+- [final boundary] Follow-ups: none filed (BUG-04 OPTIONAL only; TEST-08 OPTIONAL only; TEST-10 none; no unaddressed comments).
+- [final boundary] re-ingest: nodes=0 (items=42 done=11 to_verify=1 unmapped=30 link=0 labels-ignored=0). No item filed since the wave-2 re-ingest; registered=none; feature map unchanged and valid. BUG-01 is to_verify, left for a human.
+- [final boundary] Remote heads feature/BUG-01, BUG-04, TEST-08, TEST-09, TEST-10 remain on origin after their squash merges (no open PR, not resume points).
