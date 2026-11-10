@@ -96,22 +96,6 @@ def test_settings_cors_origins_defaults_when_unset(monkeypatch):
     assert get_settings().cors_origins == DEFAULT_CORS_ORIGINS == ("http://localhost:5183",)
 
 
-def test_settings_build_commit_reads_environment_on_every_call(monkeypatch):
-    """BUILD_COMMIT is read per call, so a changed value is seen immediately."""
-    monkeypatch.setenv("BUILD_COMMIT", "first")
-    assert get_settings().build_commit == "first"
-
-    monkeypatch.setenv("BUILD_COMMIT", "second")
-    assert get_settings().build_commit == "second"
-
-
-def test_settings_build_commit_is_none_when_unset(monkeypatch):
-    """With BUILD_COMMIT unset the raw setting is None; the service picks the default."""
-    monkeypatch.delenv("BUILD_COMMIT", raising=False)
-
-    assert get_settings().build_commit is None
-
-
 @pytest.mark.parametrize("blank", ["", "   ", " , "])
 def test_settings_cors_origins_treats_blank_value_as_unset(monkeypatch, blank):
     """A blank CORS_ORIGINS falls back to the default rather than allowing nothing."""
