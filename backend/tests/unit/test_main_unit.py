@@ -1,6 +1,7 @@
 """Unit tests for the FastAPI app factory (backend/app/main.py)."""
 
 from app.main import create_app
+from app.services.uptime_service import StartupStamp
 
 # FastAPI's own routes, present on every app regardless of what this project
 # registers; subtracted so a test asserts only the app's custom routes.
@@ -72,8 +73,13 @@ def test_create_app_captures_one_startup_stamp_per_app():
     first_app = create_app()
     second_app = create_app()
 
-    assert first_app.state.startup is first_app.state.startup
+    assert isinstance(first_app.state.startup, StartupStamp)
+    assert isinstance(second_app.state.startup, StartupStamp)
     assert first_app.state.startup is not second_app.state.startup
+    assert (
+        first_app.state.startup.started_monotonic
+        <= second_app.state.startup.started_monotonic
+    )
 
 
 def test_create_app_returns_independent_instances():
