@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import LandingPage from "./LandingPage";
 import { listNotes, createNote } from "../api/notes";
-import { getBackendVersion } from "../api/version";
+import { getBackendVersionInfo } from "../api/version";
 
 vi.mock("../api/notes", () => ({
   listNotes: vi.fn(),
@@ -10,7 +10,7 @@ vi.mock("../api/notes", () => ({
 }));
 
 vi.mock("../api/version", () => ({
-  getBackendVersion: vi.fn(),
+  getBackendVersionInfo: vi.fn(),
 }));
 
 const MOCKED_BACKEND_VERSION = "4.5.6";
@@ -29,8 +29,11 @@ describe("LandingPage", () => {
     listNotesMock.mockReset();
     createNoteMock.mockReset();
     listNotesMock.mockResolvedValue([]);
-    vi.mocked(getBackendVersion).mockReset();
-    vi.mocked(getBackendVersion).mockResolvedValue(MOCKED_BACKEND_VERSION);
+    vi.mocked(getBackendVersionInfo).mockReset();
+    vi.mocked(getBackendVersionInfo).mockResolvedValue({
+      version: MOCKED_BACKEND_VERSION,
+      commit: null,
+    });
   });
 
   it("renders the app title 'Task Notes'", async () => {
