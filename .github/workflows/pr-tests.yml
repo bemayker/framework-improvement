@@ -352,7 +352,7 @@ jobs:
           # pytest exits 5 when it collects no tests yet (e.g. before the
           # scaffold feature adds them); treat that as a pass, not a red X.
           if [ -d backend/tests/unit ]; then
-            (cd backend && uv run pytest tests/unit -q)
+            (cd backend && uv run pytest tests/unit -q) || [ "$?" -eq 5 ]
           fi
       - name: Frontend unit tests (Vitest)
         run: |
@@ -434,7 +434,7 @@ jobs:
           DATABASE_URL: postgresql://tasknotes:tasknotes@localhost:5442/tasknotes
         run: |
           if [ -d backend/tests/integration ]; then
-            (cd backend && uv run pytest tests/integration -q)
+            (cd backend && uv run pytest tests/integration -q) || [ "$?" -eq 5 ]
           fi
 
       - name: Stop services
