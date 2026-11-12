@@ -8,7 +8,7 @@
 # The job ALWAYS runs and its log states why it did or did not post, so a
 # half-finished setup never shows as a failed check.
 #
-# WHAT THE MESSAGE SAYS IS DERIVED, NEVER ASSERTED (MDF-005). Every claim in the
+# WHAT THE MESSAGE SAYS IS DERIVED, NEVER ASSERTED. Every claim in the
 # text is read from something: the tracker status from the tracker's own REST
 # API, the CI result from this head SHA's check runs, the work item ID from the
 # branch. A fact this workflow could not read is OMITTED from the message rather
@@ -249,7 +249,7 @@ jobs:
           fi
 
           # A plan PR carries the "mayker:plan-review" label (/plan-feature Section 11).
-          # A /fix or /deliver PR is ALSO opened as a draft (MDF-045), so the
+          # A /fix or /deliver PR is ALSO opened as a draft, so the
           # draft bit alone no longer means "plan". The label is conditional in
           # the skill ("if the Git provider supports it"), hence the neutral
           # fallback below rather than a guess from the title prefix — the plan
