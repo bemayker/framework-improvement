@@ -1,4 +1,4 @@
-<!-- materialized-from: mayker-dev v0.3.491; do not edit, regenerate with /upgrade-project -->
+<!-- materialized-from: mayker-dev v0.3.479; do not edit, regenerate with /upgrade-project -->
 <!--
   Universal standard. Loaded at launch from .claude/rules/ (always on). Do not edit per project.
   Slash-command mapping, operational behaviour, git conventions.
@@ -93,7 +93,7 @@ Batch independent work into one Bash call per exec turn, in a shape the permissi
 - **No variable expansion other than `$HOME` and `$PWD`:** not an assigned variable, `"$@"`, `$1` or `$?`. Put the value in as a literal, or compute it inside a script. A `$` inside single quotes is not an expansion.
 - **No line holding a `{` and a quote outside single quotes, and a heredoc body counts as outside.** Pass a JSON record as a single-quoted operand of the script, never via `printf`; stage a document holding such lines (below). **No zsh `<N-M>` shape:** write a pair as `A and B`.
 - **No environment-assignment prefix** (`NAME=value command`), and no leading `env`. A recorded backing service reaches a test command through `bash ~/.mayker/mayker-dev/hooks/lib/run-env.sh --id {ID} --run-id {RUN_ID} -- <test command>`.
-- **No tool-call write under `.claude/`**, by `Write`, `Edit`, a redirect, or a `cp` or `mv` naming a `.claude/` path as either end, and **no `sleep`, loop or background watch of your own for CI**. Stage a document: `Write` it to `.mayker/staging/{name}`, then `bash ~/.mayker/mayker-dev/hooks/lib/run-dir.sh stage-in write-*|append-* <dir> <name> .mayker/staging/{name}`; publish a run's files with `run-dir.sh publish-run`, and wait with `ci-poll.sh --wait` (2.1).
+- **No tool-call write under `.claude/`**, by `Write`, `Edit`, a redirect, or a `cp` or `mv` naming a `.claude/` path as either end, and **no `sleep`, loop or background watch of your own for CI**. Stage a document: `Write` it to `.mayker/staging/{name}`, then `bash ~/.mayker/mayker-dev/hooks/lib/run-dir.sh stage-in write-*|append-* <dir> <name> .mayker/staging/{name}` (MDF-456); publish a run's files with `run-dir.sh publish-run`, and wait with `ci-poll.sh --wait` (2.1).
 - **No trailing `&&` or `||`, and no command over 10,000 characters.** A staged document is not in the command; a script appends its own output (5.3).
 
 ### 5.2 What composes fine, and must not be "fixed"
