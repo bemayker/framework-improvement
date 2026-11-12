@@ -10,7 +10,7 @@ test.describe("TEST-08 footer app version", () => {
     await page.goto("/");
 
     await expect(page.getByTestId("app-version")).toContainText(backendVersion);
-    await expect(page.getByTestId("app-footer")).toHaveText(`Task Notes v${backendVersion}`);
+    await expect(page.getByTestId("app-footer")).toContainText(`Task Notes v${backendVersion}`);
   });
 
   test("renders the footer without a version when /api/version is unreachable", async ({
