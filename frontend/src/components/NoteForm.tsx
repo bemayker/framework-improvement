@@ -59,7 +59,7 @@ const savingButtonStyle: CSSProperties = {
   opacity: 0.6,
 };
 
-const errorStyle:CSSProperties = {
+const errorStyle: CSSProperties = {
   fontSize: "0.875rem",
   color: "#b3261e",
   margin: 0,
