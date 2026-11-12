@@ -17,7 +17,7 @@ Feature: TEST-08 Footer shows the app version
     Given "frontend/package.json" declares version "0.0.0"
     When I open "http://localhost:5183/"
     Then the footer shows "0.1.0" and does not contain "0.0.0"
-    And the browser made one "GET http://localhost:8010/api/version" request that returned 200
+    And the browser made at least one "GET http://localhost:8010/api/version" request that returned 200 with {"version":"0.1.0"}
     And "AppFooter.tsx" contains no version literal and no package.json import
 
   Scenario: Footer renders without a version when it cannot be resolved (criterion 3, edge case)
