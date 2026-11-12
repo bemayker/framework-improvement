@@ -1,5 +1,5 @@
 import { useEffect, useState, type CSSProperties } from "react";
-import { getBackendVersion } from "../api/version";
+import { getBackendVersionInfo, type BackendVersionInfo } from "../api/version";
 
 const APP_NAME = "Task Notes";
 
@@ -10,21 +10,21 @@ const footerStyle: CSSProperties = {
 };
 
 function AppFooter() {
-  const [version, setVersion] = useState<string | null>(null);
+  const [info, setInfo] = useState<BackendVersionInfo | null>(null);
 
   useEffect(() => {
     let isMounted = true;
 
-    getBackendVersion()
-      .then((backendVersion) => {
+    getBackendVersionInfo()
+      .then((backendInfo) => {
         if (isMounted) {
-          setVersion(backendVersion);
+          setInfo(backendInfo);
         }
       })
       .catch(() => {
         // Loading and failure render alike: the app name alone, never a placeholder.
         if (isMounted) {
-          setVersion(null);
+          setInfo(null);
         }
       });
 
@@ -33,10 +33,15 @@ function AppFooter() {
     };
   }, []);
 
+  const version = info?.version ?? null;
+  // The commit sits "next to the version", so it is never shown without one.
+  const commit = version ? (info?.commit ?? null) : null;
+
   return (
     <footer data-testid="app-footer" style={footerStyle}>
       {APP_NAME}
       {version ? <span data-testid="app-version"> v{version}</span> : null}
+      {commit ? <span data-testid="app-commit"> ({commit})</span> : null}
     </footer>
   );
 }
