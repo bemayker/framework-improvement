@@ -1,0 +1,18 @@
+- Plan base: 293907c4c7f905c127f702c51ad48a381b1cf12e
+- [plan] run=deliver-20261113T154223Z tracker comments read: 41 (2 pages); actionable 0 (all mayker-dev PR-opened notes from earlier runs). Assumptions recorded in plan.md Re-Plan Feedback.
+
+- run=deliver-20261113T154223Z plan self-approved (orchestrator, /deliver 6.2 step 1). Rationale:
+  - Criteria: all 3 acceptance criteria mapped. `planned-tests.sh ids` on the plan printed 11 rows, at least one test id per criterion (criterion 1: 3 ids, tier E2E; criterion 2: 5 ids, tier Unit; criterion 3: 3 ids, tier Unit), and both non-E2E rows carry a reason.
+  - Scope (`user_story_alignment.md` Section 3): frontend only, as the item's notes ask. No label, no link, no second request, no backend change. The edit to `e2e/tests/TEST-08_footer_app_version.spec.ts` is required, not extra: its exact-text assertion `Task Notes v{version}` fails on a stack built with `BUILD_COMMIT` once the footer shows the commit.
+  - Layering (`coding_standards.md` Section 4): the commit is read in the existing client `frontend/src/api/version.ts`; `AppFooter.tsx` makes no fetch of its own. The other callers of `fetchBackendVersion` at main `78110b3` are `AppFooter.test.tsx` and `LandingPage.test.tsx`, and both are in the manifest.
+  - Technology Selection: no net-new component, module or dependency; the three recorded lines (`String.prototype.slice`, the existing client, Playwright `page.route`) each name what was chosen over what. Nothing hand-built that a native feature covers.
+  - File Manifest: 10 exact paths (4 new, 6 modified), each phase-tagged; no invented endpoint (`GET /api/version` with `commit` exists since TEST-09 `4e346c0`).
+  - Assumption accepted (criterion 2, "the version alone"): version and commit arrive in one response, so pending and failure show `Task Notes` alone as TEST-08 does, and the version alone is shown when the commit is unusable (`unknown`, empty, missing, non-string). Recorded in the plan's Re-Plan Feedback; to be carried into the PR description.
+  - Residual doubt: the plan base is `293907c` and main is now `78110b3` (BUG-01, PR #793). That commit changes backend server-time files and BUG-01 artifacts only, none in this manifest; 6.4's merged-since check against the recorded plan base still runs.
+- run=deliver-20261113T154223Z schedule: build not held behind BUG-04. Union of all phases compared: TEST-10's 10 paths and BUG-04's 6 paths (`NoteForm.tsx`, `NoteForm.test.tsx`, its e2e spec, two UAT files, its `uat_script.md`) share none. The map's pair note on `LandingPage.tsx` does not materialize: neither manifest names it. The planner's CHORE-02 overlap is moot: CHORE-02 is cancelled in the tracker and not in this run's graph. Phase D of TEST-10 and of BUG-04 never run together (smoke run ports).
+- [branch] run=deliver-20261113T154223Z feature/TEST-10-footer-build-commit cut --no-track from origin/main@78110b3; worktree .claude/worktrees/TEST-10.
+- [worktree-deps] installed=2 present=0 unlocked=0 failed=0 duration=2s
+- [run-dir] move-item: moved=3 appended=0 kept=1 failed=0
+- [merged-since] base=293907c (forced) ref=origin/main@78110b3 commits=1 overlap=0 verdict=clean
+- [review] run=deliver-20261113T154223Z VERDICT: PASS blocking=0 recommended=1 optional=0 (no fix round; no BLOCKING finding to close)
+- [refactor-gate] 1 improvements applied (10 files examined); 18798e3. RECOMMENDED 1 (pending Gherkin scenario lacked the commit Given) applied. No source change, tests not re-run.

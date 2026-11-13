@@ -16,12 +16,19 @@ const { version: bundleVersion } = JSON.parse(readFileSync(frontendPackageJsonPa
   version: string;
 };
 
+function escapeRegExp(value: string): string {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
 test.describe("TEST-08 footer app version", () => {
   test("shows the backend version from GET /api/version in the footer", async ({ page }) => {
     await page.goto("/");
 
     const footer = page.getByTestId("app-footer");
-    await expect(footer).toHaveText(`Task Notes v${backendVersion}`);
+    // The stack may or may not have been built with BUILD_COMMIT (TEST-10).
+    await expect(footer).toHaveText(
+      new RegExp(`^Task Notes v${escapeRegExp(backendVersion)}( \\([0-9a-f]{7}\\))?$`),
+    );
     if (bundleVersion !== backendVersion) {
       await expect(footer).not.toContainText(`v${bundleVersion}`);
     }
