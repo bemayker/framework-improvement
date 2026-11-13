@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, waitFor } from "@testing-library/react";
+import { act, render, screen, waitFor } from "@testing-library/react";
 import AppFooter from "./AppFooter";
 import { fetchBackendVersion } from "../api/version";
 import { version as bundleVersion } from "../../package.json";
@@ -31,7 +31,9 @@ describe("AppFooter", () => {
     render(<AppFooter />);
 
     await waitFor(() => expect(fetchBackendVersionMock).toHaveBeenCalledTimes(1));
-    await Promise.resolve();
+    // The rejection travels through .then and .catch; flush it so the assertions
+    // below run after the catch handler, not before it.
+    await act(async () => {});
     const footer = screen.getByTestId("app-footer");
     expect(footer.textContent).toBe("Task Notes");
     expect(footer.textContent).not.toMatch(/undefined|null|unknown/);
