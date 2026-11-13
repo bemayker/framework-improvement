@@ -5,7 +5,7 @@
 - Docker and Docker Compose installed and running.
 - Repository checked out on branch `feature/TEST-08-footer-app-version` (or `main` once merged).
 - `backend/pyproject.toml` reads `version = "0.1.0"`; `frontend/package.json` reads `"version": "0.0.0"`. If either changes, the expected values below change with it.
-- Chrome or Edge with DevTools for steps 5 to 7.
+- Chrome or Edge with DevTools for steps 4, 9 and 10.
 
 ## Test Environment Setup
 

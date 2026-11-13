@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, waitFor } from "@testing-library/react";
+import { act, render, screen, waitFor } from "@testing-library/react";
 import AppFooter from "./AppFooter";
 import { fetchVersion } from "../api/version";
 import { version as packageVersion } from "../../package.json";
@@ -35,9 +35,10 @@ describe("AppFooter", () => {
 
     render(<AppFooter />);
 
-    await waitFor(() => expect(fetchVersionMock).toHaveBeenCalledTimes(1));
-    const footer = screen.getByTestId("app-footer");
-    await waitFor(() => expect(footer.textContent).toBe("Task Notes"));
+    await act(async () => {});
+
+    expect(fetchVersionMock).toHaveBeenCalledTimes(1);
+    expect(screen.getByTestId("app-footer").textContent).toBe("Task Notes");
   });
 
   it("renders the app name only when the backend reports the unknown sentinel", async () => {
@@ -45,10 +46,10 @@ describe("AppFooter", () => {
 
     render(<AppFooter />);
 
-    await waitFor(() => expect(fetchVersionMock).toHaveBeenCalledTimes(1));
-    await Promise.resolve();
-    const footer = screen.getByTestId("app-footer");
-    expect(footer.textContent).toBe("Task Notes");
+    await act(async () => {});
+
+    expect(fetchVersionMock).toHaveBeenCalledTimes(1);
+    expect(screen.getByTestId("app-footer").textContent).toBe("Task Notes");
   });
 
   it("renders the app name only while the version is loading", () => {
