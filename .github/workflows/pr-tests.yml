@@ -43,6 +43,11 @@ name: PR Tests
 on:
   pull_request:
     types: [opened, synchronize, reopened]
+  # Cache-warm run on the default branch (migration 0.3.491-01, MDF-545): every
+  # setup, cache, install and services step runs, no test does, so each cache is
+  # saved where every pull request can read it.
+  push:
+    branches: [main, master]
 
 # One run per PR branch; a newer push supersedes the one in flight. This keeps
 # CI load bounded when several items and fix-cycles push in quick succession.
@@ -348,6 +353,7 @@ jobs:
           fi
 
       - name: Backend unit tests
+        if: github.event_name != 'push'
         run: |
           # pytest exits 5 when it collects no tests yet (e.g. before the
           # scaffold feature adds them); treat that as a pass, not a red X.
@@ -355,6 +361,7 @@ jobs:
             (cd backend && uv run pytest tests/unit -q)
           fi
       - name: Frontend unit tests (Vitest)
+        if: github.event_name != 'push'
         run: |
           if [ -f frontend/package.json ] && (cd frontend && npm run 2>/dev/null | grep -q " test"); then
             (cd frontend && npm test --silent)
@@ -430,6 +437,7 @@ jobs:
       # reaches the db service through the host port docker-compose.yml
       # publishes for it (5442:5432).
       - name: Backend integration tests
+        if: github.event_name != 'push'
         env:
           DATABASE_URL: postgresql://tasknotes:tasknotes@localhost:5442/tasknotes
         run: |
@@ -495,7 +503,10 @@ jobs:
         run: |
           set -u
           ver=""
-          if [ -f package.json ]; then
+          if [ -f package-lock.json ]; then
+            ver="$(node -e 'try{var l=require("./package-lock.json");var p=(l.packages||{})["node_modules/@playwright/test"];console.log((p&&p.version)||"")}catch(e){console.log("")}')"
+          fi
+          if [ -z "$ver" ] && [ -f package.json ]; then
             ver="$(node -e 'try{var p=require("./package.json");var d=(p.devDependencies||{})["@playwright/test"]||(p.dependencies||{})["@playwright/test"]||"";console.log(String(d).replace(/[^0-9A-Za-z.\-]/g,""))}catch(e){console.log("")}')"
           fi
           [ -n "$ver" ] || ver="unpinned"
@@ -542,6 +553,7 @@ jobs:
       # workers` carries it: an integer is substituted into THIS command as
       # `--workers=N`; `auto` (the current value) leaves the command as written.
       - name: E2E tests (Playwright)
+        if: github.event_name != 'push'
         run: |
           if [ -f playwright.config.ts ] && [ -d e2e/tests ]; then
             npx playwright test
@@ -631,7 +643,7 @@ jobs:
   # passed or skipped, failure when any of them failed.
   # ---------------------------------------------------------------------------
   pr-tests:
-    if: always()
+    if: always() && github.event_name != 'push'
     needs: [changes, unit, integration, e2e, feature-map]
     runs-on: ubuntu-latest
     steps:
