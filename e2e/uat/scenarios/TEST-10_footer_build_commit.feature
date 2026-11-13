@@ -15,7 +15,8 @@ Feature: TEST-10 Footer shows the build commit next to the version
     And "4e5f6" does not appear in the footer
 
   Scenario: Footer shows the name alone while the version request is pending
-    Given the network is throttled so "/api/version" is slow
+    Given the backend reports commit "a1b2c3d4e5f6" and version "0.1.0"
+    And the network is throttled so "/api/version" is slow
     When the landing page first renders
     Then the footer reads "Task Notes" alone with no commit, no parentheses and no "undefined"
     And when the request finishes the footer changes to "Task Notes v0.1.0 (a1b2c3d)" without a reload
