@@ -3,10 +3,8 @@ Feature: BUG-01 Server time is not served stale from the edge cache
   I want GET /api/time to tell the CDN not to cache its response
   So that two requests a second apart return two different server times
 
-  Background:
-    Given the Task Notes backend API is running at "http://localhost:8000"
-
   Scenario: The response carries Cache-Control no-store (criterion 1)
+    Given the Task Notes backend API is running at "http://localhost:8000" (or the backend URL the handover names)
     When a client sends a GET request to "/api/time"
     Then the response status code is 200
     And the response header "Cache-Control" is "no-store"
@@ -30,5 +28,6 @@ Feature: BUG-01 Server time is not served stale from the edge cache
     And any CDN cache-status header reads a miss, bypass or dynamic value, never a hit
 
   Scenario: A POST to the route is rejected (edge case)
+    Given the Task Notes backend API is running at "http://localhost:8000" (or the backend URL the handover names)
     When a client sends a POST request to "/api/time"
     Then the response status code is 405
