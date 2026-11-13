@@ -39,3 +39,27 @@ def test_get_app_version_returns_unknown_when_distribution_not_installed(monkeyp
     monkeypatch.setattr(version_service, "version", raise_not_found)
 
     assert version_service.get_app_version() == version_service.UNKNOWN_VERSION
+
+
+def test_get_build_commit_truncates_full_sha_to_first_12_characters(monkeypatch):
+    """A 40-character sha (what CI passes in) comes back as its first 12."""
+    sha = "3f9c2a1b7d4e5f60718293a4b5c6d7e8f9012345"
+    monkeypatch.setenv("BUILD_COMMIT", sha)
+
+    assert version_service.get_build_commit() == sha[:12] == "3f9c2a1b7d4e"
+
+
+def test_get_build_commit_returns_full_value_when_12_characters_or_fewer(monkeypatch):
+    """Edge case: values at or under the limit are not altered."""
+    monkeypatch.setenv("BUILD_COMMIT", "abc123")
+    assert version_service.get_build_commit() == "abc123"
+
+    monkeypatch.setenv("BUILD_COMMIT", "123456789012")
+    assert version_service.get_build_commit() == "123456789012"
+
+
+def test_get_build_commit_returns_unknown_when_unset(monkeypatch):
+    """Error case: no BUILD_COMMIT yields the default, never a raise."""
+    monkeypatch.delenv("BUILD_COMMIT", raising=False)
+
+    assert version_service.get_build_commit() == "unknown"
