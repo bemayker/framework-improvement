@@ -11,7 +11,7 @@
 
 | # | Step | Expected Result | Pass/Fail |
 |---|------|------------------|-----------|
-| 1 | Run `docker compose down`, then `docker compose build --build-arg BUILD_COMMIT=62be9fd76e4beeb5ec93d5fd3e9da1a35242d049 backend`, then `docker compose up -d --build` (criterion 1) | All services start; `docker compose ps` shows backend and frontend running | [ ] Pass [ ] Fail |
+| 1 | Run `docker compose down`, then `docker compose build --build-arg BUILD_COMMIT=62be9fd76e4beeb5ec93d5fd3e9da1a35242d049 backend`, then `docker compose up -d` (no `--build`, which would rebuild with the default `unknown`) (criterion 1) | All services start; `docker compose ps` shows backend and frontend running | [ ] Pass [ ] Fail |
 | 2 | Open http://localhost:8010/api/version | The body reads `{"version":"0.1.0","commit":"62be9fd76e4b"}` | [ ] Pass [ ] Fail |
 | 3 | Open http://localhost:5183/ and read the footer | It reads exactly `Task Notes v0.1.0 (62be9fd)`: seven commit characters, after the version, in parentheses | [ ] Pass [ ] Fail |
 | 4 | Open http://localhost:5183/ with DevTools Network open, throttling set to "Slow 3G", and reload (criterion 2) | While the `version` request is pending the footer reads exactly `Task Notes`; once it completes it reads `Task Notes v0.1.0 (62be9fd)`. Set throttling back to "No throttling" | [ ] Pass [ ] Fail |
