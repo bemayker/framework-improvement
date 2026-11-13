@@ -1,84 +1,25 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
-import { act, render, screen, waitFor } from "@testing-library/react";
+import { describe, it, expect } from "vitest";
+import { render, screen } from "@testing-library/react";
 import AppFooter from "./AppFooter";
-import { fetchBackendVersion } from "../api/version";
-import type { BackendVersion } from "../api/version";
-import { version as bundleVersion } from "../../package.json";
-
-vi.mock("../api/version", () => ({
-  fetchBackendVersion: vi.fn(),
-}));
-
-const fetchBackendVersionMock = vi.mocked(fetchBackendVersion);
+import { version } from "../../package.json";
 
 describe("AppFooter", () => {
-  beforeEach(() => {
-    fetchBackendVersionMock.mockReset();
-    fetchBackendVersionMock.mockResolvedValue({ version: "9.8.7", commit: "a1b2c3d4e5f6" });
-  });
-
-  it("renders the first 7 characters of the commit next to the version", async () => {
+  it("renders the application name", () => {
     render(<AppFooter />);
 
-    await waitFor(() =>
-      expect(screen.getByTestId("app-footer").textContent).toBe(
-        "Task Notes v9.8.7 (a1b2c3d)",
-      ),
-    );
-    expect(fetchBackendVersionMock).toHaveBeenCalledTimes(1);
+    expect(screen.getByTestId("app-footer")).toHaveTextContent("Task Notes");
   });
 
-  it("renders the version alone when the backend reports no usable commit", async () => {
-    fetchBackendVersionMock.mockResolvedValue({ version: "9.8.7", commit: null });
-
+  it("renders the version imported from package.json", () => {
     render(<AppFooter />);
 
-    await waitFor(() =>
-      expect(screen.getByTestId("app-footer").textContent).toBe("Task Notes v9.8.7"),
-    );
+    expect(screen.getByTestId("app-footer")).toHaveTextContent(version);
   });
 
-  it("renders the app name without a version when the version request fails", async () => {
-    fetchBackendVersionMock.mockRejectedValue(new Error("unreachable"));
-
-    render(<AppFooter />);
-
-    await waitFor(() => expect(fetchBackendVersionMock).toHaveBeenCalledTimes(1));
-    // The rejection travels through .then and .catch; flush it so the assertions
-    // below run after the catch handler, not before it.
-    await act(async () => {});
-    const footer = screen.getByTestId("app-footer");
-    expect(footer.textContent).toBe("Task Notes");
-    expect(footer.textContent).not.toMatch(/undefined|null|unknown/);
-  });
-
-  it("renders the app name without a version while the version request is pending", () => {
-    fetchBackendVersionMock.mockReturnValue(new Promise<BackendVersion>(() => {}));
-
-    render(<AppFooter />);
-
-    expect(screen.getByTestId("app-footer").textContent).toBe("Task Notes");
-  });
-
-  it("shows the backend version even when it differs from the frontend package version", async () => {
-    expect(bundleVersion).not.toBe("9.8.7");
-
-    render(<AppFooter />);
-
-    await waitFor(() =>
-      expect(screen.getByTestId("app-footer")).toHaveTextContent("v9.8.7"),
-    );
-    expect(screen.getByTestId("app-footer").textContent).not.toContain(
-      `v${bundleVersion}`,
-    );
-  });
-
-  it("is exposed as the contentinfo landmark and carries the app-footer test id", async () => {
+  it("is exposed as the contentinfo landmark and carries the app-footer test id", () => {
     render(<AppFooter />);
 
     const footer = screen.getByRole("contentinfo");
     expect(footer).toHaveAttribute("data-testid", "app-footer");
-    // Let the mount-time version load settle so no state update lands after the test.
-    await waitFor(() => expect(footer).toHaveTextContent("v9.8.7"));
   });
 });
