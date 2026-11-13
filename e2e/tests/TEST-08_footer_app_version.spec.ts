@@ -13,7 +13,10 @@ test.describe("TEST-08 footer shows the backend version", () => {
 
     await page.goto("/");
 
-    await expect(page.getByTestId("app-footer")).toHaveText(`Task Notes v${backendVersion}`);
+    // A stack built with a real BUILD_COMMIT appends " (abcdef0)" after the version.
+    await expect(page.getByTestId("app-footer")).toHaveText(
+      new RegExp(`^Task Notes v${backendVersion}( \\([0-9a-f]{7}\\))?$`),
+    );
   });
 
   test("shows the footer without a version when /api/version is unreachable", async ({
