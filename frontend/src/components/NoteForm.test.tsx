@@ -117,6 +117,29 @@ describe("NoteForm", () => {
     expect(onCreated).toHaveBeenCalledWith(savedNote);
   });
 
+  it("sends one save request when the form element is submitted twice before the button can be disabled", async () => {
+    let resolveSave: (note: { id: number; text: string }) => void = () => {};
+    createNoteMock.mockReturnValue(
+      new Promise((resolve) => {
+        resolveSave = resolve;
+      }),
+    );
+    const onCreated = vi.fn();
+    render(<NoteForm onCreated={onCreated} />);
+
+    typeNote("Buy milk");
+    // Submitting the form element bypasses the button's disabled state, so only
+    // the in-flight guard can stop the second submit.
+    fireEvent.submit(screen.getByTestId("note-form"));
+    fireEvent.submit(screen.getByTestId("note-form"));
+
+    expect(createNoteMock).toHaveBeenCalledTimes(1);
+    expect(screen.queryByTestId("note-form-error")).not.toBeInTheDocument();
+
+    resolveSave({ id: 14, text: "Buy milk" });
+    await waitFor(() => expect(onCreated).toHaveBeenCalledTimes(1));
+  });
+
   it("accepts a new note after the previous save has finished", async () => {
     createNoteMock
       .mockResolvedValueOnce({ id: 11, text: "Buy milk" })
