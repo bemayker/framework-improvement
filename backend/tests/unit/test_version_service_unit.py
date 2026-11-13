@@ -5,6 +5,36 @@ from importlib.metadata import PackageNotFoundError
 from app.services import version_service
 
 
+def test_get_build_commit_returns_configured_commit_when_set(monkeypatch):
+    """Happy path: the BUILD_COMMIT value is returned."""
+    monkeypatch.setenv("BUILD_COMMIT", "abc1234")
+
+    assert version_service.get_build_commit() == "abc1234"
+
+
+def test_get_build_commit_returns_unknown_when_unset(monkeypatch):
+    """Unset path: the documented default is returned."""
+    monkeypatch.delenv("BUILD_COMMIT", raising=False)
+
+    assert version_service.get_build_commit() == "unknown"
+
+
+def test_get_build_commit_truncates_a_40_character_sha_to_12(monkeypatch):
+    """Edge case: a full sha is cut to its first COMMIT_LENGTH characters."""
+    sha = "62be9fd76e4beeb5ec93d5fd3e9da1a35242d049"
+    monkeypatch.setenv("BUILD_COMMIT", sha)
+
+    assert version_service.COMMIT_LENGTH == 12
+    assert version_service.get_build_commit() == sha[:12] == "62be9fd76e4b"
+
+
+def test_get_build_commit_keeps_a_value_of_12_characters_or_fewer(monkeypatch):
+    """Edge case: the boundary value of exactly 12 characters is returned whole."""
+    monkeypatch.setenv("BUILD_COMMIT", "123456789012")
+
+    assert version_service.get_build_commit() == "123456789012"
+
+
 def test_get_app_version_returns_installed_distribution_version(monkeypatch):
     """Happy path: the resolved metadata value is returned verbatim."""
     monkeypatch.setattr(version_service, "version", lambda name: "9.9.9")
