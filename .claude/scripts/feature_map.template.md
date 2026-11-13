@@ -1,4 +1,4 @@
-<!-- materialized-from: mayker-dev v0.3.491; do not edit, regenerate with /upgrade-project -->
+<!-- materialized-from: mayker-dev v0.3.479; do not edit, regenerate with /upgrade-project -->
 <!--
   CANONICAL TEMPLATE — this file is the single source of truth for the shape of
   `.claude/feature_map.md`. `/sync-project` (Section 4) and `/deliver` (Section 2
@@ -23,7 +23,7 @@
   `hooks/lib/feature-map-repair.sh` writes exactly the same one when it repairs
   an older map.
 
-  The stamp is DIAGNOSTIC ONLY: nothing reads it to decide anything,
+  The stamp is DIAGNOSTIC ONLY (MDF-059): nothing reads it to decide anything,
   and it carries no "do not edit" clause, unlike the seven stamped rules and the
   vendored validator pair, because the ROWS below are the project's own data. It
   exists so a map can say which plugin version shaped its structure.
@@ -33,10 +33,10 @@
   and /deliver Section 2 skips setup entirely once project_state.json exists. So
   a map written before this file gained `## Schema` and `## Work items` stays
   invalid forever, and the heal for it is `hooks/lib/feature-map-repair.sh
-  <path>` — named by the ledger's floor, `migrations/FLOOR.md` — never
+  <path>` — named by the ledger's floor, `migrations/FLOOR.md` (MDF-244) — never
   a hand edit of the table.
 
-  THE EXCEPTION IS THE `## Schema` SECTION BELOW, since 0.3.179.
+  THE EXCEPTION IS THE `## Schema` SECTION BELOW, since 0.3.179 (MDF-207).
   /sync-project Section 5.3 runs `hooks/lib/feature-map-schema-reconcile.sh
   --apply` on every run, in both modes, replacing that one section of an existing
   map with this file's copy of it — so a block still documenting a column set
@@ -80,7 +80,7 @@ is why the script is **vendored** into `.claude/scripts/` rather than read from
 
 | Column | Required | Format | Notes |
 | --- | --- | --- | --- |
-| `Feature ID` | yes | tracker ID or `US-###` / `BUG-###` / `FEAT-###` | Must be unique. Matches the ID the tracker MCP resolves. |
+| `Feature ID` | yes | tracker ID or `US-###` / `BUG-###` / `MDF-###` | Must be unique. Matches the ID the tracker MCP resolves. |
 | `Title` | yes | free text, no pipes | Escape any literal `\|`. |
 | `depends_on` | yes | `[]` or `[ID]` or `[ID, ID]` | **Direct** dependencies only, never transitive. Literal `[]` when none, never blank. No cycles. |
 | `branch` | yes | `feature/{Feature ID}-{slug}` | The `feature/{ID}` prefix is a hard requirement: the auto-Done pipeline matches it on merge. Slug is lowercase, hyphenated, max 40 chars. |
@@ -88,7 +88,7 @@ is why the script is **vendored** into `.claude/scripts/` rather than read from
 | `shared_risk_notes` | no | `⚠️ {note}` or empty | **Derived, never authored.** Flags independent items likely to touch the same files. Flag both rows of a pair. Serialize rather than run these concurrently. Every route that writes rows infers it over the rows whose cell is still empty and appends to — never replaces — a cell that already carries a note; an empty cell means "not yet inferred", not "no overlap", so the run report says which (`work_items.md` Section 7). |
 | `test_checkpoint` | no | `✅`, `➖`, or empty | **Authored, never derived.** Marks an item whose merge is a boundary worth running the whole local suite at. **Any number of rows may be flagged**, unlike `scaffold`. `➖` is a **declined** proposal, which is a decision and not a gap: only `✅` runs a suite, and an empty cell is the one that gets proposed again. See below. |
 | `wave` | no | a positive integer, or empty | **Authored, never derived at read time.** The human's sequencing intent: which items form one front. Numbers need not be contiguous. Empty means *unwaved* — the row sorts after every waved row and renders under `Unwaved`. Every `depends_on` of a waved row must itself be waved, with a **strictly smaller** wave. See below. |
-| `repos` | no | empty, or `repo, repo` | **Authored.** The repositories one story spans, **in merge order**, when it spans more than one (an API and a UI). Each is a repository name, optionally `owner/name`, with no duplicates. Empty means *this repository only*, which is every single-repository story. Only the **last** repository listed marks the story Done on merge. See below. |
+| `repos` | no | empty, or `repo, repo` | **Authored.** The repositories one story spans, **in merge order**, when it spans more than one (an API and a UI, MDF-226). Each is a repository name, optionally `owner/name`, with no duplicates. Empty means *this repository only*, which is every single-repository story. Only the **last** repository listed marks the story Done on merge. See below. |
 
 ### `test_checkpoint`, the boundary the graph cannot express
 
@@ -118,7 +118,7 @@ computed and never stored here, but a judgement about where a full run earns its
 time is not computable from the graph.
 
 **Three states, not two, and the third is why a decline is not re-asked forever**
-. `✅` is accepted, `➖` is **declined**, and empty means *no decision has
+(MDF-205). `✅` is accepted, `➖` is **declined**, and empty means *no decision has
 been recorded* — the proposal routine runs over empty cells only, so an empty cell
 is a request to be proposed again and a `➖` is not. Before `➖` existed a declined
 proposal was written back as an empty cell, byte-identical to a cell a human had
