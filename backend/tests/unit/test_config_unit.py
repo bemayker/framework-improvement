@@ -96,6 +96,25 @@ def test_settings_cors_origins_defaults_when_unset(monkeypatch):
     assert get_settings().cors_origins == DEFAULT_CORS_ORIGINS == ("http://localhost:5183",)
 
 
+def test_settings_cors_origins_strips_trailing_slashes(monkeypatch):
+    """BUG-02: a trailing slash is removed so it matches the browser's Origin header."""
+    monkeypatch.setenv("CORS_ORIGINS", "http://localhost:5183/, https://b.example/ ,https://c.example")
+
+    assert get_settings().cors_origins == (
+        "http://localhost:5183",
+        "https://b.example",
+        "https://c.example",
+    )
+
+
+@pytest.mark.parametrize("slash_only", ["/", " / ", "/, ,//"])
+def test_settings_cors_origins_treats_slash_only_value_as_unset(monkeypatch, slash_only):
+    """A value that is only slashes leaves no origin, so the default applies."""
+    monkeypatch.setenv("CORS_ORIGINS", slash_only)
+
+    assert get_settings().cors_origins == DEFAULT_CORS_ORIGINS
+
+
 @pytest.mark.parametrize("blank", ["", "   ", " , "])
 def test_settings_cors_origins_treats_blank_value_as_unset(monkeypatch, blank):
     """A blank CORS_ORIGINS falls back to the default rather than allowing nothing."""
