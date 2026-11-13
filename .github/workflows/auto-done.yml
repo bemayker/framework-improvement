@@ -3,7 +3,7 @@
 # item Done. It runs in CI (no MCP).
 #
 # Routing is decided by `work_item_source` in .claude/project_state.json, NOT by
-# which files happen to exist (MDF-040) — under `hybrid` an item can have both a
+# which files happen to exist — under `hybrid` an item can have both a
 # tracker twin and a local file, and rules/work_items.md Section 3 makes the
 # tracker twin authoritative, so presence-based routing would flip the shadowed
 # file and strand the authoritative side:
@@ -35,7 +35,7 @@ on:
 
 permissions:
   contents: write # for the frontmatter flip commit (local and hybrid sources)
-  pull-requests: write # for the merged pull request's final phase label (MDF-281)
+  pull-requests: write # for the merged pull request's final phase label
 
 jobs:
   auto-done:
@@ -77,11 +77,11 @@ jobs:
           fi
           echo "id=$id" >> "$GITHUB_OUTPUT"
 
-      # A story that spans several repositories (MDF-226) is Done only when its
+      # A story that spans several repositories is Done only when its
       # LAST half merges: `repos` in `.claude/feature_map.md` lists them in merge
       # order, and only the last one listed marks it. An empty cell, no row, or no
       # map at all is a single-repository story, marked here as before.
-      # A multi-repo project (`CLAUDE.md` -> Repositories, MDF-402) reads no
+      # A multi-repo project (`CLAUDE.md` -> Repositories) reads no
       # `repos` cell: its wrapper's pull request merges last, so the wrapper marks
       # the item, and a sub-repository, whose state or map is a projection of the
       # wrapper's, never does.
@@ -140,7 +140,7 @@ jobs:
             echo "last=no" >> "$GITHUB_OUTPUT"
           fi
 
-      # A fix whose reproduction runs only on the deployed environment (MDF-267)
+      # A fix whose reproduction runs only on the deployed environment
       # merges with the pull request label `mayker:to-verify`, which a human may
       # remove before the merge once verified. With the label, this step marks the
       # item awaiting verification instead of Done, and Mark Done does not run:
@@ -155,7 +155,7 @@ jobs:
           ID: ${{ steps.fid.outputs.id }}
           PR_LABELS: ${{ toJSON(github.event.pull_request.labels.*.name) }}
           TRACKER_API_KEY: ${{ secrets.CLICKUP_API_KEY }}
-          # MDF-404: /sync-project 6.2 adds one HOME_TRACKER_KEY_{ROW} line here per repository tracker.
+          # Home trackers: /sync-project 6.2 adds one HOME_TRACKER_KEY_{ROW} line here per repository tracker.
           FLIP_TOKEN_SET: ${{ secrets.MAYKER_FLIP_TOKEN != '' }}
         run: |
           set -euo pipefail
@@ -170,7 +170,7 @@ jobs:
           state=".claude/project_state.json"
           issue_file="docs/issues/${ID}.md"
 
-          # ---- routing: Work Item Source, not file presence (MDF-040) ----
+          # ---- routing: Work Item Source, not file presence ----
           wi_source=""
           in_registry="no"
           if [ -f "$state" ]; then
@@ -216,7 +216,7 @@ jobs:
               done_status="$(jq -r '(.status_mapping.done) // "done"' "$state")"
               home="$(jq -r --arg id "$ID" '(.features[$id].tracker) // empty' "$state")"
             fi
-            # MDF-404: a multi-repo item whose home is a repository's own tracker
+            # Home trackers: a multi-repo item whose home is a repository's own tracker
             # (CLAUDE.md -> Repositories) is written there, through the same call,
             # with that tracker's statuses, scope and secret in place of the
             # project tracker's. /sync-project 6.2 maps each repository tracker's
@@ -326,7 +326,7 @@ jobs:
           # tracker/hybrid sources only. /sync-project sets the secret name for your tracker
           # (CLICKUP_API_KEY / LINEAR_API_KEY / JIRA_API_TOKEN[, JIRA_EMAIL]).
           TRACKER_API_KEY: ${{ secrets.CLICKUP_API_KEY }}
-          # MDF-404: /sync-project 6.2 adds one HOME_TRACKER_KEY_{ROW} line here per repository tracker.
+          # Home trackers: /sync-project 6.2 adds one HOME_TRACKER_KEY_{ROW} line here per repository tracker.
           # local/hybrid sources only: whether the checkout above got the admin
           # PAT that can push to a protected default branch.
           FLIP_TOKEN_SET: ${{ secrets.MAYKER_FLIP_TOKEN != '' }}
@@ -335,7 +335,7 @@ jobs:
           state=".claude/project_state.json"
           issue_file="docs/issues/${ID}.md"
 
-          # ---- routing: Work Item Source, not file presence (MDF-040) ----
+          # ---- routing: Work Item Source, not file presence ----
           wi_source=""
           in_registry="no"
           if [ -f "$state" ]; then
@@ -379,7 +379,7 @@ jobs:
               done_status="$(jq -r '(.status_mapping.done) // "done"' "$state")"
               home="$(jq -r --arg id "$ID" '(.features[$id].tracker) // empty' "$state")"
             fi
-            # MDF-404: a multi-repo item whose home is a repository's own tracker
+            # Home trackers: a multi-repo item whose home is a repository's own tracker
             # (CLAUDE.md -> Repositories) is written there, through the same call,
             # with that tracker's statuses, scope and secret in place of the
             # project tracker's. /sync-project 6.2 maps each repository tracker's
@@ -468,7 +468,7 @@ jobs:
             echo "::warning::nothing was updated for ${ID} (source='${wi_source:-unknown}')."
           fi
 
-      # The pull request's phase label mirrors the item's status (MDF-281): one
+      # The pull request's phase label mirrors the item's status: one
       # `mayker:` label, replaced at each transition. The merge is the last one,
       # so the merged pull request gets `mayker:done`, or `mayker:to-verify`
       # alone on the to-verify arm, and loses every other phase label and the
