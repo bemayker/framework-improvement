@@ -1,17 +1,25 @@
 import { API_BASE_URL } from "./config";
 
-export type VersionResponse = { version: string };
+export type VersionResponse = { version: string; commit: string };
+
+export type BackendVersion = { version: string; commit: string | null };
 
 // Mirrors UNKNOWN_VERSION in backend/app/services/version_service.py: the
 // backend's answer when its package metadata is missing.
 export const UNRESOLVED_BACKEND_VERSION = "unknown";
 
+// Mirrors UNKNOWN_BUILD_COMMIT in backend/app/core/config.py: the backend's
+// answer when BUILD_COMMIT is unset or blank.
+export const UNRESOLVED_BUILD_COMMIT = "unknown";
+
 /**
- * Fetches the backend's version. Resolves to null when the backend reports its
- * "unknown" sentinel; rejects on network errors, non-OK answers and bodies
- * without a non-empty version string. Other body fields are ignored.
+ * Fetches the backend's version and build commit. Resolves to null when the
+ * backend reports its "unknown" version sentinel; rejects on network errors,
+ * non-OK answers and bodies without a non-empty version string. The commit is
+ * null when it is missing, empty, not a string or the "unknown" sentinel; a bad
+ * commit never rejects.
  */
-export async function fetchBackendVersion(): Promise<string | null> {
+export async function fetchBackendVersion(): Promise<BackendVersion | null> {
   const response = await fetch(`${API_BASE_URL}/api/version`);
 
   if (!response.ok) {
@@ -27,5 +35,13 @@ export async function fetchBackendVersion(): Promise<string | null> {
     throw new Error("Loading the version failed: unexpected response shape");
   }
 
-  return version === UNRESOLVED_BACKEND_VERSION ? null : version;
+  if (version === UNRESOLVED_BACKEND_VERSION) {
+    return null;
+  }
+
+  const commit = body?.commit;
+  const usableCommit =
+    typeof commit === "string" && commit !== "" && commit !== UNRESOLVED_BUILD_COMMIT;
+
+  return { version, commit: usableCommit ? commit : null };
 }
