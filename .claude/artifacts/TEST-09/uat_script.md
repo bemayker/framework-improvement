@@ -22,6 +22,6 @@ Prerequisites: backend running as in Criterion 1.
 2. Open `backend/app/schemas/version.py` → `VersionResponse(BaseModel)` declares `version: str` and `commit: str`.
 
 ## Criterion 4: unit and integration tests cover the set and unset commit paths
-Prerequisites: a backing Postgres reachable through `DATABASE_URL` for the shared integration fixtures (per CLAUDE.md Backing Services).
+Prerequisites: none beyond the shared ones.
 1. Run `uv run --directory backend pytest -q tests/unit/test_config_unit.py tests/unit/test_version_service_unit.py` → output ends with `0 failed` (or no `failed` count), and includes `test_settings_build_commit_reads_env_value`, `test_settings_build_commit_defaults_to_unknown_when_unset`, `test_get_build_commit_returns_configured_value`, `test_get_build_commit_returns_unknown_when_unset` when run with `-v`.
 2. Run `uv run --directory backend pytest -q tests/integration/test_version_integration.py` → `0 failed`, and with `-v` the run lists `test_get_version_returns_commit_from_build_commit_env` and `test_get_version_returns_unknown_commit_when_build_commit_unset` as passed.
