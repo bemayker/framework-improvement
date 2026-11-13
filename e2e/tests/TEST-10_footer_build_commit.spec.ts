@@ -1,20 +1,14 @@
-import { test, expect, type Page, type Request } from "@playwright/test";
+import { test, expect, type Page } from "@playwright/test";
 
 const VERSION_PATH = "/api/version";
 const FIXED_VERSION = "0.1.0";
 
 /**
- * Matches the backend call on its exact path and method. A substring check is
- * not enough: Vite serves the frontend module `src/api/version.ts` from a URL
- * that contains the same text, so a substring matcher catches the module fetch.
- */
-function isVersionApiRequest(request: Request): boolean {
-  return request.method() === "GET" && new URL(request.url()).pathname === VERSION_PATH;
-}
-
-/**
  * Fulfils the version call with a fixed body, because no CI workflow sets
- * BUILD_COMMIT and the live backend would answer `unknown`.
+ * BUILD_COMMIT and the live backend would answer `unknown`. The match is on the
+ * exact pathname and the GET method: a substring check would also catch the
+ * module fetch, since Vite serves `src/api/version.ts` from a URL containing
+ * the same text.
  */
 async function fulfilVersionApi(page: Page, commit: string): Promise<void> {
   await page.route(
