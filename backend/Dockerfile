@@ -13,6 +13,10 @@ COPY . .
 RUN --mount=type=cache,target=/root/.cache/uv \
     uv sync
 
+# Build-time commit (TEST-09). No default here: config.py declares "unknown" once.
+ARG BUILD_COMMIT
+ENV BUILD_COMMIT=${BUILD_COMMIT}
+
 EXPOSE 8010
 
 CMD ["uv", "run", "uvicorn", "app.main:create_app", "--factory", "--host", "0.0.0.0", "--port", "8010"]
