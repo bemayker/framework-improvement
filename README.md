@@ -82,7 +82,7 @@ Docker and Docker Compose, Node.js 20, Python 3.12 and uv. See [docs/DEVELOPMENT
 │   ├── tests/                      # pytest: unit/ and integration/, shared conftest.py
 │   └── Dockerfile
 ├── frontend/                       # React + TypeScript + Vite app
-│   ├── src/                        # Components (e.g. LandingPage), entry point, Vitest setup
+│   ├── src/                        # Components (e.g. LandingPage, AppFooter), api/ client modules (notes, backend version), entry point, Vitest setup
 │   └── Dockerfile
 ├── e2e/                            # Playwright E2E specs (tests/), helpers/, and UAT artifacts (uat/scenarios, uat/scripts)
 ├── docs/
