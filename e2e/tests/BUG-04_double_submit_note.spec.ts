@@ -78,7 +78,7 @@ test.describe("BUG-04 double submit of a note", () => {
     await expect(page.getByTestId(`note-list-item-${createdNote.id}`)).toHaveText(
       noteText,
     );
-    await expect(page.getByTestId("note-list-item-" + createdNote.id)).toHaveCount(1);
+    await expect(page.getByTestId("note-list").getByText(noteText)).toHaveCount(1);
     // Edge case: the guard is released once the save completes.
     await expect(submitButton).toBeEnabled();
 

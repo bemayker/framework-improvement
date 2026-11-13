@@ -3,7 +3,7 @@
 ## Prerequisites
 
 - The stack is running locally: backend on `http://localhost:8010`, frontend on `http://localhost:5183`.
-- Browser is Chrome with DevTools available (Network tab; Network request blocking for steps 10 to 12).
+- Browser is Chrome with DevTools available (Network tab; Network request blocking for steps 11 to 13).
 - Notes from earlier runs may already be in the list. Every step below is about the note you add.
 
 ## Steps

@@ -9,7 +9,6 @@ Feature: BUG-04 Saving a note twice quickly stores it once
 
   Scenario: A double submit while the save is running stores one note
     Given the landing page is open
-    And the save of a note is still in progress
     When I type "Double click check" into the note field identified by "note-input"
     And I double-click the save button identified by "note-submit"
     Then only one save request is sent to the backend
@@ -18,16 +17,15 @@ Feature: BUG-04 Saving a note twice quickly stores it once
 
   Scenario: The save button is disabled while a save is running
     Given the landing page is open
-    And the save of a note is still in progress
-    When I look at the save button identified by "note-submit"
-    Then the save button is disabled
+    When I type a note and press the save button identified by "note-submit"
+    Then while the save is in progress the save button is disabled
     And once the save has finished the save button is enabled again
 
   Scenario: After a failed save the note can be saved again
     Given the landing page is open
     And I typed "Retry check" into the note field identified by "note-input"
-    And the backend could not be reached when I pressed the save button identified by "note-submit"
-    Then I see the validation message identified by "note-form-error" saying the note could not be saved
+    When I press the save button identified by "note-submit" while the backend cannot be reached
+    Then I see the error message identified by "note-form-error" saying the note could not be saved
     And the note field still contains "Retry check"
     And the save button is enabled
     When the backend is reachable again and I press the save button again

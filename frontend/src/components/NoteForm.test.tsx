@@ -17,6 +17,17 @@ function typeNote(text: string) {
   fireEvent.change(screen.getByTestId("note-input"), { target: { value: text } });
 }
 
+/** Makes the next save hang until the returned function resolves it. */
+function holdSave(): (note: { id: number; text: string }) => void {
+  let resolveSave: (note: { id: number; text: string }) => void = () => {};
+  createNoteMock.mockReturnValue(
+    new Promise((resolve) => {
+      resolveSave = resolve;
+    }),
+  );
+  return (note) => resolveSave(note);
+}
+
 describe("NoteForm", () => {
   beforeEach(() => {
     createNoteMock.mockReset();
@@ -95,12 +106,7 @@ describe("NoteForm", () => {
   });
 
   it("sends one save request when the form is submitted twice before the first save completes", async () => {
-    let resolveSave: (note: { id: number; text: string }) => void = () => {};
-    createNoteMock.mockReturnValue(
-      new Promise((resolve) => {
-        resolveSave = resolve;
-      }),
-    );
+    const resolveSave = holdSave();
     const onCreated = vi.fn();
     render(<NoteForm onCreated={onCreated} />);
 
@@ -115,12 +121,7 @@ describe("NoteForm", () => {
   });
 
   it("sends one save request when the form is submitted twice via Enter before the first save completes", async () => {
-    let resolveSave: (note: { id: number; text: string }) => void = () => {};
-    createNoteMock.mockReturnValue(
-      new Promise((resolve) => {
-        resolveSave = resolve;
-      }),
-    );
+    const resolveSave = holdSave();
     const onCreated = vi.fn();
     render(<NoteForm onCreated={onCreated} />);
 
@@ -135,12 +136,7 @@ describe("NoteForm", () => {
   });
 
   it("disables the save button while a save is in flight and re-enables it after success", async () => {
-    let resolveSave: (note: { id: number; text: string }) => void = () => {};
-    createNoteMock.mockReturnValue(
-      new Promise((resolve) => {
-        resolveSave = resolve;
-      }),
-    );
+    const resolveSave = holdSave();
     render(<NoteForm onCreated={vi.fn()} />);
 
     expect(screen.getByTestId("note-submit")).toBeEnabled();
