@@ -2,12 +2,21 @@ import { API_BASE_URL } from "./apiBaseUrl";
 
 export type VersionResponse = {
   version: string;
+  commit?: unknown;
+};
+
+export type VersionInfo = {
+  version: string;
+  commit: string | null;
 };
 
 const VERSION_URL = `${API_BASE_URL}/api/version`;
 
-/** Fetches the backend's own version string from GET /api/version. */
-export async function fetchVersion(): Promise<string> {
+// What the backend reports when BUILD_COMMIT is unset or blank.
+const UNKNOWN_COMMIT = "unknown";
+
+/** Fetches the backend's version and build commit from GET /api/version. */
+export async function fetchVersion(): Promise<VersionInfo> {
   const response = await fetch(VERSION_URL);
 
   if (!response.ok) {
@@ -23,5 +32,12 @@ export async function fetchVersion(): Promise<string> {
     throw new Error("Loading the version failed: unexpected response");
   }
 
-  return version;
+  // The commit is optional for the client: an unusable one must not fail the version.
+  const rawCommit = body?.commit;
+  const commit =
+    typeof rawCommit === "string" && rawCommit !== "" && rawCommit !== UNKNOWN_COMMIT
+      ? rawCommit
+      : null;
+
+  return { version, commit };
 }

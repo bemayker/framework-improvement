@@ -27,10 +27,35 @@ describe("version API client", () => {
   it("fetches the version from /api/version on the default base URL", async () => {
     fetchMock.mockResolvedValue(okResponse({ version: "0.1.0" }));
 
-    const version = await fetchVersion();
+    const info = await fetchVersion();
 
     expect(fetchMock).toHaveBeenCalledWith(DEFAULT_VERSION_URL);
-    expect(version).toBe("0.1.0");
+    expect(info).toEqual({ version: "0.1.0", commit: null });
+  });
+
+  it("returns the commit as reported by /api/version", async () => {
+    fetchMock.mockResolvedValue(
+      okResponse({ version: "0.1.0", commit: "0123456789ab" }),
+    );
+
+    expect(await fetchVersion()).toEqual({
+      version: "0.1.0",
+      commit: "0123456789ab",
+    });
+  });
+
+  it("returns a null commit when the response carries the unknown sentinel", async () => {
+    fetchMock.mockResolvedValue(okResponse({ version: "0.1.0", commit: "unknown" }));
+
+    expect(await fetchVersion()).toEqual({ version: "0.1.0", commit: null });
+  });
+
+  it("returns a null commit when the commit is not a non-empty string", async () => {
+    fetchMock.mockResolvedValueOnce(okResponse({ version: "0.1.0", commit: 42 }));
+    fetchMock.mockResolvedValueOnce(okResponse({ version: "0.1.0", commit: "" }));
+
+    expect((await fetchVersion()).commit).toBeNull();
+    expect((await fetchVersion()).commit).toBeNull();
   });
 
   it("throws with the status and reason when the response is not OK", async () => {
