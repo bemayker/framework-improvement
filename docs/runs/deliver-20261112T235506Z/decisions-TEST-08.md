@@ -1,0 +1,12 @@
+# Decisions (TEST-08, after its final push): deliver-20261112T235506Z
+
+The entries `.claude/artifacts/TEST-08/decisions.md` received after the last push of its branch (2fa00cc), the head its pull request merged. The entries before them reached the default branch in that file.
+
+- 2026-11-13 [TEST-08] run=deliver-20261112T235506Z 6.9 merge verdict: merge PR #744 (squash) at head 2fa00cc. Rationale: all five conditions of autonomy.md Section 5 hold. (1) Self-review `VERDICT: PASS blocking=0 recommended=2 optional=1`; both RECOMMENDED applied by the refactor gate, the OPTIONAL listed under the PR's known improvements. (2) ci-poll line read at this decision: `verdict=green next=none failed=0 poll=1`, 7 of 7 checks done, PR out of draft. (3) Criteria 1 to 5 (criterion 2 as amended and criterion 5 as added by the tracker correction comment) are met: push gate at 2fa00cc pytest 42 passed, 0 failed, 14 skipped and vitest 31 passed, 0 failed; E2E smoke 6 passed, 0 failed; handover stack rebuilt at 2fa00cc, health=pass. (4) PR surface: 0 inline, 0 general comments, 0 reviews, no change request, mergeable=MERGEABLE, mergeStateStatus=CLEAN; tracker surface: the one actionable comment is addressed in code and answered on the tracker, nothing new since 6.1. (5) Escalation bar not triggered: a frontend-only change with no migration, secret or external side effect, undone by a revert PR.
+- [TEST-08] 6.7: CI verdict=green (7/7). Handover rebuild: status=rebuilt sha=2fa00cc health=pass project=framework-improvement-test-08-handover urls=backend=http://localhost:21373,db=localhost:21374,frontend=http://localhost:21375 duration=11s. PR label: #744 mayker:in-review (removed mayker:in-progress). Status "to test".
+- [TEST-08] 6.8: PR #744 0 comments, 0 reviews; tracker: correction comment answered in this run's PR-link comment; nothing new since 6.1.
+- [TEST-08] 6.9: merged PR #744 by squash, merge commit 9c91fa1.
+- auto-done: run 43335710801 succeeded
+- [TEST-08] 6.10: tracker status reads complete (auto-Done fired); no backstop flip.
+- [standards-provenance] 7 dispatch(es); both always-on standards SELF-REPORTED as read by 3 of 7 (information only, no pass bar); 0 unbacked provenance claim(s); 4 of 7 dispatch(es) not assessed (no artifact or claim)
+- [checkpoint] due=yes items=TEST-08 command=uv run --directory backend pytest -q && npm --prefix frontend test merged=TEST-08 (named by caller) head=9c91fa1 tip=origin/main@9c91fa1 verdict=pass (pytest 61 passed, 14 skipped; vitest 31 passed)
