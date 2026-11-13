@@ -1,0 +1,11 @@
+# Decisions (TEST-09, after its final push): deliver-20261112T235506Z
+
+The entries `.claude/artifacts/TEST-09/decisions.md` received after the last push of its branch (4143184), the head its pull request merged. The entries before them reached the default branch in that file.
+
+- 2026-11-13 [TEST-09] run=deliver-20261112T235506Z 6.9: merge verdict for PR #743 is merge (squash). Rationale: all five conditions of autonomy.md Section 5 hold at head 4143184. (1) Self-review `VERDICT: PASS blocking=0 recommended=0 optional=1`; the one OPTIONAL (stale docstring in backend/tests/unit/test_config_unit.py) is in the PR's Known improvements; refactor gate no findings (10 files examined). (2) ci-poll line read at this decision: `verdict=green next=none failed=0 poll=1`, 7/7 checks done; PR out of draft, mergeable=MERGEABLE, mergeStateStatus=CLEAN; push gate recorded for the head (pytest 53 passed, 0 failed, 14 skipped and vitest 26 passed, 0 failed). (3) All 4 acceptance criteria met per the plan's criterion coverage and the PR body, the 12-character cut included. (4) PR surface: 0 inline, 0 general comments, 0 reviews, no change request; tracker surface: the one actionable comment (BUILD_COMMIT cut to its first 12 characters) is addressed in code and tests, and no new comment since 6.1 beyond this run's own PR-link note. (5) Escalation bar (Section 4) not triggered: additive response field, Dockerfile ARG/ENV and a compose build arg, no migration, no secret, all revertible by a revert PR. Handover stack rebuilt at 4143184, health=pass.
+- [TEST-09] 6.7: CI verdict=green (7/7). Handover rebuild: status=rebuilt sha=4143184 health=pass project=framework-improvement-test-09-handover urls=backend=http://localhost:30819,db=localhost:30820,frontend=http://localhost:30821 duration=11s. PR label: #743 mayker:in-review (removed mayker:in-progress). Status "to test".
+- [TEST-09] 6.8: PR #743 0 comments, 0 reviews; tracker: no new comment since 6.1.
+- [TEST-09] 6.9: merged PR #743 by squash, merge commit b8c9cfd.
+- auto-done: run 43334981233 succeeded
+- [TEST-09] 6.10: tracker status reads complete (auto-Done fired); no backstop flip.
+- [standards-provenance] 6 dispatch(es); both always-on standards SELF-REPORTED as read by 3 of 6 (information only, no pass bar); 0 unbacked provenance claim(s); 3 of 6 dispatch(es) not assessed (no artifact or claim)
