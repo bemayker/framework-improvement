@@ -39,6 +39,8 @@ services:
       # The browser's origin. A handover rebuild on free ports (MDF-284) rewrites
       # this localhost URL to the moved frontend port, so it must live here.
       CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:5183}
+      # Build commit reported by GET /api/version; CI exports the full sha.
+      BUILD_COMMIT: ${BUILD_COMMIT:-unknown}
     ports:
       - "8010:8010"
     volumes:
