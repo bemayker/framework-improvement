@@ -9,7 +9,7 @@ Feature: BUG-04 Saving a note twice quickly stores it twice
 
   Scenario: A second submit while the first save is in flight stores the note once
     Given the landing page is open
-    And the first save of a note is still in flight
+    And saving a note is slowed so that a save stays in flight
     When I type "Double click check 1" into the note field identified by "note-input"
     And I press the save button identified by "note-submit" twice in quick succession
     Then only one save request is sent to the backend
@@ -19,6 +19,7 @@ Feature: BUG-04 Saving a note twice quickly stores it twice
 
   Scenario: Pressing Enter twice stores the note once
     Given the landing page is open
+    And saving a note is slowed so that a save stays in flight
     When I type "Enter key check 1" into the note field identified by "note-input"
     And I press Enter twice in quick succession
     Then only one save request is sent to the backend
