@@ -37,7 +37,7 @@
 | 15 | 4 | Read `frontend/src/components/AppFooter.test.tsx` | It contains a test for the version present (`renders the version the backend reports`) and one for it absent (`renders the app name without a version when the request fails`) | [ ] Pass [ ] Fail |
 | 16 | 5 | In dev tools Network, set throttling to `Slow 3G`, then reload `http://localhost:5183/` and watch the footer | The footer first reads `Task Notes` with no version and no placeholder (no "Loading", no ellipsis) | [ ] Pass [ ] Fail |
 | 17 | 5 | Wait for the `version` request to finish | The footer then reads `Task Notes v0.1.0`; afterwards set throttling back to `No throttling` | [ ] Pass [ ] Fail |
-| 18 | Edge | From the repository root, run `npx playwright test e2e/tests/TEST-08_footer_app_version.spec.ts` | Both specs pass: the backend version is shown, and an unreachable `/api/version` leaves `Task Notes` alone | [ ] Pass [ ] Fail |
+| 18 | Edge | From the repository root, run `npx playwright test e2e/tests/TEST-08_footer_app_version.spec.ts` | `0 failed`, including the backend-version spec and the unreachable-`/api/version` spec | [ ] Pass [ ] Fail |
 
 ## Summary
 
