@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { act, render, screen, waitFor } from "@testing-library/react";
 import AppFooter from "./AppFooter";
 import { fetchBackendVersion } from "../api/version";
+import type { BackendVersion } from "../api/version";
 import { version as bundleVersion } from "../../package.json";
 
 vi.mock("../api/version", () => ({
@@ -13,16 +14,28 @@ const fetchBackendVersionMock = vi.mocked(fetchBackendVersion);
 describe("AppFooter", () => {
   beforeEach(() => {
     fetchBackendVersionMock.mockReset();
-    fetchBackendVersionMock.mockResolvedValue("9.8.7");
+    fetchBackendVersionMock.mockResolvedValue({ version: "9.8.7", commit: "a1b2c3d4e5f6" });
   });
 
-  it("renders the version the backend reports", async () => {
+  it("renders the first 7 characters of the commit next to the version", async () => {
     render(<AppFooter />);
 
     await waitFor(() =>
-      expect(screen.getByTestId("app-footer")).toHaveTextContent("Task Notes v9.8.7"),
+      expect(screen.getByTestId("app-footer").textContent).toBe(
+        "Task Notes v9.8.7 (a1b2c3d)",
+      ),
     );
     expect(fetchBackendVersionMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("renders the version alone when the backend reports no usable commit", async () => {
+    fetchBackendVersionMock.mockResolvedValue({ version: "9.8.7", commit: null });
+
+    render(<AppFooter />);
+
+    await waitFor(() =>
+      expect(screen.getByTestId("app-footer").textContent).toBe("Task Notes v9.8.7"),
+    );
   });
 
   it("renders the app name without a version when the version request fails", async () => {
@@ -40,7 +53,7 @@ describe("AppFooter", () => {
   });
 
   it("renders the app name without a version while the version request is pending", () => {
-    fetchBackendVersionMock.mockReturnValue(new Promise<string>(() => {}));
+    fetchBackendVersionMock.mockReturnValue(new Promise<BackendVersion>(() => {}));
 
     render(<AppFooter />);
 
