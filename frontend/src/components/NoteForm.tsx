@@ -1,4 +1,4 @@
-import { useRef, useState, type CSSProperties, type FormEvent } from "react";
+import { useState, type CSSProperties, type FormEvent } from "react";
 import { createNote, type Note } from "../api/notes";
 
 const FIELD_LABEL = "New note";
@@ -67,18 +67,9 @@ type NoteFormProps = {
 function NoteForm({ onCreated }: NoteFormProps) {
   const [text, setText] = useState("");
   const [error, setError] = useState<string | null>(null);
-  const [isSaving, setIsSaving] = useState(false);
-  const isSavingRef = useRef(false);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-
-    // Checked before the empty-text check: while a save is pending the first
-    // save may already have cleared the input, and a second submit must not
-    // show a validation message either.
-    if (isSavingRef.current) {
-      return;
-    }
 
     // A whitespace-only note counts as empty, and is rejected here so no
     // request is sent at all.
@@ -88,10 +79,6 @@ function NoteForm({ onCreated }: NoteFormProps) {
       return;
     }
 
-    // A ref, not only state: two submits can run before React re-renders, and
-    // both would read the same stale state from their closure.
-    isSavingRef.current = true;
-    setIsSaving(true);
     try {
       const savedNote = await createNote(trimmedText);
       setError(null);
@@ -99,9 +86,6 @@ function NoteForm({ onCreated }: NoteFormProps) {
       onCreated(savedNote);
     } catch {
       setError(SAVE_FAILED_MESSAGE);
-    } finally {
-      isSavingRef.current = false;
-      setIsSaving(false);
     }
   }
 
@@ -121,12 +105,7 @@ function NoteForm({ onCreated }: NoteFormProps) {
           style={inputStyle}
           onChange={(event) => setText(event.target.value)}
         />
-        <button
-          data-testid="note-submit"
-          type="submit"
-          style={buttonStyle}
-          disabled={isSaving}
-        >
+        <button data-testid="note-submit" type="submit" style={buttonStyle}>
           {SUBMIT_LABEL}
         </button>
       </div>
