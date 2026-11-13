@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, waitFor } from "@testing-library/react";
+import { act, render, screen, waitFor } from "@testing-library/react";
 import AppFooter from "./AppFooter";
 import { fetchBackendVersion } from "../api/version";
 
@@ -39,8 +39,10 @@ describe("AppFooter", () => {
     fetchBackendVersionMock.mockRejectedValue(new Error("network down"));
 
     render(<AppFooter />);
+    // Flush the rejected promise so the assertion runs after the failure path.
+    await act(async () => {});
 
-    await waitFor(() => expect(fetchBackendVersionMock).toHaveBeenCalled());
+    expect(fetchBackendVersionMock).toHaveBeenCalled();
     expect(screen.getByTestId("app-footer").textContent).toBe("Task Notes");
   });
 
@@ -48,8 +50,10 @@ describe("AppFooter", () => {
     fetchBackendVersionMock.mockResolvedValue(null);
 
     render(<AppFooter />);
+    // Flush the resolved promise so the assertion runs after the result applied.
+    await act(async () => {});
 
-    await waitFor(() => expect(fetchBackendVersionMock).toHaveBeenCalled());
+    expect(fetchBackendVersionMock).toHaveBeenCalled();
     expect(screen.getByTestId("app-footer").textContent).toBe("Task Notes");
   });
 
