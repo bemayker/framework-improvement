@@ -17,8 +17,15 @@ DEFAULT_CORS_ORIGINS = ("http://localhost:5183",)
 
 
 def _read_cors_origins() -> tuple[str, ...]:
-    """Return CORS_ORIGINS split on commas, or the default when none are given."""
-    entries = (entry.strip() for entry in (os.environ.get("CORS_ORIGINS") or "").split(","))
+    """Return CORS_ORIGINS split on commas, or the default when none are given.
+
+    A trailing slash is dropped from each entry: browsers send `Origin` without
+    one and CORSMiddleware compares it exactly, so `http://host:5183/` would
+    silently match nothing.
+    """
+    entries = (
+        entry.strip().rstrip("/") for entry in (os.environ.get("CORS_ORIGINS") or "").split(",")
+    )
     return tuple(entry for entry in entries if entry) or DEFAULT_CORS_ORIGINS
 
 
