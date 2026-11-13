@@ -1,8 +1,11 @@
 import { useEffect, useState } from "react";
 import type { CSSProperties } from "react";
 import { fetchVersion } from "../api/version";
+import type { VersionInfo } from "../api/version";
 
 const APP_NAME = "Task Notes";
+
+const SHORT_COMMIT_LENGTH = 7;
 
 // What the backend reports when its package metadata is not installed.
 const UNKNOWN_VERSION = "unknown";
@@ -14,15 +17,15 @@ const footerStyle: CSSProperties = {
 };
 
 function AppFooter() {
-  const [version, setVersion] = useState<string | null>(null);
+  const [info, setInfo] = useState<VersionInfo | null>(null);
 
   useEffect(() => {
     let isMounted = true;
 
     fetchVersion()
       .then((resolved) => {
-        if (isMounted && resolved !== UNKNOWN_VERSION) {
-          setVersion(resolved);
+        if (isMounted && resolved.version !== UNKNOWN_VERSION) {
+          setInfo(resolved);
         }
       })
       .catch(() => {
@@ -36,7 +39,16 @@ function AppFooter() {
 
   return (
     <footer data-testid="app-footer" style={footerStyle}>
-      {version === null ? APP_NAME : `${APP_NAME} v${version}`}
+      {info === null ? APP_NAME : `${APP_NAME} v${info.version}`}
+      {info?.commit != null && (
+        <>
+          {" ("}
+          <span data-testid="app-footer-commit">
+            {info.commit.slice(0, SHORT_COMMIT_LENGTH)}
+          </span>
+          {")"}
+        </>
+      )}
     </footer>
   );
 }
