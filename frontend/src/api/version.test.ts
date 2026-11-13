@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, afterEach } from "vitest";
-import { fetchBackendVersion } from "./version";
+import { fetchBackendVersion, UNRESOLVED_BUILD_COMMIT } from "./version";
 
 function stubFetch(response: Partial<Response>) {
   const fetchMock = vi.fn().mockResolvedValue(response);
@@ -18,18 +18,50 @@ describe("fetchBackendVersion", () => {
       json: async () => ({ version: "0.1.0" }),
     });
 
-    await expect(fetchBackendVersion()).resolves.toBe("0.1.0");
+    await expect(fetchBackendVersion()).resolves.toEqual({
+      version: "0.1.0",
+      commit: null,
+    });
     expect(fetchMock).toHaveBeenCalledTimes(1);
     expect(String(fetchMock.mock.calls[0][0])).toMatch(/\/api\/version$/);
   });
 
-  it("ignores extra fields in the response body", async () => {
+  it("returns the version and the commit from the backend", async () => {
     stubFetch({
       ok: true,
-      json: async () => ({ version: "0.2.0", commit: "abc1234" }),
+      json: async () => ({ version: "0.2.0", commit: "4f2a9c1d8e7b" }),
     });
 
-    await expect(fetchBackendVersion()).resolves.toBe("0.2.0");
+    await expect(fetchBackendVersion()).resolves.toEqual({
+      version: "0.2.0",
+      commit: "4f2a9c1d8e7b",
+    });
+  });
+
+  it("returns a null commit when the backend reports the unknown commit", async () => {
+    stubFetch({
+      ok: true,
+      json: async () => ({ version: "0.2.0", commit: UNRESOLVED_BUILD_COMMIT }),
+    });
+
+    await expect(fetchBackendVersion()).resolves.toEqual({
+      version: "0.2.0",
+      commit: null,
+    });
+  });
+
+  it("returns a null commit for an empty, missing or non-string commit without rejecting", async () => {
+    for (const body of [
+      { version: "0.2.0", commit: "" },
+      { version: "0.2.0" },
+      { version: "0.2.0", commit: 42 },
+    ]) {
+      stubFetch({ ok: true, json: async () => body });
+      await expect(fetchBackendVersion()).resolves.toEqual({
+        version: "0.2.0",
+        commit: null,
+      });
+    }
   });
 
   it("returns null when the backend reports the unknown sentinel", async () => {
