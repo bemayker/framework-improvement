@@ -20,12 +20,14 @@ class RecordingRepository:
         self.inserted_texts: list[str] = []
 
     def insert_note(self, text: str) -> Note:
+        """Store the note in memory and record its text."""
         self.inserted_texts.append(text)
         note = Note(id=len(self.notes) + 1, text=text)
         self.notes.append(note)
         return note
 
     def list_notes(self) -> list[Note]:
+        """Return the notes stored so far."""
         return list(self.notes)
 
 
@@ -33,9 +35,11 @@ class FailingRepository:
     """Stand-in for an unreachable database."""
 
     def insert_note(self, text: str) -> Note:
+        """Fail as an unreachable database would."""
         raise RuntimeError("database unreachable")
 
     def list_notes(self) -> list[Note]:
+        """Fail as an unreachable database would."""
         raise RuntimeError("database unreachable")
 
 

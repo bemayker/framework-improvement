@@ -32,6 +32,7 @@ class FakeCursor:
         return False
 
     def execute(self, sql: str) -> None:
+        """Record the statement instead of running it."""
         self._executed.append(sql)
 
 
@@ -45,15 +46,19 @@ class FakeConnection:
         self.closed = False
 
     def cursor(self) -> FakeCursor:
+        """Return a cursor that records into this connection."""
         return FakeCursor(self.executed)
 
     def commit(self) -> None:
+        """Count a commit."""
         self.commits += 1
 
     def rollback(self) -> None:
+        """Count a rollback."""
         self.rollbacks += 1
 
     def close(self) -> None:
+        """Mark the connection closed."""
         self.closed = True
 
     # `ensure_schema` opens the connection-string case with a `with` block.

@@ -7,6 +7,7 @@ startup schema initialisation and the CORS middleware the browser needs, and
 TEST-02 the health router.
 """
 
+import os
 import logging
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
@@ -43,6 +44,7 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
 
 
 def create_app() -> FastAPI:
+    """Build the FastAPI application with its routers and middleware."""
     settings = get_settings()
     app = FastAPI(title=settings.app_title, lifespan=lifespan)
     app.add_middleware(
