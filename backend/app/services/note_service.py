@@ -17,9 +17,11 @@ logger = logging.getLogger(__name__)
 class NoteRepositoryProtocol(Protocol):
     """The data-access contract this service depends on."""
 
-    def insert_note(self, text: str) -> Note: ...
+    def insert_note(self, text: str) -> Note:
+        """Store a note with this text and return it."""
 
-    def list_notes(self) -> list[Note]: ...
+    def list_notes(self) -> list[Note]:
+        """Return every stored note in insertion order."""
 
 
 def create_note(repository: NoteRepositoryProtocol, text: str) -> Note:
