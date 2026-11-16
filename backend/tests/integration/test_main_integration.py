@@ -1,13 +1,14 @@
 """Integration tests for the CORS wiring in create_app() (BUG-02), full HTTP cycle."""
 
 from fastapi.testclient import TestClient
+from httpx import Response
 
 from app.main import create_app
 
 BROWSER_ORIGIN = "http://localhost:5183"
 
 
-def _get_version_from_origin(origin: str) -> TestClient:
+def _get_version_from_origin(origin: str) -> Response:
     # Deliberately not used as a context manager: the app lifespan runs the
     # database schema step, and /api/version needs no database.
     return TestClient(create_app()).get("/api/version", headers={"Origin": origin})
