@@ -24,6 +24,7 @@ def _read_cors_origins() -> tuple[str, ...]:
 
 @dataclass(frozen=True)
 class Settings:
+    """Runtime settings read from the environment."""
     app_title: str = "Task Notes API"
     # No credential-shaped default: docker-compose.yml and .env.example
     # supply the real value via DATABASE_URL.
