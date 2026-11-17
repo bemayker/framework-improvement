@@ -14,3 +14,33 @@ Autonomous-run decisions that affect more than one item (`autonomy.md` Section 3
 - 2026-09-14 [run] Dispatch order wave-ascending among ready items: FEAT-1 and TEST-07 (wave 2) then TEST-08 (wave 3); TEST-08 dispatched in the same round because no lower-wave item was ready for a build slot (TEST-07 held by the serialization above). Wave is an ordering key, never a gate.
 - 2026-09-14 [TEST-07] Precondition in the 2026-09-07 tracker comment ("do not run /deliver until the revert has merged") verified satisfied: revert 0ac6818 (#29) is on main. Comment is a process note, not a feature change.
 - 2026-09-14 [TEST-08] Tracker correction comment overrides acceptance criterion 2: the version is fetched from the backend at runtime via the existing GET /api/version (shipped by TEST-05), never from package.json. Carried into the planner dispatch verbatim.
+
+## Run deliver-20261117T185214Z
+
+- [ingest] run=deliver-20261117T185214Z nodes=TEST-08,TEST-09,TEST-10,BUG-01,BUG-04 (items=42, done=7, to_verify=0, unmapped=30, link=0). Statuses come from item-status.sh over a live read of 38 tracker items and 5 local files.
+- [ingest] label-ignored=BUG-01 (mayker:to-verify on todo: the label counts only on done, so the item reads as todo). BUG-01 stays a node and is built.
+- [ingest] unmapped=30 items at tracker status "cancelled" (maps to null in reverse_status_mapping); dropped from the graph; none is a dependency of a node.
+- [ingest] registered=none. Every tracker item is already in the registry and the map, so no register publish precedes the first dispatch.
+- [ingest] feature_map.md not written: valid (42 rows, 43 edges), 0 wave proposals, 0 checkpoint proposals, 0 empty shared_risk_notes cells.
+- [schedule] ready order TEST-09 (wave 2, chain 2), TEST-08 (wave 3, chain 2), BUG-01 (wave 3, chain 1), BUG-04 (wave 3, chain 0); TEST-10 (wave 4) waits on TEST-08 and TEST-09. Round 1 dispatches the first three at the cap of 3.
+- [serialize] BUG-04 held behind TEST-08, and never concurrent with TEST-10: all three plausibly edit frontend/src/components/LandingPage.tsx.
+- [serialize] BUG-01 planned alongside TEST-09; its build is held behind TEST-09's merge only if both File Manifests list backend/app/main.py.
+- [resume] all 5 nodes start at Section 6.1: 0 remote feature/* heads, 0 node PRs, no plan artifacts, no worktrees.
+- 2026-11-17 [run=deliver-20261117T185214Z] TEST-09, TEST-08 and BUG-01 plans self-approved on first pass (orchestrator verdicts logged in each item's decisions.md).
+- 2026-11-17 [run=deliver-20261117T185214Z] TEST-09 and BUG-01 not serialized: whole-manifest unions disjoint (TEST-09 does not edit backend/app/main.py; BUG-01 does not edit docker-compose.yml or .env.example).
+- 2026-11-17 [run=deliver-20261117T185214Z] TEST-08 not serialized against TEST-09 or BUG-01. Rationale: whole-manifest unions are disjoint for both pairs; the flagged TEST-08/TEST-09 shared risk is a runtime dependency on /api/version whose TEST-09 change is additive (commit field) and TEST-08 reads only version.
+- 2026-11-17 [run=deliver-20261117T185214Z] [merge] BUG-01 merged (#848, squash 3e4fa86f); tracker complete + mayker:to-verify (deployed-only repro; awaits human verification). Checkpoint verdict=pass at 3e4fa86f.
+- 2026-11-17 [run=deliver-20261117T185214Z] [merge] TEST-09 merged (#847, squash 2c073671); tracker complete. Checkpoint not due.
+- 2026-11-17 [run=deliver-20261117T185214Z] [merge] TEST-08 merged (#849, squash f875d1d3); tracker complete. Checkpoint verdict=pass at f875d1d3 (first run of TEST-08 together with TEST-09 on main).
+- 2026-11-17 [run=deliver-20261117T185214Z] [wave-2 boundary] Follow-ups: none filed. known-improvements: the merged PRs #847 and #848 list only OPTIONAL findings (never a source); unaddressed-comments: none.
+- 2026-11-17 [run=deliver-20261117T185214Z] [ingest wave-2 boundary] nodes=TEST-08,TEST-10,BUG-04 (items=42 done=8 to_verify=1 unmapped=30 link=0 labels-ignored=0); registered=none; feature_map.md and project_state.json unchanged (map valid, 0 wave proposals, 0 checkpoint proposals).
+- 2026-11-17 [run=deliver-20261117T185214Z] [schedule] TEST-08 merged during the re-ingest; BUG-04 (wave 3) and TEST-10 (wave 4) now ready. Both are planned in parallel (plans write only artifacts); their builds are serialized on frontend/src/components/LandingPage.tsx unless the two File Manifests turn out disjoint.
+- 2026-11-17 [run=deliver-20261117T185214Z] [publish wave-2] arm=opened merge=merged PR https://github.com/bemayker/framework-improvement/pull/850 (merge 7758b050); paths docs/runs/deliver-20261117T185214Z. pr-tests was a required check on main at merge time (ruleset required_status_checks: pr-tests).
+- 2026-11-17 [run=deliver-20261117T185214Z] [schedule] Round 3: BUG-04 and TEST-10 dispatched to 6.1 planning in parallel; plan base f875d1d3.
+- 2026-11-17 [run=deliver-20261117T185214Z] BUG-04 and TEST-10 plans self-approved on first pass. TEST-10 and BUG-04 cleared to build concurrently: whole-manifest unions share no path (TEST-10: version client, AppFooter, LandingPage.test.tsx, TEST-08/TEST-10 specs; BUG-04: NoteForm and its test, BUG-04 spec); the LandingPage.tsx shared-risk note does not apply since neither plan modifies LandingPage.tsx. Phase D smoke runs will still be held one at a time (shared ports).
+- 2026-11-17 [run=deliver-20261117T185214Z] TEST-10 Phase D held behind BUG-04: smoke run ports
+- 2026-11-17 [run=deliver-20261117T185214Z] [merge] BUG-04 merged (#851, squash 5a927f2b); tracker complete. Repro before fail -> after pass. Checkpoint verdict=pass at da274589.
+- 2026-11-17 [run=deliver-20261117T185214Z] [merge] TEST-10 merged (#852, squash da274589); tracker complete. Checkpoint verdict=pass at da274589.
+- 2026-11-17 [run=deliver-20261117T185214Z] [final boundary] Follow-ups: none filed. known-improvements: TEST-08, BUG-04 and TEST-10 each had their one RECOMMENDED finding applied by the refactor gate; their PRs list only OPTIONAL findings (never a source). unaddressed-comments: none.
+- 2026-11-17 [run=deliver-20261117T185214Z] [ingest final boundary] nodes=none (items=42 done=11 to_verify=1 unmapped=30 link=0 labels-ignored=0); registered=none; feature_map.md and project_state.json unchanged (map valid, 42 rows, 43 edges; 0 wave proposals, 0 checkpoint proposals).
+- 2026-11-17 [run=deliver-20261117T185214Z] [ingest final boundary] five merged feature branches remain on the remote (BUG-01, BUG-04, TEST-08, TEST-09, TEST-10) and draft PR #84 (chore/fixture-plan-review) is open; none belongs to a node, left untouched for a human.
