@@ -1,5 +1,4 @@
-"""Business logic for resolving the running application's version (TEST-05)
-and build commit (TEST-09).
+"""Business logic for resolving the running application's version (TEST-05).
 
 The version is read from installed package metadata rather than hardcoded,
 so it always reflects `[project].version` in backend/pyproject.toml without
@@ -8,8 +7,6 @@ any code change when that value is bumped.
 
 import logging
 from importlib.metadata import PackageNotFoundError, version
-
-from app.core.config import get_settings
 
 logger = logging.getLogger(__name__)
 
@@ -36,8 +33,3 @@ def get_app_version() -> str:
             UNKNOWN_VERSION,
         )
         return UNKNOWN_VERSION
-
-
-def get_build_commit() -> str:
-    """Return the build commit from settings (BUILD_COMMIT, default "unknown")."""
-    return get_settings().build_commit

@@ -2,7 +2,6 @@
 
 from importlib.metadata import PackageNotFoundError
 
-from app.core.config import UNKNOWN_BUILD_COMMIT
 from app.services import version_service
 
 
@@ -29,20 +28,6 @@ def test_get_app_version_queries_the_project_distribution_name(monkeypatch):
 
     assert queried_names == [version_service.DISTRIBUTION_NAME]
     assert version_service.DISTRIBUTION_NAME == "task-notes-backend"
-
-
-def test_get_build_commit_returns_configured_commit(monkeypatch):
-    """Happy path: the resolved BUILD_COMMIT value, not a literal fallback."""
-    monkeypatch.setenv("BUILD_COMMIT", "abc1234")
-
-    assert version_service.get_build_commit() == "abc1234"
-
-
-def test_get_build_commit_returns_unknown_when_unset(monkeypatch):
-    """Edge case: no BUILD_COMMIT yields the settings sentinel."""
-    monkeypatch.delenv("BUILD_COMMIT", raising=False)
-
-    assert version_service.get_build_commit() == UNKNOWN_BUILD_COMMIT
 
 
 def test_get_app_version_returns_unknown_when_distribution_not_installed(monkeypatch):
