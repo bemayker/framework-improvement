@@ -21,3 +21,12 @@ This run's section of the repository-root `DECISIONS.md`, which is cumulative ac
 - [ingest] Wave-2 boundary re-ingest: graph is 3 nodes (TEST-08, BUG-04, TEST-10) from item-status.sh over 42 items (done=8 to_verify=1 unmapped=30, all cancelled). registered=none; no map or registry write; 0 wave and 0 checkpoint proposals.
 - [schedule] BUG-04 planning dispatched while TEST-08 is at merge: plans only write .claude/artifacts/BUG-04/, so the TEST-08 serialization applies to its build, not its plan.
 - [schedule] TEST-10 is blocked by TEST-08 alone now that TEST-09 is done; its LandingPage.tsx risk against BUG-04 is confirmed on the File Manifests once both plans exist.
+- [merge] TEST-08 merged: PR #820 squash 258f491; auto-done run 43996123648 succeeded; item reads complete. Checkpoint due=yes verdict=pass head=126d2c21.
+- [publish] wave-2 record: arm=opened merge=merged PR #821 (chore/mayker-deliver-20261117T010850Z-wave-2).
+- [schedule] BUG-04 plan self-approved; TEST-08 hold released (TEST-08 merged, no shared file). Branch cut from origin/main 126d2c21. Repro class local-automated.
+- [schedule] TEST-10 plan verdict: revise (one re-plan) — TEST-08's E2E spec asserted the exact footer text, which TEST-10's success path makes false; the spec joins TEST-10's manifest.
+- [schedule] TEST-10 and BUG-04 cleared to build concurrently: whole-feature File Manifest unions are disjoint and neither shared_risks.md flags the other.
+- [merge] BUG-04 merged: PR #822 squash 46e58fe; auto-done run 43997532560 succeeded; item reads complete. Repro: before fail -> after pass. Checkpoint due=yes verdict=pass head=46e58fed.
+- [schedule] TEST-10 re-plan approved (one re-plan; TEST-08's E2E spec joined its manifest). Built beside BUG-04 (disjoint manifests). CHORE-02 and FEAT-9, flagged in its shared_risks.md, are cancelled.
+- [wave] Wave 3 boundary: follow-ups filed none (TEST-08's RECOMMENDED findings were all applied by its refactor gate; BUG-04 had no findings; no unaddressed comments).
+- [ingest] Wave-3 boundary re-ingest: graph is 1 node (TEST-10, in flight at 6.5) from item-status.sh over 42 items (done=10 to_verify=1 unmapped=30, all cancelled). registered=none; no map or registry write; 0 wave and 0 checkpoint proposals.
