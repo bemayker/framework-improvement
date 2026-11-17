@@ -1,0 +1,14 @@
+# Decisions (BUG-04, after its final push): deliver-20261117T185214Z
+
+The entries `.claude/artifacts/BUG-04/decisions.md` received after the last push of its branch (af89de96), the head its pull request merged. The entries before them reached the default branch in that file.
+
+- 2026-11-17 [BUG-04] run=deliver-20261117T185214Z merge verdict: merge PR #851 (squash) at head af89de9 (autonomy.md Section 5). Rationale: (1) self-review `VERDICT: PASS blocking=0 recommended=1 optional=1`, the RECOMMENDED applied by the refactor gate and the OPTIONAL listed under the PR's known improvements; (2) checks re-read after the ready conversion `verdict=green next=none failed=0 poll=1` (7/7), mergeable=MERGEABLE mergeStateStatus=CLEAN isDraft=false; (3) criteria 1 to 3 met: repro `before fail and after pass` re-run exit 0, push gate pytest 76 passed and vitest 37 passed with 0 failed and 0 skipped, Phase D E2E 1 passed against real Postgres, handover `status=rebuilt sha=af89de96 health=pass`; (4) PR inline 0, general 0, reviews 0, reviewDecision empty so no change request, and no new tracker comment since 6.1 (actionable=0) besides the run's own PR link; (5) escalation bar not triggered: a client-side in-flight guard in NoteForm.tsx, no migration, secret or external side effect, reversible by a revert PR. TEST-10 (PR #852) runs concurrently with a disjoint whole-manifest union, so no serialization hold.
+- [6.6] PR #851 opened as draft; PR label: #851 mayker:in-progress. Push gate: test-gate: verdict recorded for this push (head af89de9: full after 2s; counts: root: pytest 76 passed, 0 failed, 0 skipped + vitest 37 passed, 0 failed, 0 skipped). Upstream: verdict=upstream-ok. Item-to-PR link comment posted on ClickUp.
+- [6.7] CI: 7/7 checks done, verdict=green (poll 2). Repro: before fail -> after pass (npm --prefix frontend test -- src/components/NoteForm.test.tsx -t sends one create request when the form is submitted twice before the first save completes)
+- [6.7] Handover rebuild: status=rebuilt sha=af89de96 services=3/3 health=pass project=framework-improvement-bug-04-handover urls=backend=http://localhost:31133,db=localhost:31134,frontend=http://localhost:31135 duration=11s. PR converted to ready; PR label: #851 mayker:in-review (removed mayker:in-progress); tracker status to test (in_review).
+- [6.9] Merged #851 by squash, merge commit 5a927f2b.
+- [6.10] auto-done: run 44159063806 succeeded. Item reads complete. No backstop flip.
+- [6.10] Standards provenance: 9 dispatches; both always-on standards SELF-REPORTED as read by 3 of 9 (self-reported, information only); 0 unbacked provenance claims; 0 MISMATCH lines.
+- [6.10] [pull] result=pulled head=da274589 removed=none set-aside=none blocked-by=none
+- [6.10] [checkpoint] due=yes items=BUG-04 head=da274589 tip=origin/main@da274589 verdict=pass (backend 62 passed 14 skipped; frontend 42 passed)
+- [6.10] Teardown: docker rm -f BUG-04-db (this run's - env: line).
