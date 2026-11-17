@@ -79,6 +79,53 @@ describe("NoteForm", () => {
     expect(onCreated).not.toHaveBeenCalled();
   });
 
+  it("sends one save request when the form is submitted twice quickly", async () => {
+    let resolveSave: (note: { id: number; text: string }) => void = () => {};
+    createNoteMock.mockImplementation(
+      () => new Promise((resolve) => { resolveSave = resolve; }),
+    );
+    render(<NoteForm onCreated={vi.fn()} />);
+
+    typeNote("Buy milk");
+    submitForm();
+    submitForm();
+
+    expect(createNoteMock).toHaveBeenCalledTimes(1);
+    resolveSave({ id: 1, text: "Buy milk" });
+    await waitFor(() => expect(screen.getByTestId("note-input")).toHaveValue(""));
+  });
+
+  it("accepts a new save once the previous save has completed", async () => {
+    createNoteMock.mockResolvedValue({ id: 1, text: "First" });
+    render(<NoteForm onCreated={vi.fn()} />);
+
+    typeNote("First");
+    submitForm();
+    await waitFor(() => expect(screen.getByTestId("note-input")).toHaveValue(""));
+    await waitFor(() => expect(screen.getByTestId("note-submit")).toBeEnabled());
+
+    typeNote("Second");
+    submitForm();
+
+    await waitFor(() => expect(createNoteMock).toHaveBeenCalledTimes(2));
+    expect(createNoteMock).toHaveBeenLastCalledWith("Second");
+  });
+
+  it("accepts a retry once the previous save has failed", async () => {
+    createNoteMock.mockRejectedValue(new Error("Saving the note failed: 500"));
+    render(<NoteForm onCreated={vi.fn()} />);
+
+    typeNote("Buy milk");
+    submitForm();
+    expect(await screen.findByTestId("note-form-error")).toBeInTheDocument();
+    await waitFor(() => expect(screen.getByTestId("note-submit")).toBeEnabled());
+
+    submitForm();
+
+    await waitFor(() => expect(createNoteMock).toHaveBeenCalledTimes(2));
+    expect(createNoteMock).toHaveBeenLastCalledWith("Buy milk");
+  });
+
   it("clears a previous validation message once a valid note is saved", async () => {
     createNoteMock.mockResolvedValue({ id: 9, text: "Buy milk" });
     render(<NoteForm onCreated={vi.fn()} />);
