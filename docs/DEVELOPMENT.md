@@ -25,6 +25,15 @@ See the [README → Running the project](../README.md#running-the-project) for t
 
 How to start the application is in the README → Running the project. Ports, environment files (`.env.example`) and backing services the application needs are listed there or under Development environment.
 
+### Build commit (`BUILD_COMMIT`)
+
+`GET /api/version` returns `{"version": "<string>", "commit": "<string>"}`. `commit` is read from the optional `BUILD_COMMIT` environment variable (the build's git sha), resolved in `backend/app/core/config.py`:
+
+- Unset, empty or whitespace-only: `commit` is `unknown`. That default lives only in `config.py`.
+- Longer than 12 characters (for example a full 40-character sha): `commit` is its first 12 characters. A shorter value is returned unchanged.
+
+`docker-compose.yml` passes `BUILD_COMMIT` through to the backend container, so set it in `.env` or on the command line, for example `BUILD_COMMIT=$(git rev-parse HEAD) docker compose up -d backend`. `.env.example` documents the variable.
+
 ## Testing
 
 The test gate runs the command in `CLAUDE.md` → `Test gate command:` before every push, and CI runs the suites on every pull request. Test directories, naming and the tier toggles are in `CLAUDE.md` → Test Configuration and Feature Toggles.
