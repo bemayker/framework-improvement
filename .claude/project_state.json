@@ -19,8 +19,8 @@
     "effective_path": {
       "path": "gh",
       "host": "github.com",
-      "verified_at": "2026-11-13T13:00:05Z",
-      "plugin_version": "0.3.491",
+      "verified_at": "2026-11-17T16:31:10Z",
+      "plugin_version": "0.3.499",
       "mcp_server_url": ""
     }
   },
@@ -320,8 +320,8 @@
     }
   },
   "discovery": {
-    "last_scan_commit": "0078ca5bf975b07bbc658b2c0296fa9d952800cf",
-    "scanned_at": "2026-11-13T13:00:05Z",
+    "last_scan_commit": "5257ef84957aa367412513e6a2f0e473625eaae6",
+    "scanned_at": "2026-11-17T16:31:16Z",
     "scanned_by": "/sync-project"
   },
   "framework": {
@@ -329,8 +329,8 @@
     "migrated_to": "0.3.499",
     "migrated_at": "2026-11-17T16:21:19Z",
     "synced": {
-      "plugin_version": "0.3.491",
-      "synced_at": "2026-11-13T13:00:35Z"
+      "plugin_version": "0.3.499",
+      "synced_at": "2026-11-17T16:31:19Z"
     }
   }
 }
