@@ -22,7 +22,12 @@ import os
 
 import pytest
 
-from app.core.config import DEFAULT_CORS_ORIGINS, Settings, get_settings
+from app.core.config import (
+    DEFAULT_CORS_ORIGINS,
+    UNKNOWN_BUILD_COMMIT,
+    Settings,
+    get_settings,
+)
 
 
 def test_get_settings_returns_the_configured_app_title():
@@ -94,6 +99,46 @@ def test_settings_cors_origins_defaults_when_unset(monkeypatch):
     monkeypatch.delenv("CORS_ORIGINS", raising=False)
 
     assert get_settings().cors_origins == DEFAULT_CORS_ORIGINS == ("http://localhost:5183",)
+
+
+FULL_SHA = "0123456789abcdef0123456789abcdef01234567"
+
+
+def test_settings_build_commit_reads_env_value(monkeypatch):
+    """BUILD_COMMIT is the one declared source of the build commit."""
+    monkeypatch.setenv("BUILD_COMMIT", "abc1234")
+
+    assert get_settings().build_commit == "abc1234"
+
+
+def test_settings_build_commit_defaults_to_unknown_when_unset(monkeypatch):
+    """With BUILD_COMMIT unset the commit is the documented sentinel."""
+    monkeypatch.delenv("BUILD_COMMIT", raising=False)
+
+    assert get_settings().build_commit == UNKNOWN_BUILD_COMMIT == "unknown"
+
+
+@pytest.mark.parametrize("blank", ["", "   "])
+def test_settings_build_commit_treats_blank_value_as_unset(monkeypatch, blank):
+    """A blank BUILD_COMMIT is unset, as a blank CORS_ORIGINS is."""
+    monkeypatch.setenv("BUILD_COMMIT", blank)
+
+    assert get_settings().build_commit == UNKNOWN_BUILD_COMMIT
+
+
+def test_settings_build_commit_truncates_long_value_to_12_characters(monkeypatch):
+    """A full 40-character sha is cut to its first 12 characters."""
+    monkeypatch.setenv("BUILD_COMMIT", f"  {FULL_SHA}  ")
+
+    assert get_settings().build_commit == FULL_SHA[:12] == "0123456789ab"
+
+
+@pytest.mark.parametrize("value", ["0123456789ab", "abc1234"])
+def test_settings_build_commit_keeps_value_of_12_or_fewer_characters(monkeypatch, value):
+    """A value of exactly 12 characters, or fewer, is returned unchanged."""
+    monkeypatch.setenv("BUILD_COMMIT", value)
+
+    assert get_settings().build_commit == value
 
 
 @pytest.mark.parametrize("blank", ["", "   ", " , "])
