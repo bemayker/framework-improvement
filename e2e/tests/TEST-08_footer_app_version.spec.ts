@@ -11,7 +11,7 @@ test.describe("TEST-08 footer app version", () => {
 
     const appVersion = page.getByTestId("app-version");
     await expect(appVersion).toHaveText(` v${version}`);
-    // Starts-with, not exact: TEST-10 may append the build commit after the version.
+    // Contains, not exact: TEST-10 may append the build commit after the version.
     await expect(page.getByTestId("app-footer")).toContainText(`Task Notes v${version}`);
   });
 
