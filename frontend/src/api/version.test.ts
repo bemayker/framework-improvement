@@ -28,8 +28,54 @@ describe("version API client", () => {
   it("fetches the version from GET /api/version on the configured base URL", async () => {
     fetchMock.mockResolvedValue(okResponse({ version: "0.1.0" }));
 
-    await expect(fetchBackendVersion()).resolves.toBe("0.1.0");
+    await expect(fetchBackendVersion()).resolves.toMatchObject({ version: "0.1.0" });
     expect(fetchMock).toHaveBeenCalledWith(DEFAULT_VERSION_URL);
+  });
+
+  it("returns the version and the commit cut to 7 characters", async () => {
+    fetchMock.mockResolvedValue(
+      okResponse({ version: "0.1.0", commit: "abc1234def56" }),
+    );
+
+    await expect(fetchBackendVersion()).resolves.toEqual({
+      version: "0.1.0",
+      commit: "abc1234",
+    });
+  });
+
+  it("returns a commit shorter than 7 characters as received", async () => {
+    fetchMock.mockResolvedValue(okResponse({ version: "0.1.0", commit: "abc" }));
+
+    await expect(fetchBackendVersion()).resolves.toEqual({
+      version: "0.1.0",
+      commit: "abc",
+    });
+  });
+
+  it("returns a null commit when the backend reports the unknown sentinel", async () => {
+    fetchMock.mockResolvedValue(okResponse({ version: "0.1.0", commit: "unknown" }));
+
+    await expect(fetchBackendVersion()).resolves.toEqual({
+      version: "0.1.0",
+      commit: null,
+    });
+  });
+
+  it("returns a null commit when the commit is missing, empty or not a string", async () => {
+    const unusableBodies = [
+      { version: "0.1.0" },
+      { version: "0.1.0", commit: "" },
+      { version: "0.1.0", commit: 1234567 },
+      { version: "0.1.0", commit: null },
+    ];
+
+    for (const body of unusableBodies) {
+      fetchMock.mockResolvedValue(okResponse(body));
+      await expect(fetchBackendVersion()).resolves.toEqual({
+        version: "0.1.0",
+        commit: null,
+      });
+    }
   });
 
   it("returns null when the request fails with a network error", async () => {
