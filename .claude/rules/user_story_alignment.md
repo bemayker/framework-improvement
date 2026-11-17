@@ -1,4 +1,4 @@
-<!-- materialized-from: mayker-dev v0.3.499; do not edit, regenerate with /upgrade-project -->
+<!-- materialized-from: mayker-dev v0.3.491; do not edit, regenerate with /upgrade-project -->
 <!--
   Universal standard. Loaded at launch from .claude/rules/ (always on). Do not edit per project.
   Feature alignment and anti-hallucination: scope containment, no gold plating,
@@ -6,8 +6,6 @@
 -->
 
 # Feature Alignment & Anti-Hallucination Rules
-
-> **Advice:** no check covers this standard; the reviewer grades it.
 
 ## 1. The Prime Directive
 
@@ -19,7 +17,7 @@ Before generating a single line of code, the AI must parse the acceptance criter
 
 1. List every criterion as a checkbox.
 2. Verify if the current context provides enough information to satisfy each criterion.
-3. If information is missing and cannot be inferred from the plan or `CLAUDE.md`, make a reasonable assumption, record it as a scope change (Section 4), and do not block the workflow.
+3. If information is missing and cannot be inferred from the plan or `CLAUDE.md`, log the ambiguity in the PR description. Make a reasonable assumption and document it. Do not block the workflow.
 
 ## 3. Scope Containment (The "No Gold Plating" Rule)
 
@@ -29,7 +27,10 @@ Before generating a single line of code, the AI must parse the acceptance criter
 
 ## 4. Handling Ambiguity
 
-Assisted and autonomous runs decide the same way: make a reasonable assumption from `CLAUDE.md` and proceed. A scope change lands in the plan and an architecture change in an ADR, both through `hooks/lib/decision-record.sh`; the PR body's `## Decisions` block links them.
+When a feature description is vague:
+
+- **In interactive mode (local Claude Code session):** Ask the user for clarification before proceeding.
+- **In autonomous/cloud mode (Claude Code on the web, Routines, headless):** Make a reasonable assumption based on the project description in `CLAUDE.md`, document the assumption in the PR description, and proceed. Do not block.
 
 ## 5. Definition of Done
 
@@ -46,4 +47,4 @@ A feature is considered implementation-complete when:
 
 - Always check existing files before creating new ones to avoid duplicates.
 - Read `CLAUDE.md` Architecture Notes to ensure the new feature fits the defined architecture.
-- A conflict between the feature requirements and the architecture is an architecture change (Section 4).
+- If you notice a conflict between the feature requirements and the architecture, document it in the PR description.
