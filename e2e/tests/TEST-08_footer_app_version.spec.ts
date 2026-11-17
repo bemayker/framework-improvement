@@ -5,7 +5,7 @@ test.describe("TEST-08 footer app version", () => {
   test("footer shows the version the backend reports", async ({ page }) => {
     await page.goto("/");
 
-    await expect(page.getByTestId("app-footer")).toHaveText(`Task Notes v${readBackendVersion()}`);
+    await expect(page.getByTestId("app-footer-version")).toHaveText(` v${readBackendVersion()}`);
   });
 
   test("footer shows only the app name when the version endpoint fails", async ({ page }) => {
