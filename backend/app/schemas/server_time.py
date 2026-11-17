@@ -5,9 +5,15 @@ which would serialise an aware UTC datetime with a `Z` suffix.
 """
 
 from datetime import UTC
-from typing import Literal
+from typing import Annotated, Literal
 
-from pydantic import AwareDatetime, BaseModel, field_serializer
+from pydantic import AwareDatetime, BaseModel, WithJsonSchema, field_serializer
+
+# The serializer returns `str`, which would drop "format" from the OpenAPI
+# document; /docs must keep showing `now` as a date-time string.
+_DateTimeString = Annotated[
+    str, WithJsonSchema({"type": "string", "format": "date-time"})
+]
 
 
 class ServerTimeResponse(BaseModel):
@@ -21,6 +27,6 @@ class ServerTimeResponse(BaseModel):
     timezone: Literal["UTC"] = "UTC"
 
     @field_serializer("now")
-    def serialize_now(self, value: AwareDatetime) -> str:
+    def serialize_now(self, value: AwareDatetime) -> _DateTimeString:
         """Render `now` as fixed-width ISO 8601 in UTC with a `+00:00` offset."""
         return value.astimezone(UTC).isoformat(timespec="microseconds")

@@ -43,6 +43,14 @@ def test_server_time_response_converts_non_utc_offset_to_utc():
     assert dumped["now"] == "2026-11-17T00:30:43.000005+00:00"
 
 
+def test_server_time_response_openapi_now_keeps_date_time_format():
+    """Criterion 3: /docs shows `now` as a date-time string, not a bare string."""
+    schema = ServerTimeResponse.model_json_schema(mode="serialization")
+
+    assert schema["properties"]["now"]["type"] == "string"
+    assert schema["properties"]["now"]["format"] == "date-time"
+
+
 def test_server_time_response_timezone_is_utc():
     """Criterion 3: timezone defaults to and dumps as the literal UTC."""
     instant = datetime(2026, 11, 17, tzinfo=timezone.utc)
