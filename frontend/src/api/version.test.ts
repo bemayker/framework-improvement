@@ -19,6 +19,7 @@ describe("getVersion", () => {
 
   afterEach(() => {
     vi.unstubAllGlobals();
+    vi.unstubAllEnvs();
   });
 
   it("returns the version the backend reports, from the default base URL", async () => {
@@ -71,6 +72,5 @@ describe("getVersion", () => {
     expect(fetchMock).toHaveBeenCalledWith(
       "http://backend.example:9000/api/version",
     );
-    vi.unstubAllEnvs();
   });
 });

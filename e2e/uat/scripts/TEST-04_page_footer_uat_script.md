@@ -6,7 +6,7 @@
 - Repository checked out locally, on branch `feature/TEST-04-page-footer` (or later, once merged, on `main`).
 - Copy `.env.example` to `.env` in the repository root (defaults are usable as-is for local UAT).
 - No other process bound to ports `5173` (frontend) or `8000` (backend).
-- Have the backend's version at hand: run `curl -s http://localhost:8000/api/version` once the stack is up and note the `version` value. The footer's expected version comes from that response, not from this document or from `frontend/package.json`. At the time of writing it is `0.1.0`; a later version bump changes the expected text without changing this script.
+- Have the backend's version at hand: run `curl -s http://localhost:8010/api/version` once the stack is up and note the `version` value. The footer's expected version comes from that response, not from this document or from `frontend/package.json`. At the time of writing it is `0.1.0`; a later version bump changes the expected text without changing this script.
 
 ## Test Environment Setup
 
