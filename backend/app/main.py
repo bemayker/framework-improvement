@@ -2,10 +2,9 @@
 
 TEST-01 (the scaffold feature) instantiates the app with no feature routes.
 Later features register their routers here without restructuring this factory:
-TEST-05 registers the version router, TEST-03 the notes router plus the
-startup schema initialisation and the CORS middleware the browser needs, and
-TEST-02 the health router, TEST-07 the uptime router plus the process clock
-captured at startup.
+TEST-05 the version router; TEST-03 the notes router, the startup schema
+initialisation and the CORS middleware the browser needs; TEST-02 the health
+router; TEST-07 the uptime router and the process clock captured at startup.
 """
 
 import logging
@@ -28,9 +27,9 @@ logger = logging.getLogger(__name__)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncIterator[None]:
-    """Create the notes table on startup, when a database is configured.
+    """Capture the process start clock, then create the notes table when a database is configured.
 
-    Skipped with a warning when DATABASE_URL is unset: the version endpoint
+    Table creation is skipped with a warning when DATABASE_URL is unset: the version endpoint
     needs no database and must still answer, so startup never hard-requires
     one (the notes endpoints then fail loudly per request instead).
     """
