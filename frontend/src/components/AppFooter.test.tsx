@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, waitFor } from "@testing-library/react";
+import { act, render, screen } from "@testing-library/react";
 import AppFooter from "./AppFooter";
 import { fetchBackendVersion } from "../api/version";
 
@@ -36,7 +36,10 @@ describe("AppFooter", () => {
 
     render(<AppFooter />);
 
-    await waitFor(() => expect(fetchBackendVersionMock).toHaveBeenCalledTimes(1));
+    // Flush the resolved null through setVersion before asserting, so this checks
+    // the resolved-failure render and not the pending state again.
+    await act(async () => {});
+    expect(fetchBackendVersionMock).toHaveBeenCalledTimes(1);
     expect(screen.getByTestId("app-footer").textContent).toBe("Task Notes");
     expect(screen.queryByTestId("app-version")).not.toBeInTheDocument();
   });
