@@ -1,5 +1,7 @@
 """Unit tests for the FastAPI app factory (backend/app/main.py)."""
 
+from fastapi.testclient import TestClient
+
 from app.main import create_app
 
 # FastAPI's own routes, present on every app regardless of what this project
@@ -72,7 +74,12 @@ def test_create_app_captures_process_start_once_per_app():
     first_app = create_app()
     second_app = create_app()
 
-    assert first_app.state.process_start is first_app.state.process_start
+    captured_before = first_app.state.process_start
+    client = TestClient(first_app)
+    client.get("/api/uptime")
+    client.get("/api/uptime")
+
+    assert first_app.state.process_start is captured_before
     assert first_app.state.process_start is not second_app.state.process_start
     assert (
         first_app.state.process_start.started_at
