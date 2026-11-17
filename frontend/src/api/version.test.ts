@@ -26,8 +26,67 @@ describe("getVersion", () => {
     fetchMock.mockResolvedValue(jsonResponse({ version: "0.1.0" }));
     const { getVersion } = await import("./version");
 
-    await expect(getVersion()).resolves.toBe("0.1.0");
+    await expect(getVersion()).resolves.toEqual({
+      version: "0.1.0",
+      commit: null,
+    });
     expect(fetchMock).toHaveBeenCalledWith("http://localhost:8010/api/version");
+  });
+
+  it("returns the version and the commit cut to 7 characters", async () => {
+    fetchMock.mockResolvedValue(
+      jsonResponse({ version: "0.1.0", commit: "abc1234def56" }),
+    );
+    const { getVersion } = await import("./version");
+
+    await expect(getVersion()).resolves.toEqual({
+      version: "0.1.0",
+      commit: "abc1234",
+    });
+  });
+
+  it("returns a null commit when the backend reports the unknown sentinel", async () => {
+    fetchMock.mockResolvedValue(
+      jsonResponse({ version: "0.1.0", commit: "unknown" }),
+    );
+    const { getVersion } = await import("./version");
+
+    await expect(getVersion()).resolves.toEqual({
+      version: "0.1.0",
+      commit: null,
+    });
+  });
+
+  it("returns a null commit when the commit is empty or not a string", async () => {
+    const { getVersion } = await import("./version");
+
+    fetchMock.mockResolvedValueOnce(
+      jsonResponse({ version: "0.1.0", commit: "" }),
+    );
+    await expect(getVersion()).resolves.toEqual({
+      version: "0.1.0",
+      commit: null,
+    });
+
+    fetchMock.mockResolvedValueOnce(
+      jsonResponse({ version: "0.1.0", commit: 1234567 }),
+    );
+    await expect(getVersion()).resolves.toEqual({
+      version: "0.1.0",
+      commit: null,
+    });
+  });
+
+  it("keeps a commit shorter than 7 characters whole", async () => {
+    fetchMock.mockResolvedValue(
+      jsonResponse({ version: "0.1.0", commit: "abc12" }),
+    );
+    const { getVersion } = await import("./version");
+
+    await expect(getVersion()).resolves.toEqual({
+      version: "0.1.0",
+      commit: "abc12",
+    });
   });
 
   it("throws with the status and reason when the response is not OK", async () => {
