@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import type { CSSProperties } from "react";
-import { getBackendVersion } from "../api/version";
+import { getBackendBuildInfo } from "../api/version";
+import type { BuildInfo } from "../api/version";
 
 const APP_NAME = "Task Notes";
 
@@ -11,14 +12,14 @@ const footerStyle: CSSProperties = {
 };
 
 function AppFooter() {
-  const [version, setVersion] = useState<string | null>(null);
+  const [buildInfo, setBuildInfo] = useState<BuildInfo | null>(null);
 
   useEffect(() => {
     let isMounted = true;
 
-    getBackendVersion().then((resolved) => {
+    getBackendBuildInfo().then((resolved) => {
       if (isMounted) {
-        setVersion(resolved);
+        setBuildInfo(resolved);
       }
     });
 
@@ -30,8 +31,11 @@ function AppFooter() {
   return (
     <footer data-testid="app-footer" style={footerStyle}>
       {APP_NAME}
-      {version !== null && (
-        <span data-testid="app-footer-version"> v{version}</span>
+      {buildInfo !== null && (
+        <span data-testid="app-footer-version"> v{buildInfo.version}</span>
+      )}
+      {buildInfo?.commit != null && (
+        <span data-testid="app-footer-commit"> ({buildInfo.commit})</span>
       )}
     </footer>
   );

@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { getBackendVersion } from "./version";
+import { getBackendBuildInfo } from "./version";
 
 const DEFAULT_VERSION_URL = "http://localhost:8010/api/version";
 
@@ -28,7 +28,7 @@ describe("version API client", () => {
   it("requests GET /api/version from the default API base URL", async () => {
     fetchMock.mockResolvedValue(okResponse({ version: "0.1.0" }));
 
-    await getBackendVersion();
+    await getBackendBuildInfo();
 
     expect(fetchMock).toHaveBeenCalledTimes(1);
     expect(fetchMock).toHaveBeenCalledWith(DEFAULT_VERSION_URL);
@@ -37,7 +37,7 @@ describe("version API client", () => {
   it("uses VITE_API_BASE_URL instead of the default when it is configured", async () => {
     vi.stubEnv("VITE_API_BASE_URL", "https://notes.example.test");
     vi.resetModules();
-    const { getBackendVersion: getVersionWithConfiguredBase } = await import(
+    const { getBackendBuildInfo: getVersionWithConfiguredBase } = await import(
       "./version"
     );
     fetchMock.mockResolvedValue(okResponse({ version: "0.1.0" }));
@@ -49,10 +49,39 @@ describe("version API client", () => {
     );
   });
 
-  it("returns the version the backend reports", async () => {
-    fetchMock.mockResolvedValue(okResponse({ version: "0.1.0" }));
+  it("returns the version and the first 7 characters of the commit", async () => {
+    fetchMock.mockResolvedValue(
+      okResponse({ version: "0.1.0", commit: "0123456789ab" }),
+    );
 
-    await expect(getBackendVersion()).resolves.toBe("0.1.0");
+    await expect(getBackendBuildInfo()).resolves.toEqual({
+      version: "0.1.0",
+      commit: "0123456",
+    });
+  });
+
+  it("returns a null commit when the backend reports the unknown sentinel", async () => {
+    fetchMock.mockResolvedValue(
+      okResponse({ version: "0.1.0", commit: "unknown" }),
+    );
+
+    await expect(getBackendBuildInfo()).resolves.toEqual({
+      version: "0.1.0",
+      commit: null,
+    });
+  });
+
+  it("returns a null commit when the commit is missing, blank or not a string", async () => {
+    const expected = { version: "0.1.0", commit: null };
+
+    fetchMock.mockResolvedValue(okResponse({ version: "0.1.0" }));
+    await expect(getBackendBuildInfo()).resolves.toEqual(expected);
+
+    fetchMock.mockResolvedValue(okResponse({ version: "0.1.0", commit: "  " }));
+    await expect(getBackendBuildInfo()).resolves.toEqual(expected);
+
+    fetchMock.mockResolvedValue(okResponse({ version: "0.1.0", commit: 42 }));
+    await expect(getBackendBuildInfo()).resolves.toEqual(expected);
   });
 
   it("returns null when the response is not OK", async () => {
@@ -63,29 +92,29 @@ describe("version API client", () => {
       json: async () => ({ version: "0.1.0" }),
     } as Response);
 
-    await expect(getBackendVersion()).resolves.toBeNull();
+    await expect(getBackendBuildInfo()).resolves.toBeNull();
   });
 
   it("returns null when the request fails", async () => {
     fetchMock.mockRejectedValue(new TypeError("Failed to fetch"));
 
-    await expect(getBackendVersion()).resolves.toBeNull();
+    await expect(getBackendBuildInfo()).resolves.toBeNull();
   });
 
   it("returns null when the backend reports the unknown sentinel", async () => {
     fetchMock.mockResolvedValue(okResponse({ version: "unknown" }));
 
-    await expect(getBackendVersion()).resolves.toBeNull();
+    await expect(getBackendBuildInfo()).resolves.toBeNull();
   });
 
   it("returns null when the body has no string version", async () => {
     fetchMock.mockResolvedValue(okResponse({ version: 3 }));
-    await expect(getBackendVersion()).resolves.toBeNull();
+    await expect(getBackendBuildInfo()).resolves.toBeNull();
 
     fetchMock.mockResolvedValue(okResponse({}));
-    await expect(getBackendVersion()).resolves.toBeNull();
+    await expect(getBackendBuildInfo()).resolves.toBeNull();
 
     fetchMock.mockResolvedValue(okResponse(null));
-    await expect(getBackendVersion()).resolves.toBeNull();
+    await expect(getBackendBuildInfo()).resolves.toBeNull();
   });
 });
