@@ -1,0 +1,11 @@
+# Decisions (TEST-08, after its final push): deliver-20261117T194314Z
+
+The entries `.claude/artifacts/TEST-08/decisions.md` received after the last push of its branch (85e022d7), the head its pull request merged. The entries before them reached the default branch in that file.
+
+- run=deliver-20261117T194314Z 6.6: PR #858 opened as draft; PR label: #858 mayker:in-progress; tracker link comment posted. Gate: test-gate verdict recorded for this push (head 85e022d: full; pytest 42 passed 14 skipped + vitest 32 passed).
+- 6.7: CI 7/7 green (poll 2). Handover rebuild status=rebuilt sha=85e022d7 health=pass project=framework-improvement-test-08-handover duration=10s. PR converted to ready; PR label: #858 mayker:in-review; status to test.
+- 2026-11-17 [TEST-08] Merge verdict: merge PR #858 (squash). Rationale: all five conditions of autonomy.md Section 5 hold on the facts the dispatch carried (run=deliver-20261117T194314Z): (1) self-review `VERDICT: PASS blocking=0 recommended=1 optional=2`, the RECOMMENDED finding discharged by its Verify check (mutating AppFooter's .catch made the failure test fail; reverted, no code change), refactor gate no findings over 7 files; (2) ci-poll `verdict=green next=none failed=0 poll=1`, 7/7 checks; (3) all five acceptance criteria checked off, Phase D smoke 7 passed and 0 failed; (4) PR has 0 inline, 0 general comments, 0 reviews and no change request (MERGEABLE, CLEAN), and the one human tracker correction is answered in the plan, the PR and a tracker reply; (5) escalation bar not triggered: a footer version read is reversible by a revert PR. Residual: the two OPTIONAL findings and the unmutated null-test note stay in the PR's known improvements. TEST-09 (#857) merging concurrently touches disjoint files and TEST-08 reads only the `version` field; re-read mergeability if #857 lands first.
+- run=deliver-20261117T194314Z 6.9: merged #858 squash cfa1f61b (mergeable re-read CLEAN after #856/#857 landed).
+- 6.10 auto-done: run 44164984830 succeeded.
+- 6.10 re-read: status complete (done). Standards provenance: 9 dispatches; both always-on standards self-reported read by 4 of 9; 0 unbacked claims; 0 MISMATCH.
+- 6.10 checkpoint: [checkpoint] due=yes items=TEST-08 head=cfa1f61b tip=origin/main@cfa1f61b verdict=pass (pytest 62 passed 14 skipped; vitest 32 passed). Teardown: no env lines of this run.
