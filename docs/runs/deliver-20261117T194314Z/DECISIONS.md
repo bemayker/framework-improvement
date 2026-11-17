@@ -20,3 +20,12 @@ This run's section of the repository-root `DECISIONS.md`, which is cumulative ac
 - [run] Wave-2 boundary: follow-ups filed none (every merged item's known improvements are OPTIONAL; no unaddressed comments).
 - [run] Re-ingest at wave-2 boundary: nodes=TEST-10,BUG-04 (items=42 nodes=2 done=9 to_verify=1 unmapped=30); registered=none; map not written.
 - [run] BUG-04 (wave 3) and TEST-10 (wave 4) both ready; planners dispatched concurrently; build serialization decided at the plan verdicts on the union of the two File Manifests (LandingPage.tsx flagged). BUG-04's tracker description is empty: the planner derives criteria from the title and records the assumption.
+- [run] Wave-2 record published: #859 merged (arm=opened merge=merged).
+- [run] Plans self-approved (first pass, no re-plan): BUG-04 (criteria derived from the title; tracker description empty), TEST-10 (criterion-2 interpretation recorded). No build serialization: the two whole-feature File Manifests are disjoint; the LandingPage overlap flagged in feature_map.md and TEST-10 shared_risks.md is in neither manifest.
+- [run] BUG-04 repro local-automated: before fail (exit 1, 174a1e09) -> after pass (exit 0, 18cefae2).
+- [run] TEST-10 refactor-gate handover manifest: the --findings-on-stdin call was refused by bash-shape-guard brace-quote (the finding quotes a JS object literal); manifest generated without findings and the read set carried in the dispatch prompt. Framework defect, reported in the run report, not filed in the project tracker.
+- [run] TEST-10 documentation check edited docs/DEVELOPMENT.md, which the plan File Manifest did not list; reviewer OPTIONAL judged it in scope and correct; listed under Not in the plan in PR #860.
+- [run] Merged: BUG-04 #861 (1d9eb4b2), TEST-10 #860 (e29f69f3), each on an orchestrator merge verdict with all five autonomy.md Section 5 conditions met; checks 7/7 green.
+- [run] Checkpoints: BUG-04 and TEST-10 verdict=pass at head e29f69f3 (pytest 62 passed 14 skipped; vitest 40 passed). BUG-04-db torn down.
+- [run] Final boundary: follow-ups filed none (known improvements all OPTIONAL; no unaddressed comments). Re-ingest nodes=none (items=42 done=11 to_verify=1 unmapped=30); registered=none; map unchanged. BUG-01 stays to_verify for a human check on the deployed environment.
+- [run] Merged feature branches (TEST-08, TEST-09, BUG-01, BUG-04, TEST-10) remain on the remote; branch cleanup left to a human.
