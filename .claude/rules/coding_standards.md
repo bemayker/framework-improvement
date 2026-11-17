@@ -1,4 +1,4 @@
-<!-- materialized-from: mayker-dev v0.3.499; do not edit, regenerate with /upgrade-project -->
+<!-- materialized-from: mayker-dev v0.3.491; do not edit, regenerate with /upgrade-project -->
 <!--
   Universal standard. Loaded at launch from .claude/rules/ (always on). Do not edit per project.
   Stack-agnostic: code quality, naming, architecture patterns, component design, test attributes.
@@ -6,11 +6,10 @@
 
 # Coding Standards & Best Practices
 
-> **Advice:** no check covers Sections 1 and 4; the reviewer grades them.
 > **Not loaded at launch:** Sections 2 and 3 in `${CLAUDE_PLUGIN_ROOT}/rules/coding_standards/backend_frontend.md` (the mayker-dev plugin). Read the named file before you apply or cite one of those sections.
 > **Rules here, reasons there:** the full text of Section 5, with its measured example, is in `${CLAUDE_PLUGIN_ROOT}/rules/coding_standards/backend_frontend.md` → "Section 5, in full". Read it before you cite or change a Section 5 rule.
 
-> **Mode-aware:** in `existing` mode, `existing_codebase.md` comes first and the rules below are the fallback for net-new code.
+> **Mode-aware (existing codebase):** When `CLAUDE.md` Project Mode is `existing`, apply `existing_codebase.md` first: match the conventions already present in the code you touch, treat the rules below as the fallback for net-new code, and never restructure existing code to satisfy them. In `new` mode, apply the rules below as written.
 
 ## 1. General Principles
 
