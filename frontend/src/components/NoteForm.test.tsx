@@ -90,6 +90,20 @@ describe("NoteForm", () => {
     expect(createNoteMock).toHaveBeenCalledTimes(1);
   });
 
+  it("sends one create request when the form itself is submitted twice in the same tick", async () => {
+    createNoteMock.mockReturnValue(new Promise(() => {}));
+    render(<NoteForm onCreated={vi.fn()} />);
+
+    typeNote("Buy milk");
+    // Submitting the form directly bypasses the button's disabled state, so
+    // only the ref guard in the handler can stop the second request.
+    const form = screen.getByTestId("note-form");
+    fireEvent.submit(form);
+    fireEvent.submit(form);
+
+    expect(createNoteMock).toHaveBeenCalledTimes(1);
+  });
+
   it("disables the save button while a save is in flight", async () => {
     createNoteMock.mockReturnValue(new Promise(() => {}));
     render(<NoteForm onCreated={vi.fn()} />);
