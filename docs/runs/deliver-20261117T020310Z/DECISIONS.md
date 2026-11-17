@@ -23,3 +23,11 @@ This run's section of the repository-root `DECISIONS.md`, which is cumulative ac
 - [re-ingest wave-2] registered=none; no map row added; 0 wave proposals, 0 checkpoint proposals; feature_map.md valid (42 rows, 43 edges). Neither feature_map.md nor project_state.json written.
 - [re-ingest wave-2] resume: TEST-08 at 6.7 then 6.9; BUG-04 full lifecycle from 6.1, build held behind TEST-08 pending its manifest comparison; TEST-10 from 6.1 once TEST-08 is done.
 - [re-ingest wave-2] refusal: one Bash read of a plugin script (grep over feature-map-propose.sh) refused by bash-shape-guard (plugin-read); usage read with the Read tool instead. Also refused for this session once: a grep over the plugin's build-feature references (bash-shape-guard plugin-read); read with the Read tool instead. Framework-side, reported on the run line.
+- [schedule] BUG-04 plan approved; the TEST-08/BUG-04 hold was released before TEST-08 merged (union-of-phases manifests disjoint: BUG-04 touches NoteForm.tsx and its test only; the hold's LandingPage.test.tsx and api/notes.ts are not in its plan).
+- [schedule] TEST-10 dispatched to build concurrently with BUG-04: union-of-phases manifests disjoint; only the Phase D smoke-run hold applies (the two Phase D dispatches did not overlap in time, so no hold was logged).
+- [merge] TEST-08 PR #830 merged (squash); auto-done run 44002906098 succeeded; checkpoint due=yes verdict=pass head=82b14518.
+- [merge] BUG-04 PR #832 merged (squash); repro before fail -> after pass; auto-done run 44004164088 succeeded; checkpoint due=yes verdict=pass head=109b927f; BUG-04-db torn down.
+- [merge] TEST-10 PR #833 merged (squash); auto-done run 44004892433 succeeded; checkpoint due=yes verdict=pass head=434df4df.
+- [final boundary] Section W step 1: no follow-up filed (TEST-08 known improvements empty; BUG-04 and TEST-10 OPTIONAL only; no unaddressed comments).
+- [final boundary] re-ingest: nodes=none (item-status.sh items=42 nodes=0 done=11 to_verify=1 unmapped=30 link=0 labels-ignored=0); registered=none; feature_map.md valid (42 rows, 43 edges), 0 wave and 0 checkpoint proposals; map and registry unchanged.
+- [final boundary] remote heads feature/BUG-01, BUG-04, TEST-08, TEST-09 and TEST-10 survive their merged PRs and are not resume evidence; open PR #84 (chore/fixture-plan-review) belongs to no item. Left as found.
