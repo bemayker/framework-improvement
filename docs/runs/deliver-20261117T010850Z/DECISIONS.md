@@ -30,3 +30,8 @@ This run's section of the repository-root `DECISIONS.md`, which is cumulative ac
 - [schedule] TEST-10 re-plan approved (one re-plan; TEST-08's E2E spec joined its manifest). Built beside BUG-04 (disjoint manifests). CHORE-02 and FEAT-9, flagged in its shared_risks.md, are cancelled.
 - [wave] Wave 3 boundary: follow-ups filed none (TEST-08's RECOMMENDED findings were all applied by its refactor gate; BUG-04 had no findings; no unaddressed comments).
 - [ingest] Wave-3 boundary re-ingest: graph is 1 node (TEST-10, in flight at 6.5) from item-status.sh over 42 items (done=10 to_verify=1 unmapped=30, all cancelled). registered=none; no map or registry write; 0 wave and 0 checkpoint proposals.
+- [publish] wave-3 record: arm=opened merge=merged PR #823 (chore/mayker-deliver-20261117T010850Z-wave-3).
+- [merge] TEST-10 merged: PR #824 squash edf09d8; auto-done run 43998434650 succeeded; item reads complete. Checkpoint due=yes verdict=pass head=edf09d8a. Residual doubt logged: criterion 2's "version alone while pending or failed" read as "Task Notes" (version and commit arrive in one response); a literal reading needs a follow-up item.
+- [wave] Final boundary (wave 4): follow-ups filed none (TEST-10's RECOMMENDED findings were applied by its refactor gate; its remaining known improvement is OPTIONAL; no unaddressed comments).
+- [ingest] Final-boundary re-ingest: item-status.sh over 42 items reports nodes=0 done=11 to_verify=1 unmapped=30 (all cancelled). registered=none; no map or registry write. The graph is empty; the run proceeds to its report.
+- [run] BUG-01 is the one item left for a human: merged (PR #818) at complete + mayker:to-verify, awaiting the deployed-environment check of its criterion 3.
