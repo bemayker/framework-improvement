@@ -4,10 +4,10 @@ TEST-01 (the scaffold feature) instantiates the app with no feature routes.
 Later features register their routers here without restructuring this factory:
 TEST-05 registers the version router, TEST-03 the notes router plus the
 startup schema initialisation and the CORS middleware the browser needs, and
-TEST-02 the health router.
+TEST-02 the health router, TEST-07 the uptime router plus the process clock
+captured at startup.
 """
 
-import os
 import logging
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
@@ -19,7 +19,9 @@ from app.core.config import get_settings
 from app.core.db import ensure_schema
 from app.routers.health import router as health_router
 from app.routers.notes import router as notes_router
+from app.routers.uptime import router as uptime_router
 from app.routers.version import router as version_router
+from app.services import uptime_service
 
 logger = logging.getLogger(__name__)
 
@@ -32,6 +34,9 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     needs no database and must still answer, so startup never hard-requires
     one (the notes endpoints then fail loudly per request instead).
     """
+    # First, so the start instant is captured once per startup and never
+    # depends on the database.
+    app.state.process_clock = uptime_service.start_clock()
     settings = get_settings()
     if settings.database_url is None:
         logger.warning(
@@ -56,6 +61,7 @@ def create_app() -> FastAPI:
     app.include_router(version_router)
     app.include_router(notes_router)
     app.include_router(health_router)
+    app.include_router(uptime_router)
     return app
 
 
