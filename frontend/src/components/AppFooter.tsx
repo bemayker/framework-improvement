@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import type { CSSProperties } from "react";
 import { getAppVersion } from "../api/version";
+import type { AppVersionInfo } from "../api/version";
 
 const APP_NAME = "Task Notes";
 
@@ -11,13 +12,13 @@ const footerStyle: CSSProperties = {
 };
 
 function AppFooter() {
-  const [version, setVersion] = useState<string | null>(null);
+  const [info, setInfo] = useState<AppVersionInfo | null>(null);
 
   useEffect(() => {
     let isMounted = true;
     getAppVersion()
       .then((resolved) => {
-        if (isMounted) setVersion(resolved);
+        if (isMounted) setInfo(resolved);
       })
       .catch(() => {
         // Loading and failure look the same by design: the name, no version.
@@ -30,8 +31,11 @@ function AppFooter() {
   return (
     <footer data-testid="app-footer" style={footerStyle}>
       {APP_NAME}
-      {version !== null && (
-        <span data-testid="app-footer-version"> v{version}</span>
+      {info?.version != null && (
+        <span data-testid="app-footer-version"> v{info.version}</span>
+      )}
+      {info?.version != null && info.commit !== null && (
+        <span data-testid="app-footer-commit"> ({info.commit})</span>
       )}
     </footer>
   );

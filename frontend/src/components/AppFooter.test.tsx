@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, waitFor } from "@testing-library/react";
+import { act, render, screen, waitFor } from "@testing-library/react";
 import AppFooter from "./AppFooter";
 import { getAppVersion } from "../api/version";
 
@@ -15,7 +15,7 @@ describe("AppFooter", () => {
   });
 
   it("renders the version returned by the backend", async () => {
-    getAppVersionMock.mockResolvedValue("9.9.9");
+    getAppVersionMock.mockResolvedValue({ version: "9.9.9", commit: null });
 
     render(<AppFooter />);
 
@@ -26,16 +26,45 @@ describe("AppFooter", () => {
     );
   });
 
-  it("renders the app name without a version while the request is pending", () => {
+  it("renders the first 7 characters of the commit next to the version", async () => {
+    getAppVersionMock.mockResolvedValue({ version: "9.9.9", commit: "4f2a9c1" });
+
+    render(<AppFooter />);
+
+    await waitFor(() =>
+      expect(screen.getByTestId("app-footer").textContent).toBe(
+        "Task Notes v9.9.9 (4f2a9c1)",
+      ),
+    );
+    expect(screen.getByTestId("app-footer-commit")).toHaveTextContent(
+      "(4f2a9c1)",
+    );
+  });
+
+  it("renders the version alone when the backend reports no commit", async () => {
+    getAppVersionMock.mockResolvedValue({ version: "9.9.9", commit: null });
+
+    render(<AppFooter />);
+
+    await waitFor(() =>
+      expect(screen.getByTestId("app-footer").textContent).toBe(
+        "Task Notes v9.9.9",
+      ),
+    );
+    expect(screen.queryByTestId("app-footer-commit")).toBeNull();
+  });
+
+  it("renders the app name without a version or commit while the request is pending", () => {
     getAppVersionMock.mockReturnValue(new Promise(() => {}));
 
     render(<AppFooter />);
 
     expect(screen.getByTestId("app-footer").textContent).toBe("Task Notes");
     expect(screen.queryByTestId("app-footer-version")).toBeNull();
+    expect(screen.queryByTestId("app-footer-commit")).toBeNull();
   });
 
-  it("renders the app name without a version when the request fails", async () => {
+  it("renders the app name without a version or commit when the request fails", async () => {
     getAppVersionMock.mockRejectedValue(new Error("network down"));
 
     render(<AppFooter />);
@@ -43,16 +72,21 @@ describe("AppFooter", () => {
     await waitFor(() => expect(getAppVersionMock).toHaveBeenCalledTimes(1));
     expect(screen.getByTestId("app-footer").textContent).toBe("Task Notes");
     expect(screen.queryByTestId("app-footer-version")).toBeNull();
+    expect(screen.queryByTestId("app-footer-commit")).toBeNull();
   });
 
   it("renders the app name without a version when the backend reports none", async () => {
-    getAppVersionMock.mockResolvedValue(null);
+    getAppVersionMock.mockResolvedValue({ version: null, commit: "4f2a9c1" });
 
     render(<AppFooter />);
 
     await waitFor(() => expect(getAppVersionMock).toHaveBeenCalledTimes(1));
+    await act(async () => {
+      await getAppVersionMock.mock.results[0].value;
+    });
     expect(screen.getByTestId("app-footer").textContent).toBe("Task Notes");
     expect(screen.queryByTestId("app-footer-version")).toBeNull();
+    expect(screen.queryByTestId("app-footer-commit")).toBeNull();
   });
 
   it("is exposed as the contentinfo landmark and carries the app-footer test id", () => {

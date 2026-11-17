@@ -34,6 +34,8 @@ How to start the application is in the README → Running the project. Ports, en
 
 `docker-compose.yml` passes `BUILD_COMMIT` through to the backend container, so set it in `.env` or on the command line, for example `BUILD_COMMIT=$(git rev-parse HEAD) docker compose up -d backend`. `.env.example` documents the variable.
 
+The frontend footer shows the commit too: after the version it renders `(<first 7 characters of commit>)`, for example `Task Notes v0.1.0 (a1b2c3d)`. When `commit` is `unknown` the commit part is omitted, and so is the version part when the version is `unknown`.
+
 ## Testing
 
 The test gate runs the command in `CLAUDE.md` → `Test gate command:` before every push, and CI runs the suites on every pull request. Test directories, naming and the tier toggles are in `CLAUDE.md` → Test Configuration and Feature Toggles.
