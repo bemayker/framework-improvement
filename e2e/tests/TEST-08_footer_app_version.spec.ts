@@ -12,7 +12,9 @@ test.describe("TEST-08 footer app version", () => {
     await page.route("**/api/version", (route) =>
       route.fulfill({ status: 503, contentType: "application/json", body: "{}" }),
     );
+    const versionResponse = page.waitForResponse("**/api/version");
     await page.goto("/");
+    await versionResponse;
 
     await expect(page.getByTestId("app-footer")).toBeVisible();
     await expect(page.getByTestId("app-footer")).toHaveText("Task Notes");
