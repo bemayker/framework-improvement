@@ -1,13 +1,20 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import LandingPage from "./LandingPage";
-import { version } from "../../package.json";
 import { listNotes, createNote } from "../api/notes";
+import { fetchBackendVersion } from "../api/version";
 
 vi.mock("../api/notes", () => ({
   listNotes: vi.fn(),
   createNote: vi.fn(),
 }));
+
+vi.mock("../api/version", () => ({
+  fetchBackendVersion: vi.fn(),
+}));
+
+// A value no frontend file contains, so the footer can only get it from the client.
+const BACKEND_VERSION = "7.7.7-backend";
 
 const listNotesMock = vi.mocked(listNotes);
 const createNoteMock = vi.mocked(createNote);
@@ -23,6 +30,7 @@ describe("LandingPage", () => {
     listNotesMock.mockReset();
     createNoteMock.mockReset();
     listNotesMock.mockResolvedValue([]);
+    vi.mocked(fetchBackendVersion).mockResolvedValue(BACKEND_VERSION);
   });
 
   it("renders the app title 'Task Notes'", async () => {
@@ -43,11 +51,13 @@ describe("LandingPage", () => {
     expect(screen.getByRole("heading", { name: "Task Notes" })).toBeInTheDocument();
   });
 
-  it("renders the footer with the app name and version", async () => {
+  it("shows the version the backend reports, not the frontend package version", async () => {
     await renderLandingPage();
 
+    expect(await screen.findByTestId("app-version")).toHaveTextContent(
+      `v${BACKEND_VERSION}`,
+    );
     expect(screen.getByTestId("app-footer")).toHaveTextContent("Task Notes");
-    expect(screen.getByTestId("app-footer")).toHaveTextContent(version);
   });
 
   it("renders the note form and the note list", async () => {
