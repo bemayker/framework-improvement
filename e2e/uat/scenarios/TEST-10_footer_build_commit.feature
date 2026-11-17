@@ -20,7 +20,8 @@ Feature: TEST-10 Footer shows the build commit
     And the footer does not contain "undefined", "null", "unknown" or an error text
 
   Scenario: Footer shows no commit while the request is pending
-    Given the network is throttled so that "/api/version" answers slowly
+    Given the backend reports commit "0123456789ab" at "/api/version"
+    And the network is throttled so that "/api/version" answers slowly
     When I open the landing page
     Then until the request completes the footer reads "Task Notes" with no placeholder text
     And once it completes the footer reads "Task Notes v0.1.0 (0123456)"

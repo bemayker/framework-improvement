@@ -13,14 +13,15 @@ export type BuildInfo = {
   commit: string | null;
 };
 
-// The backend's own sentinel for "package metadata missing" (version_service.py).
-const UNKNOWN_VERSION = "unknown";
+// The backend's own sentinel for a version or commit it could not determine
+// (version_service.py).
+const UNKNOWN_SENTINEL = "unknown";
 
 // The backend reports a 12-character commit; the footer shows only 7.
 const SHORT_COMMIT_LENGTH = 7;
 
 function shortenCommit(commit: unknown): string | null {
-  if (typeof commit !== "string" || commit.trim() === "" || commit === UNKNOWN_VERSION) {
+  if (typeof commit !== "string" || commit.trim() === "" || commit === UNKNOWN_SENTINEL) {
     return null;
   }
 
@@ -38,7 +39,7 @@ export async function getBackendBuildInfo(): Promise<BuildInfo | null> {
     const body = (await response.json()) as Partial<VersionResponse> | null;
     const version = body?.version;
 
-    if (typeof version !== "string" || version === "" || version === UNKNOWN_VERSION) {
+    if (typeof version !== "string" || version === "" || version === UNKNOWN_SENTINEL) {
       return null;
     }
 
