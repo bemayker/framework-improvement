@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, waitFor } from "@testing-library/react";
+import { act, render, screen, waitFor } from "@testing-library/react";
 import AppFooter from "./AppFooter";
 import { getAppVersion } from "../api/version";
 
@@ -76,13 +76,17 @@ describe("AppFooter", () => {
   });
 
   it("renders the app name without a version when the backend reports none", async () => {
-    getAppVersionMock.mockResolvedValue({ version: null, commit: null });
+    getAppVersionMock.mockResolvedValue({ version: null, commit: "4f2a9c1" });
 
     render(<AppFooter />);
 
     await waitFor(() => expect(getAppVersionMock).toHaveBeenCalledTimes(1));
+    await act(async () => {
+      await getAppVersionMock.mock.results[0].value;
+    });
     expect(screen.getByTestId("app-footer").textContent).toBe("Task Notes");
     expect(screen.queryByTestId("app-footer-version")).toBeNull();
+    expect(screen.queryByTestId("app-footer-commit")).toBeNull();
   });
 
   it("is exposed as the contentinfo landmark and carries the app-footer test id", () => {
