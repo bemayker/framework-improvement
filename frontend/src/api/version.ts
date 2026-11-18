@@ -9,8 +9,18 @@ const VERSION_URL = `${API_BASE_URL}/api/version`;
 // backend's own answer when its package metadata is missing.
 export const UNKNOWN_BACKEND_VERSION = "unknown";
 
-/** Fetches the backend's version string, returned as sent (the caller decides display). */
-export async function getVersion(): Promise<string> {
+// Mirrors UNKNOWN_COMMIT in backend/app/core/config.py, the backend's own
+// answer when BUILD_COMMIT is unset or blank.
+export const UNKNOWN_BACKEND_COMMIT = "unknown";
+
+export type VersionInfo = { version: string; commit: string | null };
+
+/**
+ * Fetches the backend's version and build commit, returned as sent (the caller
+ * decides display). A bad commit never fails the call: the version in the same
+ * body is still good, so the commit becomes null instead.
+ */
+export async function getVersion(): Promise<VersionInfo> {
   const response = await fetch(VERSION_URL);
 
   if (!response.ok) {
@@ -19,11 +29,14 @@ export async function getVersion(): Promise<string> {
     );
   }
 
-  const body = (await response.json()) as { version?: unknown };
+  const body = (await response.json()) as { version?: unknown; commit?: unknown };
 
   if (typeof body.version !== "string" || body.version === "") {
     throw new Error("Unexpected version response");
   }
 
-  return body.version;
+  const commit =
+    typeof body.commit === "string" && body.commit !== "" ? body.commit : null;
+
+  return { version: body.version, commit };
 }
