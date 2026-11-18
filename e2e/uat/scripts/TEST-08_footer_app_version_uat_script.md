@@ -6,8 +6,8 @@
 - Repository checked out locally, on branch `feature/TEST-08-footer-app-version` (or later, once merged, on `main`).
 - Copy `.env.example` to `.env` in the repository root (defaults are usable as-is for local UAT).
 - No other process bound to ports `5183` (frontend) or `8010` (backend).
-- Frontend dependencies installed (`npm --prefix frontend install`) for step 9.
-- Chrome (developer tools are used in steps 4, 5 and 12).
+- Frontend dependencies installed (`npm --prefix frontend install`) for step 10.
+- Chrome (developer tools are used in steps 4, 5 and 14).
 
 ## Test Environment Setup
 

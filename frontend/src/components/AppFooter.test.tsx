@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, waitFor } from "@testing-library/react";
+import { act, render, screen, waitFor } from "@testing-library/react";
 import AppFooter from "./AppFooter";
 import { fetchBackendVersion } from "../api/version";
 
@@ -12,6 +12,11 @@ const BUNDLE_VERSION = "9.9.9-bundle";
 vi.mock("../../package.json", () => ({ version: BUNDLE_VERSION }));
 
 const fetchBackendVersionMock = vi.mocked(fetchBackendVersion);
+
+// Flushes the already-settled mock promise and its state update, so an assertion sees the settled footer rather than the pending one.
+async function settlePendingPromises() {
+  await act(async () => {});
+}
 
 describe("AppFooter", () => {
   beforeEach(() => {
@@ -44,7 +49,8 @@ describe("AppFooter", () => {
 
     render(<AppFooter />);
 
-    await waitFor(() => expect(fetchBackendVersionMock).toHaveBeenCalled());
+    await settlePendingPromises();
+    expect(fetchBackendVersionMock).toHaveBeenCalled();
     expect(screen.getByTestId("app-footer").textContent).toBe("Task Notes");
   });
 
@@ -53,7 +59,8 @@ describe("AppFooter", () => {
 
     render(<AppFooter />);
 
-    await waitFor(() => expect(fetchBackendVersionMock).toHaveBeenCalled());
+    await settlePendingPromises();
+    expect(fetchBackendVersionMock).toHaveBeenCalled();
     expect(screen.getByTestId("app-footer").textContent).toBe("Task Notes");
   });
 
@@ -70,7 +77,8 @@ describe("AppFooter", () => {
 
     fetchBackendVersionMock.mockResolvedValue(null);
     render(<AppFooter />);
-    await waitFor(() => expect(fetchBackendVersionMock).toHaveBeenCalledTimes(2));
+    await settlePendingPromises();
+    expect(fetchBackendVersionMock).toHaveBeenCalledTimes(2);
     expect(screen.getByTestId("app-footer")).not.toHaveTextContent(
       BUNDLE_VERSION,
     );
