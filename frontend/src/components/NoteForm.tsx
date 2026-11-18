@@ -1,4 +1,4 @@
-import { useState, type CSSProperties, type FormEvent } from "react";
+import { useRef, useState, type CSSProperties, type FormEvent } from "react";
 import { createNote, type Note } from "../api/notes";
 
 const FIELD_LABEL = "New note";
@@ -53,6 +53,12 @@ const buttonStyle: CSSProperties = {
   cursor: "pointer",
 };
 
+const savingButtonStyle: CSSProperties = {
+  ...buttonStyle,
+  opacity: 0.6,
+  cursor: "default",
+};
+
 const errorStyle: CSSProperties = {
   fontSize: "0.875rem",
   color: "#b3261e",
@@ -67,6 +73,11 @@ type NoteFormProps = {
 function NoteForm({ onCreated }: NoteFormProps) {
   const [text, setText] = useState("");
   const [error, setError] = useState<string | null>(null);
+  // The ref is the guard: state updates only land on the next render, so two
+  // submit events dispatched before it would both slip past a state check.
+  // The state mirrors it to disable the button.
+  const isSavingRef = useRef(false);
+  const [isSaving, setIsSaving] = useState(false);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -79,6 +90,12 @@ function NoteForm({ onCreated }: NoteFormProps) {
       return;
     }
 
+    if (isSavingRef.current) {
+      return;
+    }
+    isSavingRef.current = true;
+    setIsSaving(true);
+
     try {
       const savedNote = await createNote(trimmedText);
       setError(null);
@@ -86,6 +103,9 @@ function NoteForm({ onCreated }: NoteFormProps) {
       onCreated(savedNote);
     } catch {
       setError(SAVE_FAILED_MESSAGE);
+    } finally {
+      isSavingRef.current = false;
+      setIsSaving(false);
     }
   }
 
@@ -105,7 +125,12 @@ function NoteForm({ onCreated }: NoteFormProps) {
           style={inputStyle}
           onChange={(event) => setText(event.target.value)}
         />
-        <button data-testid="note-submit" type="submit" style={buttonStyle}>
+        <button
+          data-testid="note-submit"
+          type="submit"
+          disabled={isSaving}
+          style={isSaving ? savingButtonStyle : buttonStyle}
+        >
           {SUBMIT_LABEL}
         </button>
       </div>
