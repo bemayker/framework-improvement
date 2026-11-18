@@ -39,3 +39,27 @@ def test_get_app_version_returns_unknown_when_distribution_not_installed(monkeyp
     monkeypatch.setattr(version_service, "version", raise_not_found)
 
     assert version_service.get_app_version() == version_service.UNKNOWN_VERSION
+
+
+def test_get_build_commit_truncates_full_sha_to_first_12_characters(monkeypatch):
+    """A 40-character sha (what CI passes) is reported as its first 12."""
+    full_sha = "3f9c2a7b1d4e8f6a0c5b9e2d7a1f4c8b6e3d0a9f"
+    monkeypatch.setenv("BUILD_COMMIT", full_sha)
+
+    assert version_service.get_build_commit() == full_sha[:12] == "3f9c2a7b1d4e"
+
+
+def test_get_build_commit_keeps_value_of_12_characters_or_fewer(monkeypatch):
+    """Boundary: 12 characters and a shorter value are returned unchanged."""
+    monkeypatch.setenv("BUILD_COMMIT", "abc1234")
+    assert version_service.get_build_commit() == "abc1234"
+
+    monkeypatch.setenv("BUILD_COMMIT", "123456789abc")
+    assert version_service.get_build_commit() == "123456789abc"
+
+
+def test_get_build_commit_returns_unknown_when_build_commit_unset(monkeypatch):
+    """Unset BUILD_COMMIT yields the default sentinel."""
+    monkeypatch.delenv("BUILD_COMMIT", raising=False)
+
+    assert version_service.get_build_commit() == "unknown"
