@@ -18,6 +18,8 @@ def test_get_time_returns_200_with_utc_now_and_timezone(client: TestClient):
     body = response.json()
     assert set(body) == {"now", "timezone"}
     assert body["timezone"] == "UTC"
+    # Python 3.12 parses a `Z` suffix as UTC too, so pin the contract's explicit form.
+    assert body["now"].endswith("+00:00")
     offset = datetime.fromisoformat(body["now"]).utcoffset()
     assert offset is not None
     assert offset.total_seconds() == 0
