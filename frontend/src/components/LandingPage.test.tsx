@@ -12,6 +12,7 @@ vi.mock("../api/notes", () => ({
 vi.mock("../api/version", () => ({
   getVersion: vi.fn(),
   UNKNOWN_BACKEND_VERSION: "unknown",
+  UNKNOWN_BACKEND_COMMIT: "unknown",
 }));
 
 const getVersionMock = vi.mocked(getVersion);
