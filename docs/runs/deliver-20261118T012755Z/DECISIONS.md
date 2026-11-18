@@ -34,3 +34,4 @@ This run's section of the repository-root `DECISIONS.md`, which is cumulative ac
 - [post-merge] auto-done succeeded for BUG-04 (run 44221509257) and TEST-10 (run 44221822368); both complete.
 - [wave] final boundary: waves 3 and 4 drained. Follow-ups: none (BUG-04 and TEST-10 carry only OPTIONAL findings; no unaddressed comment).
 - [ingest] final-boundary re-ingest (main 415bb305): [item-status] items=42 nodes=0 done=11 to_verify=1 unmapped=30 link=0 labels-ignored=0. 38 tracker tasks, none new since run start; registered=none; map valid (42 rows, 0 proposals). Graph empty: the run proceeds to its report.
+- [publish] wave-4 record: [publish] arm=opened branch=chore/mayker-deliver-20261118T012755Z-wave-4 base=main head-was=main pr=https://github.com/bemayker/framework-improvement/pull/881 policy=auto merge=merged remote=origin superseded=none. pr-tests was a required check on main at merge time (ruleset required_status_checks: pr-tests).
