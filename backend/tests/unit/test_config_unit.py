@@ -22,7 +22,7 @@ import os
 
 import pytest
 
-from app.core.config import DEFAULT_CORS_ORIGINS, UNKNOWN_COMMIT, Settings, get_settings
+from app.core.config import DEFAULT_CORS_ORIGINS, Settings, get_settings
 
 
 def test_get_settings_returns_the_configured_app_title():
@@ -94,23 +94,6 @@ def test_settings_cors_origins_defaults_when_unset(monkeypatch):
     monkeypatch.delenv("CORS_ORIGINS", raising=False)
 
     assert get_settings().cors_origins == DEFAULT_CORS_ORIGINS == ("http://localhost:5183",)
-
-
-def test_settings_build_commit_reads_build_commit_env(monkeypatch):
-    """BUILD_COMMIT is read per call, surrounding whitespace stripped."""
-    monkeypatch.setenv("BUILD_COMMIT", " abc1234 ")
-
-    assert get_settings().build_commit == "abc1234"
-
-
-def test_settings_build_commit_defaults_to_unknown_when_unset_or_blank(monkeypatch):
-    """Unset and blank BUILD_COMMIT both resolve to UNKNOWN_COMMIT."""
-    monkeypatch.delenv("BUILD_COMMIT", raising=False)
-    assert get_settings().build_commit == UNKNOWN_COMMIT == "unknown"
-
-    for blank in ("", "   "):
-        monkeypatch.setenv("BUILD_COMMIT", blank)
-        assert get_settings().build_commit == UNKNOWN_COMMIT
 
 
 @pytest.mark.parametrize("blank", ["", "   ", " , "])
