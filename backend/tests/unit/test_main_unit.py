@@ -1,5 +1,7 @@
 """Unit tests for the FastAPI app factory (backend/app/main.py)."""
 
+from fastapi.testclient import TestClient
+
 from app.main import create_app
 
 # FastAPI's own routes, present on every app regardless of what this project
@@ -56,6 +58,30 @@ def test_create_app_registers_health_route():
     custom_paths = _collect_route_paths(app.routes) - BUILT_IN_ROUTE_PATHS
 
     assert "/api/health" in custom_paths
+
+
+def test_create_app_registers_uptime_route():
+    """Criterion 1: the app registers the TEST-07 uptime route."""
+    app = create_app()
+
+    custom_paths = _collect_route_paths(app.routes) - BUILT_IN_ROUTE_PATHS
+
+    assert "/api/uptime" in custom_paths
+
+
+def test_create_app_captures_process_start_once():
+    """Criterion 3: one start marker per app, owned by that app instance."""
+    first_app = create_app()
+    second_app = create_app()
+    marker_before_requests = first_app.state.process_start
+
+    client = TestClient(first_app)
+    client.get("/api/uptime")
+    client.get("/api/uptime")
+
+    assert first_app.state.process_start is marker_before_requests
+    assert first_app.state.process_start is not second_app.state.process_start
+    assert first_app.state.process_start.started_at.utcoffset() is not None
 
 
 def test_create_app_returns_independent_instances():
