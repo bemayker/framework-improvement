@@ -14,7 +14,8 @@ test.describe("TEST-08 footer app version", () => {
     await page.goto("/");
 
     await expect(page.getByTestId("app-version")).toContainText(backendVersion as string);
-    await expect(page.getByTestId("app-footer")).toHaveText(`Task Notes v${backendVersion}`);
+    // Contains-match: with BUILD_COMMIT set on the backend the footer also shows the commit (TEST-10).
+    await expect(page.getByTestId("app-footer")).toContainText(`Task Notes v${backendVersion}`);
   });
 
   test("shows only the app name in the footer when /api/version is unreachable", async ({
