@@ -22,3 +22,12 @@ This run's section of the repository-root `DECISIONS.md`, which is cumulative ac
 - [wave-2] Follow-ups: none filed (every merged item's known improvements are OPTIONAL; no unaddressed comments).
 - [ingest] Re-ingestion at the wave-2 boundary: item-status items=42 nodes=2 done=9 to_verify=1 unmapped=30; nodes BUG-04, TEST-10. registered=none; map not written (0 wave, 0 checkpoint proposals; valid 42 rows, 43 edges).
 - [schedule] BUG-04 and TEST-10 plan in parallel; builds provisionally serialized BUG-04 before TEST-10 (LandingPage.tsx note, LandingPage.test.tsx overlap); hold re-checked against the union of both File Manifests. The TEST-08/BUG-04 hold closed with TEST-08's merge.
+- [publish] wave-2: PR #887 merged (arm=opened merge=merged); checkout returned to main@c9f192a4.
+- [schedule] BUG-04 plan self-approved (title-derived criteria, scope-contained); repro local-automated (NoteForm component test).
+- [schedule] TEST-10 plan self-approved; residual doubt on criterion 2's reading (pending/failed stays "Task Notes" per TEST-08) logged for a human. Lifted the provisional BUG-04/TEST-10 build serialization: 0 shared paths on the union of all phases.
+- [schedule] Round 6: BUG-04 and TEST-10 cut from origin/main@c9f192a4; merged-since clean for both (commits=0); Phase A dispatched concurrently.
+- [schedule] TEST-10 Phase D held behind BUG-04: smoke run ports (released when BUG-04's Phase D returned).
+- [merge] BUG-04 #888 squash 6c728544 (repro before fail -> after pass), TEST-10 #889 squash 1381bd71. Orchestrator merge verdicts logged per item; no shared path.
+- [post-merge] auto-done succeeded for both (runs 44228970937, 44228989585); both complete. Checkpoints BUG-04 pass, TEST-10 pass (head 1381bd71). BUG-04-db torn down.
+- [wave-4] Follow-ups: none filed (no RECOMMENDED known improvements left; no unaddressed comments).
+- [ingest] Final-boundary re-ingest (main @ 1381bd71): items=42 nodes=0 done=11 to_verify=1 unmapped=30; registered=none; map valid, not written. Graph empty: proceeding to the report.
