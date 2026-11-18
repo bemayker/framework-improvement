@@ -1,10 +1,12 @@
-<!-- materialized-from: mayker-dev v0.3.491; do not edit, regenerate with /upgrade-project -->
+<!-- materialized-from: mayker-dev v0.3.502; do not edit, regenerate with /upgrade-project -->
 <!--
   Universal standard. Loaded at launch from .claude/rules/ (always on). Do not edit per project.
   Slash-command mapping, operational behaviour, git conventions.
 -->
 
 # Workflow Triggers & Operational Behaviour
+
+> **Advice:** a rule here that names no hook, script or tool grant has no check; the reviewer grades it.
 
 > **Not loaded at launch:** Section 2.1 in `${CLAUDE_PLUGIN_ROOT}/rules/workflow_triggers/waiting_policy.md`; Section 4.1 in `${CLAUDE_PLUGIN_ROOT}/rules/workflow_triggers/worktrees.md`; Sections 5.3 to 5.8 in `${CLAUDE_PLUGIN_ROOT}/rules/workflow_triggers/bash_shape.md` (the mayker-dev plugin). Read the named file before you apply or cite one of those sections.
 
@@ -40,14 +42,7 @@ The batch commands run the single-item procedure per item, each in its own workt
 
 ## 2. Subagents
 
-The plan / build / review split is expressed with dedicated subagents provided by the plugin (`planner`, `builder`, `reviewer`). The skills delegate to them by name:
-
-| Subagent | Role | Permissions |
-| --- | --- | --- |
-| `planner` | Architect plans (used by `/plan-feature`, `/plan-features`, `/deliver`) | Read-mostly; writes only plan artifacts under `.claude/artifacts/` |
-| `builder` | Implementation + tests, and CI-failure fixes (used by `/build-feature`, `/build-features`, `/revise-feature`, `/fix`, `/watch-pr`, `/deliver`) | Read/write code, run tests, commit and push |
-| `reviewer` | Self-review against `review_standards.md`, plus a narrowed second pass over what that review could not cover (`review_standards.md` Section 6.4); used by `/build-feature`, `/build-features`, `/fix`, `/security-fix`, `/deliver` | Read-only; cannot edit, run, or commit |
-| `orchestrator` | Autonomous scheduling and verdicts for `/deliver` | Read-mostly; writes only run artifacts and decision logs; spawns nothing |
+The plan / build / review split runs on the plugin's subagents `planner`, `builder`, `reviewer` and `orchestrator`. Each one's role and tool grant is its `agents/*.md` definition, which the Agent tool shows and enforces.
 
 The reviewer only reports; the builder fixes. Each reviewer dispatch carries the run's observed test results (`.claude/artifacts/run/handover/{ID}-run.md`) and run id, so a prediction contradicting an observed pass is never BLOCKING (`review_standards.md` Sections 4 and 6.1). The orchestrator only decides; the `/deliver` session executes its verdicts.
 
@@ -55,18 +50,15 @@ The reviewer only reports; the builder fixes. Each reviewer dispatch carries the
 
 ## 3. Operational Behaviour
 
-- **No TODO placeholders:** Do not generate code with "TODO: Implement logic" or similar. Write the full implementation.
 - **Response format:** Be concise. Use Markdown for all code blocks.
-- **MCP:** The issue tracker MCP is required only when Work Item Source is `tracker` or `hybrid`. The Git provider path is keyed on the provider: its mapping file names either the provider's command-line tool (no provider MCP call) or the provider's MCP. Each skill verifies what it needs at startup, reusing `project_state.json` → `git_provider.effective_path` (`mcp_integration.md` Section 5.0).
-- **Config required:** the seven pipeline commands stop without `.claude/project_state.json`. `mcp_integration.md` Section 0 lists them, the six exceptions and the stop message.
-- **Autonomy compatible:** only `/init-project` and `/sync-project` have human checkpoints. Run both in a local interactive session, never on an unattended surface (Routines, CI jobs, headless `claude -p`). `/sync-project` refuses an unattended invocation (`hooks/lib/surface-detect.sh`; an `unknown` surface proceeds and is reported). `/upgrade-project` is the maintenance path that is safe there: it never prompts, never applies a `manual` migration, and writes `.claude/rules/` and `.claude/scripts/` only through `hooks/lib/materialize.sh`. Never answer a materialization stop with a permission grant, a hook `allow` or a write route of your own. On an unattended surface, name a command `/mayker-dev:<command>` and check the run's recorded product, never the exit code alone: `claude -p` exits 0 on `Unknown command`.
-- **Keeping a repo current after a plugin update:** `claude plugin update` refreshes nothing the plugin materialized into the repo. Run both of the other two. `/upgrade-project` applies the `migrations/` ledger (`CLAUDE.md`, `pr-tests.yml`, the `feature_map.md` structure) and re-stamps `.claude/rules/`. A `/sync-project` re-run regenerates `project_state.json`, the project docs and the other plugin-owned CI workflows, and is the only heal for `CLAUDE.md`'s Backing Services block and a missing or `auto` `Test gate command:`.
+- **Autonomy compatible:** only `/init-project` and `/sync-project` have human checkpoints; `/sync-project` refuses an unattended surface (`surface-detect.sh`), and `/upgrade-project` is the maintenance path that is safe there. Never answer a materialization stop with a permission grant, a hook `allow` or a write route of your own.
+- **Keeping a repo current after a plugin update:** `rule-drift-check` names `/upgrade-project` when the repo lags the plugin; a `/sync-project` re-run regenerates `project_state.json`, the project docs and the plugin-owned CI workflows.
 - **Autonomy mode:** `CLAUDE.md` → Autonomy selects the operating model. `assisted` (default): humans review plan PRs, set Ready for Build, and review and merge implementation PRs; the batch commands change how many items move, not who approves. `autonomous`: `/deliver` drives the backlog per `autonomy.md`, self-approves plans and merges by its own verdict, and hard-stops unless the toggle reads `autonomous`. Quality gates are identical in both modes.
 - **Permissions:** Autonomous runs rely on the permission posture in `.claude/settings.json` so agents do not block on approvals. See `docs/DEVELOPMENT.md` → Permissions & Autonomy.
 
 ## 4. Git Conventions
 
-- **Branching:** One branch per work item, prefix `feature/`, named in `feature_map.md` (tracker features) or the work item's frontmatter (local items). `/refactor` and `/generate-tests` use `refactor/` and `test/`. `/upgrade-project`, `/sync-project` and `/diagnose` land their output on `chore/mayker-{command}-...`, and `/deliver` its own non-item landings on `chore/mayker-{run_id}-{purpose}` (the run id begins `deliver-`). `branch-guard.sh` allows those prefixes and `main`/`master`/`develop`, and blocks every other branch, including a `chore/` name outside `mayker-`.
+- **Branching:** one branch per work item, named in `feature_map.md` or the local item's frontmatter. `branch-guard` refuses a commit or push on any other branch and names the allowed prefixes.
 - **Commits:** Use semantic commit messages:
   - `feat({FEATURE_ID}): ...` for new features
   - `fix({FEATURE_ID}): ...` for bug fixes
@@ -79,26 +71,11 @@ The reviewer only reports; the builder fixes. Each reviewer dispatch carries the
 
 ## 5. Bash command shape
 
-Batch independent work into one Bash call per exec turn, in a shape the permission layer can grant. Treat every shape rule as a correctness rule: on an unattended surface a refused command prompts nobody, and its step silently does not run.
+Batch independent work into one Bash call per exec turn, in a shape the permission layer can grant: on an unattended surface a refused command prompts nobody, and its step silently does not run.
 
-### 5.1 Never emit these shapes
+### 5.1 Refused shapes
 
-- **No `$(…)` command substitution, and no backticks.** Take a value from a prior call's printed output as a literal, or from a helper script that computes it. Use the script whenever the value is a fact about the moment the call runs, such as a timestamp.
-- **No `.`, `source` or `eval`.** Run a shared library instead: `bash ~/.mayker/mayker-dev/hooks/lib/<script>.sh …`.
-- **No `cd` segment.** Use `git -C <dir>`, an explicit path argument, or a tool's root flag (`uv run --directory <dir>`, `npm --prefix <dir>`, `make -C <dir>`). This binds a configured command such as `CLAUDE.md` → `Test gate command:` too, because a session runs it as well as the hook.
-- **No path outside the working directories.** The plugin cache is the exception, through the two shipped `permissions.additionalDirectories` entries (5.8), and the read fence setting disables that route (5.6). Running a program through the pointer is allowed; a read through it is judged on the resolved target. Read the installed version with `bash ~/.mayker/mayker-dev/hooks/lib/plugin-version.sh`.
-- **No `sed` or `awk` reading a file.** Read it with the `Read` tool, `cat`, `head` or `grep`. On a pipe, both are fine.
-- **No quoted string containing `git push`.** Spell a search pattern so it cannot contain the phrase.
-- **No `${…}` brace expansion, and no `$CLAUDE_PLUGIN_ROOT` in a Bash command.** Name a plugin script through the pointer, unquoted: `bash ~/.mayker/mayker-dev/hooks/lib/<script>.sh …` (5.7).
-- **No variable expansion other than `$HOME` and `$PWD`:** not an assigned variable, `"$@"`, `$1` or `$?`. Put the value in as a literal, or compute it inside a script. A `$` inside single quotes is not an expansion.
-- **No line holding a `{` and a quote outside single quotes, and a heredoc body counts as outside.** Pass a JSON record as a single-quoted operand of the script, never via `printf`; stage a document holding such lines (below). **No zsh `<N-M>` shape:** write a pair as `A and B`.
-- **No environment-assignment prefix** (`NAME=value command`), and no leading `env`. A recorded backing service reaches a test command through `bash ~/.mayker/mayker-dev/hooks/lib/run-env.sh --id {ID} --run-id {RUN_ID} -- <test command>`.
-- **No tool-call write under `.claude/`**, by `Write`, `Edit`, a redirect, or a `cp` or `mv` naming a `.claude/` path as either end, and **no `sleep`, loop or background watch of your own for CI**. Stage a document: `Write` it to `.mayker/staging/{name}`, then `bash ~/.mayker/mayker-dev/hooks/lib/run-dir.sh stage-in write-*|append-* <dir> <name> .mayker/staging/{name}`; publish a run's files with `run-dir.sh publish-run`, and wait with `ci-poll.sh --wait` (2.1).
-- **No trailing `&&` or `||`, and no command over 10,000 characters.** A staged document is not in the command; a script appends its own output (5.3).
-
-### 5.2 What composes fine, and must not be "fixed"
-
-Measured allowed, so do not re-spell them: pipes of two and three segments; `&&`, `||` and `;` chains; `2>&1`; a quoted `--jq` filter; a bare assignment segment; unbraced `$PWD` or `$HOME` inside a path; an unquoted `~/…` path (quoting it stops the tilde expanding); an absolute path inside the repository; and the provider tool's API call its mapping file names. A chain prompts only when one of its segments has no grant.
+`bash-shape-guard` refuses each shape the permission layer was measured to refuse and names the shipped route; the shapes and their reasons are in `bash_refused_shapes.md` (named above). Three routes it does not see: read a project file with the `Read` tool, `cat`, `head` or `grep`, never `sed` or `awk`; write under `.claude/` only through `bash ~/.mayker/mayker-dev/hooks/lib/run-dir.sh stage-in write-*|append-* <dir> <name> .mayker/staging/{name}` from a document you wrote at `.mayker/staging/{name}`, never with `Write` or `Edit`; and wait for CI only with `ci-poll.sh --wait`, never with `sleep` or a loop of your own.
 
 ### 5.9 A refused command is reported, never substituted
 
