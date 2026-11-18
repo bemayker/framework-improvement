@@ -9,27 +9,44 @@ vi.mock("../api/version", () => ({
 
 const getBackendVersionMock = vi.mocked(getBackendVersion);
 
-/** Asserts the footer is exactly the app name: no version text, no gap. */
+/** Asserts the footer is exactly the app name: no version or commit text. */
 function expectAppNameOnly() {
   const footer = screen.getByTestId("app-footer");
   expect(footer.textContent).toBe("Task Notes");
   expect(screen.queryByTestId("app-version")).not.toBeInTheDocument();
+  expect(screen.queryByTestId("app-commit")).not.toBeInTheDocument();
 }
 
 describe("AppFooter", () => {
   beforeEach(() => {
     getBackendVersionMock.mockReset();
-    getBackendVersionMock.mockResolvedValue("0.1.0");
+    getBackendVersionMock.mockResolvedValue({
+      version: "0.1.0",
+      commit: "0123456",
+    });
   });
 
-  it("renders the backend version once the fetch resolves", async () => {
+  it("renders the short commit next to the version once the fetch resolves", async () => {
+    render(<AppFooter />);
+
+    expect(await screen.findByTestId("app-version")).toHaveTextContent("v0.1.0");
+    expect(screen.getByTestId("app-commit")).toHaveTextContent("(0123456)");
+    expect(screen.getByTestId("app-footer").textContent).toBe(
+      "Task Notes v0.1.0 (0123456)",
+    );
+  });
+
+  it("renders the version alone when the backend reports no commit", async () => {
+    getBackendVersionMock.mockResolvedValue({ version: "0.1.0", commit: null });
+
     render(<AppFooter />);
 
     expect(await screen.findByTestId("app-version")).toHaveTextContent("v0.1.0");
     expect(screen.getByTestId("app-footer").textContent).toBe("Task Notes v0.1.0");
+    expect(screen.queryByTestId("app-commit")).not.toBeInTheDocument();
   });
 
-  it("renders the app name without a version while the fetch is pending", () => {
+  it("renders the app name without a version or commit while the fetch is pending", () => {
     getBackendVersionMock.mockReturnValue(new Promise(() => {}));
 
     render(<AppFooter />);
@@ -37,7 +54,7 @@ describe("AppFooter", () => {
     expectAppNameOnly();
   });
 
-  it("renders the app name without a version when the backend is unreachable", async () => {
+  it("renders the app name without a version or commit when the backend is unreachable", async () => {
     getBackendVersionMock.mockRejectedValue(new Error("network down"));
 
     render(<AppFooter />);

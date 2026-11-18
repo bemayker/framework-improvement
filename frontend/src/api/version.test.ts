@@ -17,11 +17,53 @@ describe("getBackendVersion", () => {
   it("returns the version the backend sent, from the default base URL", async () => {
     const fetchMock = stubFetch({
       ok: true,
-      json: async () => ({ version: "0.1.0" }),
+      json: async () => ({ version: "0.1.0", commit: "unknown" }),
     });
 
-    await expect(getBackendVersion()).resolves.toBe("0.1.0");
+    await expect(getBackendVersion()).resolves.toEqual({
+      version: "0.1.0",
+      commit: null,
+    });
     expect(fetchMock).toHaveBeenCalledWith("http://localhost:8010/api/version");
+  });
+
+  it("returns the version and the 7-character commit the backend sent", async () => {
+    stubFetch({
+      ok: true,
+      json: async () => ({ version: "0.1.0", commit: "0123456789ab" }),
+    });
+
+    await expect(getBackendVersion()).resolves.toEqual({
+      version: "0.1.0",
+      commit: "0123456",
+    });
+  });
+
+  it("resolves a null commit when the backend reports the unknown commit", async () => {
+    stubFetch({
+      ok: true,
+      json: async () => ({ version: "0.1.0", commit: "unknown" }),
+    });
+
+    await expect(getBackendVersion()).resolves.toEqual({
+      version: "0.1.0",
+      commit: null,
+    });
+  });
+
+  it("resolves a null commit when the body has no string commit", async () => {
+    for (const body of [
+      { version: "0.1.0" },
+      { version: "0.1.0", commit: "" },
+      { version: "0.1.0", commit: 12345 },
+    ]) {
+      stubFetch({ ok: true, json: async () => body });
+
+      await expect(getBackendVersion()).resolves.toEqual({
+        version: "0.1.0",
+        commit: null,
+      });
+    }
   });
 
   it("resolves null when the backend reports the unknown sentinel", async () => {
@@ -59,7 +101,10 @@ describe("getBackendVersion", () => {
 
     const { getBackendVersion: freshClient } = await import("./version");
 
-    await expect(freshClient()).resolves.toBe("2.0.0");
+    await expect(freshClient()).resolves.toEqual({
+      version: "2.0.0",
+      commit: null,
+    });
     expect(fetchMock).toHaveBeenCalledWith("http://api.example.test/api/version");
   });
 });
