@@ -10,6 +10,7 @@ function stubFetch(response: Partial<Response>) {
 describe("getVersion", () => {
   afterEach(() => {
     vi.unstubAllGlobals();
+    vi.unstubAllEnvs();
   });
 
   it("returns the version the backend sent, from the default base URL", async () => {
@@ -20,6 +21,20 @@ describe("getVersion", () => {
 
     await expect(getVersion()).resolves.toBe("0.1.0");
     expect(fetchMock).toHaveBeenCalledWith("http://localhost:8010/api/version");
+  });
+
+  it("uses VITE_API_BASE_URL instead of the default when it is configured", async () => {
+    vi.stubEnv("VITE_API_BASE_URL", "https://notes.example.test");
+    vi.resetModules();
+    const { getVersion: getVersionWithConfiguredBase } = await import("./version");
+    const fetchMock = stubFetch({
+      ok: true,
+      json: async () => ({ version: "0.1.0", commit: "abc1234" }),
+    });
+
+    await getVersionWithConfiguredBase();
+
+    expect(fetchMock).toHaveBeenCalledWith("https://notes.example.test/api/version");
   });
 
   it("throws when the backend answers with a non-OK status", async () => {
