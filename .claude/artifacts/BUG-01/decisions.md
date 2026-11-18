@@ -1,0 +1,17 @@
+- Plan base: d7663f0df0e962d6becd5c79c44f766337159abb
+- Tracker comments read: 49 (0 actionable; all framework PR notices)
+- Plan verdict (orchestrator, run=deliver-20261118T022816Z, /deliver 6.2): **approve**, first pass, no re-plan.
+  - Criteria: all 3 acceptance criteria are mapped. `planned-tests.sh ids` printed ids for rows 1, 2 and 3 (5 id lines, no row empty); every row is tiered Integration with a recorded reason, and none needs navigation or interaction, so no E2E spec is correct. Criterion 3 is a human check on the deployed host: the plan keeps it as a manual step and covers per-request freshness plus the header locally.
+  - Scope: the plan recreates FEAT-1's `GET /api/time` slice because `backend/app/routers/server_time.py` is absent from main at d7663f0d (checked: `backend/app/main.py` registers only version, notes and health; no server_time module exists under `backend/app`). This matches the ingestion note in `.claude/artifacts/run/graph.md`. The route is the precondition of the fix, not gold plating (`user_story_alignment.md` Section 3): nothing beyond FEAT-1's contract plus the one header is added, no middleware, no other endpoint touched.
+  - Layering: router sets the header and holds no business logic, service owns the clock, schema is Pydantic, no repository because there is no data access (`coding_standards/backend_frontend.md` Section 2.2); it mirrors the existing version slice.
+  - Manifest: exact paths, validator line `valid (10 entries; B=7 G=3)`; the only endpoint is the one the item names.
+  - Technology Selection: recorded for each net-new module (stdlib `datetime` over a time library, FastAPI `Response` header over middleware or a caching library, Pydantic over a bare dict); no new dependency.
+  - Residual doubts, not grounds for revise: the integration test sleeps 1.1 s for the freshness assertion; `ServerTimeResponse.now` is `str` rather than `datetime`; the plan's Re-Plan Feedback cites `user_story_alignment.md` with the placeholder "(unopened section)" instead of a section number.
+  - Serialization stands: `backend/app/main.py` and `backend/tests/unit/test_main_unit.py` are in this manifest, so BUG-01 builds after TEST-09 if TEST-09's manifest lists either.
+- Repro: deployed-only: two GETs to /api/time a second apart on the deployed host return the same `now` (edge cache; no CDN locally). Environment: the deployed environment the item names (docs/DEVELOPMENT.md Test environments table has no row). Steps: .claude/artifacts/run/test_steps-BUG-01.md (source: item)
+- Status: plan review -> on hold (ready_for_build) after self-approval; no readiness label to remove (item carries only mayker:to-verify).
+- [merged-since] base=d7663f0d (forced) ref=origin/main@d7663f0d commits=0 overlap=0 verdict=clean
+- [run-dir] move-item: moved=3 appended=0 kept=1 failed=0
+- [worktree-deps] installed=2 present=0 unlocked=0 failed=0
+- Self-review: VERDICT: PASS blocking=0 recommended=2 optional=1 (no BLOCKING findings to close; 2 RECOMMENDED sent to the refactor gate)
+- Docs check: skipped (no setup, env or layout change)
