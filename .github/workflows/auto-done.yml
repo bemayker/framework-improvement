@@ -523,7 +523,7 @@ jobs:
     # Generation is DISABLED. It validates STRUCTURE only and never runs the
     # scenarios as browser tests: the executable E2E specs (*.spec.ts) run in
     # pr-tests.yml.
-    # See the plugin's docs/framework-manual.md -> "Why UAT is validated, not executed".
+    # See the plugin's DEVELOPMENT.md -> "Why UAT is validated, not executed".
     if: github.event.pull_request.merged == true
     runs-on: ubuntu-latest
     steps:
