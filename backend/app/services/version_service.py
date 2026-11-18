@@ -3,15 +3,27 @@
 The version is read from installed package metadata rather than hardcoded,
 so it always reflects `[project].version` in backend/pyproject.toml without
 any code change when that value is bumped.
+
+TEST-09 adds the build commit. CI passes a full 40-character sha through
+BUILD_COMMIT; clients get the short form, so the service truncates it to
+COMMIT_LENGTH characters.
 """
 
 import logging
 from importlib.metadata import PackageNotFoundError, version
 
+from app.core.config import get_settings
+
 logger = logging.getLogger(__name__)
 
 DISTRIBUTION_NAME = "task-notes-backend"
 UNKNOWN_VERSION = "unknown"
+COMMIT_LENGTH = 12
+
+
+def get_build_commit() -> str:
+    """Return the configured build commit, cut to its first COMMIT_LENGTH characters."""
+    return get_settings().build_commit[:COMMIT_LENGTH]
 
 
 def get_app_version() -> str:

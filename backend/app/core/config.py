@@ -15,6 +15,14 @@ from dataclasses import dataclass, field
 # VITE_API_BASE_URL wiring in docker-compose.yml), which is cross-origin.
 DEFAULT_CORS_ORIGINS = ("http://localhost:5183",)
 
+# TEST-09: what GET /api/version reports when no build commit was supplied.
+UNKNOWN_COMMIT = "unknown"
+
+
+def _read_build_commit() -> str:
+    """Return BUILD_COMMIT (CI passes the full sha), or UNKNOWN_COMMIT when unset or blank."""
+    return (os.environ.get("BUILD_COMMIT") or "").strip() or UNKNOWN_COMMIT
+
 
 def _read_cors_origins() -> tuple[str, ...]:
     """Return CORS_ORIGINS split on commas, or the default when none are given."""
@@ -33,6 +41,8 @@ class Settings:
     )
     # CORS_ORIGINS (comma-separated), read per call; unset or blank uses the default.
     cors_origins: tuple[str, ...] = field(default_factory=_read_cors_origins)
+    # BUILD_COMMIT, read per call; unset or blank uses UNKNOWN_COMMIT.
+    build_commit: str = field(default_factory=_read_build_commit)
 
 
 def get_settings() -> Settings:
