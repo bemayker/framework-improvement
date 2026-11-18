@@ -13,6 +13,11 @@ COPY . .
 RUN --mount=type=cache,target=/root/.cache/uv \
     uv sync
 
+# Late so a new sha does not invalidate the dependency layers. No default
+# here: the app's settings own the "unknown" fallback.
+ARG BUILD_COMMIT
+ENV BUILD_COMMIT=${BUILD_COMMIT}
+
 EXPOSE 8010
 
 CMD ["uv", "run", "uvicorn", "app.main:create_app", "--factory", "--host", "0.0.0.0", "--port", "8010"]
