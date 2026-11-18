@@ -93,4 +93,81 @@ describe("NoteForm", () => {
       expect(screen.queryByTestId("note-form-error")).not.toBeInTheDocument(),
     );
   });
+
+  // A save that stays pending until the test settles it, so the second submit
+  // is fired deterministically while the first is in flight.
+  function deferSave() {
+    let resolve!: (note: { id: number; text: string }) => void;
+    let reject!: (reason: Error) => void;
+    const promise = new Promise<{ id: number; text: string }>((res, rej) => {
+      resolve = res;
+      reject = rej;
+    });
+    createNoteMock.mockReturnValueOnce(promise);
+    return { resolve, reject };
+  }
+
+  it("sends one save request when Save note is clicked twice while saving", async () => {
+    const pending = deferSave();
+    const onCreated = vi.fn();
+    render(<NoteForm onCreated={onCreated} />);
+
+    typeNote("Buy milk");
+    submitForm();
+    submitForm();
+
+    expect(createNoteMock).toHaveBeenCalledTimes(1);
+
+    pending.resolve({ id: 1, text: "Buy milk" });
+    await waitFor(() => expect(onCreated).toHaveBeenCalledTimes(1));
+    expect(createNoteMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("disables the save button while a save is pending", async () => {
+    const pending = deferSave();
+    render(<NoteForm onCreated={vi.fn()} />);
+
+    expect(screen.getByTestId("note-submit")).toBeEnabled();
+    typeNote("Buy milk");
+    submitForm();
+
+    await waitFor(() => expect(screen.getByTestId("note-submit")).toBeDisabled());
+
+    pending.resolve({ id: 1, text: "Buy milk" });
+    await waitFor(() => expect(screen.getByTestId("note-submit")).toBeEnabled());
+  });
+
+  it("accepts a new submit after a failed save", async () => {
+    const pending = deferSave();
+    render(<NoteForm onCreated={vi.fn()} />);
+
+    typeNote("Buy milk");
+    submitForm();
+    pending.reject(new Error("Saving the note failed: 500"));
+    await waitFor(() => expect(screen.getByTestId("note-submit")).toBeEnabled());
+
+    createNoteMock.mockResolvedValueOnce({ id: 2, text: "Buy milk" });
+    submitForm();
+
+    await waitFor(() => expect(createNoteMock).toHaveBeenCalledTimes(2));
+  });
+
+  it("accepts a new submit after a successful save", async () => {
+    const pending = deferSave();
+    const onCreated = vi.fn();
+    render(<NoteForm onCreated={onCreated} />);
+
+    typeNote("Buy milk");
+    submitForm();
+    pending.resolve({ id: 1, text: "Buy milk" });
+    await waitFor(() => expect(onCreated).toHaveBeenCalledTimes(1));
+    await waitFor(() => expect(screen.getByTestId("note-submit")).toBeEnabled());
+
+    createNoteMock.mockResolvedValueOnce({ id: 2, text: "Buy milk" });
+    typeNote("Buy milk");
+    submitForm();
+
+    await waitFor(() => expect(createNoteMock).toHaveBeenCalledTimes(2));
+    expect(createNoteMock).toHaveBeenLastCalledWith("Buy milk");
+  });
 });
