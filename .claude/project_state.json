@@ -320,17 +320,17 @@
     }
   },
   "discovery": {
-    "last_scan_commit": "3fe03b6d1e0807bbd236b18cf64181f5c3513d5d",
-    "scanned_at": "2026-11-17T23:11:56Z",
+    "last_scan_commit": "0078ca5bf975b07bbc658b2c0296fa9d952800cf",
+    "scanned_at": "2026-11-13T13:00:05Z",
     "scanned_by": "/sync-project"
   },
   "framework": {
     "initialized_at": "unknown",
-    "migrated_to": "0.3.499",
-    "migrated_at": "2026-11-17T23:04:04Z",
+    "migrated_to": "0.3.491",
+    "migrated_at": "2026-11-13T12:44:15Z",
     "synced": {
-      "plugin_version": "0.3.499",
-      "synced_at": "2026-11-17T23:11:58Z"
+      "plugin_version": "0.3.491",
+      "synced_at": "2026-11-13T13:00:35Z"
     }
   }
 }
