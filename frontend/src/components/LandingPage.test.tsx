@@ -31,7 +31,7 @@ describe("LandingPage", () => {
     createNoteMock.mockReset();
     listNotesMock.mockResolvedValue([]);
     getVersionMock.mockReset();
-    getVersionMock.mockResolvedValue("9.9.9");
+    getVersionMock.mockResolvedValue({ version: "9.9.9", commit: null });
   });
 
   it("renders the app title 'Task Notes'", async () => {

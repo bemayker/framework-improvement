@@ -19,8 +19,39 @@ describe("getVersion", () => {
       json: async () => ({ version: "0.1.0", commit: "abc1234" }),
     });
 
-    await expect(getVersion()).resolves.toBe("0.1.0");
+    await expect(getVersion()).resolves.toEqual({
+      version: "0.1.0",
+      commit: "abc1234",
+    });
     expect(fetchMock).toHaveBeenCalledWith("http://localhost:8010/api/version");
+  });
+
+  it("returns the version and commit the backend sent", async () => {
+    stubFetch({
+      ok: true,
+      json: async () => ({ version: "0.1.0", commit: "abcdef123456" }),
+    });
+
+    await expect(getVersion()).resolves.toEqual({
+      version: "0.1.0",
+      commit: "abcdef123456",
+    });
+  });
+
+  it("returns a null commit when the body has no non-empty string commit", async () => {
+    for (const body of [
+      { version: "0.1.0" },
+      { version: "0.1.0", commit: "" },
+      { version: "0.1.0", commit: 123 },
+      { version: "0.1.0", commit: null },
+    ]) {
+      stubFetch({ ok: true, json: async () => body });
+
+      await expect(getVersion()).resolves.toEqual({
+        version: "0.1.0",
+        commit: null,
+      });
+    }
   });
 
   it("uses VITE_API_BASE_URL instead of the default when it is configured", async () => {

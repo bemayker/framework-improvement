@@ -6,6 +6,7 @@ import { getVersion } from "../api/version";
 vi.mock("../api/version", () => ({
   getVersion: vi.fn(),
   UNKNOWN_BACKEND_VERSION: "unknown",
+  UNKNOWN_BACKEND_COMMIT: "unknown",
 }));
 
 const getVersionMock = vi.mocked(getVersion);
@@ -13,7 +14,57 @@ const getVersionMock = vi.mocked(getVersion);
 describe("AppFooter", () => {
   beforeEach(() => {
     getVersionMock.mockReset();
-    getVersionMock.mockResolvedValue("9.9.9");
+    getVersionMock.mockResolvedValue({ version: "9.9.9", commit: null });
+  });
+
+  it("renders the first 7 characters of the commit next to the version", async () => {
+    getVersionMock.mockResolvedValue({ version: "9.9.9", commit: "abcdef123456" });
+
+    render(<AppFooter />);
+
+    expect(await screen.findByTestId("app-commit")).toHaveTextContent("(abcdef1)");
+    expect(screen.getByTestId("app-footer").textContent).toBe(
+      "Task Notes v9.9.9 (abcdef1)",
+    );
+  });
+
+  it("renders no commit while the version request is pending", () => {
+    getVersionMock.mockReturnValue(new Promise(() => {}));
+
+    render(<AppFooter />);
+
+    expect(screen.getByTestId("app-footer").textContent).toBe("Task Notes");
+    expect(screen.queryByTestId("app-commit")).not.toBeInTheDocument();
+  });
+
+  it("renders no commit when the version request fails", async () => {
+    getVersionMock.mockRejectedValue(new Error("Loading the version failed: 500"));
+
+    render(<AppFooter />);
+
+    await waitFor(() => expect(getVersionMock).toHaveBeenCalledTimes(1));
+    const footerText = screen.getByTestId("app-footer").textContent;
+    expect(footerText).toBe("Task Notes");
+    expect(footerText).not.toContain("undefined");
+    expect(screen.queryByTestId("app-commit")).not.toBeInTheDocument();
+  });
+
+  it("renders the version alone when the backend reports an unknown commit", async () => {
+    getVersionMock.mockResolvedValue({ version: "9.9.9", commit: "unknown" });
+
+    render(<AppFooter />);
+
+    expect(await screen.findByTestId("app-version")).toHaveTextContent("v9.9.9");
+    expect(screen.getByTestId("app-footer").textContent).toBe("Task Notes v9.9.9");
+    expect(screen.queryByTestId("app-commit")).not.toBeInTheDocument();
+  });
+
+  it("renders the version alone when the backend sends no commit", async () => {
+    render(<AppFooter />);
+
+    expect(await screen.findByTestId("app-version")).toHaveTextContent("v9.9.9");
+    expect(screen.getByTestId("app-footer").textContent).toBe("Task Notes v9.9.9");
+    expect(screen.queryByTestId("app-commit")).not.toBeInTheDocument();
   });
 
   it("renders the version the backend reports", async () => {
@@ -43,7 +94,7 @@ describe("AppFooter", () => {
   });
 
   it("renders the app name without a version when the backend reports an unknown version", async () => {
-    getVersionMock.mockResolvedValue("unknown");
+    getVersionMock.mockResolvedValue({ version: "unknown", commit: "abcdef123456" });
 
     render(<AppFooter />);
 
