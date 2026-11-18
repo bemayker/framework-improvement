@@ -7,3 +7,5 @@ class VersionResponse(BaseModel):
     """Response body for GET /api/version."""
 
     version: str
+    # Sourced from the BUILD_COMMIT environment variable via the settings module.
+    commit: str
