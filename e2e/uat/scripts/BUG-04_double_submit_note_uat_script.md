@@ -4,7 +4,7 @@
 
 - Backend running at `http://localhost:8010` with the database up, frontend running at `http://localhost:5183`.
 - Browser developer tools available; steps 6 to 8 use the **Network** tab with throttling set to "Slow 3G" (Chrome) or an equivalent preset.
-- For steps 13 and 14, the ability to stop and start the backend (process or container) while the frontend keeps running.
+- For steps 11 and 12, the ability to stop and start the backend (process or container) while the frontend keeps running.
 - Notes from earlier runs may already be in the list; every step is about the note you add.
 
 ## Steps
