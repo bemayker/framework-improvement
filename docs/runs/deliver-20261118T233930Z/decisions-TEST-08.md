@@ -1,0 +1,11 @@
+# Decisions (TEST-08, after its final push): deliver-20261118T233930Z
+
+The entries `.claude/artifacts/TEST-08/decisions.md` received after the last push of its branch (3e509bad), the head its pull request merged. The entries before them reached the default branch in that file.
+
+- 6.6 PR: opened https://github.com/bemayker/framework-improvement/pull/905 (draft); item-to-PR comment posted.
+- 2026-11-19 [TEST-08] Merge verdict: merge PR #905 by squash (run=deliver-20261118T233930Z, head 3e509ba). Rationale: all five conditions of `autonomy.md` Section 5 hold. (1) Self-review `VERDICT: PASS blocking=0 recommended=2 optional=0`, both RECOMMENDED applied by the refactor gate. (2) `ci-poll.sh` re-read at the merge decision: `verdict=green next=none failed=0 poll=1`, 7 of 7 checks, PR CLEAN/MERGEABLE. (3) All six acceptance criteria are checked in the PR body and backed by the push gate (pytest 42 passed, 0 failed, 14 skipped; vitest 34 passed, 0 failed) and the Phase D E2E smoke (6 passed against a real backend and frontend); the plan verdict's residual doubt on criterion 5 is closed by a test that mocks the bundle version to a sentinel. (4) PR surface: 0 inline, 0 general, 0 reviews, reviewDecision empty, no change request; tracker surface: no new comment since 6.1, and the one actionable correction comment is answered by the run's PR-link comment. (5) Escalation bar not triggered: a frontend-only change with no backend file, no migration and no secret, undone by a revert PR.
+- 2026-11-19 [TEST-08] Noted at merge, not withholding. Rationale: the 14 skipped pytest tests are the database-backed ones (no database provisioned this run) and this item changes no backend file, so they are not evidence for or against it; the handover stack reads `sha=3e509bad+dirty` only because this decision log was appended after the push, and health=pass.
+- 6.9 merged #905 squash 9e056d57.
+- auto-done: run 44425213176 succeeded; tracker re-read: complete (fired, no backstop).
+- Standards provenance: 0 MISMATCH, 0 unbacked claims; always-on both read 3 of 8 (self-reported).
+- [checkpoint] due=yes items=TEST-08,BUG-01 head=5dce121e verdict=pass (pytest 63 passed 14 skipped; vitest 34 passed).
