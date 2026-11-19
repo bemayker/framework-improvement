@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, waitFor } from "@testing-library/react";
+import { act, render, screen, waitFor } from "@testing-library/react";
 import AppFooter from "./AppFooter";
 import { version as packageVersion } from "../../package.json";
 import { fetchBackendVersion } from "../api/version";
@@ -77,7 +77,9 @@ describe("AppFooter", () => {
 
     render(<AppFooter />);
 
-    await waitFor(() => expect(fetchBackendVersionMock).toHaveBeenCalled());
+    // Drain the microtask queue so the rejection's .catch has run before asserting.
+    await act(async () => {});
+    expect(fetchBackendVersionMock).toHaveBeenCalled();
     const text = screen.getByTestId("app-footer").textContent;
     expect(text).toBe("Task Notes");
     expect(text).not.toContain("undefined");
