@@ -1,0 +1,11 @@
+# Decisions (TEST-08, after its final push): deliver-20261119T010710Z
+
+The entries `.claude/artifacts/TEST-08/decisions.md` received after the last push of its branch (078d8a4c), the head its pull request merged. The entries before them reached the default branch in that file.
+
+- 6.6 PR: https://github.com/bemayker/framework-improvement/pull/918 (draft); PR label: #918 mayker:in-progress; gate: verdict recorded for this push (head 078d8a4: full); item-to-PR comment posted
+- 6.7 CI: verdict=green 7/7 (PR 918); handover-rebuild status=rebuilt sha=078d8a4c+dirty health=pass project=framework-improvement-test-08-handover; ready-pr isDraft=false; status in_review (to test); PR label: #918 mayker:in-review (removed mayker:in-progress)
+- 2026-11-19 [TEST-08] Merge verdict: merge PR #918 (squash), run=deliver-20261119T010710Z, orchestrator, /deliver 6.9. Rationale: all five conditions of `autonomy.md` Section 5 hold on the facts the session carried. (1) self-review `PASS blocking=0 recommended=0 optional=2`; (2) `CI #918: 7/7 checks done (green) verdict=green failed=0` from the pre-dispatch `ci-poll.sh --poll 1` re-read, PR not draft, MERGEABLE and CLEAN; (3) criteria 1 to 4 checked in the PR body, push gate recorded for head 078d8a4 (full; pytest 42 passed 0 failed 14 skipped, vitest 34 passed), Phase D E2E smoke 7 passed; (4) 0 inline comments, 0 general comments, 0 reviews, no change request, and the 6.8 tracker re-read found nothing newer than the run's own PR-link note (the two human tracker comments were answered in the plan); (5) escalation bar not triggered: frontend and e2e only, reversible by a revert PR. The refactor gate's one applied improvement added no source or test file and is inside the gated head. Merge order: last of three, after TEST-09, because the footer reads `GET /api/version`, the endpoint TEST-09 changes; the file sets are disjoint, so the order is for a coherent main history, not to avoid a conflict.
+- 6.9 merged: PR 918 squash a116f048
+- 6.10 auto-done: run 44436730823 succeeded
+- 6.10 standards provenance: 8 dispatches, 0 unbacked claims, no MISMATCH; always-on both read (self-reported) 5 of 8
+- 6.10 checkpoint: due=yes items=TEST-08,BUG-01 verdict=pass head=a116f048 (64 pytest passed 14 skipped + 34 vitest passed)
