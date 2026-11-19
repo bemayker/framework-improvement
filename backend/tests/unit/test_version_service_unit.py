@@ -30,6 +30,28 @@ def test_get_app_version_queries_the_project_distribution_name(monkeypatch):
     assert version_service.DISTRIBUTION_NAME == "task-notes-backend"
 
 
+def test_get_build_commit_truncates_full_sha_to_first_12_characters(monkeypatch):
+    """Tracker clarification: a 40-character sha reports its first 12."""
+    full_sha = "49c5d32dbdfb9ac66826decc406cf33bdfe68f13"
+    monkeypatch.setenv("BUILD_COMMIT", full_sha)
+
+    assert version_service.get_build_commit() == full_sha[:12] == "49c5d32dbdfb"
+
+
+def test_get_build_commit_returns_short_value_unchanged(monkeypatch):
+    """A value of 12 characters or fewer is not altered."""
+    monkeypatch.setenv("BUILD_COMMIT", "abc1234")
+
+    assert version_service.get_build_commit() == "abc1234"
+
+
+def test_get_build_commit_returns_unknown_when_unset(monkeypatch):
+    """Unset path: the default sentinel is reported."""
+    monkeypatch.delenv("BUILD_COMMIT", raising=False)
+
+    assert version_service.get_build_commit() == "unknown"
+
+
 def test_get_app_version_returns_unknown_when_distribution_not_installed(monkeypatch):
     """Error case: a missing distribution yields the sentinel, never a raise."""
 
