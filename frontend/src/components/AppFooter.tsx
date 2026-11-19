@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import type { CSSProperties } from "react";
 import { fetchBackendVersion } from "../api/version";
+import type { BackendVersionInfo } from "../api/version";
 
 const APP_NAME = "Task Notes";
 
@@ -10,8 +11,20 @@ const footerStyle: CSSProperties = {
   marginTop: "1.5rem",
 };
 
+// The commit is only shown next to a version, never on its own.
+function footerText(info: BackendVersionInfo | null): string {
+  if (!info) {
+    return APP_NAME;
+  }
+
+  const withVersion = `${APP_NAME} v${info.version}`;
+  return info.commit ? `${withVersion} (${info.commit})` : withVersion;
+}
+
 function AppFooter() {
-  const [backendVersion, setBackendVersion] = useState<string | null>(null);
+  const [backendInfo, setBackendInfo] = useState<BackendVersionInfo | null>(
+    null,
+  );
 
   useEffect(() => {
     let isMounted = true;
@@ -20,7 +33,7 @@ function AppFooter() {
     fetchBackendVersion()
       .then((resolved) => {
         if (isMounted) {
-          setBackendVersion(resolved);
+          setBackendInfo(resolved);
         }
       })
       .catch(() => undefined);
@@ -32,7 +45,7 @@ function AppFooter() {
 
   return (
     <footer data-testid="app-footer" style={footerStyle}>
-      {backendVersion ? `${APP_NAME} v${backendVersion}` : APP_NAME}
+      {footerText(backendInfo)}
     </footer>
   );
 }
