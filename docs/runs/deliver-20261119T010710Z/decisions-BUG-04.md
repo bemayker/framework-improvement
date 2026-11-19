@@ -1,0 +1,13 @@
+# Decisions (BUG-04, after its final push): deliver-20261119T010710Z
+
+The entries `.claude/artifacts/BUG-04/decisions.md` received after the last push of its branch (27d164cd), the head its pull request merged. The entries before them reached the default branch in that file.
+
+- 6.6 PR: https://github.com/bemayker/framework-improvement/pull/920 (draft); PR label: #920 mayker:in-progress; gate: verdict recorded for this push (head 27d164c: full); item-to-PR comment posted; Repro: before fail -> after pass
+- 6.7 CI: verdict=green 7/7 (PR 920); repro verdict: before fail -> after pass (exit 0); handover-rebuild status=rebuilt sha=27d164cd+dirty health=pass project=framework-improvement-bug-04-handover; ready-pr isDraft=false; status in_review (to test); PR label: #920 mayker:in-review (removed mayker:in-progress)
+- 2026-11-19 [BUG-04] Merge verdict: merge PR #920 by squash (run deliver-20261119T010710Z, orchestrator, head 27d164cd). Rationale: all five conditions of autonomy.md Section 5 hold. (1) Self-review clean: VERDICT PASS blocking=0 recommended=2 optional=1, both RECOMMENDED applied by the refactor gate (de3fe681); the one OPTIONAL (a test comment wording) is listed under Known improvements. (2) Checks: the session's pre-dispatch ci-poll line reads `CI #920: 7/7 checks done (green) verdict=green failed=0`; PR is OPEN, not draft, MERGEABLE, CLEAN. (3) Criteria 1 to 3 met: NoteForm.tsx has the in-flight ref guard set before the await, native `disabled` on the submit button, and both reset in `finally`; repro verdict `before fail and after pass` (exit 0) on npm --prefix frontend test -- src/components/NoteForm.test.tsx; push gate full on head 27d164c (pytest 78 passed 0 failed 0 skipped, vitest 39 passed); E2E smoke 2 passed against real Postgres. (4) Feedback surfaces: 0 inline comments, 0 general comments, 0 reviews, reviewDecision empty so no change request; tracker re-read shows nothing newer than the run's own PR-link note. (5) Escalation bar not triggered: a frontend-only change, reversible by a revert PR. Residual doubt carried from the plan verdict: the criteria are derived from the title (empty ClickUp description), an assumption no human reporter confirmed; two-tab or retried-request duplicates stay out of scope.
+- 6.9 merged: PR 920 squash bb8e3629
+- 6.10 auto-done: run 44439257835 succeeded
+- 6.10 auto-done: status complete (fired, no backstop)
+- 6.10 standards provenance: 9 dispatches, 0 unbacked claims, no MISMATCH; always-on both read (self-reported) 2 of 9
+- 6.10 checkpoint: due=yes items=TEST-10,BUG-04 verdict=pass head=05b8eb98
+- 6.10 teardown: docker rm -f BUG-04-db
