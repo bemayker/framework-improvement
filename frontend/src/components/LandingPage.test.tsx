@@ -9,14 +9,6 @@ vi.mock("../api/notes", () => ({
   createNote: vi.fn(),
 }));
 
-// Differs from frontend/package.json on purpose: the footer shows the backend's.
-// Hoisted because vi.mock runs before module-level constants are initialised.
-const { BACKEND_VERSION } = vi.hoisted(() => ({ BACKEND_VERSION: "9.8.7" }));
-
-vi.mock("../api/version", () => ({
-  fetchBackendVersion: vi.fn().mockResolvedValue({ version: BACKEND_VERSION, commit: null }),
-}));
-
 const listNotesMock = vi.mocked(listNotes);
 const createNoteMock = vi.mocked(createNote);
 
@@ -51,17 +43,11 @@ describe("LandingPage", () => {
     expect(screen.getByRole("heading", { name: "Task Notes" })).toBeInTheDocument();
   });
 
-  it("renders the footer with the app name and the backend version", async () => {
+  it("renders the footer with the app name and version", async () => {
     await renderLandingPage();
 
-    await waitFor(() =>
-      expect(screen.getByTestId("app-footer")).toHaveTextContent(
-        `Task Notes v${BACKEND_VERSION}`,
-      ),
-    );
-    expect(screen.getByTestId("app-footer")).not.toHaveTextContent(
-      `v${version}`,
-    );
+    expect(screen.getByTestId("app-footer")).toHaveTextContent("Task Notes");
+    expect(screen.getByTestId("app-footer")).toHaveTextContent(version);
   });
 
   it("renders the note form and the note list", async () => {

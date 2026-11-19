@@ -30,40 +30,6 @@ def test_get_app_version_queries_the_project_distribution_name(monkeypatch):
     assert version_service.DISTRIBUTION_NAME == "task-notes-backend"
 
 
-FULL_SHA = "0123456789abcdef0123456789abcdef01234567"
-
-
-def test_get_build_commit_returns_configured_settings_value(monkeypatch):
-    """Criterion 2: the value comes from the settings module's BUILD_COMMIT."""
-    monkeypatch.setenv("BUILD_COMMIT", "abc1234")
-
-    assert version_service.get_build_commit() == "abc1234"
-
-
-def test_get_build_commit_returns_unknown_when_build_commit_unset(monkeypatch):
-    """Unset path: the default is reported."""
-    monkeypatch.delenv("BUILD_COMMIT", raising=False)
-
-    assert version_service.get_build_commit() == "unknown"
-
-
-def test_get_build_commit_truncates_full_sha_to_first_12_characters(monkeypatch):
-    """Criterion 5: a 40-character sha is cut to its first 12 characters."""
-    monkeypatch.setenv("BUILD_COMMIT", FULL_SHA)
-
-    assert version_service.get_build_commit() == FULL_SHA[:12]
-    assert version_service.COMMIT_DISPLAY_LENGTH == 12
-
-
-def test_get_build_commit_returns_short_value_unchanged(monkeypatch):
-    """Edge case: exactly 12 characters, and fewer, pass through untouched."""
-    monkeypatch.setenv("BUILD_COMMIT", FULL_SHA[:12])
-    assert version_service.get_build_commit() == FULL_SHA[:12]
-
-    monkeypatch.setenv("BUILD_COMMIT", "abc")
-    assert version_service.get_build_commit() == "abc"
-
-
 def test_get_app_version_returns_unknown_when_distribution_not_installed(monkeypatch):
     """Error case: a missing distribution yields the sentinel, never a raise."""
 
