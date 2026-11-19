@@ -1,0 +1,11 @@
+- Plan base: 49c5d32dbdfb9ac66826decc406cf33bdfe68f13
+- Tracker comments read: 0 actionable (bot notes only)
+- 2026-11-19 [BUG-01] plan self-approved (run=deliver-20261119T001937Z, first verdict, no re-plan). Rationale: the plan's three acceptance criteria match the tracker item verbatim, and the Criterion coverage table gives each a tier, at least one test id and a why-not-E2E reason (`planned-tests.sh ids` listed ids for rows 1, 2 and 3). Layering follows the existing version slice (schema, service, router, registration in `backend/app/main.py`), the File Manifest is exact, and Technology Selection records each choice and what it was chosen over, with no new dependency.
+- 2026-11-19 [BUG-01] Accepted the plan's scope change restoring the FEAT-1 server-time slice. Rationale: checked on main at 49c5d32d that `backend/app/routers/server_time.py`, its schema and its service are absent and `main.py` registers only the version, notes and health routers, so the header fix has no endpoint to land on; the restore is bounded to FEAT-1's own criteria and is recorded under the plan's `## Scope changes`. Residual doubt: the `POST /api/time` 405 test and UAT edge case go slightly beyond BUG-01's criteria, accepted as supporting tests of the restored endpoint, not a reason to re-plan.
+- Repro: deployed-only: curl -s https://<deployed-host>/api/time; sleep 1; curl -s https://<deployed-host>/api/time, expect two different `now` values (source: item)
+- [merged-since] base=49c5d32d (forced) ref=origin/main@49c5d32d commits=0 overlap=0 verdict=clean
+- worktree-deps: installed=2 present=0 unlocked=0 failed=0
+- move-item: moved=3 appended=0 kept=1 failed=0
+- Docs check: no change (endpoint and tests only)
+- Self-review (6.5): VERDICT PASS blocking=0 recommended=0 optional=1; no BLOCKING finding to close
+- Refactor gate: no findings (7 files examined), commit 3f73bfa6
