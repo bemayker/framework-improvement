@@ -13,7 +13,44 @@ const fetchBackendVersionMock = vi.mocked(fetchBackendVersion);
 describe("AppFooter", () => {
   beforeEach(() => {
     fetchBackendVersionMock.mockReset();
-    fetchBackendVersionMock.mockResolvedValue("9.9.9");
+    fetchBackendVersionMock.mockResolvedValue({
+      version: "9.9.9",
+      commit: null,
+    });
+  });
+
+  it("shows the first 7 characters of the backend commit next to the version", async () => {
+    fetchBackendVersionMock.mockResolvedValue({
+      version: "9.9.9",
+      commit: "abcdef123456",
+    });
+
+    render(<AppFooter />);
+
+    await waitFor(() =>
+      expect(screen.getByTestId("app-footer").textContent).toBe(
+        "Task Notes v9.9.9 (abcdef1)",
+      ),
+    );
+  });
+
+  it("shows the version alone when the backend reports the commit as unknown", async () => {
+    // The client turns the backend's "unknown" commit into null.
+    fetchBackendVersionMock.mockResolvedValue({
+      version: "9.9.9",
+      commit: null,
+    });
+
+    render(<AppFooter />);
+
+    await waitFor(() =>
+      expect(screen.getByTestId("app-footer").textContent).toBe(
+        "Task Notes v9.9.9",
+      ),
+    );
+    expect(screen.getByTestId("app-footer").textContent).not.toMatch(
+      /undefined|null|unknown|\(/,
+    );
   });
 
   it("renders the version returned by the backend, not the frontend package version", async () => {
