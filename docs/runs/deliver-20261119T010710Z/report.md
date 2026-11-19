@@ -1,0 +1,56 @@
+▶ /deliver merges the feature pull requests it opens, once `autonomy.md` Section 5's conditions hold, and its own publishes through Section L. No human merge is asked for, and `CLAUDE.md` → Merge policy does not apply to an autonomous run.
+Autonomous delivery run complete.
+
+Delivered:  5 items merged to Done (TEST-09 → https://github.com/bemayker/framework-improvement/pull/916, squash a5357b27; BUG-01 → https://github.com/bemayker/framework-improvement/pull/917, squash 97f1b156, to_verify; TEST-08 → https://github.com/bemayker/framework-improvement/pull/918, squash a116f048; BUG-04 → https://github.com/bemayker/framework-improvement/pull/920, squash bb8e3629; TEST-10 → https://github.com/bemayker/framework-improvement/pull/921, squash 05b8eb98)
+No-pipeline merge: none (every delivered item merged on green checks, at least one each)
+Blocked:    0 items
+Repro: BUG-01: Repro: not runnable locally: the stale value only appears behind the CDN edge cache; nothing caches locally, verify on the deployed environment the item names (no Test environments row): [curl -si GET /api/time, confirm Cache-Control: no-store, repeat one second later, confirm the two now values differ]; BUG-04: Repro: before fail -> after pass (npm --prefix frontend test -- src/components/NoteForm.test.tsx); TEST-09, TEST-08, TEST-10: n/a (not a defect item)
+Awaiting verification: to-verify=BUG-01 (merged, awaiting verification on the deployed environment; depends on it: CHORE-06) — from feature-map-waves.sh --next over 42 items, 42 with a known status; PR #917 carries mayker:to-verify, and the tracker item reads complete with the tag mayker:to-verify
+Auto-Done: TEST-09: auto-done #916: run 44436696999 succeeded; BUG-01: auto-done #917: run 44436715190 succeeded; TEST-08: auto-done #918: run 44436730823 succeeded; BUG-04: auto-done: run 44439257835 succeeded; TEST-10: auto-done: run 44439513100 succeeded — statuses re-read as complete for all five (BUG-01 complete plus tag mayker:to-verify); no backstop flip ran
+Dispatch stalls: none (no dispatch stalled: no failure notification arrived)
+Fallback wakeups: none scheduled (waiting policy 2.1: background dispatches are awaited by notification)
+Run ended: complete (the graph is empty) — the only human action left is BUG-01's verification on the deployed environment
+Next session: none (the run did not end on a handover)
+Comments unaddressed at merge: none (PR and tracker comments re-read before each merge verdict; none actionable)
+Item-to-PR link: all posted (5 of 5 tracker items; ClickUp comments 1200230000154839, 1200230000154840, 1200230000154841, 1200230000154848, 1200230000154850)
+Gate verdict: all asserted (5 of 5 items recorded a verdict for every push) — TEST-09: test-gate: verdict recorded for this push (head 2726ed5: full after 3s; pytest 55 passed, 0 failed, 14 skipped + vitest 26 passed); BUG-01: (head e07cae5: full; pytest 51 passed 14 skipped + vitest 26 passed); TEST-08: (head 078d8a4: full; pytest 42 passed 14 skipped + vitest 34 passed); BUG-04: (head 27d164c: full; pytest 78 passed 0 skipped + vitest 39 passed); TEST-10: (head ab5ba42: full; pytest 64 passed 14 skipped + vitest 39 passed), and its re-trigger push (head 0a20702: full; same counts)
+Review closure: none (no item's review raised a BLOCKING finding) — verdicts, BLOCKING/RECOMMENDED/OPTIONAL: TEST-09 PASS 0/0/2; BUG-01 PASS 0/0/1; TEST-08 PASS 0/0/2; BUG-04 PASS 0/2/1; TEST-10 PASS 0/1/1
+Refactor gate: TEST-09: no findings (8 files examined); BUG-01: no findings (7 files examined); TEST-08: 1 improvements applied (13 files examined); BUG-04: 2 improvements applied (6 files examined), both RECOMMENDED review findings; TEST-10: 1 improvements applied (6 files examined), the RECOMMENDED finding, with Verify-by-running discharged (mutant failed as expected) — no gate added a source or test file, so the gate re-check was skipped each time
+Environment: none (every item's backing services were declared) — BUG-04: service=postgres container=BUG-04-db port=55019 … teardown=docker rm -f BUG-04-db, provisioned from CLAUDE.md → Backing Services, not derived, torn down at 6.10; no derived=yes line this run; no other item needed a backing service
+Handover rebuild: TEST-09: rebuilt from 2726ed50+dirty, health=pass, 10s, as Compose project framework-improvement-test-09-handover (backend http://localhost:30819, frontend http://localhost:30821) | BUG-01: rebuilt from e07cae5c+dirty, health=pass, 11s, as Compose project framework-improvement-bug-01-handover (backend http://localhost:25785, frontend http://localhost:25787) | TEST-08: rebuilt from 078d8a4c+dirty, health=pass, 9s, as Compose project framework-improvement-test-08-handover (backend http://localhost:21373, frontend http://localhost:21375) | BUG-04: rebuilt from 27d164cd+dirty, health=pass, 10s, as Compose project framework-improvement-bug-04-handover (backend http://localhost:31133, frontend http://localhost:31135) | TEST-10: rebuilt from 0a207021+dirty, health=pass, 11s, as Compose project framework-improvement-test-10-handover (backend http://localhost:20873, frontend http://localhost:20875) — "+dirty" is decisions.md appended after the manifest commit; the stacks are still running for testers, stop each with `docker compose -p <project> down`
+CLAUDE.md discovery: not run (this run skipped Section 2: .claude/project_state.json already existed)
+Feature ID write-back: not run (this run skipped Section 2: .claude/project_state.json already existed) — registered=none at all three ingests, 0 written
+Default branch protection: not run (this run skipped Section 2: .claude/project_state.json already existed)
+Waves: assigned: wave 1 = 1 item, wave 2 = 16 items, wave 3 = 12 items, wave 4 = 7 items, wave 5 = 6 items (0 unwaved; 42 rows, per-wave IDs in .claude/feature_map.md) — authored earlier and left untouched, 0 proposed this run; this run's nodes: wave 2 = TEST-09, wave 3 = TEST-08, BUG-01, BUG-04, wave 4 = TEST-10 — an ordering key only; no item was ever held back because a lower wave was unfinished, except: TEST-08 and BUG-01 (wave 3) dispatched in round 1 beside TEST-09 (wave 2), and TEST-10 (wave 4) beside BUG-04 (wave 3), because slots were free and no other lower-wave item was ready
+Shared risk: not run (no row's shared_risk_notes cell was empty among the nodes, so nothing was inferred — every note on this map is an earlier run's or a human's) — 0 inferred; the existing notes flagged 3 pairs (TEST-09 and BUG-01: main.py; TEST-08 and BUG-04: LandingPage.tsx; BUG-04 and TEST-10: LandingPage.tsx and its test), all re-judged on whole-feature File Manifest unions and found disjoint, so Section 5 step 2 serialized 0 builds; one Phase D smoke-run hold (TEST-10 behind BUG-04, ports)
+Test checkpoints: flagged: none proposed this run (flags on the map are an earlier run's or a human's)
+                  fired: 2, both PASSED — after TEST-09/BUG-01/TEST-08: due=yes items=TEST-08,BUG-01 … head=a116f048 verdict=pass (64 pytest passed 14 skipped + 34 vitest passed); after BUG-04/TEST-10: due=yes items=TEST-10,BUG-04 … head=05b8eb98 verdict=pass
+Run publish: wave-2: PR https://github.com/bemayker/framework-improvement/pull/919 — merged ([publish] arm=opened branch=chore/mayker-deliver-20261119T010710Z-wave-2 pr=https://github.com/bemayker/framework-improvement/pull/919 policy=auto merge=merged); wave-4: PR https://github.com/bemayker/framework-improvement/pull/922 — merged ([publish] arm=opened branch=chore/mayker-deliver-20261119T010710Z-wave-4 pr=https://github.com/bemayker/framework-improvement/pull/922 policy=auto merge=merged); whether pr-tests was a required check at merge time: not read
+Unmerged-green: none (no item ended green and unmerged)
+Follow-ups filed: none (no follow-up source fired) — known-improvements: every unapplied known improvement on #916/#917/#918/#920/#921 is OPTIONAL; unaddressed-comments: none
+Repositories created: none
+Pipelines created or fixed: none — CI note: TEST-10 used 1 of 3 CI fix attempts: first run red on integration (psycopg UniqueViolation pg_type_typname_nsp_index (notes) at fixture setup, a CREATE TABLE race in the CI database), classified infra/flake; `gh run rerun --failed` was refused by GitHub ("Resource not accessible by personal access token"); fallback empty commit 0a207021 re-triggered and the second run was green. The race lives in the shared integration fixture and can recur on any PR.
+Decisions of note: 22, this run section only (see DECISIONS.md, the per-item decisions.md under .claude/artifacts/, and the decisions file of each merged item under docs/runs/deliver-20261119T010710Z/, holding the entries after its final push) — highlights: BUG-01 recreated FEAT-1's /api/time slice (absent from main after reset #915); BUG-04 criteria derived from its title (empty ClickUp description); TEST-08 footer reads the backend version at runtime per the correction comment; TEST-10 cuts the commit to 7 characters in the frontend; serialization lifted for BUG-04 and TEST-10 on disjoint manifests; plan base for BUG-04 and TEST-10 corrected to 7c61eb74 (the wave-2 publish merged first)
+Standards provenance: both always-on standards self-reported as read by 18 of 41 dispatches across the run (TEST-09 3 of 8; BUG-01 4 of 7; TEST-08 5 of 8; BUG-04 2 of 9; TEST-10 4 of 9); 0 unbacked provenance claim(s); no MISMATCH; counts are self-reported, not measured | no pass bar on the read count; items blocked before 6.10 are unchecked
+Artifacts not written: none known when this report was composed (the session appends any publish MISSING names)
+Refusals: [refusals] dispatches=46 refusals=5; builder agent-a396d73d392399075: 2 (a sed read of a plugin file, redone with Read; a standards-gate lint refusal of a commit, fixed: unused import); main session: 3 bash-shape-guard refusals (printf-subscript, sed-read, variable `$?`), each re-issued in the shipped shape, no step lost
+Unattended check: .claude/artifacts/run/deliver-run.json, state complete — written by run-dir.sh, not by this session; a headless caller reads that file rather than any line above
+
+Re-run /deliver at any time: it resumes blocked and in-flight items
+and picks up new backlog items; merged work is never redone.
+
+## Run statistics
+
+Generated 2026-11-19 01:50 UTC. Token metrics: available. Skill load: read.
+
+Subagent dispatches: 46 subagent transcript(s) read; this session has a run-level unit, so they are the RUN's and are not attributed to any single work item (MDF-174).
+
+| Step | Title | Wall | Turns | Tool calls | Tools/turn | Max batch | Out tok | Ctx max | Cache hit | Model | R/E/X turns |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| **run total** |  | 43m26s | 527 | 1065 | 2.31 | 14 | 392.8K | 460.8K | 0.96 | claude-opus-5-5 | 73/64/274 (exec 77% of wall) |
+
+CI wait: 4m43s in `ci-poll.sh` calls; framework wall (wall less CI wait) 38m42s.
+
+46 dispatch(es) in `deliver` (general-purpose 2, mayker-dev:builder 23, mayker-dev:orchestrator 11, mayker-dev:planner 5, mayker-dev:reviewer 5): median ctx max 62.5K, peak 113.8K, 0 above the auto threshold.
+
+The raw summary is published beside this report as `docs/runs/deliver-20261119T010710Z/run-stats_summary.{json,md}`.
