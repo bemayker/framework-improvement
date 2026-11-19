@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, waitFor } from "@testing-library/react";
+import { act, render, screen, waitFor } from "@testing-library/react";
 import AppFooter from "./AppFooter";
 import { version as packageVersion } from "../../package.json";
 import { fetchBackendVersion } from "../api/version";
@@ -15,20 +15,41 @@ describe("AppFooter", () => {
     fetchBackendVersionMock.mockReset();
   });
 
-  it("renders the backend version once /api/version resolves", async () => {
-    fetchBackendVersionMock.mockResolvedValue("9.8.7");
+  it("renders the version and the first 7 characters of the commit once /api/version resolves", async () => {
+    fetchBackendVersionMock.mockResolvedValue({
+      version: "9.8.7",
+      commit: "3f9a2c1",
+    });
 
     render(<AppFooter />);
 
     await waitFor(() =>
-      expect(screen.getByTestId("app-footer")).toHaveTextContent(
-        /^Task Notes v9\.8\.7$/,
+      expect(screen.getByTestId("app-footer").textContent).toBe(
+        "Task Notes v9.8.7 (3f9a2c1)",
+      ),
+    );
+  });
+
+  it("renders the version alone when the backend reports no commit", async () => {
+    fetchBackendVersionMock.mockResolvedValue({
+      version: "9.8.7",
+      commit: null,
+    });
+
+    render(<AppFooter />);
+
+    await waitFor(() =>
+      expect(screen.getByTestId("app-footer").textContent).toBe(
+        "Task Notes v9.8.7",
       ),
     );
   });
 
   it("renders the version from the backend, not the frontend bundle's own", async () => {
-    fetchBackendVersionMock.mockResolvedValue("9.8.7");
+    fetchBackendVersionMock.mockResolvedValue({
+      version: "9.8.7",
+      commit: null,
+    });
 
     render(<AppFooter />);
 
@@ -46,7 +67,9 @@ describe("AppFooter", () => {
 
     render(<AppFooter />);
 
-    expect(screen.getByTestId("app-footer").textContent).toBe("Task Notes");
+    const text = screen.getByTestId("app-footer").textContent;
+    expect(text).toBe("Task Notes");
+    expect(text).not.toContain("undefined");
   });
 
   it("renders the app name without a version when /api/version is unreachable", async () => {
@@ -54,8 +77,12 @@ describe("AppFooter", () => {
 
     render(<AppFooter />);
 
-    await waitFor(() => expect(fetchBackendVersionMock).toHaveBeenCalled());
-    expect(screen.getByTestId("app-footer").textContent).toBe("Task Notes");
+    // Drain the microtask queue so the rejection's .catch has run before asserting.
+    await act(async () => {});
+    expect(fetchBackendVersionMock).toHaveBeenCalled();
+    const text = screen.getByTestId("app-footer").textContent;
+    expect(text).toBe("Task Notes");
+    expect(text).not.toContain("undefined");
   });
 
   it("renders the app name without a version when the backend reports no version", async () => {

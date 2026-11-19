@@ -20,7 +20,11 @@ test.describe("TEST-08 footer app version", () => {
     await page.goto("/");
     await versionResponse;
 
-    await expect(page.getByTestId("app-footer")).toHaveText(`Task Notes v${backendVersion}`);
+    // Anchored: the exact version, then an optional " (7-character commit)" suffix shown when BUILD_COMMIT is set.
+    const escapedVersion = backendVersion.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    await expect(page.getByTestId("app-footer")).toHaveText(
+      new RegExp(`^Task Notes v${escapedVersion}( \\([0-9a-zA-Z]{7}\\))?$`),
+    );
   });
 
   test("renders the footer with the app name and the backend version", async ({ page }) => {
