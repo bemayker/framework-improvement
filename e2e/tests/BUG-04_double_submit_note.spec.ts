@@ -55,8 +55,9 @@ test.describe("BUG-04 double submit note", () => {
     const postMayProceed = new Promise<void>((resolve) => {
       releasePost = resolve;
     });
+    const isNotesPath = (url: URL): boolean => url.pathname === NOTES_PATH;
     await page.route(
-      (url) => url.pathname === NOTES_PATH,
+      isNotesPath,
       async (route) => {
         if (route.request().method() === "POST") {
           await postMayProceed;
@@ -83,7 +84,7 @@ test.describe("BUG-04 double submit note", () => {
     await expect(page.getByTestId("note-submit")).toBeEnabled();
     expect(createRequests).toHaveLength(1);
 
-    await page.unroute((url) => url.pathname === NOTES_PATH);
+    await page.unroute(isNotesPath);
     const reloadedNotes = page.waitForResponse(
       (response) => isNotesApiRequest(response.request(), "GET") && response.ok(),
     );

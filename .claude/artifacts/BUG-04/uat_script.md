@@ -5,7 +5,7 @@
 - Docker and Docker Compose installed and running; backend published on `http://localhost:8010` and frontend on `http://localhost:5183` (from `docker-compose.yml`).
 - Repository checked out locally on branch `feature/BUG-04-double-submit-note` (or, once merged, on `main`).
 - A browser with devtools; the Network tab open and filtered on `notes`.
-- A terminal with `npm` installed (criterion 2, step 6).
+- A terminal with `npm` installed (criterion 2, step 10).
 
 ## Test Environment Setup
 
