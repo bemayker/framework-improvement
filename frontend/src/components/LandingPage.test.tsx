@@ -10,10 +10,11 @@ vi.mock("../api/notes", () => ({
 }));
 
 // Differs from frontend/package.json on purpose: the footer shows the backend's.
-const BACKEND_VERSION = "9.8.7";
+// Hoisted because vi.mock runs before module-level constants are initialised.
+const { BACKEND_VERSION } = vi.hoisted(() => ({ BACKEND_VERSION: "9.8.7" }));
 
 vi.mock("../api/version", () => ({
-  fetchBackendVersion: vi.fn().mockResolvedValue("9.8.7"),
+  fetchBackendVersion: vi.fn().mockResolvedValue(BACKEND_VERSION),
 }));
 
 const listNotesMock = vi.mocked(listNotes);
