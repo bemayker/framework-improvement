@@ -6,6 +6,7 @@ status: plan_review
 branch: feature/CHORE-90-verify-note
 depends_on: []
 scaffold: false
+pr: https://github.com/bemayker/framework-improvement/pull/937
 ---
 
 ## Description / expected behaviour
