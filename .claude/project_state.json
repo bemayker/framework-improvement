@@ -331,6 +331,13 @@
       "id_source": "framework",
       "id_carrier": "title_prefix",
       "url": "https://app.clickup.com/t/123k99d1hzj"
+    },
+    "FEAT-17": {
+      "external_id": "123k99d1j6w",
+      "external_identifier": "",
+      "id_source": "framework",
+      "id_carrier": "title_prefix",
+      "url": "https://app.clickup.com/t/123k99d1j6w"
     }
   },
   "discovery": {
