@@ -359,11 +359,39 @@
       "id_source": "framework",
       "id_carrier": "title_prefix",
       "url": "https://app.clickup.com/t/123k99d1kwt"
+    },
+    "FEAT-21": {
+      "external_id": "123k99d1kzk",
+      "external_identifier": "",
+      "id_source": "framework",
+      "id_carrier": "title_prefix",
+      "url": "https://app.clickup.com/t/123k99d1kzk"
+    },
+    "FEAT-22": {
+      "external_id": "123k99d1kzm",
+      "external_identifier": "",
+      "id_source": "framework",
+      "id_carrier": "title_prefix",
+      "url": "https://app.clickup.com/t/123k99d1kzm"
+    },
+    "FEAT-23": {
+      "external_id": "123k99d1m8g",
+      "external_identifier": "",
+      "id_source": "framework",
+      "id_carrier": "title_prefix",
+      "url": "https://app.clickup.com/t/123k99d1m8g"
+    },
+    "FEAT-24": {
+      "external_id": "123k99d1m8h",
+      "external_identifier": "",
+      "id_source": "framework",
+      "id_carrier": "title_prefix",
+      "url": "https://app.clickup.com/t/123k99d1m8h"
     }
   },
   "discovery": {
-    "last_scan_commit": "e44fe4d3b88d34dc80265fa48ef3600c1827d0a5",
-    "scanned_at": "2026-11-20T19:07:14Z",
+    "last_scan_commit": "74fd640b802a472e86caf90d0fbe34f97f5958d7",
+    "scanned_at": "2026-11-22T12:19:47Z",
     "scanned_by": "/sync-project"
   },
   "framework": {
