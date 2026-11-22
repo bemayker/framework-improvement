@@ -352,6 +352,13 @@
       "id_source": "framework",
       "id_carrier": "title_prefix",
       "url": "https://app.clickup.com/t/123k99d1kwj"
+    },
+    "FEAT-20": {
+      "external_id": "123k99d1kwt",
+      "external_identifier": "",
+      "id_source": "framework",
+      "id_carrier": "title_prefix",
+      "url": "https://app.clickup.com/t/123k99d1kwt"
     }
   },
   "discovery": {
@@ -364,8 +371,8 @@
     "migrated_to": "0.3.502",
     "migrated_at": "2026-11-18T20:43:19Z",
     "synced": {
-      "plugin_version": "0.3.518",
-      "synced_at": "2026-11-20T13:55:12Z"
+      "plugin_version": "0.3.519",
+      "synced_at": "2026-11-22T05:35:07Z"
     }
   }
 }
