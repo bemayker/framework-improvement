@@ -326,8 +326,8 @@
   },
   "framework": {
     "initialized_at": "unknown",
-    "migrated_to": "0.3.491",
-    "migrated_at": "2026-11-13T12:44:15Z",
+    "migrated_to": "0.3.519",
+    "migrated_at": "2026-11-22T16:13:17Z",
     "synced": {
       "plugin_version": "0.3.491",
       "synced_at": "2026-11-13T13:00:35Z"
