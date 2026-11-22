@@ -1,7 +1,5 @@
-<!-- materialized-from: mayker-dev v0.3.502; do not edit, regenerate with /upgrade-project -->
+<!-- materialized-from: mayker-dev v0.3.491; do not edit, regenerate with /upgrade-project -->
 # Existing-codebase mode
-
-> **Advice:** no check covers this standard; the reviewer grades it, on the scope `review-scope.sh` writes.
 
 ## 1. When this applies
 
