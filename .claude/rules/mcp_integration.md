@@ -1,4 +1,4 @@
-<!-- materialized-from: mayker-dev v0.3.502; do not edit, regenerate with /upgrade-project -->
+<!-- materialized-from: mayker-dev v0.3.491; do not edit, regenerate with /upgrade-project -->
 <!--
   Universal standard. Loaded at launch from .claude/rules/ (always on). Do not edit per project.
   MCP usage is gated by Work Item Source: issue tracker + Git provider patterns,
@@ -7,8 +7,6 @@
 -->
 
 # MCP Integration
-
-> **Advice:** no check covers the stop on an unavailable MCP, Section 1.3 or its batched reads.
 
 > **Not loaded at launch:** Sections 1.1 and 6 in `${CLAUDE_PLUGIN_ROOT}/rules/adapters/shared.md`; Sections 1.2, 1.4, 1.5 and 2 to 4 in `${CLAUDE_PLUGIN_ROOT}/rules/adapters/tracker/shared.md`; Sections 5 (5.0 to 5.4) and 7 (with 7.1) in `${CLAUDE_PLUGIN_ROOT}/rules/adapters/git/shared.md` (the mayker-dev plugin). Read the named file before you apply or cite one of those sections.
 
@@ -31,7 +29,11 @@ If a *required* MCP is unavailable when an agent starts (the issue tracker MCP o
 
 The seven **pipeline commands** (`/plan-feature`, `/build-feature`, `/plan-features`, `/build-features`, `/revise-feature`, `/refactor`, `/generate-tests`) require `.claude/project_state.json`. The six exceptions are `/diagnose`, `/fix`, `/watch-pr`, `/security-scan`, `/security-fix` and `/waves`. `/sync-project` generates the file, `/init-project` runs before it exists, and `/upgrade-project` reports its absence rather than stopping.
 
-A pipeline command's first `adapter-resolve.sh` call exits 2 when the file is missing; **STOP** then: "⛔ `.claude/project_state.json` not found. Run `/init-project` then `/sync-project` to generate it (`/sync-project` alone if the repo is already initialized)."
+**Before reading any MCP configuration, a command that needs `project_state.json` checks:**
+
+1. Does `.claude/project_state.json` exist?
+2. If **NO**: **STOP.** "⛔ `.claude/project_state.json` not found. Run `/init-project` then `/sync-project` to generate it (`/sync-project` alone if the repo is already initialized)."
+3. If **YES**: Read and parse the file. Proceed.
 
 ## 1. Configuration: `.claude/project_state.json`
 
