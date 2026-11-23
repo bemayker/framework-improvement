@@ -3,10 +3,8 @@ Feature: BUG-01 Server time is not served from the edge cache
   I want GET /api/time to carry a Cache-Control: no-store directive
   So that a CDN never serves a stale server time
 
-  Background:
-    Given the Task Notes backend API is running at "http://localhost:8000"
-
   Scenario: The time endpoint responds with Cache-Control no-store
+    Given the Task Notes backend API is running at "http://localhost:8000"
     When a client sends a GET request to "/api/time"
     Then the response status code is 200
     And the response header "Cache-Control" is "no-store"
