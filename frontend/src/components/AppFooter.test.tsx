@@ -14,8 +14,26 @@ describe("AppFooter", () => {
     fetchBackendVersionMock.mockReset();
   });
 
-  it("renders the version reported by the backend", async () => {
-    fetchBackendVersionMock.mockResolvedValue("4.5.6");
+  it("renders the short commit next to the version", async () => {
+    fetchBackendVersionMock.mockResolvedValue({
+      version: "4.5.6",
+      commit: "0123456789ab",
+    });
+
+    render(<AppFooter />);
+
+    await waitFor(() =>
+      expect(screen.getByTestId("app-footer")).toHaveTextContent(
+        /^Task Notes v4\.5\.6 \(0123456\)$/,
+      ),
+    );
+  });
+
+  it("shows the version alone when the backend reports the unknown commit", async () => {
+    fetchBackendVersionMock.mockResolvedValue({
+      version: "4.5.6",
+      commit: null,
+    });
 
     render(<AppFooter />);
 
@@ -46,7 +64,10 @@ describe("AppFooter", () => {
   });
 
   it("shows only the app name when the backend reports the unknown sentinel", async () => {
-    fetchBackendVersionMock.mockResolvedValue(null);
+    fetchBackendVersionMock.mockResolvedValue({
+      version: null,
+      commit: "0123456789ab",
+    });
 
     render(<AppFooter />);
 
