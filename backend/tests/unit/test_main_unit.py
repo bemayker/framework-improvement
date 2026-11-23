@@ -1,5 +1,6 @@
 """Unit tests for the FastAPI app factory (backend/app/main.py)."""
 
+from app import main as main_module
 from app.main import create_app
 
 # FastAPI's own routes, present on every app regardless of what this project
@@ -56,6 +57,33 @@ def test_create_app_registers_health_route():
     custom_paths = _collect_route_paths(app.routes) - BUILT_IN_ROUTE_PATHS
 
     assert "/api/health" in custom_paths
+
+
+def test_create_app_registers_uptime_route():
+    """Edge case: the app registers the TEST-07 uptime route."""
+    app = create_app()
+
+    custom_paths = _collect_route_paths(app.routes) - BUILT_IN_ROUTE_PATHS
+
+    assert "/api/uptime" in custom_paths
+
+
+def test_create_app_captures_startup_once_on_app_state(monkeypatch):
+    """The startup stamp is taken once per app, at creation, and stored on app.state."""
+    calls = []
+    real_capture = main_module.capture_startup
+
+    def counting_capture():
+        stamp = real_capture()
+        calls.append(stamp)
+        return stamp
+
+    monkeypatch.setattr(main_module, "capture_startup", counting_capture)
+
+    app = create_app()
+
+    assert len(calls) == 1
+    assert app.state.startup is calls[0]
 
 
 def test_create_app_returns_independent_instances():
