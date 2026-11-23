@@ -27,7 +27,7 @@ How to start the application is in the README → Running the project. Ports, en
 
 ### Build commit (`BUILD_COMMIT`)
 
-`BUILD_COMMIT` is the git commit the running backend was built from. CI passes the full 40-character sha through `docker-compose.yml`; the `commit` field of the version response shows its first 12 characters. When it is unset or blank, `commit` is `"unknown"`, which is the default for a local `docker compose up`. To set it locally: `BUILD_COMMIT=$(git rev-parse HEAD) docker compose up -d --build backend`.
+`BUILD_COMMIT` is the git commit the running backend was built from. Whoever builds or deploys the backend sets it, as the full 40-character sha, and `docker-compose.yml` passes it through; the `commit` field of the version response shows its first 12 characters. When it is unset or blank, `commit` is `"unknown"`, which is the default for a local `docker compose up`. To set it locally: `BUILD_COMMIT=$(git rev-parse HEAD) docker compose up -d --build backend`.
 
 ## Testing
 
