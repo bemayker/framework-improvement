@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { getBackendVersion } from "./version";
+import { getBackendVersionInfo } from "./version";
 
 const DEFAULT_VERSION_URL = "http://localhost:8010/api/version";
 
@@ -33,36 +33,61 @@ describe("version API client", () => {
     vi.unstubAllGlobals();
   });
 
-  it("fetches GET /api/version from the default base URL and returns the version", async () => {
-    fetchMock.mockResolvedValue(okResponse({ version: "0.1.0" }));
+  it("returns the version and the commit from GET /api/version", async () => {
+    fetchMock.mockResolvedValue(
+      okResponse({ version: "0.1.0", commit: "abcdef123456" }),
+    );
 
-    await expect(getBackendVersion()).resolves.toBe("0.1.0");
+    await expect(getBackendVersionInfo()).resolves.toEqual({
+      version: "0.1.0",
+      commit: "abcdef123456",
+    });
 
     expect(fetchMock).toHaveBeenCalledTimes(1);
     expect(fetchMock).toHaveBeenCalledWith(DEFAULT_VERSION_URL);
   });
 
+  it("returns a null commit when the response carries no usable commit", async () => {
+    fetchMock.mockResolvedValue(okResponse({ version: "0.1.0" }));
+    await expect(getBackendVersionInfo()).resolves.toEqual({
+      version: "0.1.0",
+      commit: null,
+    });
+
+    fetchMock.mockResolvedValue(okResponse({ version: "0.1.0", commit: "" }));
+    await expect(getBackendVersionInfo()).resolves.toEqual({
+      version: "0.1.0",
+      commit: null,
+    });
+
+    fetchMock.mockResolvedValue(okResponse({ version: "0.1.0", commit: 42 }));
+    await expect(getBackendVersionInfo()).resolves.toEqual({
+      version: "0.1.0",
+      commit: null,
+    });
+  });
+
   it("throws with the status and reason when the response is not OK", async () => {
     fetchMock.mockResolvedValue(failedResponse(503, "Service Unavailable"));
 
-    await expect(getBackendVersion()).rejects.toThrow(
+    await expect(getBackendVersionInfo()).rejects.toThrow(
       "Loading the version failed: 503 Service Unavailable",
     );
   });
 
   it("throws when the response body carries no version string", async () => {
     fetchMock.mockResolvedValue(okResponse({ version: 3 }));
-    await expect(getBackendVersion()).rejects.toThrow(
+    await expect(getBackendVersionInfo()).rejects.toThrow(
       "Loading the version failed",
     );
 
     fetchMock.mockResolvedValue(okResponse({}));
-    await expect(getBackendVersion()).rejects.toThrow(
+    await expect(getBackendVersionInfo()).rejects.toThrow(
       "Loading the version failed",
     );
 
     fetchMock.mockResolvedValue(okResponse({ version: "" }));
-    await expect(getBackendVersion()).rejects.toThrow(
+    await expect(getBackendVersionInfo()).rejects.toThrow(
       "Loading the version failed",
     );
   });

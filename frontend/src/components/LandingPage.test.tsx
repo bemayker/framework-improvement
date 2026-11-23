@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import LandingPage from "./LandingPage";
 import { listNotes, createNote } from "../api/notes";
-import { getBackendVersion } from "../api/version";
+import { getBackendVersionInfo } from "../api/version";
 
 vi.mock("../api/notes", () => ({
   listNotes: vi.fn(),
@@ -10,14 +10,14 @@ vi.mock("../api/notes", () => ({
 }));
 
 vi.mock("../api/version", () => ({
-  getBackendVersion: vi.fn(),
+  getBackendVersionInfo: vi.fn(),
 }));
 
 const BACKEND_VERSION = "9.8.7";
 
 const listNotesMock = vi.mocked(listNotes);
 const createNoteMock = vi.mocked(createNote);
-const getBackendVersionMock = vi.mocked(getBackendVersion);
+const getBackendVersionInfoMock = vi.mocked(getBackendVersionInfo);
 
 /** Renders the page and waits for the mount-time notes load to settle. */
 async function renderLandingPage() {
@@ -30,8 +30,11 @@ describe("LandingPage", () => {
     listNotesMock.mockReset();
     createNoteMock.mockReset();
     listNotesMock.mockResolvedValue([]);
-    getBackendVersionMock.mockReset();
-    getBackendVersionMock.mockResolvedValue(BACKEND_VERSION);
+    getBackendVersionInfoMock.mockReset();
+    getBackendVersionInfoMock.mockResolvedValue({
+      version: BACKEND_VERSION,
+      commit: null,
+    });
   });
 
   it("renders the app title 'Task Notes'", async () => {
