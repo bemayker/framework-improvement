@@ -89,6 +89,27 @@ def test_settings_cors_origins_parses_comma_separated_env_value(monkeypatch):
     assert get_settings().cors_origins == ("https://a.example", "https://b.example")
 
 
+@pytest.mark.parametrize(
+    ("raw", "expected"),
+    [
+        ("http://localhost:5183/", ("http://localhost:5183",)),
+        ("http://a.example/, http://b.example", ("http://a.example", "http://b.example")),
+    ],
+)
+def test_settings_cors_origins_strips_trailing_slash(monkeypatch, raw, expected):
+    """BUG-02: a trailing slash on a configured origin is dropped, other entries kept."""
+    monkeypatch.setenv("CORS_ORIGINS", raw)
+
+    assert get_settings().cors_origins == expected
+
+
+def test_settings_cors_origins_slash_only_entry_falls_back_to_default(monkeypatch):
+    """Edge case: an entry that is only a slash becomes blank and is dropped."""
+    monkeypatch.setenv("CORS_ORIGINS", " / ")
+
+    assert get_settings().cors_origins == DEFAULT_CORS_ORIGINS
+
+
 def test_settings_cors_origins_defaults_when_unset(monkeypatch):
     """With CORS_ORIGINS unset the frontend's default origin is allowed."""
     monkeypatch.delenv("CORS_ORIGINS", raising=False)

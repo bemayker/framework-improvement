@@ -1,5 +1,7 @@
 """Unit tests for the FastAPI app factory (backend/app/main.py)."""
 
+from fastapi.testclient import TestClient
+
 from app.main import create_app
 
 # FastAPI's own routes, present on every app regardless of what this project
@@ -56,6 +58,22 @@ def test_create_app_registers_health_route():
     custom_paths = _collect_route_paths(app.routes) - BUILT_IN_ROUTE_PATHS
 
     assert "/api/health" in custom_paths
+
+
+def test_cors_origin_with_trailing_slash_matches_browser_origin(monkeypatch):
+    """BUG-02: an origin configured with a trailing slash still matches the browser's.
+
+    Browsers send `Origin` without a trailing slash, and CORSMiddleware compares
+    origins exactly, so the configured value must be normalised. The status is
+    not asserted: /api/health may answer 503 when no database is reachable, and
+    the CORS header is added either way.
+    """
+    monkeypatch.setenv("CORS_ORIGINS", "http://localhost:5183/")
+    client = TestClient(create_app())
+
+    response = client.get("/api/health", headers={"Origin": "http://localhost:5183"})
+
+    assert response.headers.get("access-control-allow-origin") == "http://localhost:5183"
 
 
 def test_create_app_returns_independent_instances():
