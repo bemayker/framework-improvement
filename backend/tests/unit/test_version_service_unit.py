@@ -39,3 +39,32 @@ def test_get_app_version_returns_unknown_when_distribution_not_installed(monkeyp
     monkeypatch.setattr(version_service, "version", raise_not_found)
 
     assert version_service.get_app_version() == version_service.UNKNOWN_VERSION
+
+
+def test_get_build_commit_returns_value_when_set(monkeypatch):
+    """Happy path: a value of 12 characters or fewer is returned unchanged."""
+    monkeypatch.setenv("BUILD_COMMIT", "abc1234")
+
+    assert version_service.get_build_commit() == "abc1234"
+
+
+def test_get_build_commit_returns_unknown_when_unset(monkeypatch):
+    """Edge case: with BUILD_COMMIT unset the default sentinel is returned."""
+    monkeypatch.delenv("BUILD_COMMIT", raising=False)
+
+    assert version_service.get_build_commit() == "unknown"
+
+
+def test_get_build_commit_truncates_full_sha_to_twelve_characters(monkeypatch):
+    """A 40-character sha (what CI passes in) is cut to its first 12 characters."""
+    monkeypatch.setenv("BUILD_COMMIT", "0123456789abcdef0123456789abcdef01234567")
+
+    assert version_service.get_build_commit() == "0123456789ab"
+    assert version_service.COMMIT_LENGTH == 12
+
+
+def test_get_build_commit_keeps_exactly_twelve_characters(monkeypatch):
+    """Boundary: a value of exactly 12 characters is not shortened."""
+    monkeypatch.setenv("BUILD_COMMIT", "0123456789ab")
+
+    assert version_service.get_build_commit() == "0123456789ab"
