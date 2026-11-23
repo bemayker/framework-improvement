@@ -57,7 +57,7 @@
 
 | Item | Result |
 |------|--------|
-| Total steps | 13 |
+| Total steps | 12 |
 | Passed | ___ |
 | Failed | ___ |
 | Tester | ___________________ |
