@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { act, render, screen, fireEvent, waitFor } from "@testing-library/react";
 import NoteForm from "./NoteForm";
 import { createNote, type Note } from "../api/notes";
 
@@ -111,9 +111,12 @@ describe("NoteForm", () => {
     render(<NoteForm onCreated={vi.fn()} />);
 
     typeNote("Buy milk");
-    // Two submits in the same tick, before React re-renders with the disabled button.
-    fireEvent.submit(screen.getByTestId("note-form"));
-    fireEvent.submit(screen.getByTestId("note-form"));
+    // Both submits sit inside one act(), so React cannot re-render between them: the
+    // second handler call still holds the stale isSaving and only the ref guard stops it.
+    act(() => {
+      fireEvent.submit(screen.getByTestId("note-form"));
+      fireEvent.submit(screen.getByTestId("note-form"));
+    });
 
     expect(createNoteMock).toHaveBeenCalledTimes(1);
 
