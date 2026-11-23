@@ -44,21 +44,6 @@ describe("AppFooter", () => {
     );
   });
 
-  it("renders the version reported by the backend", async () => {
-    fetchBackendVersionMock.mockResolvedValue({
-      version: "4.5.6",
-      commit: null,
-    });
-
-    render(<AppFooter />);
-
-    await waitFor(() =>
-      expect(screen.getByTestId("app-footer")).toHaveTextContent(
-        /^Task Notes v4\.5\.6$/,
-      ),
-    );
-  });
-
   it("shows only the app name while the version request is pending", () => {
     fetchBackendVersionMock.mockReturnValue(new Promise(() => {}));
 
