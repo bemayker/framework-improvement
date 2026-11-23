@@ -17,3 +17,6 @@ This run's section of the repository-root `DECISIONS.md`, which is cumulative ac
 - [run] TEST-10 plan verdict revised once: LandingPage.test.tsx mocks fetchBackendVersion with the old return shape and was missing from the manifest. Re-plan added it (9 entries) and the re-check approved.
 - [run] Merged: BUG-04 (#968). Repro before fail -> after pass. Checkpoint pass at 792aa04c. Wave 3 drained (BUG-01, TEST-08, BUG-04).
 - [run] Wave-3 boundary: follow-ups filed none (BUG-04's review and refactor gate had no findings; no comment unaddressed). Re-ingest: 52 items, nodes=TEST-10, registered=none, 0 proposals. TEST-10's branch was cut at e1baa32a, one commit behind main; file sets disjoint from BUG-04.
+- [run] Wave-3 record published as PR #969 (merged).
+- [run] Merged: TEST-10 (#970), one commit behind main at merge (BUG-04's 792aa04c, disjoint files, provider CLEAN). Checkpoint pass at 6a195a42. Wave 4 drained.
+- [run] Final boundary: follow-ups filed none (TEST-10's one RECOMMENDED finding applied by its gate; no comment unaddressed). Re-ingest: [item-status] items=52 nodes=0 done=11 to_verify=1 unmapped=40, registered=none. The graph is empty; the run proceeds to Section 8.
