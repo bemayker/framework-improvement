@@ -1,0 +1,17 @@
+# Decisions (BUG-01, after its final push): deliver-20261123T150435Z
+
+The entries `.claude/artifacts/BUG-01/decisions.md` received after the last push of its branch (415c23c7), the head its pull request merged. The entries before them reached the default branch in that file.
+
+
+## Merge verdict: merge (orchestrator, run=deliver-20261123T150435Z, /deliver 6.9)
+
+- 2026-11-23 [BUG-01] Merge PR #956, then route the item to verification, not to Done. Rationale: the five conditions of `autonomy.md` Section 5 (read from `autonomy/autonomous_run.md`) hold as far as a merge can make them hold, and criterion 3 can only be observed after this merge is deployed.
+- **Condition 1 (self-review):** `VERDICT: PASS blocking=0 recommended=1 optional=2`, as carried by the dispatch prompt and recorded in this log's [review] line; the RECOMMENDED finding was applied by the refactor gate (b7aaf95a).
+- **Condition 2 (checks):** the `ci-poll.sh` line carried by the dispatch prompt, re-read at this decision: `verdict=green next=none failed=0 poll=1 pr=956` (7 of 7 checks). I did not read the checks myself; the line is the verdict.
+- **Condition 3 (criteria):** criteria 1 and 2 are met by the implementation (route-scoped `Cache-Control: no-store`, asserted by `test_get_time_sets_cache_control_no_store`, per `plan.md` Criterion coverage and the green checks). Criterion 3 is NOT verified: its own text places it after deploy and with a human, and the repro line in the dispatch prompt reads `not runnable locally: the edge cache exists only on the deployed environment`. The local tests pin the cause only. The dispatch prompt states that a deployed-only repro exits 0 and merges per the operator decision of 2026-09-30; I rely on the prompt for that decision and did not read it myself.
+- **Condition 4 (comments):** PR 0 inline, 0 conversation, 0 reviews, no change request; tracker: no new non-automated comment since planning (53 automated notices at planning, 0 actionable).
+- **Condition 5 (escalation bar, Section 4):** not triggered. One response header on one route is reversible by a revert PR and unambiguous.
+- **Carried forward for the session:** the item keeps `mayker:to-verify` and must take the to_verify route after merge. It must not be flipped to Done on the strength of the tests, and the run report lists criterion 3 as left for a human on the deployed environment (`docs/DEVELOPMENT.md` Test environments has no row, so the host is not named anywhere in the repository).
+- run=deliver-20261123T150435Z [handover] repro verdict exit 0 (deployed-only); label mayker:to-verify added to PR #956 (the label already existed in the repository). Handover rebuild: status=rebuilt sha=415c23c7 services=3/3 health=pass project=framework-improvement-bug-01-handover urls=backend=http://localhost:25785,db=localhost:25786,frontend=http://localhost:25787 duration=13s. PR converted out of draft; PR label: #956 mayker:in-review (removed mayker:in-progress); tracker status "to test".
+- run=deliver-20261123T150435Z [merge] PR #956 squash-merged. auto-done: run 45204427852 succeeded. Tracker re-read: status complete with tag mayker:to-verify (status_mapping has no to_verify, so done plus the tag is the to-verify arm: fired). Not verified until a human removes the tag.
+- run=deliver-20261123T150435Z [provenance] 4 dispatches, 0 MISMATCH lines, 0 unbacked provenance claims; both always-on standards self-reported as read by 2 of 4 (self-reported, no pass bar).
