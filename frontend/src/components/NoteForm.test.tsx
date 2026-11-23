@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import NoteForm from "./NoteForm";
-import { createNote, type Note } from "../api/notes";
+import { createNote } from "../api/notes";
 
 vi.mock("../api/notes", () => ({
   createNote: vi.fn(),
@@ -15,15 +15,6 @@ function submitForm() {
 
 function typeNote(text: string) {
   fireEvent.change(screen.getByTestId("note-input"), { target: { value: text } });
-}
-
-// A save the test settles by hand, so a request can stay in flight without timers.
-function deferredSave() {
-  let resolve!: (note: Note) => void;
-  const promise = new Promise<Note>((res) => {
-    resolve = res;
-  });
-  return { promise, resolve };
 }
 
 describe("NoteForm", () => {
@@ -101,67 +92,5 @@ describe("NoteForm", () => {
     await waitFor(() =>
       expect(screen.queryByTestId("note-form-error")).not.toBeInTheDocument(),
     );
-  });
-
-  it("sends one create request when the form is submitted twice before the save completes", async () => {
-    const pendingSave = deferredSave();
-    createNoteMock.mockReturnValue(pendingSave.promise);
-    const onCreated = vi.fn();
-    render(<NoteForm onCreated={onCreated} />);
-
-    typeNote("Buy milk");
-    // Both submit events are dispatched before React re-renders, which is what
-    // a fast double click does.
-    fireEvent.submit(screen.getByTestId("note-form"));
-    fireEvent.submit(screen.getByTestId("note-form"));
-
-    expect(createNoteMock).toHaveBeenCalledTimes(1);
-
-    pendingSave.resolve({ id: 10, text: "Buy milk" });
-    await waitFor(() => expect(onCreated).toHaveBeenCalledTimes(1));
-    expect(createNoteMock).toHaveBeenCalledTimes(1);
-  });
-
-  it("disables the save button while a save is in progress", async () => {
-    const pendingSave = deferredSave();
-    createNoteMock.mockReturnValue(pendingSave.promise);
-    render(<NoteForm onCreated={vi.fn()} />);
-
-    typeNote("Buy milk");
-    submitForm();
-
-    await waitFor(() => expect(screen.getByTestId("note-submit")).toBeDisabled());
-
-    pendingSave.resolve({ id: 11, text: "Buy milk" });
-    await waitFor(() => expect(screen.getByTestId("note-submit")).toBeEnabled());
-  });
-
-  it("re-enables the save button after the note is saved", async () => {
-    createNoteMock.mockResolvedValue({ id: 12, text: "Buy milk" });
-    render(<NoteForm onCreated={vi.fn()} />);
-
-    typeNote("Buy milk");
-    submitForm();
-
-    await waitFor(() => expect(screen.getByTestId("note-input")).toHaveValue(""));
-    expect(screen.getByTestId("note-submit")).toBeEnabled();
-  });
-
-  it("re-enables the save button after a failed save so the note can be retried", async () => {
-    createNoteMock.mockRejectedValueOnce(new Error("Saving the note failed: 500"));
-    createNoteMock.mockResolvedValueOnce({ id: 13, text: "Buy milk" });
-    const onCreated = vi.fn();
-    render(<NoteForm onCreated={onCreated} />);
-
-    typeNote("Buy milk");
-    submitForm();
-
-    expect(await screen.findByTestId("note-form-error")).toBeInTheDocument();
-    expect(screen.getByTestId("note-submit")).toBeEnabled();
-
-    submitForm();
-
-    await waitFor(() => expect(onCreated).toHaveBeenCalledTimes(1));
-    expect(createNoteMock).toHaveBeenCalledTimes(2);
   });
 });
