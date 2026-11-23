@@ -1,0 +1,15 @@
+# Decisions (cross-cutting): deliver-20261123T201421Z
+
+This run's section of the repository-root `DECISIONS.md`, which is cumulative across runs. Per-item decisions live in `.claude/artifacts/{ID}/decisions.md`.
+
+## Run deliver-20261123T201421Z
+
+- [run] Ingestion: 52 items resolved (48 tracker, 4 local); nodes TEST-08, TEST-09, TEST-10, BUG-01, BUG-04; 40 cancelled items unmapped and dropped; scaffold TEST-01 done; registered=none.
+- [run] BUG-01 carries mayker:to-verify on a todo status; the label counts only on done, so it is built as todo.
+- [run] BUG-04 and TEST-10 take the full lifecycle: reset #963 reverted #959/#960, the tracker reads to do and no branch, PR or artifact survives.
+- [run] Round 1 dispatch order: TEST-09 (wave 2), TEST-08 (wave 3, chain 2), BUG-01 (wave 3, chain 1) planned in parallel; BUG-04 waits for a free slot (Max parallel items 3). Build serialization pairs pending File Manifests: TEST-09/BUG-01 (main.py), TEST-08/BUG-04 and TEST-10/BUG-04 (LandingPage.tsx).
+- [run] Plans for TEST-09, TEST-08 and BUG-01 ran in parallel. TEST-09's manifest does not list backend/app/main.py, so the TEST-09/BUG-01 serialization pair cleared and both built concurrently. TEST-08's manifest does not list LandingPage.tsx, so TEST-08/BUG-04 and TEST-10/BUG-04 cleared as well.
+- [run] Merged: BUG-01 (#964, to_verify: deployed-only reproduction, tracker complete + mayker:to-verify), TEST-09 (#965), TEST-08 (#966). Checkpoints: BUG-01 pass at 7cb167b6, TEST-08 pass at 6f0d54e4; TEST-09 not due.
+- [run] BUG-04 admitted to planning when BUG-01's slot freed (out of strict order only in that its wave-3 peers were already in flight); TEST-10 admitted once TEST-08 and TEST-09 merged.
+- [run] Wave-2 boundary: follow-ups filed none (no RECOMMENDED finding left unapplied: BUG-01 had none, TEST-09 and TEST-08 applied theirs in the refactor gate; no comment unaddressed). Re-ingest: 52 items, nodes=TEST-10,BUG-04, registered=none, 0 wave and 0 checkpoint proposals.
+- [run] Framework defect observed (reported, not filed): a builder found `bash /Users/.../.mayker/mayker-dev/hooks/lib/run-env.sh --probe 5183` refused three times by the permission layer while the `~/.mayker/...` spelling ran.
