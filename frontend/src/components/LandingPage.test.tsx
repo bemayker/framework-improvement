@@ -1,13 +1,22 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import LandingPage from "./LandingPage";
-import { version } from "../../package.json";
+import { version as packageVersion } from "../../package.json";
 import { listNotes, createNote } from "../api/notes";
+import { fetchBackendVersion } from "../api/version";
 
 vi.mock("../api/notes", () => ({
   listNotes: vi.fn(),
   createNote: vi.fn(),
 }));
+
+vi.mock("../api/version", () => ({
+  fetchBackendVersion: vi.fn(),
+}));
+
+// A value no package.json holds, so the assertion proves the source.
+const BACKEND_VERSION = "9.8.7";
+const fetchBackendVersionMock = vi.mocked(fetchBackendVersion);
 
 const listNotesMock = vi.mocked(listNotes);
 const createNoteMock = vi.mocked(createNote);
@@ -23,6 +32,8 @@ describe("LandingPage", () => {
     listNotesMock.mockReset();
     createNoteMock.mockReset();
     listNotesMock.mockResolvedValue([]);
+    fetchBackendVersionMock.mockReset();
+    fetchBackendVersionMock.mockResolvedValue(BACKEND_VERSION);
   });
 
   it("renders the app title 'Task Notes'", async () => {
@@ -43,11 +54,17 @@ describe("LandingPage", () => {
     expect(screen.getByRole("heading", { name: "Task Notes" })).toBeInTheDocument();
   });
 
-  it("renders the footer with the app name and version", async () => {
+  it("shows the backend version, not the frontend package.json version", async () => {
     await renderLandingPage();
 
-    expect(screen.getByTestId("app-footer")).toHaveTextContent("Task Notes");
-    expect(screen.getByTestId("app-footer")).toHaveTextContent(version);
+    await waitFor(() =>
+      expect(screen.getByTestId("app-footer")).toHaveTextContent(
+        `Task Notes v${BACKEND_VERSION}`,
+      ),
+    );
+    expect(screen.getByTestId("app-footer")).not.toHaveTextContent(
+      `v${packageVersion}`,
+    );
   });
 
   it("renders the note form and the note list", async () => {
