@@ -27,3 +27,11 @@ This run's section of the repository-root `DECISIONS.md`, which is cumulative ac
 - run=deliver-20261124T101411Z [schedule] BUG-04's hold behind TEST-08 is spent (TEST-08 merged as #987); BUG-04's plan touches only NoteForm.tsx and its tests, so the map's LandingPage.tsx risk did not materialize.
 - run=deliver-20261124T101411Z [serialize] TEST-10 build provisionally held behind BUG-04 (map rows flag LandingPage.tsx); re-judged on the union of both File Manifests once TEST-10's plan exists.
 - run=deliver-20261124T101411Z [session] Framework observation: the first decisions-log.sh append of this run printed entries=0 for 11 staged lines that did land; the staged lines lacked the "- " prefix the counter expects.
+- run=deliver-20261124T101411Z [publish] wave-2 record published through #988 (arm=opened merge=merged, class framework); pr-tests required-at-merge not read by this session.
+- run=deliver-20261124T101411Z [merge] BUG-04 #989 merged b85ad956 (squash; the merge call returned a transient 502 while the PR read MERGED); auto-done run 45378294906 succeeded; tracker complete. Repro: before fail -> after pass.
+- run=deliver-20261124T101411Z [checkpoint] BUG-04: due=yes verdict=pass head=b85ad956.
+- run=deliver-20261124T101411Z [merge] TEST-10 #990 merged e598638f (squash); auto-done run 45378805885 succeeded; tracker complete. Criterion 2 built to the plan's recorded reading (pending and failure show "Task Notes" alone, since version and commit arrive in one response).
+- run=deliver-20261124T101411Z [checkpoint] TEST-10: due=yes verdict=pass head=e598638f.
+- run=deliver-20261124T101411Z [final boundary] Follow-ups filed: none. Sources read for BUG-04 (no known improvement) and TEST-10 (one OPTIONAL); no comment went unanswered.
+- run=deliver-20261124T101411Z [re-ingest final boundary] items=53 nodes=0 done=11 to_verify=1 unmapped=41 link=0 labels-ignored=0; registered=none; map valid (53 rows), 0 wave and 0 checkpoint proposals. Graph empty: the run goes to Section 8.
+- run=deliver-20261124T101411Z [observation] TEST-10's review found a real TS2559 type error that no CI gate or test tier checks (no tier runs `tsc -b`); fixed in the PR. The project's gates should run the frontend type check.
