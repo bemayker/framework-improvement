@@ -28,7 +28,7 @@ This item has no UI. Every step is an HTTP request, a file inspection or a test 
 | 4 | With `BUILD_COMMIT` unset, run `curl -s http://localhost:8010/api/version` | `commit` is `"unknown"` | [ ] Pass [ ] Fail |
 | 5 | Run `BUILD_COMMIT=0123456789abcdef0123456789abcdef01234567 docker compose up -d --build backend`, then `curl -s http://localhost:8010/api/version` | `commit` is `"0123456789ab"` (first 12 characters, not all 40) | [ ] Pass [ ] Fail |
 | 6 | Run `BUILD_COMMIT=abc1234 docker compose up -d --build backend`, then `curl -s http://localhost:8010/api/version` | `commit` is `"abc1234"` (shorter values are not padded or cut) | [ ] Pass [ ] Fail |
-| 7 | Run `grep -n "unknown" backend/app/routers/version.py` | No output: the router holds no `"unknown"` literal and no quoted sha; its only commit source is `commit=get_build_commit()` | [ ] Pass [ ] Fail |
+| 7 | Run `grep -n "commit" backend/app/routers/version.py` | Docstring and import lines aside, the only `commit=` match is `commit=get_build_commit()`: the router holds no quoted sha and no `"unknown"` literal | [ ] Pass [ ] Fail |
 | 8 | Restore: run `docker compose up -d --build backend` with `BUILD_COMMIT` unset, then `curl -s http://localhost:8010/api/version` | `commit` is back to `"unknown"` | [ ] Pass [ ] Fail |
 
 ### Criterion 3: response body is defined by a Pydantic schema in backend/app/schemas/
