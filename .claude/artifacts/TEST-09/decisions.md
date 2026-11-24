@@ -1,0 +1,14 @@
+- Plan base: cfa85c3953dc086c6b05c27c3937660e30237eed
+- run=deliver-20261124T203156Z Plan verdict (orchestrator, /deliver 6.2): **approve**, first pass, no re-plan.
+  - Criteria: all four item criteria are carried; criterion 2 is amended with the tracker comment's 12-character rule, recorded under Re-Plan Feedback with the `BUILD_COMMIT` naming assumption.
+  - Scope containment (`user_story_alignment.md` Section 3): no CI step is added for `BUILD_COMMIT`. Verified: no file in `.github/workflows/` names it, and no criterion asks for one. The Dockerfile `ARG`/`ENV`, compose build arg and `.env.example` key are in scope because criterion 2 says "set at build time", and `docs/DEVELOPMENT.md` line 28 and `README.md` line 70 already describe exactly that. `backend/app/main.py` is untouched: the version router is already registered there (line 56), verified.
+  - Layering (`coding_standards.md` Section 2.2, read in the plugin's `coding_standards/backend_frontend.md`): router passes the value through with no logic, truncation sits in the service, the response is a schema in `backend/app/schemas/`, no repository because there is no data access. Configuration keeps the Section 5 invariant: `build_commit` reads the environment like the module's other values, with the default owned in one place.
+  - Testing strategy: `planned-tests.sh ids` lists at least one test id for each of criteria 1 to 4 (13 rows, 9 distinct ids); every row is non-E2E with a reason, and no criterion needs navigation or interaction. The config tests assert the set-value resolution, not only the fallback.
+  - Technology Selection: three lines, each naming what was chosen and over what (stdlib `os.environ.get` over `pydantic-settings`, string slice over a sha helper, Docker `ARG`/`ENV` over a generated version file); no net-new module or dependency.
+  - File Manifest: exact, 3 new [G] and 10 modified [B] entries; all ten modified files exist on main.
+  - Residual doubts: (1) the tracker comment asserts CI passes a full 40-character sha, which no workflow does today, so a CI-built image reports `"unknown"` until a separate item wires it; left out on scope, to be named in the run report. (2) `backend/app/core/config.py` and `backend/tests/unit/test_config_unit.py` overlap FEAT-15/17/19/20/23 per `shared_risks.md`; the dispatch reports those cancelled, so no serialization hold now, but any item later scheduled against the config module or the version slice (FEAT-8) is serialized behind TEST-09.
+- merged-since: base=cfa85c39 (forced) ref=origin/main@cfa85c39 commits=0 overlap=0 verdict=clean
+- worktree-deps: installed=2 present=0 unlocked=0 failed=0 duration=1s
+- move-item: moved=3 appended=0 kept=1 failed=0
+- Self-review (6.5): VERDICT: PASS blocking=0 recommended=1 optional=2 (no BLOCKING findings to close)
+- Refactor gate: 1 improvements applied (9 files examined), commit 9338d5c9; RECOMMENDED UAT step 7 finding applied
