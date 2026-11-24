@@ -148,3 +148,4 @@ Prerequisites: a checkout of the branch, with `uv` installed.
 ## Scope changes
 
 - 2026-11-24 The tracker comment's point 2 (add GET /api/echo?msg={text} in backend/app/main.py, with backend/app/routers/echo.py and backend/app/schemas/echo.py) is not added to FEAT-1's scope. Reason: GET /api/echo is TEST-06's own work item, TEST-11 and BUG-05 build on it with opposite whitespace rules, and no FEAT-1 acceptance criterion asks for it (user_story_alignment.md Sections 3 and 6); the plan PR reviewer is asked to confirm or overrule.
+- 2026-11-24 Removed the unused `import os` from backend/app/main.py (not in the plan). Reason: it was pre-existing, and the commit gate's `uv run ruff check` row fails on any changed file carrying F401, so the planned main.py edit could not be committed with it.
