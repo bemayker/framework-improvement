@@ -1,6 +1,7 @@
 """Unit tests for the FastAPI app factory (backend/app/main.py)."""
 
 from app.main import create_app
+from app.services.uptime_service import ProcessStart
 
 # FastAPI's own routes, present on every app regardless of what this project
 # registers; subtracted so a test asserts only the app's custom routes.
@@ -56,6 +57,24 @@ def test_create_app_registers_health_route():
     custom_paths = _collect_route_paths(app.routes) - BUILT_IN_ROUTE_PATHS
 
     assert "/api/health" in custom_paths
+
+
+def test_create_app_registers_uptime_route():
+    """Edge case: the app registers the TEST-07 uptime route."""
+    app = create_app()
+
+    custom_paths = _collect_route_paths(app.routes) - BUILT_IN_ROUTE_PATHS
+
+    assert "/api/uptime" in custom_paths
+
+
+def test_create_app_captures_process_start_on_app_state():
+    """Each create_app() call captures its own ProcessStart on app.state."""
+    first_app = create_app()
+    second_app = create_app()
+
+    assert isinstance(first_app.state.process_start, ProcessStart)
+    assert first_app.state.process_start is not second_app.state.process_start
 
 
 def test_create_app_returns_independent_instances():
