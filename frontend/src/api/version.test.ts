@@ -23,24 +23,66 @@ describe("version API client", () => {
     vi.unstubAllEnvs();
   });
 
-  it("returns the version the backend reports from /api/version", async () => {
-    fetchMock.mockResolvedValue(okResponse({ version: "0.1.0" }));
+  it("returns the version and the first 7 characters of the commit from /api/version", async () => {
+    fetchMock.mockResolvedValue(
+      okResponse({ version: "0.1.0", commit: "4e631128d728" }),
+    );
 
-    await expect(fetchBackendVersion()).resolves.toBe("0.1.0");
+    await expect(fetchBackendVersion()).resolves.toEqual({
+      version: "0.1.0",
+      commit: "4e63112",
+    });
 
     expect(fetchMock).toHaveBeenCalledWith("http://localhost:8010/api/version");
   });
 
-  it("resolves null for the backend unknown sentinel", async () => {
+  it("resolves a null version for the backend unknown sentinel", async () => {
     fetchMock.mockResolvedValue(okResponse({ version: "unknown" }));
 
-    await expect(fetchBackendVersion()).resolves.toBeNull();
+    await expect(fetchBackendVersion()).resolves.toEqual({
+      version: null,
+      commit: null,
+    });
   });
 
-  it("resolves null for an empty version string", async () => {
+  it("resolves a null version for an empty version string", async () => {
     fetchMock.mockResolvedValue(okResponse({ version: "" }));
 
-    await expect(fetchBackendVersion()).resolves.toBeNull();
+    await expect(fetchBackendVersion()).resolves.toEqual({
+      version: null,
+      commit: null,
+    });
+  });
+
+  it("resolves a null commit for the backend unknown commit sentinel", async () => {
+    fetchMock.mockResolvedValue(
+      okResponse({ version: "0.1.0", commit: "unknown" }),
+    );
+
+    await expect(fetchBackendVersion()).resolves.toEqual({
+      version: "0.1.0",
+      commit: null,
+    });
+  });
+
+  it("resolves a null commit when the response carries no commit string", async () => {
+    fetchMock.mockResolvedValue(okResponse({ version: "0.1.0" }));
+    await expect(fetchBackendVersion()).resolves.toEqual({
+      version: "0.1.0",
+      commit: null,
+    });
+
+    fetchMock.mockResolvedValue(okResponse({ version: "0.1.0", commit: "" }));
+    await expect(fetchBackendVersion()).resolves.toEqual({
+      version: "0.1.0",
+      commit: null,
+    });
+
+    fetchMock.mockResolvedValue(okResponse({ version: "0.1.0", commit: 42 }));
+    await expect(fetchBackendVersion()).resolves.toEqual({
+      version: "0.1.0",
+      commit: null,
+    });
   });
 
   it("throws when the response is not OK", async () => {
