@@ -19,7 +19,7 @@ export interface BackendVersion {
   commit: string | null;
 }
 
-function shortCommit(body: { commit?: unknown }): string | null {
+function shortCommit(body: { version: string; commit?: unknown }): string | null {
   const { commit } = body;
 
   if (typeof commit !== "string" || commit === "" || commit === UNRESOLVED_BACKEND_COMMIT) {
