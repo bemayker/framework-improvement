@@ -12,7 +12,29 @@ const getBackendVersionMock = vi.mocked(getBackendVersion);
 describe("AppFooter", () => {
   beforeEach(() => {
     getBackendVersionMock.mockReset();
-    getBackendVersionMock.mockResolvedValue("9.8.7");
+    getBackendVersionMock.mockResolvedValue({ version: "9.8.7", commit: null });
+  });
+
+  it("renders the first 7 characters of the build commit next to the version", async () => {
+    getBackendVersionMock.mockResolvedValue({
+      version: "9.8.7",
+      commit: "a1b2c3d4e5f6",
+    });
+
+    render(<AppFooter />);
+
+    expect(await screen.findByTestId("app-commit")).toHaveTextContent("(a1b2c3d)");
+    expect(screen.getByTestId("app-footer").textContent).toBe(
+      "Task Notes v9.8.7 (a1b2c3d)",
+    );
+  });
+
+  it("renders the version alone when the backend reports no usable commit", async () => {
+    render(<AppFooter />);
+
+    expect(await screen.findByTestId("app-version")).toHaveTextContent("v9.8.7");
+    expect(screen.queryByTestId("app-commit")).not.toBeInTheDocument();
+    expect(screen.getByTestId("app-footer").textContent).toBe("Task Notes v9.8.7");
   });
 
   it("renders the application name", async () => {
@@ -37,6 +59,7 @@ describe("AppFooter", () => {
     const footer = screen.getByTestId("app-footer");
     expect(footer.textContent).toBe("Task Notes");
     expect(screen.queryByTestId("app-version")).not.toBeInTheDocument();
+    expect(screen.queryByTestId("app-commit")).not.toBeInTheDocument();
   });
 
   it("renders only the app name when the version request fails", async () => {
@@ -48,11 +71,12 @@ describe("AppFooter", () => {
 
     expect(screen.getByTestId("app-footer").textContent).toBe("Task Notes");
     expect(screen.queryByTestId("app-version")).not.toBeInTheDocument();
+    expect(screen.queryByTestId("app-commit")).not.toBeInTheDocument();
   });
 
   it("renders only the app name when the backend reports the unknown sentinel", async () => {
     // The client maps the sentinel to null; the footer must show no suffix.
-    getBackendVersionMock.mockResolvedValue(null);
+    getBackendVersionMock.mockResolvedValue({ version: null, commit: "a1b2c3d4e5f6" });
 
     render(<AppFooter />);
     await waitFor(() => expect(getBackendVersionMock).toHaveBeenCalledTimes(1));
