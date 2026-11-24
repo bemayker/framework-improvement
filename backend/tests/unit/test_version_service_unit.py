@@ -39,28 +39,3 @@ def test_get_app_version_returns_unknown_when_distribution_not_installed(monkeyp
     monkeypatch.setattr(version_service, "version", raise_not_found)
 
     assert version_service.get_app_version() == version_service.UNKNOWN_VERSION
-
-
-def test_get_build_commit_truncates_full_sha_to_first_12_characters(monkeypatch):
-    """Edge case: a 40-character sha, as CI passes it, is cut to its first 12."""
-    full_sha = "4e631128d7285ec47eb354795bf120878553505b"
-    monkeypatch.setenv("BUILD_COMMIT", full_sha)
-
-    assert version_service.COMMIT_LENGTH == 12
-    assert version_service.get_build_commit() == full_sha[:12] == "4e631128d728"
-
-
-def test_get_build_commit_returns_short_value_unchanged(monkeypatch):
-    """Happy path: a value of 12 characters or fewer passes through as is."""
-    monkeypatch.setenv("BUILD_COMMIT", "abc1234")
-    assert version_service.get_build_commit() == "abc1234"
-
-    monkeypatch.setenv("BUILD_COMMIT", "abcdef123456")
-    assert version_service.get_build_commit() == "abcdef123456"
-
-
-def test_get_build_commit_returns_unknown_when_build_commit_unset(monkeypatch):
-    """Error case: with no declared commit the default sentinel is returned."""
-    monkeypatch.delenv("BUILD_COMMIT", raising=False)
-
-    assert version_service.get_build_commit() == "unknown"
