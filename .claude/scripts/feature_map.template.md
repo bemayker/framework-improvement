@@ -1,4 +1,4 @@
-<!-- materialized-from: mayker-dev v0.3.519; do not edit, regenerate with /upgrade-project -->
+<!-- materialized-from: mayker-dev v0.3.491; do not edit, regenerate with /upgrade-project -->
 <!--
   CANONICAL TEMPLATE — this file is the single source of truth for the shape of
   `.claude/feature_map.md`. `/sync-project` (Section 4) and `/deliver` (Section 2
@@ -41,7 +41,7 @@
   --apply` on every run, in both modes, replacing that one section of an existing
   map with this file's copy of it — so a block still documenting a column set
   this file has since widened heals by a re-run, and a change confined to that
-  section owes no ledger entry (a full re-run heals it). Nothing else in an existing
+  section owes no ledger entry (`REPO-13`'s test). Nothing else in an existing
   map is touched by it: the rows, the preamble and the note below the table are
   the project's, a section the project WROTE itself is left byte-for-byte and
   reported, and an ABSENT section is still the repair script's to insert.
