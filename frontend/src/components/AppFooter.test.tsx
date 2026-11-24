@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, waitFor } from "@testing-library/react";
+import { act, render, screen } from "@testing-library/react";
 import AppFooter from "./AppFooter";
 import { fetchBackendVersion } from "../api/version";
 
@@ -43,8 +43,10 @@ describe("AppFooter", () => {
     fetchBackendVersionMock.mockRejectedValue(new Error("network down"));
 
     render(<AppFooter />);
+    // The call is made on mount; flush the microtasks so the rejection has
+    // settled before asserting, otherwise this would see the initial state.
+    await act(async () => {});
 
-    await waitFor(() => expect(fetchBackendVersionMock).toHaveBeenCalled());
     const footer = screen.getByTestId("app-footer");
     expect(footer.textContent).toBe("Task Notes");
     expect(screen.queryByTestId("app-version")).not.toBeInTheDocument();
@@ -55,8 +57,8 @@ describe("AppFooter", () => {
     fetchBackendVersionMock.mockResolvedValue(null);
 
     render(<AppFooter />);
+    await act(async () => {});
 
-    await waitFor(() => expect(fetchBackendVersionMock).toHaveBeenCalled());
     const footer = screen.getByTestId("app-footer");
     expect(footer.textContent).toBe("Task Notes");
     expect(footer).not.toHaveTextContent(/unknown|undefined|null/);
