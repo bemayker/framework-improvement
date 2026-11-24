@@ -12,6 +12,10 @@ class UptimeResponse(BaseModel):
     started_at: datetime
 
     @field_serializer("started_at")
-    def serialize_started_at(self, value: datetime) -> str:
-        """Emit UTC with the numeric +00:00 offset, so the offset is explicit."""
+    def serialize_started_at(self, value: datetime):  # noqa: ANN201
+        """Emit UTC with the numeric +00:00 offset, so the offset is explicit.
+
+        Deliberately unannotated: a `-> str` return type would replace the
+        field's `date-time` format in the OpenAPI schema with a bare string.
+        """
         return value.astimezone(timezone.utc).isoformat()

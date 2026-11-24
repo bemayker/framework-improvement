@@ -61,6 +61,16 @@ def test_get_uptime_openapi_response_uses_uptime_response_schema(client):
     assert schema["$ref"] == "#/components/schemas/UptimeResponse"
 
 
+def test_get_uptime_openapi_started_at_property_has_date_time_format(client):
+    """The schema keeps format date-time for started_at despite the custom serializer."""
+    schemas = client.get("/openapi.json").json()["components"]["schemas"]
+
+    started_at = schemas["UptimeResponse"]["properties"]["started_at"]
+
+    assert started_at["type"] == "string"
+    assert started_at["format"] == "date-time"
+
+
 def test_post_uptime_returns_405_method_not_allowed(client):
     """Error case: the endpoint only answers GET."""
     response = client.post("/api/uptime")
