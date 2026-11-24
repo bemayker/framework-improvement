@@ -25,6 +25,8 @@ See the [README → Running the project](../README.md#running-the-project) for t
 
 How to start the application is in the README → Running the project. Ports, environment files (`.env.example`) and backing services the application needs are listed there or under Development environment.
 
+`BUILD_COMMIT` is an optional build argument and runtime variable (see `.env.example`) that bakes the commit sha into the backend image. `GET /api/version` reports its first 12 characters, or `"unknown"` when it is unset or blank.
+
 ## Testing
 
 The test gate runs the command in `CLAUDE.md` → `Test gate command:` before every push, and CI runs the suites on every pull request. Test directories, naming and the tier toggles are in `CLAUDE.md` → Test Configuration and Feature Toggles.
