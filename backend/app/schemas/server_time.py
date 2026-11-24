@@ -18,8 +18,11 @@ class ServerTimeResponse(BaseModel):
     fractional digits, for example `2026-11-24T04:38:10.123456+00:00`.
     """
 
+    # The str-returning serializer makes the serialization-mode schema a plain
+    # string, so the date-time format is pinned here for the OpenAPI page.
     now: AwareDatetime = Field(
-        description="Server time, ISO 8601 in UTC with the explicit +00:00 offset."
+        description="Server time, ISO 8601 in UTC with the explicit +00:00 offset.",
+        json_schema_extra={"format": "date-time"},
     )
     timezone: Literal["UTC"] = "UTC"
 
