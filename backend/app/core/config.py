@@ -6,6 +6,9 @@ than bound once at import time: a dataclass field default is evaluated when
 the class is defined, which would make `get_settings()`'s "read fresh from
 the environment" promise false for anything that changes the variable after
 import (the version integration test does exactly that).
+
+TEST-09 adds `build_commit`, the one declared source of the build's commit,
+read from BUILD_COMMIT with the sentinel default `UNKNOWN_BUILD_COMMIT`.
 """
 
 import os
@@ -14,6 +17,16 @@ from dataclasses import dataclass, field
 # The browser at :5183 calls the backend at :8010 directly (the
 # VITE_API_BASE_URL wiring in docker-compose.yml), which is cross-origin.
 DEFAULT_CORS_ORIGINS = ("http://localhost:5183",)
+UNKNOWN_BUILD_COMMIT = "unknown"
+
+
+def _read_build_commit() -> str:
+    """Return BUILD_COMMIT stripped, or the sentinel when unset or blank.
+
+    Blank counts as unset because docker-compose passes `${BUILD_COMMIT:-}`,
+    which is an empty string whenever the host does not export the variable.
+    """
+    return os.environ.get("BUILD_COMMIT", "").strip() or UNKNOWN_BUILD_COMMIT
 
 
 def _read_cors_origins() -> tuple[str, ...]:
@@ -33,6 +46,8 @@ class Settings:
     )
     # CORS_ORIGINS (comma-separated), read per call; unset or blank uses the default.
     cors_origins: tuple[str, ...] = field(default_factory=_read_cors_origins)
+    # BUILD_COMMIT, read per call; unset or blank resolves to UNKNOWN_BUILD_COMMIT.
+    build_commit: str = field(default_factory=_read_build_commit)
 
 
 def get_settings() -> Settings:
