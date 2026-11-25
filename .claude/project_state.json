@@ -394,18 +394,11 @@
       "id_source": "framework",
       "id_carrier": "title_prefix",
       "url": "https://app.clickup.com/t/123k99d1rqq"
-    },
-    "FEAT-26": {
-      "external_id": "123k99d1vaf",
-      "external_identifier": "",
-      "id_source": "framework",
-      "id_carrier": "title_prefix",
-      "url": "https://app.clickup.com/t/123k99d1vaf"
     }
   },
   "discovery": {
-    "last_scan_commit": "c1c4a83c11bb14cde0b023f14e02833bad123234",
-    "scanned_at": "2026-11-25T00:02:30Z",
+    "last_scan_commit": "023ffad85f8ddd76c3e79f847facfc6141d90b7e",
+    "scanned_at": "2026-11-24T02:41:05Z",
     "scanned_by": "/sync-project"
   },
   "framework": {
