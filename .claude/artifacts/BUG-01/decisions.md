@@ -10,3 +10,5 @@
 - run=deliver-20261125T133431Z [worktree] [worktree-deps] installed=2 present=0 unlocked=0 failed=0 duration=4s
 - run=deliver-20261125T133431Z [worktree] [run-dir] move-item: moved=3 appended=0 kept=1 failed=0
 - run=deliver-20261125T133431Z [status] plan review -> on hold (ready_for_build) -> in progress. Steps file staged to .claude/artifacts/run/test_steps-BUG-01.md (deployed-only, R1).
+- run=deliver-20261125T133431Z [review] 6.5 step 1 VERDICT: PASS blocking=0 recommended=0 optional=3 (review_scope.md, 12 changed files). No fix round. OPTIONAL findings carried to the PR body's known improvements: (1) SERVER_TIMEZONE should be Final for the Literal["UTC"] field; (2) test_server_timezone_constant_is_utc asserts a constant equals itself; (3) the UAT feature's Background ties the deployed criterion-3 scenario to localhost:8010.
+- run=deliver-20261125T133431Z [review] Reviewer note: criterion 3 has no automated evidence; the fix only holds if the CDN honours the origin's no-store. The deployed host is unnamed (docs/DEVELOPMENT.md Test environments is empty).
