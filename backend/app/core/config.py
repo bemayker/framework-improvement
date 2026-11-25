@@ -46,7 +46,7 @@ class Settings:
     )
     # CORS_ORIGINS (comma-separated), read per call; unset or blank uses the default.
     cors_origins: tuple[str, ...] = field(default_factory=_read_cors_origins)
-    # BUILD_COMMIT, read per call; unset or blank resolves to "unknown".
+    # BUILD_COMMIT, read per call; unset or blank resolves to UNKNOWN_BUILD_COMMIT.
     build_commit: str = field(default_factory=_read_build_commit)
 
 

@@ -28,7 +28,7 @@ This feature has no UI: every criterion is verified against the HTTP endpoint wi
 | 4 | Run `curl -s http://localhost:8010/api/version` | Body `{"version":"0.1.0","commit":"0123456789ab"}` (the first 12 characters of the 40-character sha) | [ ] Pass [ ] Fail |
 | 5 | Run `BUILD_COMMIT=abc1234 docker compose up -d backend`, then `curl -s http://localhost:8010/api/version` | Body `{"version":"0.1.0","commit":"abc1234"}` (7 characters, unchanged) | [ ] Pass [ ] Fail |
 | 6 | Run `BUILD_COMMIT= docker compose up -d backend`, then `curl -s http://localhost:8010/api/version` | Body `{"version":"0.1.0","commit":"unknown"}` | [ ] Pass [ ] Fail |
-| 7 | Open `backend/app/routers/version.py`, then `backend/app/core/config.py` | The router contains no string literal for the commit and calls `get_build_commit()`; `"unknown"` appears once in `config.py`, as `UNKNOWN_BUILD_COMMIT` | [ ] Pass [ ] Fail |
+| 7 | Open `backend/app/routers/version.py`, then `backend/app/core/config.py` | The router contains no string literal for the commit and calls `get_build_commit()`; the string literal `"unknown"` appears once in `config.py`, as the value of `UNKNOWN_BUILD_COMMIT` | [ ] Pass [ ] Fail |
 
 ### Criterion 3: The response body is defined by a Pydantic schema in `backend/app/schemas/`
 
