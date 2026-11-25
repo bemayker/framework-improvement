@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, waitFor } from "@testing-library/react";
+import { act, render, screen } from "@testing-library/react";
 import AppFooter from "./AppFooter";
 import { fetchBackendVersion } from "../api/version";
 
@@ -47,7 +47,12 @@ describe("AppFooter", () => {
 
     render(<AppFooter />);
 
-    await waitFor(() => expect(fetchBackendVersionMock).toHaveBeenCalled());
+    // The rejection reaches the component's .catch a few microtasks after the
+    // call, so flush them before asserting the footer stayed on the app name.
+    await act(async () => {
+      await Promise.resolve();
+    });
+    expect(fetchBackendVersionMock).toHaveBeenCalled();
     expect(screen.getByTestId("app-footer").textContent).toBe("Task Notes");
     expect(screen.queryByTestId("app-footer-version")).not.toBeInTheDocument();
   });
