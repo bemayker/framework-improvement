@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
 import type { CSSProperties } from "react";
 import { fetchBackendVersion } from "../api/version";
+import type { BackendVersion } from "../api/version";
 
 const APP_NAME = "Task Notes";
+const SHORT_COMMIT_LENGTH = 7;
 
 const footerStyle: CSSProperties = {
   fontSize: "0.875rem",
@@ -11,7 +13,7 @@ const footerStyle: CSSProperties = {
 };
 
 function AppFooter() {
-  const [version, setVersion] = useState<string | null>(null);
+  const [backend, setBackend] = useState<BackendVersion | null>(null);
 
   useEffect(() => {
     // Guards against setting state after unmount.
@@ -20,7 +22,7 @@ function AppFooter() {
     fetchBackendVersion()
       .then((backendVersion) => {
         if (isMounted) {
-          setVersion(backendVersion);
+          setBackend(backendVersion);
         }
       })
       .catch(() => {
@@ -36,7 +38,15 @@ function AppFooter() {
   return (
     <footer data-testid="app-footer" style={footerStyle}>
       {APP_NAME}
-      {version !== null && <span data-testid="app-version"> v{version}</span>}
+      {backend !== null && (
+        <span data-testid="app-version"> v{backend.version}</span>
+      )}
+      {backend?.commit != null && (
+        // A sibling of app-version, so that span's text stays exactly v{version}.
+        <span data-testid="app-commit">
+          {` (${backend.commit.slice(0, SHORT_COMMIT_LENGTH)})`}
+        </span>
+      )}
     </footer>
   );
 }
