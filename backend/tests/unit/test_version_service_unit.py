@@ -2,6 +2,7 @@
 
 from importlib.metadata import PackageNotFoundError
 
+from app.core.config import DEFAULT_BUILD_COMMIT, Settings
 from app.services import version_service
 
 
@@ -39,3 +40,33 @@ def test_get_app_version_returns_unknown_when_distribution_not_installed(monkeyp
     monkeypatch.setattr(version_service, "version", raise_not_found)
 
     assert version_service.get_app_version() == version_service.UNKNOWN_VERSION
+
+
+FULL_SHA = "0123456789abcdef0123456789abcdef01234567"
+
+
+def _use_build_commit(monkeypatch, value: str) -> None:
+    monkeypatch.setattr(version_service, "get_settings", lambda: Settings(build_commit=value))
+
+
+def test_get_build_commit_truncates_full_sha_to_first_12_characters(monkeypatch):
+    """Happy path: a 40-character sha comes back as its first 12 characters."""
+    _use_build_commit(monkeypatch, FULL_SHA)
+
+    assert version_service.get_build_commit() == "0123456789ab"
+
+
+def test_get_build_commit_returns_short_value_unchanged(monkeypatch):
+    """Edge case: 12 characters or fewer are returned as given."""
+    _use_build_commit(monkeypatch, "abc123")
+    assert version_service.get_build_commit() == "abc123"
+
+    _use_build_commit(monkeypatch, FULL_SHA[: version_service.COMMIT_LENGTH])
+    assert version_service.get_build_commit() == FULL_SHA[:12]
+
+
+def test_get_build_commit_returns_unknown_when_unset(monkeypatch):
+    """Unset path: with BUILD_COMMIT absent the settings default flows through."""
+    monkeypatch.delenv("BUILD_COMMIT", raising=False)
+
+    assert version_service.get_build_commit() == DEFAULT_BUILD_COMMIT == "unknown"
