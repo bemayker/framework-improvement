@@ -2,20 +2,16 @@
 
 The version is read from installed package metadata rather than hardcoded,
 so it always reflects `[project].version` in backend/pyproject.toml without
-any code change when that value is bumped. TEST-09 adds the build commit,
-read from the settings module's single declared source.
+any code change when that value is bumped.
 """
 
 import logging
 from importlib.metadata import PackageNotFoundError, version
 
-from app.core.config import get_settings
-
 logger = logging.getLogger(__name__)
 
 DISTRIBUTION_NAME = "task-notes-backend"
 UNKNOWN_VERSION = "unknown"
-COMMIT_DISPLAY_LENGTH = 12
 
 
 def get_app_version() -> str:
@@ -37,12 +33,3 @@ def get_app_version() -> str:
             UNKNOWN_VERSION,
         )
         return UNKNOWN_VERSION
-
-
-def get_build_commit() -> str:
-    """Return the build commit, at most its first COMMIT_DISPLAY_LENGTH characters.
-
-    CI passes a full 40-character sha; clients get the short form. Settings are
-    read per call so a changed BUILD_COMMIT is seen without a restart.
-    """
-    return get_settings().build_commit[:COMMIT_DISPLAY_LENGTH]
