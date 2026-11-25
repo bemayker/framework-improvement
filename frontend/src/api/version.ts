@@ -17,12 +17,15 @@ const VERSION_URL = `${API_BASE_URL}/api/version`;
 // The backend's own "could not resolve" answer: it is not a version to show.
 const UNKNOWN_VERSION = "unknown";
 
+// The backend's commit sentinel when no build commit is set: not a commit to show.
+const UNKNOWN_COMMIT = "unknown";
+
 // The backend serves a 12-character commit; the footer shows the short form.
 const SHORT_COMMIT_LENGTH = 7;
 
 /** A missing, non-string, empty or unknown commit is null, never an error. */
 function toShortCommit(commit: unknown): string | null {
-  if (typeof commit !== "string" || commit === "" || commit === UNKNOWN_VERSION) {
+  if (typeof commit !== "string" || commit === "" || commit === UNKNOWN_COMMIT) {
     return null;
   }
   return commit.slice(0, SHORT_COMMIT_LENGTH);

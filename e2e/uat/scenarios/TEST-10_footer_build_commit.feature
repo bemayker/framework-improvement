@@ -16,7 +16,8 @@ Feature: TEST-10 Footer shows the build commit
     And the commit shows exactly 7 characters after the version
 
   Scenario: Footer shows only the app name while the version request is pending
-    Given "http://localhost:8010/api/version" answers slowly
+    Given the backend reports the commit "0123456789ab" at "http://localhost:8010/api/version"
+    And "http://localhost:8010/api/version" answers slowly
     When I open the landing page before the version request completes
     Then the footer reads exactly "Task Notes" with no placeholder
     And no element identified by "app-footer-commit" is present
