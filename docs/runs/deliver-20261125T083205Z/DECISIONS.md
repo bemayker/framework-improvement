@@ -28,3 +28,12 @@ This run's section of the repository-root `DECISIONS.md`, which is cumulative ac
 - [ingest] re-ingest at the wave boundary (main c480a825): [item-status] items=54 nodes=2 done=9 to_verify=1 unmapped=42 link=0 labels-ignored=0; nodes BUG-04 and TEST-10, both ready, full lifecycle from 6.1; registered=none; map valid, 54 rows, not written.
 - [serialize] BUG-04 hold behind TEST-08 lifted by its merge; replaced by a conditional build hold on the flagged pair BUG-04 and TEST-10 (LandingPage.tsx): both plan concurrently, builds serialized BUG-04 first if the whole-feature File Manifests share any file.
 - [schedule] order BUG-04 (wave 3, chain 0), then TEST-10 (wave 4, chain 1).
+- [plan] BUG-04 plan self-approved on first pass; criteria derived from the title (empty tracker description), client-side-only reading accepted as a reversible guess. TEST-10 plan revised once (it missed LandingPage.test.tsx and the TEST-08 E2E spec, both broken by its own change), re-plan approved.
+- [serialize] BUG-04 and TEST-10 built concurrently: union-of-all-phases File Manifests disjoint; LandingPage.tsx touched by neither.
+- [merge] BUG-04 merged #1018 squash b20d1084 (repro before fail -> after pass); auto-done run 45582254539 succeeded; tracker complete.
+- [merge] TEST-10 merged #1019 squash 8d1ae58b (criterion 2 built to the recorded reading); auto-done run 45583122871 succeeded; tracker complete.
+- [checkpoint] BUG-04 head=b20d1084 verdict=pass; TEST-10 head=8d1ae58b verdict=pass. The checkpoint ran with no database (14 backend tests skipped each time); the push gates of BUG-04 and TEST-10 ran them against Postgres: 75 passed, 0 skipped.
+- [teardown] BUG-04-db and TEST-10-db removed after their merges.
+- [wave] final boundary: follow-ups none filed (every RECOMMENDED finding applied; no comment unaddressed at merge). Re-ingest: [item-status] items=54 nodes=0 done=11 to_verify=1 unmapped=42; registered=none; map valid, not written.
+- [context] ctx=499655 window=1000000 pct=49 model=claude-opus-5-5 verdict=ok wall=ok elapsed_h=0.7 bound=continue
+- [framework] feature-map-waves.sh printed different chain= lines seconds apart on an unchanged map (9 then 16 entries). bash-shape-guard refused several composed subagent calls with a cd segment; each was re-run in an allowed shape.
