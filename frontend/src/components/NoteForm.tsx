@@ -1,4 +1,4 @@
-import { useState, type CSSProperties, type FormEvent } from "react";
+import { useRef, useState, type CSSProperties, type FormEvent } from "react";
 import { createNote, type Note } from "../api/notes";
 
 const FIELD_LABEL = "New note";
@@ -53,6 +53,11 @@ const buttonStyle: CSSProperties = {
   cursor: "pointer",
 };
 
+const savingButtonStyle: CSSProperties = {
+  opacity: 0.6,
+  cursor: "not-allowed",
+};
+
 const errorStyle: CSSProperties = {
   fontSize: "0.875rem",
   color: "#b3261e",
@@ -67,9 +72,17 @@ type NoteFormProps = {
 function NoteForm({ onCreated }: NoteFormProps) {
   const [text, setText] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
+  // A ref, not state: two clicks in the same tick both read the state value
+  // from before the first re-render, but they share one ref.
+  const saveInFlight = useRef(false);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+
+    if (saveInFlight.current) {
+      return;
+    }
 
     // A whitespace-only note counts as empty, and is rejected here so no
     // request is sent at all.
@@ -79,6 +92,8 @@ function NoteForm({ onCreated }: NoteFormProps) {
       return;
     }
 
+    saveInFlight.current = true;
+    setIsSaving(true);
     try {
       const savedNote = await createNote(trimmedText);
       setError(null);
@@ -86,6 +101,9 @@ function NoteForm({ onCreated }: NoteFormProps) {
       onCreated(savedNote);
     } catch {
       setError(SAVE_FAILED_MESSAGE);
+    } finally {
+      saveInFlight.current = false;
+      setIsSaving(false);
     }
   }
 
@@ -105,7 +123,12 @@ function NoteForm({ onCreated }: NoteFormProps) {
           style={inputStyle}
           onChange={(event) => setText(event.target.value)}
         />
-        <button data-testid="note-submit" type="submit" style={buttonStyle}>
+        <button
+          data-testid="note-submit"
+          type="submit"
+          disabled={isSaving}
+          style={isSaving ? { ...buttonStyle, ...savingButtonStyle } : buttonStyle}
+        >
           {SUBMIT_LABEL}
         </button>
       </div>
