@@ -33,7 +33,8 @@ test.describe("TEST-08 footer app version", () => {
     const footer = page.getByTestId("app-footer");
     await expect(page.getByTestId("app-footer-version")).toBeVisible();
     await expect(footer).toContainText(`v${backendVersion}`);
-    await expect(footer).toHaveText(`Task Notes v${backendVersion}`);
+    // The version element alone: a configured BUILD_COMMIT adds a commit element after it (TEST-10).
+    await expect(page.getByTestId("app-footer-version")).toHaveText(` v${backendVersion}`);
   });
 
   test("omits the version when /api/version is unreachable", async ({ page }) => {

@@ -12,7 +12,35 @@ const fetchBackendVersionMock = vi.mocked(fetchBackendVersion);
 describe("AppFooter", () => {
   beforeEach(() => {
     fetchBackendVersionMock.mockReset();
-    fetchBackendVersionMock.mockResolvedValue("9.8.7");
+    fetchBackendVersionMock.mockResolvedValue({
+      version: "9.8.7",
+      commit: "0123456",
+    });
+  });
+
+  it("renders the version and the first 7 characters of the build commit", async () => {
+    render(<AppFooter />);
+
+    const commit = await screen.findByTestId("app-footer-commit");
+    expect(commit).toHaveTextContent("(0123456)");
+    expect(screen.getByTestId("app-footer").textContent).toBe(
+      "Task Notes v9.8.7 (0123456)",
+    );
+  });
+
+  it("renders the version alone when the backend reports no commit", async () => {
+    fetchBackendVersionMock.mockResolvedValue({
+      version: "9.8.7",
+      commit: null,
+    });
+
+    render(<AppFooter />);
+
+    await screen.findByTestId("app-footer-version");
+    expect(screen.getByTestId("app-footer").textContent).toBe(
+      "Task Notes v9.8.7",
+    );
+    expect(screen.queryByTestId("app-footer-commit")).not.toBeInTheDocument();
   });
 
   it("renders the application name", async () => {
@@ -40,6 +68,7 @@ describe("AppFooter", () => {
 
     expect(screen.getByTestId("app-footer").textContent).toBe("Task Notes");
     expect(screen.queryByTestId("app-footer-version")).not.toBeInTheDocument();
+    expect(screen.queryByTestId("app-footer-commit")).not.toBeInTheDocument();
   });
 
   it("renders only the app name when the version request fails", async () => {
@@ -55,6 +84,7 @@ describe("AppFooter", () => {
     expect(fetchBackendVersionMock).toHaveBeenCalled();
     expect(screen.getByTestId("app-footer").textContent).toBe("Task Notes");
     expect(screen.queryByTestId("app-footer-version")).not.toBeInTheDocument();
+    expect(screen.queryByTestId("app-footer-commit")).not.toBeInTheDocument();
   });
 
   it("is exposed as the contentinfo landmark and carries the app-footer test id", async () => {
