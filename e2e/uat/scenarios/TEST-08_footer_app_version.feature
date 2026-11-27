@@ -16,7 +16,7 @@ Feature: TEST-08 Footer shows the app version
     Given the backend reports 0.1.0 and frontend/package.json says 0.0.0
     When I open the landing page
     Then the footer shows 0.1.0
-    And the browser made one GET request to "/api/version"
+    And the browser requested "/api/version" and got 200 with {"version":"0.1.0"}
     And the footer component contains no version literal and no package.json import
 
   Scenario: Footer renders without a version when it cannot be resolved (criterion 3)

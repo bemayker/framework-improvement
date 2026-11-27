@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, waitFor } from "@testing-library/react";
+import { act, render, screen, waitFor } from "@testing-library/react";
 import AppFooter from "./AppFooter";
 import { fetchBackendVersion } from "../api/version";
 
@@ -41,6 +41,7 @@ describe("AppFooter", () => {
     render(<AppFooter />);
 
     await waitFor(() => expect(fetchBackendVersionMock).toHaveBeenCalledTimes(1));
+    await act(async () => {});
     expect(screen.getByTestId("app-footer").textContent).toBe("Task Notes");
   });
 

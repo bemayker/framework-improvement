@@ -23,7 +23,7 @@
 |---|------|------------------|-----------|
 | 4 | Open `frontend/package.json` and read `version` | It is `0.0.0` | [ ] Pass [ ] Fail |
 | 5 | Open http://localhost:5183/ and read the footer | It reads `Task Notes v0.1.0`, not `Task Notes v0.0.0` | [ ] Pass [ ] Fail |
-| 6 | In devtools Network tab, reload http://localhost:5183/ | One `GET` to `http://localhost:8010/api/version` with status 200 and body `{"version":"0.1.0"}` | [ ] Pass [ ] Fail |
+| 6 | In devtools Network tab, reload http://localhost:5183/ | A `GET` to `http://localhost:8010/api/version` returned status 200 and body `{"version":"0.1.0"}` | [ ] Pass [ ] Fail |
 | 7 | Open `frontend/src/components/AppFooter.tsx` | It contains no import of `package.json` and no version literal such as `0.1.0` | [ ] Pass [ ] Fail |
 
 ### Criterion 3: When the version cannot be resolved, the footer renders without it
