@@ -5,7 +5,8 @@ open a database connection, so `database_url` is now read per call rather
 than bound once at import time: a dataclass field default is evaluated when
 the class is defined, which would make `get_settings()`'s "read fresh from
 the environment" promise false for anything that changes the variable after
-import (the version integration test does exactly that).
+import (the version integration test does exactly that). TEST-09 adds
+`build_commit`, read from BUILD_COMMIT the same way.
 """
 
 import os
@@ -20,6 +21,8 @@ def _read_cors_origins() -> tuple[str, ...]:
     """Return CORS_ORIGINS split on commas, or the default when none are given."""
     entries = (entry.strip() for entry in (os.environ.get("CORS_ORIGINS") or "").split(","))
     return tuple(entry for entry in entries if entry) or DEFAULT_CORS_ORIGINS
+
+
 DEFAULT_BUILD_COMMIT = "unknown"
 
 

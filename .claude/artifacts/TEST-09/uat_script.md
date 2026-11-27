@@ -56,7 +56,7 @@ None of the acceptance criteria is verifiable through the UI: no frontend consum
 
 | Item | Result |
 |------|--------|
-| Total steps | 12 (10 required, 2 optional edge cases: steps 5 and 6) |
+| Total steps | 12 (all required) |
 | Passed | ___ |
 | Failed | ___ |
 | Tester | ___________________ |

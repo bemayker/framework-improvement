@@ -36,7 +36,7 @@ Feature: TEST-09 Version endpoint reports the build commit
 
   Scenario: The response body is defined by a Pydantic schema
     Given the backend is running
-    When the OpenAPI document at "/docs" is read
+    When the OpenAPI document at "/openapi.json" is read
     Then the 200 response of "GET /api/version" references the schema "VersionResponse"
     And "VersionResponse" declares "version" and "commit" as strings
     And the schema is defined in backend/app/schemas/version.py
