@@ -39,3 +39,26 @@ def test_get_app_version_returns_unknown_when_distribution_not_installed(monkeyp
     monkeypatch.setattr(version_service, "version", raise_not_found)
 
     assert version_service.get_app_version() == version_service.UNKNOWN_VERSION
+
+
+def test_get_build_commit_returns_configured_value_when_set(monkeypatch):
+    """Happy path: a value of 12 characters or fewer is returned unchanged."""
+    monkeypatch.setenv("BUILD_COMMIT", "abc1234")
+
+    assert version_service.get_build_commit() == "abc1234"
+
+
+def test_get_build_commit_returns_unknown_when_build_commit_unset(monkeypatch):
+    """Edge case: unset falls back to the settings default."""
+    monkeypatch.delenv("BUILD_COMMIT", raising=False)
+
+    assert version_service.get_build_commit() == "unknown"
+
+
+def test_get_build_commit_truncates_full_sha_to_first_12_characters(monkeypatch):
+    """Edge case: a full 40-character sha is cut to its first 12 characters."""
+    full_sha = "0123456789abcdef0123456789abcdef01234567"
+    monkeypatch.setenv("BUILD_COMMIT", full_sha)
+
+    assert version_service.get_build_commit() == full_sha[:12] == "0123456789ab"
+    assert version_service.BUILD_COMMIT_MAX_LENGTH == 12
