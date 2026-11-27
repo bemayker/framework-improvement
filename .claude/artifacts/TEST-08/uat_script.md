@@ -17,7 +17,7 @@
 | 3 | Scroll to the bottom and read the footer | It reads `Task Notes v0.1.0`, the value noted in step 1 | [ ] Pass [ ] Fail |
 | 4 | Open `frontend/package.json` and read `"version"` | It is `0.0.0`, which differs from the backend's version | [ ] Pass [ ] Fail |
 | 5 | Re-read the footer | It shows the backend version and the text `0.0.0` appears nowhere in it | [ ] Pass [ ] Fail |
-| 6 | Open dev tools, Network tab, reload the page | One `GET http://localhost:8010/api/version` request with status 200 is listed | [ ] Pass [ ] Fail |
+| 6 | Open dev tools, Network tab, reload the page | A `GET http://localhost:8010/api/version` request with status 200 is listed (two in development, where React StrictMode mounts effects twice) | [ ] Pass [ ] Fail |
 | 7 | Run `grep -n "package.json" frontend/src/components/AppFooter.tsx` from the repository root | No output: the component no longer imports the frontend package metadata | [ ] Pass [ ] Fail |
 | 8 | Run `docker compose stop backend`, then reload `http://localhost:5183/` | The page still loads, heading and note form visible | [ ] Pass [ ] Fail |
 | 9 | Read the footer | It reads exactly `Task Notes`: no `v`, no `undefined`, no `null`, no `unknown`, no trailing gap | [ ] Pass [ ] Fail |
