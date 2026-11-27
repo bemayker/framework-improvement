@@ -20,6 +20,12 @@ def _read_cors_origins() -> tuple[str, ...]:
     """Return CORS_ORIGINS split on commas, or the default when none are given."""
     entries = (entry.strip() for entry in (os.environ.get("CORS_ORIGINS") or "").split(","))
     return tuple(entry for entry in entries if entry) or DEFAULT_CORS_ORIGINS
+DEFAULT_BUILD_COMMIT = "unknown"
+
+
+def _read_build_commit() -> str:
+    """Return BUILD_COMMIT stripped, or the default when it is unset or blank."""
+    return (os.environ.get("BUILD_COMMIT") or "").strip() or DEFAULT_BUILD_COMMIT
 
 
 @dataclass(frozen=True)
@@ -33,6 +39,9 @@ class Settings:
     )
     # CORS_ORIGINS (comma-separated), read per call; unset or blank uses the default.
     cors_origins: tuple[str, ...] = field(default_factory=_read_cors_origins)
+    # BUILD_COMMIT (the sha the build was made from), read per call; unset or
+    # blank reports "unknown".
+    build_commit: str = field(default_factory=_read_build_commit)
 
 
 def get_settings() -> Settings:
