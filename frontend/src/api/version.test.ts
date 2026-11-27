@@ -20,7 +20,10 @@ describe("getBackendVersion", () => {
       json: async () => ({ version: " 0.1.0 ", commit: "abc123" }),
     });
 
-    await expect(getBackendVersion()).resolves.toBe("0.1.0");
+    await expect(getBackendVersion()).resolves.toEqual({
+      version: "0.1.0",
+      commit: "abc123",
+    });
     expect(fetchMock).toHaveBeenCalledWith("http://localhost:8010/api/version");
   });
 
@@ -34,7 +37,10 @@ describe("getBackendVersion", () => {
 
     const { getBackendVersion: freshClient } = await import("./version");
 
-    await expect(freshClient()).resolves.toBe("2.0.0");
+    await expect(freshClient()).resolves.toEqual({
+      version: "2.0.0",
+      commit: null,
+    });
     expect(fetchMock).toHaveBeenCalledWith(
       "http://backend.example:9000/api/version",
     );
@@ -57,6 +63,34 @@ describe("getBackendVersion", () => {
 
     stubFetch({ ok: true, json: async () => ({ version: "   " }) });
     await expect(getBackendVersion()).rejects.toThrow("no version");
+  });
+
+  it("returns the commit the backend reports", async () => {
+    stubFetch({
+      ok: true,
+      json: async () => ({ version: "0.1.0", commit: " 3f9c2ab71d04 " }),
+    });
+
+    await expect(getBackendVersion()).resolves.toEqual({
+      version: "0.1.0",
+      commit: "3f9c2ab71d04",
+    });
+  });
+
+  it("returns a null commit when the backend reports none", async () => {
+    for (const body of [
+      { version: "0.1.0" },
+      { version: "0.1.0", commit: 42 },
+      { version: "0.1.0", commit: "   " },
+      { version: "0.1.0", commit: "unknown" },
+    ]) {
+      stubFetch({ ok: true, json: async () => body });
+
+      await expect(getBackendVersion()).resolves.toEqual({
+        version: "0.1.0",
+        commit: null,
+      });
+    }
   });
 
   it("throws when the response carries the backend's unknown sentinel", async () => {
