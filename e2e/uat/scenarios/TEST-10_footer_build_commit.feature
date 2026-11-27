@@ -26,7 +26,7 @@ Feature: TEST-10 Footer shows the build commit
     Given the request to "GET /api/version" has not answered yet
     When the landing page renders
     Then the footer reads "Task Notes" with no placeholder text
-    And once the request completes the footer shows the version and the commit
+    And once the request completes the footer shows the version, and the commit only when the backend reports one
 
   Scenario: Footer shows the version alone when the backend reports an unknown commit (edge case)
     Given BUILD_COMMIT is unset so "GET /api/version" returns the commit "unknown"

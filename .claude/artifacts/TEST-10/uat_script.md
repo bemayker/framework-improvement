@@ -18,7 +18,7 @@
 | 5 | Read the footer | It reads exactly `Task Notes`, with no `undefined`, `null`, `unknown`, parentheses or error text | [ ] Pass [ ] Fail |
 | 6 | Run `unset BUILD_COMMIT`, then `docker compose up --build -d`, then reload the page | The footer reads `Task Notes v0.1.0` with no parentheses and no `unknown` | [ ] Pass [ ] Fail |
 | 7 | In dev tools, Network tab, set throttling to `Slow 3G` and reload | Before `/api/version` answers the footer reads `Task Notes` with no placeholder text | [ ] Pass [ ] Fail |
-| 8 | Wait until the request completes | The version appears, with no commit as in step 6 | [ ] Pass [ ] Fail |
+| 8 | Wait until the request completes | The version appears, and the commit only when the backend reports one (none here, as in step 6) | [ ] Pass [ ] Fail |
 | 9 | Set throttling back to "No throttling" | Throttling is off | [ ] Pass [ ] Fail |
 | 10 | Run `npm --prefix frontend test -- src/components/AppFooter.test.tsx` from the repository root | The run passes with no failed or errored test and exits 0 | [ ] Pass [ ] Fail |
 | 11 | Open `frontend/src/components/AppFooter.test.tsx` | It contains `renders the first 7 characters of the commit next to the version`, `renders no commit while the request is pending` and `renders no commit when the backend is unreachable` | [ ] Pass [ ] Fail |
