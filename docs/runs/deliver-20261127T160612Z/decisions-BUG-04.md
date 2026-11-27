@@ -1,0 +1,14 @@
+# Decisions (BUG-04, after its final push): deliver-20261127T160612Z
+
+The entries `.claude/artifacts/BUG-04/decisions.md` received after the last push of its branch (4ae194eb), the head its pull request merged. The entries before them reached the default branch in that file.
+
+- 2026-11-27 [BUG-04] Merge verdict: merge PR #1051 at head 4ae194eb, squash (run=deliver-20261127T160612Z). Rationale: all five conditions of `autonomy.md` Section 5 hold. (1) Self-review `VERDICT: PASS blocking=0 recommended=0 optional=0`; refactor gate no findings (2 files examined). (2) `ci-poll.sh` line `verdict=green next=none failed=0 poll=1`, re-read after the conversion out of draft; the PR is not a draft, mergeable=MERGEABLE, mergeStateStatus=CLEAN, and the provider rollup shows every check run COMPLETED/SUCCESS, both `Notify Slack on PR` runs included. (3) The four criteria derived from the title are met by the diff in `frontend/src/components/NoteForm.tsx`: a synchronous ref guard stops the second submit (1), the button is `disabled` while saving (2), the `finally` block releases guard and button after success or failure (3), and nothing blocks a sequential submit with the same text (4); reproduction `before fail -> after pass (npm --prefix frontend test -- src/components/NoteForm.test.tsx)`, E2E smoke 1 passed on real postgres-16, push gate pytest 75 and vitest 40 passed. (4) 0 inline comments, 0 general comments, 0 reviews, reviewDecision empty so no change request; tracker re-read found no new human comment. (5) Escalation bar (Section 4) not triggered: a frontend-only change, undone by a revert PR.
+- 2026-11-27 [BUG-04] Residual doubt carried to the run report, not a merge blocker. Rationale: the ticket description is empty, so criteria 2 to 4 are the planner's reading of the title and no reporter confirmed them; the choice is ambiguous but reversible, which Section 4 says is decided and logged, not withheld.
+- 6.6: pushed 4ae194eb (gate full: pytest 75 passed, vitest 40 passed); upstream-ok; draft PR #1051; PR label mayker:in-progress.
+- 6.7: CI green 7/7 (poll=3); Repro verdict exit 0: before fail -> after pass (npm --prefix frontend test -- src/components/NoteForm.test.tsx); handover-rebuild status=rebuilt sha=4ae194eb services=3/3 health=pass project=framework-improvement-bug-04-handover duration=11s; #1051 ready; PR label: #1051 mayker:in-review; status -> in_review.
+- 6.8: 0 inline, 0 general, 0 reviews; tracker re-read: no new human comment.
+- 6.9: merged #1051 squash, merge commit f3846b2c.
+- 6.10 auto-done: run 46035437429 succeeded; re-read status complete. No backstop.
+- 6.10 standards provenance: 9 dispatches, 0 unbacked provenance claims (self-reported read count 5 of 9).
+- 6.10 checkpoint: due=yes items=BUG-04 head=f3846b2c tip=origin/main@f3846b2c verdict=pass.
+- 6.10 teardown: docker rm -f BUG-04-db (this run's env line).
