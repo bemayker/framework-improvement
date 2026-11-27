@@ -6,6 +6,7 @@ never matched the browser's slash-less `Origin` header, so no
 `/api/version` needs no database, so these tests run without one.
 """
 
+import httpx
 from fastapi.testclient import TestClient
 
 from app.main import create_app
@@ -13,7 +14,7 @@ from app.main import create_app
 BROWSER_ORIGIN = "http://localhost:5183"
 
 
-def _get_version_as(origin: str, monkeypatch, cors_origins: str | None) -> TestClient:
+def _get_version_as(origin: str, monkeypatch, cors_origins: str | None) -> httpx.Response:
     """Build the app after the environment is set, then call /api/version."""
     if cors_origins is None:
         monkeypatch.delenv("CORS_ORIGINS", raising=False)
