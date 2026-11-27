@@ -93,4 +93,62 @@ describe("NoteForm", () => {
       expect(screen.queryByTestId("note-form-error")).not.toBeInTheDocument(),
     );
   });
+
+  it("ignores a second form submit while the first save is pending", async () => {
+    let resolveSave: (note: { id: number; text: string }) => void = () => {};
+    createNoteMock.mockReturnValue(
+      new Promise((resolve) => {
+        resolveSave = resolve;
+      }),
+    );
+    const onCreated = vi.fn();
+    render(<NoteForm onCreated={onCreated} />);
+
+    typeNote("Buy milk");
+    fireEvent.submit(screen.getByTestId("note-form"));
+    fireEvent.submit(screen.getByTestId("note-form"));
+    submitForm();
+
+    expect(createNoteMock).toHaveBeenCalledTimes(1);
+
+    resolveSave({ id: 1, text: "Buy milk" });
+    await waitFor(() => expect(onCreated).toHaveBeenCalledTimes(1));
+  });
+
+  it("disables Save note while a save is pending and enables it again after it succeeds", async () => {
+    let resolveSave: (note: { id: number; text: string }) => void = () => {};
+    createNoteMock.mockReturnValue(
+      new Promise((resolve) => {
+        resolveSave = resolve;
+      }),
+    );
+    render(<NoteForm onCreated={vi.fn()} />);
+
+    typeNote("Buy milk");
+    submitForm();
+
+    expect(screen.getByTestId("note-submit")).toBeDisabled();
+
+    resolveSave({ id: 2, text: "Buy milk" });
+    await waitFor(() => expect(screen.getByTestId("note-submit")).toBeEnabled());
+  });
+
+  it("enables Save note again after a failed save so the note can be retried", async () => {
+    createNoteMock.mockRejectedValueOnce(new Error("Saving the note failed: 500"));
+    createNoteMock.mockResolvedValueOnce({ id: 3, text: "Buy milk" });
+    const onCreated = vi.fn();
+    render(<NoteForm onCreated={onCreated} />);
+
+    typeNote("Buy milk");
+    submitForm();
+
+    expect(await screen.findByTestId("note-form-error")).toBeInTheDocument();
+    await waitFor(() => expect(screen.getByTestId("note-submit")).toBeEnabled());
+    expect(screen.getByTestId("note-input")).toHaveValue("Buy milk");
+
+    submitForm();
+
+    await waitFor(() => expect(onCreated).toHaveBeenCalledTimes(1));
+    expect(createNoteMock).toHaveBeenCalledTimes(2);
+  });
 });
