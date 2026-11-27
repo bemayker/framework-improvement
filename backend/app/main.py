@@ -2,9 +2,11 @@
 
 TEST-01 (the scaffold feature) instantiates the app with no feature routes.
 Later features register their routers here without restructuring this factory:
-TEST-05 registers the version router, TEST-03 the notes router plus the
-startup schema initialisation and the CORS middleware the browser needs, and
-TEST-02 the health router, and BUG-01 the server time router.
+- TEST-05: the version router
+- TEST-03: the notes router, the startup schema initialisation and the CORS
+  middleware the browser needs
+- TEST-02: the health router
+- BUG-01: the server time router
 """
 
 import logging
