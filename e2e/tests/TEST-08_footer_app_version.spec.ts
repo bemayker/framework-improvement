@@ -10,9 +10,19 @@ test.describe("TEST-08 footer app version", () => {
       (response) => new URL(response.url()).pathname === VERSION_PATH,
     );
     await page.goto("/");
-    const { version } = (await (await versionResponse).json()) as { version: string };
+    const { version, commit } = (await (await versionResponse).json()) as {
+      version: string;
+      commit?: unknown;
+    };
+    const trimmedCommit = typeof commit === "string" ? commit.trim() : "";
+    const commitSuffix =
+      trimmedCommit !== "" && trimmedCommit !== "unknown"
+        ? ` (${trimmedCommit.slice(0, 7)})`
+        : "";
 
-    await expect(page.getByTestId("app-footer")).toHaveText(`Task Notes v${version}`);
+    await expect(page.getByTestId("app-footer")).toHaveText(
+      `Task Notes v${version}${commitSuffix}`,
+    );
   });
 
   test("renders the footer with the app name and the backend version", async ({ page }) => {

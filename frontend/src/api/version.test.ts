@@ -19,9 +19,50 @@ describe("fetchBackendVersion", () => {
   it("returns the version string from GET /api/version", async () => {
     const fetchMock = stubFetchJson({ version: "0.1.0" });
 
-    await expect(fetchBackendVersion()).resolves.toBe("0.1.0");
+    await expect(fetchBackendVersion()).resolves.toEqual({
+      version: "0.1.0",
+      commit: null,
+    });
     expect(fetchMock).toHaveBeenCalledTimes(1);
     expect(String(fetchMock.mock.calls[0][0])).toMatch(/\/api\/version$/);
+  });
+
+  it("returns the commit cut to its first 7 characters", async () => {
+    stubFetchJson({ version: "0.1.0", commit: "0123456789ab" });
+    await expect(fetchBackendVersion()).resolves.toEqual({
+      version: "0.1.0",
+      commit: "0123456",
+    });
+
+    stubFetchJson({ version: "0.1.0", commit: "abc" });
+    await expect(fetchBackendVersion()).resolves.toEqual({
+      version: "0.1.0",
+      commit: "abc",
+    });
+  });
+
+  it("returns a null commit when the backend reports the unknown commit sentinel", async () => {
+    stubFetchJson({ version: "0.1.0", commit: "unknown" });
+
+    await expect(fetchBackendVersion()).resolves.toEqual({
+      version: "0.1.0",
+      commit: null,
+    });
+  });
+
+  it("returns a null commit when the commit is missing, blank or not a string", async () => {
+    for (const body of [
+      { version: "0.1.0" },
+      { version: "0.1.0", commit: "   " },
+      { version: "0.1.0", commit: 12345 },
+      { version: "0.1.0", commit: null },
+    ]) {
+      stubFetchJson(body);
+      await expect(fetchBackendVersion()).resolves.toEqual({
+        version: "0.1.0",
+        commit: null,
+      });
+    }
   });
 
   it("returns null when the request fails", async () => {
