@@ -1,31 +1,17 @@
-"""Business logic for resolving the running application's version (TEST-05, TEST-09).
+"""Business logic for resolving the running application's version (TEST-05).
 
 The version is read from installed package metadata rather than hardcoded,
 so it always reflects `[project].version` in backend/pyproject.toml without
-any code change when that value is bumped. The build commit comes from the
-BUILD_COMMIT setting, shortened here so the router stays free of rules.
+any code change when that value is bumped.
 """
 
 import logging
 from importlib.metadata import PackageNotFoundError, version
 
-from app.core.config import get_settings
-
 logger = logging.getLogger(__name__)
 
 DISTRIBUTION_NAME = "task-notes-backend"
 UNKNOWN_VERSION = "unknown"
-BUILD_COMMIT_LENGTH = 12
-
-
-def get_build_commit() -> str:
-    """Return the build commit, cut to its first 12 characters.
-
-    CI passes a full 40-character sha; the tracker clarification for TEST-09
-    asks for only its first 12. Shorter values, including "unknown", pass
-    through unchanged.
-    """
-    return get_settings().build_commit[:BUILD_COMMIT_LENGTH]
 
 
 def get_app_version() -> str:
