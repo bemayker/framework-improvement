@@ -23,12 +23,41 @@ describe("AppFooter", () => {
   });
 
   it("renders the version the API client returned", async () => {
-    fetchVersionMock.mockResolvedValue("4.5.6");
+    fetchVersionMock.mockResolvedValue({ version: "4.5.6", commit: null });
 
     render(<AppFooter />);
 
     expect(await screen.findByTestId("app-footer-version")).toHaveTextContent("v4.5.6");
-    expect(screen.getByTestId("app-footer")).toHaveTextContent("Task Notes v4.5.6");
+    expect(screen.getByTestId("app-footer")).toHaveTextContent(/^Task Notes v4\.5\.6$/);
+  });
+
+  it("renders the first 7 characters of the commit next to the version", async () => {
+    fetchVersionMock.mockResolvedValue({ version: "1.2.3", commit: "abcdef1234567890" });
+
+    render(<AppFooter />);
+
+    expect(await screen.findByTestId("app-footer-commit")).toHaveTextContent("abcdef1");
+    expect(screen.getByTestId("app-footer")).toHaveTextContent(
+      /^Task Notes v1\.2\.3 \(abcdef1\)$/,
+    );
+  });
+
+  it("renders the version alone when the commit is the unknown sentinel", async () => {
+    fetchVersionMock.mockResolvedValue({ version: "1.2.3", commit: "unknown" });
+
+    await renderSettledFooter();
+
+    expect(screen.getByTestId("app-footer")).toHaveTextContent(/^Task Notes v1\.2\.3$/);
+    expect(screen.queryByTestId("app-footer-commit")).not.toBeInTheDocument();
+  });
+
+  it("renders the version alone when the response carries no commit", async () => {
+    fetchVersionMock.mockResolvedValue({ version: "1.2.3", commit: null });
+
+    await renderSettledFooter();
+
+    expect(screen.getByTestId("app-footer")).toHaveTextContent(/^Task Notes v1\.2\.3$/);
+    expect(screen.queryByTestId("app-footer-commit")).not.toBeInTheDocument();
   });
 
   it("renders exactly Task Notes while the version is loading", () => {
@@ -50,7 +79,7 @@ describe("AppFooter", () => {
   });
 
   it("renders exactly Task Notes when the backend reports the unknown sentinel", async () => {
-    fetchVersionMock.mockResolvedValue("unknown");
+    fetchVersionMock.mockResolvedValue({ version: "unknown", commit: "abcdef1234567890" });
 
     await renderSettledFooter();
 
@@ -59,7 +88,7 @@ describe("AppFooter", () => {
   });
 
   it("renders exactly Task Notes when the backend reports a blank version", async () => {
-    fetchVersionMock.mockResolvedValue("   ");
+    fetchVersionMock.mockResolvedValue({ version: "   ", commit: "abcdef1234567890" });
 
     await renderSettledFooter();
 
