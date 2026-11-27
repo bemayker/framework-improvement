@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# materialized-from: mayker-dev v0.3.522; do not edit, regenerate with /upgrade-project
+# materialized-from: mayker-dev v0.3.491; do not edit, regenerate with /upgrade-project
 #
 # Schema validator for a consuming repo's `.claude/feature_map.md` (MDF-044).
 #
@@ -83,7 +83,6 @@
 set -uo pipefail
 # Stay on the plugin version this session loaded (MDF-225, hooks/lib/pointer-guard.sh).
 [ -z "${BASH_VERSION:-}" ] || [ ! -f "${BASH_SOURCE[0]%/*}/pointer-guard.sh" ] || { . "${BASH_SOURCE[0]%/*}/pointer-guard.sh"; mayker_pointer_guard "${BASH_SOURCE[0]}" "$@"; }
-[ "${1:-}" != "--help" ] || [ "${BASH_SOURCE[0]}" != "$0" ] || { awk '/^# Usage/ { u = 1 } u && (!/^#/ || /^# [A-Z][A-Z]+ /) { exit } u { sub(/^# ?/, ""); print }' "$0"; exit 0; }
 
 QUIET=0
 MAP=""
