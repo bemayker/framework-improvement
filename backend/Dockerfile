@@ -9,10 +9,6 @@ COPY pyproject.toml uv.lock ./
 RUN --mount=type=cache,target=/root/.cache/uv \
     uv sync --no-install-project --frozen
 
-# Build-time commit reported by GET /api/version; empty means "unknown" (see app/core/config.py).
-ARG BUILD_COMMIT
-ENV BUILD_COMMIT=${BUILD_COMMIT}
-
 COPY . .
 RUN --mount=type=cache,target=/root/.cache/uv \
     uv sync
