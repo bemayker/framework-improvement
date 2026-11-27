@@ -15,7 +15,7 @@ describe("AppFooter", () => {
   });
 
   it("renders the version returned by the backend", async () => {
-    fetchBackendVersionMock.mockResolvedValue("9.8.7");
+    fetchBackendVersionMock.mockResolvedValue({ version: "9.8.7", commit: null });
 
     render(<AppFooter />);
 
@@ -24,8 +24,30 @@ describe("AppFooter", () => {
     );
   });
 
+  it("renders the short commit next to the version", async () => {
+    fetchBackendVersionMock.mockResolvedValue({ version: "9.8.7", commit: "0123456" });
+
+    render(<AppFooter />);
+
+    await waitFor(() =>
+      expect(screen.getByTestId("app-footer").textContent).toBe(
+        "Task Notes v9.8.7 (0123456)",
+      ),
+    );
+  });
+
+  it("renders the version alone when the commit is unavailable", async () => {
+    fetchBackendVersionMock.mockResolvedValue({ version: "9.8.7", commit: null });
+
+    render(<AppFooter />);
+
+    await waitFor(() =>
+      expect(screen.getByTestId("app-footer").textContent).toBe("Task Notes v9.8.7"),
+    );
+  });
+
   it("renders the backend version rather than the frontend package version", async () => {
-    fetchBackendVersionMock.mockResolvedValue("9.8.7");
+    fetchBackendVersionMock.mockResolvedValue({ version: "9.8.7", commit: null });
 
     render(<AppFooter />);
 
