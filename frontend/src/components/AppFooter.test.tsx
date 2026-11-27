@@ -1,104 +1,22 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, waitFor } from "@testing-library/react";
+import { describe, it, expect } from "vitest";
+import { render, screen } from "@testing-library/react";
 import AppFooter from "./AppFooter";
-import { fetchVersion } from "../api/version";
-
-vi.mock("../api/version", () => ({
-  fetchVersion: vi.fn(),
-}));
-
-const fetchVersionMock = vi.mocked(fetchVersion);
-
-/** Renders the footer and waits until the mount-time version request has settled. */
-async function renderSettledFooter() {
-  render(<AppFooter />);
-  await waitFor(() => expect(fetchVersionMock).toHaveBeenCalledTimes(1));
-  // Let the resolved or rejected promise flush into component state.
-  await new Promise((resolve) => setTimeout(resolve, 0));
-}
+import { version } from "../../package.json";
 
 describe("AppFooter", () => {
-  beforeEach(() => {
-    fetchVersionMock.mockReset();
-  });
-
-  it("renders the version the API client returned", async () => {
-    fetchVersionMock.mockResolvedValue({ version: "4.5.6", commit: null });
-
+  it("renders the application name", () => {
     render(<AppFooter />);
 
-    expect(await screen.findByTestId("app-footer-version")).toHaveTextContent("v4.5.6");
-    expect(screen.getByTestId("app-footer")).toHaveTextContent(/^Task Notes v4\.5\.6$/);
+    expect(screen.getByTestId("app-footer")).toHaveTextContent("Task Notes");
   });
 
-  it("renders the first 7 characters of the commit next to the version", async () => {
-    fetchVersionMock.mockResolvedValue({ version: "1.2.3", commit: "abcdef1234567890" });
-
+  it("renders the version imported from package.json", () => {
     render(<AppFooter />);
 
-    expect(await screen.findByTestId("app-footer-commit")).toHaveTextContent("abcdef1");
-    expect(screen.getByTestId("app-footer")).toHaveTextContent(
-      /^Task Notes v1\.2\.3 \(abcdef1\)$/,
-    );
-  });
-
-  it("renders the version alone when the commit is the unknown sentinel", async () => {
-    fetchVersionMock.mockResolvedValue({ version: "1.2.3", commit: "unknown" });
-
-    await renderSettledFooter();
-
-    expect(screen.getByTestId("app-footer")).toHaveTextContent(/^Task Notes v1\.2\.3$/);
-    expect(screen.queryByTestId("app-footer-commit")).not.toBeInTheDocument();
-  });
-
-  it("renders the version alone when the response carries no commit", async () => {
-    fetchVersionMock.mockResolvedValue({ version: "1.2.3", commit: null });
-
-    await renderSettledFooter();
-
-    expect(screen.getByTestId("app-footer")).toHaveTextContent(/^Task Notes v1\.2\.3$/);
-    expect(screen.queryByTestId("app-footer-commit")).not.toBeInTheDocument();
-  });
-
-  it("renders exactly Task Notes while the version is loading", () => {
-    fetchVersionMock.mockReturnValue(new Promise(() => {}));
-
-    render(<AppFooter />);
-
-    expect(screen.getByTestId("app-footer")).toHaveTextContent(/^Task Notes$/);
-    expect(screen.queryByTestId("app-footer-version")).not.toBeInTheDocument();
-  });
-
-  it("renders exactly Task Notes when the version request fails", async () => {
-    fetchVersionMock.mockRejectedValue(new Error("Loading the version failed: 500"));
-
-    await renderSettledFooter();
-
-    expect(screen.getByTestId("app-footer")).toHaveTextContent(/^Task Notes$/);
-    expect(screen.queryByTestId("app-footer-version")).not.toBeInTheDocument();
-  });
-
-  it("renders exactly Task Notes when the backend reports the unknown sentinel", async () => {
-    fetchVersionMock.mockResolvedValue({ version: "unknown", commit: "abcdef1234567890" });
-
-    await renderSettledFooter();
-
-    expect(screen.getByTestId("app-footer")).toHaveTextContent(/^Task Notes$/);
-    expect(screen.queryByTestId("app-footer-version")).not.toBeInTheDocument();
-  });
-
-  it("renders exactly Task Notes when the backend reports a blank version", async () => {
-    fetchVersionMock.mockResolvedValue({ version: "   ", commit: "abcdef1234567890" });
-
-    await renderSettledFooter();
-
-    expect(screen.getByTestId("app-footer")).toHaveTextContent(/^Task Notes$/);
-    expect(screen.queryByTestId("app-footer-version")).not.toBeInTheDocument();
+    expect(screen.getByTestId("app-footer")).toHaveTextContent(version);
   });
 
   it("is exposed as the contentinfo landmark and carries the app-footer test id", () => {
-    fetchVersionMock.mockReturnValue(new Promise(() => {}));
-
     render(<AppFooter />);
 
     const footer = screen.getByRole("contentinfo");
