@@ -15,12 +15,32 @@ describe("fetchVersion", () => {
   it("requests GET /api/version from the default base URL and returns the version", async () => {
     const fetchMock = stubFetch({
       ok: true,
-      json: async () => ({ version: "1.2.3" }),
+      json: async () => ({ version: "1.2.3", commit: "abcdef1234567890" }),
     });
 
-    await expect(fetchVersion()).resolves.toBe("1.2.3");
+    await expect(fetchVersion()).resolves.toMatchObject({ version: "1.2.3" });
     expect(fetchMock).toHaveBeenCalledTimes(1);
     expect(fetchMock.mock.calls[0][0]).toMatch(/\/api\/version$/);
+  });
+
+  it("returns the version and the commit from GET /api/version", async () => {
+    stubFetch({
+      ok: true,
+      json: async () => ({ version: "1.2.3", commit: "abcdef1234567890" }),
+    });
+
+    await expect(fetchVersion()).resolves.toEqual({
+      version: "1.2.3",
+      commit: "abcdef1234567890",
+    });
+  });
+
+  it("returns a null commit when the body carries no string commit", async () => {
+    stubFetch({ ok: true, json: async () => ({ version: "1.2.3" }) });
+    await expect(fetchVersion()).resolves.toEqual({ version: "1.2.3", commit: null });
+
+    stubFetch({ ok: true, json: async () => ({ version: "1.2.3", commit: 42 }) });
+    await expect(fetchVersion()).resolves.toEqual({ version: "1.2.3", commit: null });
   });
 
   it("throws when the response is not OK", async () => {
