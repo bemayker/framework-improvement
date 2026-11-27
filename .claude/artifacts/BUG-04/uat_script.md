@@ -31,7 +31,7 @@
 | 12 | Reset throttling. Stop the backend container (or enable "Offline" in the Network tab), type `BUG-04 retry check` and click "Save note" | The message "The note could not be saved. Please try again." appears, `BUG-04 retry check` is still in the field, and the button is enabled | [ ] Pass [ ] Fail |
 | 13 | Start the backend again (or disable "Offline") and click "Save note" | `BUG-04 retry check` appears exactly once in the list and the field is empty | [ ] Pass [ ] Fail |
 | 14 | Run `npm --prefix frontend test` from the repository root | The run passes: no failed or errored test in the summary, including the new tests in `frontend/src/components/NoteForm.test.tsx`, and the command exits 0 | [ ] Pass [ ] Fail |
-| 15 | With the stack running, run `npx playwright test e2e/tests/BUG-04_double_submit_note.spec.ts` from the repository root | Both specs pass, no failed test on the summary line, exit code 0 | [ ] Pass [ ] Fail |
+| 15 | With the stack running, run `npx playwright test e2e/tests/BUG-04_double_submit_note.spec.ts` from the repository root | The tests in the file pass: the summary line reports no failed or errored test, and the command exits 0. | [ ] Pass [ ] Fail |
 
 ## Acceptance criteria coverage
 
