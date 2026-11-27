@@ -17,11 +17,7 @@ This project uses a Claude Code-driven, per-feature delivery framework: a human 
    - Backend (FastAPI): http://localhost:8010
    - Database: PostgreSQL, exposed on host port 5442
 
-`docker compose up` starts three services: `db` (PostgreSQL 16), `backend` (FastAPI via uv), and `frontend` (Vite dev server).
-
-**Optional: report the build commit.** `GET /api/version` reports the first 12 characters of `BUILD_COMMIT`, or `unknown` when it is unset or blank. It is a Docker build argument, baked into the backend image, so set it when you build: either uncomment `BUILD_COMMIT=` in `.env` and fill it in, or run `BUILD_COMMIT=$(git rev-parse HEAD) docker compose up --build`. Changing it needs a rebuild of the backend image.
-
-See [docs/DEVELOPMENT.md → Running tests locally](docs/DEVELOPMENT.md#running-tests-locally) to run the test suites without Docker.
+`docker compose up` starts three services: `db` (PostgreSQL 16), `backend` (FastAPI via uv), and `frontend` (Vite dev server). See [docs/DEVELOPMENT.md → Running tests locally](docs/DEVELOPMENT.md#running-tests-locally) to run the test suites without Docker.
 
 ---
 
@@ -38,15 +34,15 @@ This project's framework needs an **issue tracker** MCP connection (reading feat
 Two things to know before you run it, because they trip people up:
 
 - **ClickUp (and Linear/Jira) use OAuth**, so there is no token to store; you approve in the browser via `/mcp`. A token-authenticated server instead references its secret as `'${SOME_TOKEN}'`, so `.mcp.json` stores only the variable name.
-- **On GitHub Enterprise** (GHES or a `*.ghe.com` tenant), `gh` needs the host: `/init-project` detects a non-github.com remote and writes `GH_HOST=<your-host>` into `.claude/settings.json`, and you run `gh auth login --hostname <host>` once per machine. See **[framework manual → GitHub Enterprise](https://github.com/bemayker/mayker-dev-plugin/blob/main/docs/framework-manual.md#github-enterprise-ghes-and-ghecom)**.
+- **On GitHub Enterprise** (GHES or a `*.ghe.com` tenant), `gh` needs the host: `/init-project` detects a non-github.com remote and writes `GH_HOST=<your-host>` into `.claude/settings.json`, and you run `gh auth login --hostname <host>` once per machine. See **[docs/DEVELOPMENT.md → GitHub Enterprise](docs/DEVELOPMENT.md#github-enterprise-ghes-and-ghecom)**.
 
-Verify the tracker with `claude mcp list` (or `/mcp` inside a session) and the Git path with `gh auth status`. The full `claude mcp add` forms, the worked ClickUp and GitHub examples, secret handling, and the optional Figma MCP are documented once in **[framework manual → MCP connections](https://github.com/bemayker/mayker-dev-plugin/blob/main/docs/framework-manual.md#1-mcp-connections-mandatory)**; follow that for setup rather than repeating it here.
+Verify the tracker with `claude mcp list` (or `/mcp` inside a session) and the Git path with `gh auth status`. The full `claude mcp add` forms, the worked ClickUp and GitHub examples, secret handling, and the optional Figma MCP are documented once in **[docs/DEVELOPMENT.md → MCP connections](docs/DEVELOPMENT.md#1-mcp-connections-mandatory)**; follow that for setup rather than repeating it here.
 
 > In Claude Code on the web / Routines, the same project-scoped `.mcp.json` is used and credentials are supplied by the environment rather than your local machine.
 
 ### Permissions & autonomy
 
-Autonomous (cloud) runs must not stop to ask for approvals. The permission posture lives in `.claude/settings.json`: `/init-project` writes the allow/deny list and `defaultMode` from the plugin (the committed file starts with only the marketplace/plugin bootstrap), and the plugin supplies the hooks that enforce the test and format gates. See [framework manual → Permissions & Autonomy](https://github.com/bemayker/mayker-dev-plugin/blob/main/docs/framework-manual.md#2-permissions--autonomy).
+Autonomous (cloud) runs must not stop to ask for approvals. The permission posture lives in `.claude/settings.json`: `/init-project` writes the allow/deny list and `defaultMode` from the plugin (the committed file starts with only the marketplace/plugin bootstrap), and the plugin supplies the hooks that enforce the test and format gates. See [docs/DEVELOPMENT.md → Permissions & Autonomy](docs/DEVELOPMENT.md#2-permissions--autonomy).
 
 ### Repository secrets (for CI/CD)
 
@@ -56,7 +52,7 @@ The CI pipelines require these secrets to be configured in your repository:
 | --- | --- | --- | --- |
 | `CLICKUP_API_KEY` | Auto-transition features to Done on merge | ClickUp → Settings → Apps → API Token | GitHub → Settings → Secrets and variables → Actions |
 
-> The secret name matches your tracker (`CLICKUP_API_KEY` / `LINEAR_API_KEY` / `JIRA_API_TOKEN` + `JIRA_EMAIL`). With `local` work-item source there is no tracker secret. Optional Slack notifications need a `NOTIFY_SLACK` Variable + `SLACK_WEBHOOK_URL` Secret; optional security scanning needs `AIKIDO_API_KEY`. Full names, locations, and the Slack three-step setup are in [docs/DEVELOPMENT.md → Repository secrets](docs/DEVELOPMENT.md#repository-secrets).
+> The secret name matches your tracker (`CLICKUP_API_KEY` / `LINEAR_API_KEY` / `JIRA_API_TOKEN` + `JIRA_EMAIL`). With `local` work-item source there is no tracker secret. Optional Slack notifications need a `NOTIFY_SLACK` Variable + `SLACK_WEBHOOK_URL` Secret; optional security scanning needs `AIKIDO_API_KEY`. Full names, locations, and the Slack three-step setup are in [docs/DEVELOPMENT.md → Repository Secrets](docs/DEVELOPMENT.md#3-repository-secrets-for-cicd).
 
 ### Development environment
 
@@ -100,7 +96,7 @@ Docker and Docker Compose, Node.js 20, Python 3.12 and uv. See [docs/DEVELOPMENT
 
 ## Development workflow
 
-See the [framework manual → Development Workflow](https://github.com/bemayker/mayker-dev-plugin/blob/main/docs/framework-manual.md#development-workflow) for the complete guide. Quick summary:
+See [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md) for the complete guide. Quick summary:
 
 1. Install the plugin (see Install below), then run `/init-project` locally (one-time setup). It generates `CLAUDE.md`; fill in your project details and run `/sync-project` to finish. Re-run `/sync-project` whenever the tracker backlog or the codebase moves.
 2. **Build the scaffold feature first** (`new` mode): plan, review, mark Ready for Build, build, and merge the feature flagged `scaffold` in `feature_map.md`. It creates the project structure, test infrastructure, and CI that every other feature depends on, and the precedence gate blocks every other item until it is Done.
