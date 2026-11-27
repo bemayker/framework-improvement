@@ -1,6 +1,9 @@
 """Unit tests for the uptime service (TEST-07), with a fake monotonic clock."""
 
+import dataclasses
 from datetime import datetime, timedelta, timezone
+
+import pytest
 
 from app.services import uptime_service
 from app.services.uptime_service import StartupClock, capture_startup, compute_uptime
@@ -65,8 +68,5 @@ def test_startup_clock_is_immutable():
     """Error case: the captured clock cannot be reassigned after creation."""
     clock = StartupClock(started_at=datetime.now(timezone.utc), started_monotonic=1.0)
 
-    try:
+    with pytest.raises(dataclasses.FrozenInstanceError):
         clock.started_monotonic = 2.0  # type: ignore[misc]
-    except AttributeError:
-        return
-    raise AssertionError("StartupClock accepted a reassignment")
