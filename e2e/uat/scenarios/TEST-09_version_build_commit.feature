@@ -30,3 +30,9 @@ Feature: TEST-09 Version endpoint reports the build commit
   Scenario: The response body is defined by a Pydantic schema
     When a client requests "/openapi.json"
     Then the "VersionResponse" schema declares required string properties "version" and "commit"
+
+  Scenario: The unit and integration tests for the set and unset commit paths pass
+    Given the repository is checked out
+    When "uv run --directory backend pytest -q tests/unit/test_config_unit.py tests/unit/test_version_service_unit.py tests/unit/test_version_schema_unit.py tests/integration/test_version_integration.py" is run
+    Then the summary line reports no failed or errored test
+    And the command exits 0
