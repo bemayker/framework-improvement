@@ -1,3 +1,5 @@
+import { API_BASE_URL } from "./baseUrl";
+
 // Single client layer for the notes API: components never call fetch directly
 // (coding_standards.md Section 4, applied to this project's own backend).
 
@@ -5,8 +7,6 @@ export type Note = {
   id: number;
   text: string;
 };
-
-import { API_BASE_URL } from "./baseUrl";
 
 const NOTES_URL = `${API_BASE_URL}/api/notes`;
 

@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, waitFor } from "@testing-library/react";
+import { act, render, screen } from "@testing-library/react";
 import AppFooter from "./AppFooter";
 import { fetchAppVersion } from "../api/version";
 
@@ -8,6 +8,11 @@ vi.mock("../api/version", () => ({
 }));
 
 const fetchAppVersionMock = vi.mocked(fetchAppVersion);
+
+// Lets the already-settled mock promise run its then/catch handlers before asserting.
+async function settlePendingPromises() {
+  await act(async () => {});
+}
 
 describe("AppFooter", () => {
   beforeEach(() => {
@@ -56,7 +61,7 @@ describe("AppFooter", () => {
 
     render(<AppFooter />);
 
-    await waitFor(() => expect(fetchAppVersionMock).toHaveBeenCalled());
+    await settlePendingPromises();
     const footer = screen.getByTestId("app-footer");
     expect(footer.textContent).toBe("Task Notes");
     expect(footer).not.toHaveTextContent(/undefined|null|unknown/);
@@ -68,7 +73,7 @@ describe("AppFooter", () => {
 
     render(<AppFooter />);
 
-    await waitFor(() => expect(fetchAppVersionMock).toHaveBeenCalled());
+    await settlePendingPromises();
     expect(screen.getByTestId("app-footer").textContent).toBe("Task Notes");
     expect(screen.queryByTestId("app-version")).not.toBeInTheDocument();
   });
