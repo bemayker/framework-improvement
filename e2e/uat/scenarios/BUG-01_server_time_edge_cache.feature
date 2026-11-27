@@ -3,10 +3,8 @@ Feature: BUG-01 Server time is not served stale from the edge cache
   I want every GET /api/time response to forbid caching
   So that a CDN in front of the API never returns an old "now"
 
-  Background:
-    Given the Task Notes backend is running on "http://localhost:8000"
-
   Scenario: The time endpoint forbids caching (criterion 1)
+    Given the Task Notes backend is running on "http://localhost:8000"
     When a client sends a GET request to "/api/time"
     Then the response status code is 200
     And the response header "Cache-Control" is "no-store"
@@ -21,12 +19,14 @@ Feature: BUG-01 Server time is not served stale from the edge cache
 
   Scenario: Two calls a second apart return different times on the deployed environment (criterion 3, verified by a human)
     Given the fix is deployed behind the CDN
+    And the backend is reachable at "https://<deployed-host>"
     When a client sends a GET request to "/api/time"
     And one second later sends a second GET request to "/api/time"
     Then both responses carry the header "Cache-Control" with value "no-store"
     And the "now" value of the second response differs from the first
 
   Scenario: A POST to the time endpoint is rejected and returns no time (edge case)
+    Given the Task Notes backend is running on "http://localhost:8000"
     When a client sends a POST request to "/api/time"
     Then the response status code is 405
     And the response body carries no "now" field
