@@ -5,7 +5,7 @@ No criterion is verifiable through the UI: `GET /api/time` has no frontend consu
 ## Prerequisites
 
 - A terminal with `curl`.
-- Criteria 1 and 2: the backend running locally on port 8000 (`docker compose up -d backend`, or `uv run --directory backend uvicorn app.main:app --port 8000`). No database is needed for this endpoint. Backend dependencies installed (`uv sync --directory backend`).
+- Criteria 1 and 2: the backend running locally on port 8000, started with `uv run --directory backend uvicorn app.main:app --port 8000` (the Docker Compose backend publishes port 8010, so the steps below do not apply to it unchanged). No database is needed for this endpoint. Backend dependencies installed (`uv sync --directory backend`).
 - Criterion 3: the merge of this fix is deployed, and you know the deployed API host (written `<deployed-host>` below; the item names none and `docs/DEVELOPMENT.md` Test environments is empty).
 
 ## Steps
