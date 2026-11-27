@@ -6,7 +6,8 @@ import type { VersionInfo } from "../api/version";
 const APP_NAME = "Task Notes";
 const SHORT_COMMIT_LENGTH = 7;
 
-// The backend reports this placeholder when its distribution is not installed.
+// The backend reports this placeholder for the version when its distribution is not
+// installed, and for the commit when BUILD_COMMIT is unset.
 const UNKNOWN_SENTINEL = "unknown";
 
 const footerStyle: CSSProperties = {
